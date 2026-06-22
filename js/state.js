@@ -65,6 +65,7 @@ export const el = {
   btnDecAss: document.getElementById("btn-dec-ass"),
   btnIncAss: document.getElementById("btn-inc-ass"),
   btnAvancoAssimilacao: document.getElementById("btn-avanco-assimilacao"),
+  btnRestoreDet: document.getElementById("btn-restore-det"),
   
   // Dice Drawer Controls
   diceDrawer: document.getElementById("dice-drawer"),

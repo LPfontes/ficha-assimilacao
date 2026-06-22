@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Assimilação RPG - Gerenciador de Fichas</title>
-  
+  <link rel="icon" type="image/webp" href="logoAssimilacao.webp">
   <!-- Fontes do Google: Outfit (Títulos/Militar/Industrial) e Inter (Legibilidade) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,8 +16,8 @@
 
   <!-- Barra de Controle Principal (Superior) -->
   <header class="main-header">
-    <div class="header-logo">
-      <span class="logo-accent">A</span>SSIMILAÇÃO <span class="subtitle">RPG</span>
+    <div class="header-logo" style="display: flex; align-items: center;">
+      <img src="logotipoAssimilacao.webp" alt="Assimilação RPG Logo" style="height: 40px; width: auto; max-width: 100%;">
     </div>
     
       <div class="header-controls">
@@ -28,18 +28,15 @@
           </select>
         </div>
         
-        <button id="btn-open-roller" class="btn btn-secondary" title="Abrir Rolador de Dados" style="border-color: var(--color-green-glow); color: var(--color-green-glow);">
-          <span>🎲</span> Lançar Dados
-        </button>
-        
+
         <button id="btn-new-char" class="btn btn-primary" title="Criar Nova Ficha">
         <span class="btn-icon" data-icon="plus"></span> Nova Ficha
       </button>
-      <button id="btn-import-json" class="btn btn-secondary" title="Importar Ficha JSON">
+      <button id="btn-import-json" class="btn btn-secondary import-json" title="Importar Ficha JSON">
         <span class="btn-icon" data-icon="import"></span> Importar
       </button>
       <input type="file" id="file-import" accept=".json" style="display: none;">
-      <button id="btn-export-json" class="btn btn-secondary" title="Exportar Ficha JSON" disabled>
+      <button id="btn-export-json" class="btn btn-secondary export-json" title="Exportar Ficha JSON" disabled>
         <span class="btn-icon" data-icon="export"></span> Exportar
       </button>
       <button id="btn-delete-char" class="btn btn-danger" title="Apagar Personagem" disabled>
@@ -302,50 +299,75 @@
                 </div>
               </div>
               
-              <!-- CARD CABO DE GUERRA -->
-              <div class="cabo-guerra-card card-glass">
-                <h3 class="status-header">CABO DE GUERRA</h3>
-                <div class="cabo-guerra-display">
-                  <!-- Determinação -->
-                  <div class="cabo-side det-side">
-                    <div class="cabo-label">DETERMINAÇÃO</div>
-                    <div class="cabo-level-wrapper" style="display: flex; align-items: center; gap: 6px;">
-                      <button class="btn-cabo-adjust" id="btn-dec-det" title="Diminuir nível de Determinação">-</button>
-                      <div class="cabo-level" id="sheet-det-level">Nível 9</div>
-                      <button class="btn-cabo-adjust" id="btn-inc-det" title="Aumentar nível de Determinação">+</button>
-                    </div>
-                    <div class="cabo-points-tracker" id="sheet-det-points">
-                      <!-- Pontos de Determinação -->
-                    </div>
+              <div class="roll-chat-section" id="roll-chat">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 style="margin: 0; padding: 0;">Chat de Rolagens</h3>
+                    <button class="btn btn-secondary btn-sm btn-danger" id="btn-clear-chat" title="Limpar Histórico de Rolagens">Limpar</button>
                   </div>
-                  <!-- Indicador de Equilíbrio / Cabo -->
-                  <div class="cabo-indicator-bar">
-                    <div class="cabo-ratio-fill" id="cabo-ratio-fill"></div>
+                  <div class="roll-chat-messages" id="roll-chat-messages">
+                    <div class="chat-placeholder">Nenhuma rolagem realizada nesta sessão.</div>
                   </div>
-                  <!-- Assimilação -->
-                  <div class="cabo-side ass-side">
-                    <div class="cabo-label">ASSIMILAÇÃO</div>
-                    <div class="cabo-level-wrapper" style="display: flex; align-items: center; gap: 6px;">
-                      <button class="btn-cabo-adjust" id="btn-dec-ass" title="Diminuir nível de Assimilação">-</button>
-                      <div class="cabo-level" id="sheet-ass-level">Nível 1</div>
-                      <button class="btn-cabo-adjust" id="btn-inc-ass" title="Aumentar nível de Assimilação">+</button>
-                    </div>
-                    <div class="cabo-points-tracker" id="sheet-ass-points">
-                      <!-- Pontos de Assimilação -->
-                    </div>
-                  </div>
-                </div>
-                <!-- Estado Suscetível Warning -->
-                <div class="suscetivel-alert hidden" id="suscetivel-alert">
-                  <div><strong>ESTADO SUSCETÍVEL!</strong> Seus pontos de Determinação zeraram.</div>
-                  <button id="btn-avanco-assimilacao" class="btn btn-danger btn-sm" style="margin-top: 8px; width: 100%; font-family: var(--font-heading); font-weight: bold;">
-                    Avanço da Assimilação (+1 Nível de Assimilação)
-                  </button>
-                </div>
               </div>
               
+            </div>
+            
+            <!-- COLUNA CENTRAL: CABO DE GUERRA E SAÚDE -->
+            <div class="sheet-redesign-center">
+              
+              <!-- CABO E SAÚDE (MESMA LINHA) -->
+              <div class="status-cards-row">
+                
+                <!-- CARD CABO DE GUERRA -->
+                <div class="cabo-guerra-card card-glass" style="margin-bottom: 0;">
+                  <h3 class="status-header" style="background: linear-gradient(to right, var(--color-rust-glow) 30%, var(--color-blue-glow) 70%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CABO DE GUERRA</h3>
+                  
+                  <div class="cabo-guerra-display">
+                    <!-- Coluna Determinação -->
+                    <div class="cabo-side det-side">
+                      <span class="cabo-label">DETERMINAÇÃO</span>
+                      <div class="cabo-level-container">
+                        <button id="btn-dec-det" class="btn-cabo-adjust" title="Diminuir Nível de Determinação">-</button>
+                        <span id="sheet-det-level" class="cabo-level"></span>
+                        <button id="btn-inc-det" class="btn-cabo-adjust" title="Aumentar Nível de Determinação">+</button>
+                      </div>
+                      <div id="sheet-det-points" class="cabo-points-tracker">
+                        <!-- JS renderiza símbolos -->
+                      </div>
+                    </div>
+                    
+                    <!-- Coluna Assimilação -->
+                    <div class="cabo-side ass-side">
+                      <span class="cabo-label">ASSIMILAÇÃO</span>
+                      <div class="cabo-level-container">
+                        <button id="btn-dec-ass" class="btn-cabo-adjust" title="Diminuir Nível de Assimilação">-</button>
+                        <span id="sheet-ass-level" class="cabo-level"></span>
+                        <button id="btn-inc-ass" class="btn-cabo-adjust" title="Aumentar Nível de Assimilação">+</button>
+                      </div>
+                      <div id="sheet-ass-points" class="cabo-points-tracker">
+                        <!-- JS renderiza símbolos -->
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Botão Restaurar Determinação -->
+                  <div style="margin-top: 12px; display: flex; justify-content: center;">
+                    <button id="btn-restore-det" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 10px;" title="Restaurar Determinação para o valor máximo">
+                      Restaurar Determinação
+                    </button>
+                  </div>
+                  
+                  <!-- Estado Suscetível Warning -->
+                  <div class="suscetivel-alert hidden" id="suscetivel-alert">
+                    <div><strong>ESTADO SUSCETÍVEL!</strong> Seus pontos de Determinação zeraram.</div>
+                    <button id="btn-avanco-assimilacao" class="btn btn-danger btn-sm" style="margin-top: 8px; width: 100%; font-family: var(--font-heading); font-weight: bold;">
+                      Avanço da Assimilação (+1 Nível de Assimilação)
+                    </button>
+                  </div>
+                </div>
+              
+              
               <!-- CARD SAÚDE -->
-              <div class="saude-card card-glass">
+              <div class="saude-card card-glass" style="margin-bottom: 0;">
                 <h3 class="status-header">
                   <span class="header-icon" data-icon="saude"></span> SAÚDE
                   <span class="health-formula-info">(1 + Potência + Resolução)</span>
@@ -354,40 +376,43 @@
                   <!-- JS renderiza dinamicamente as gotas de saúde -->
                 </div>
               </div>
-              
-            </div>
-            
-            <!-- COLUNA DIREITA: APTIDÕES (CONHECIMENTOS, INSTINTOS, PRÁTICAS) E TABS -->
-            <div class="sheet-redesign-right">
+              </div>
               
               <!-- APTIDÕES (TRÊS COLUNAS PARALELAS) -->
               <div class="aptitudes-columns-container">
-                <!-- CONHECIMENTOS -->
-                <div class="aptitude-column-card card-glass">
-                  <h3 class="aptitude-column-header">CONHECIMENTOS</h3>
-                  <div class="aptitude-list" id="conhecimentos-list-sheet">
-                    <!-- JS insere conhecimentos -->
-                  </div>
-                </div>
-                
                 <!-- INSTINTOS -->
                 <div class="aptitude-column-card card-glass">
-                  <h3 class="aptitude-column-header">INSTINTOS</h3>
-                  <div class="aptitude-list" id="instincts-list-sheet">
+                  <h3 class="aptitude-column-header instintos-header">INSTINTOS</h3>
+                  <div class="aptitude-list instintos-list" id="instincts-list-sheet">
                     <!-- JS insere instintos -->
                   </div>
                 </div>
-                
+                 <!-- CONHECIMENTOS -->
+                <div class="aptitude-column-card card-glass">
+                  <h3 class="aptitude-column-header conhecimentos-header">CONHECIMENTOS</h3>
+                  <div class="aptitude-list conhecimentos-list" id="conhecimentos-list-sheet">
+                    <!-- JS insere conhecimentos -->
+                  </div>
+                </div>
                 <!-- PRÁTICAS -->
                 <div class="aptitude-column-card card-glass">
-                  <h3 class="aptitude-column-header">PRÁTICAS</h3>
-                  <div class="aptitude-list" id="praticas-list-sheet">
+                  <h3 class="aptitude-column-header praticas-header">PRÁTICAS</h3>
+                  <div class="aptitude-list praticas-list" id="praticas-list-sheet">
                     <!-- JS insere práticas -->
                   </div>
                 </div>
               </div>
               
-              <!-- TABS (BARRA + CONTEÚDOS) -->
+              <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                <button id="btn-open-roller" class="btn btn-secondary" title="Abrir Rolador de Dados" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
+                  <span style="font-size: 1.2em; vertical-align: middle; margin-right: 4px;">🎲</span> Lançar Dados
+                </button>
+              </div>
+              
+            </div>
+            
+            <!-- COLUNA DIREITA: TABS -->
+            <div class="sheet-redesign-right">
               <div class="sheet-redesign-tabs-container">
                 <div class="sheet-redesign-tabs-nav card-glass">
                   <button class="sheet-tab-btn active" data-tab="tab-mutacoes">
@@ -458,148 +483,189 @@
           </div>
         </div> <!-- Fim .sheet-pages-column -->
 
-<aside id="dice-drawer" class="dice-drawer closed">
-    <!-- Gatilho / Aba para abrir/fechar -->
-    <button id="btn-toggle-drawer" class="drawer-trigger">
-      <span class="trigger-text">ROLADOR DE DADOS</span>
-      <span class="trigger-arrow">◀</span>
-    </button>
+<div id="dice-drawer" class="modal-overlay hidden">
+  <div class="modal-content card-glass" style="max-width: 800px;">
+    <button id="btn-close-drawer" class="modal-close">&times;</button>
     
     <div class="drawer-content">
-      <h3>Painel de Rolagem</h3>
-      <div class="grid-2-col">
-        <!-- COLUNA 1 -->
-        <div class="drawer-col-1">
-          <!-- Seleção Rápida de Aptidões na Gaveta -->
-          <div class="dice-skills-selection">
+      <h2 class="modal-title">🎲 Painel de Rolagem</h2>
+      
+      <!-- Tabs de Navegação -->
+      <div class="roller-tabs-nav" style="display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
+        <button id="tab-roller-normal" class="btn btn-secondary" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Normal</button>
+        <button id="tab-roller-assimilada" class="btn btn-secondary" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Assimilada (Instinto)</button>
+      </div>
 
-            <h4>Selecionar Aptidões</h4>
-            <div class="form-group" style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;">
-              <label for="roll-select-instinto" style="font-size: 12px; color: var(--text-secondary);">Instinto (d6/d12):</label>
-              <select id="roll-select-instinto" style="width: 100%; font-size: 13px; padding: 6px 10px;">
-                <option value="">-- Nenhum --</option>
-                <option value="Influência">Influência</option>
-                <option value="Percepção">Percepção</option>
-                <option value="Potência">Potência</option>
-                <option value="Reação">Reação</option>
-                <option value="Resolução">Resolução</option>
-                <option value="Sagacidade">Sagacidade</option>
-              </select>
+      <!-- Conteúdo do Painel Normal -->
+      <div id="panel-roller-normal">
+        <div class="grid-2-col-d">
+          <div class="drawer-col-1">
+            <div class="dice-skills-selection">
+              <h4>Selecionar Aptidões</h4>
+              <div class="grid-2-col">
+                <div class="form-group" style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;">
+                <label for="roll-select-instinto" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Instinto (d6/d12):</label>
+                <select id="roll-select-instinto" style="width: 100%; font-size: var(--font-size-sm); padding: 6px 10px;">
+                  <option value="">-- Nenhum --</option>
+                  <option value="Influência">Influência</option>
+                  <option value="Percepção">Percepção</option>
+                  <option value="Potência">Potência</option>
+                  <option value="Reação">Reação</option>
+                  <option value="Resolução">Resolução</option>
+                  <option value="Sagacidade">Sagacidade</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                <label for="roll-select-skill" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Conhecimento / Prática (d10):</label>
+                <select id="roll-select-skill" style="width: 100%; font-size: var(--font-size-sm); padding: 6px 10px;">
+                  <option value="">-- Nenhum --</option>
+                  <optgroup label="Conhecimentos">
+                    <option value="Biologia">Biologia</option>
+                    <option value="Erudição">Erudição</option>
+                    <option value="Engenharia">Engenharia</option>
+                    <option value="Geografia">Geografia</option>
+                    <option value="Medicina">Medicina</option>
+                    <option value="Segurança">Segurança</option>
+                  </optgroup>
+                  <optgroup label="Práticas">
+                    <option value="Armas">Armas</option>
+                    <option value="Atletismo">Atletismo</option>
+                    <option value="Expressão">Expressão</option>
+                    <option value="Furtividade">Furtividade</option>
+                    <option value="Manufaturas">Manufaturas</option>
+                    <option value="Sobrevivência">Sobrevivência</option>
+                  </optgroup>
+                </select>
+              </div>
+              </div>
+              
             </div>
-            <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
-              <label for="roll-select-skill" style="font-size: 12px; color: var(--text-secondary);">Conhecimento / Prática (d10):</label>
-              <select id="roll-select-skill" style="width: 100%; font-size: 13px; padding: 6px 10px;">
-                <option value="">-- Nenhum --</option>
-                <optgroup label="Conhecimentos">
-                  <option value="Biologia">Biologia</option>
-                  <option value="Erudição">Erudição</option>
-                  <option value="Engenharia">Engenharia</option>
-                  <option value="Geografia">Geografia</option>
-                  <option value="Medicina">Medicina</option>
-                  <option value="Segurança">Segurança</option>
-                </optgroup>
-                <optgroup label="Práticas">
-                  <option value="Armas">Armas</option>
-                  <option value="Atletismo">Atletismo</option>
-                  <option value="Expressão">Expressão</option>
-                  <option value="Furtividade">Furtividade</option>
-                  <option value="Manufaturas">Manufaturas</option>
-                  <option value="Sobrevivência">Sobrevivência</option>
-                </optgroup>
-              </select>
+            
+            <div class="roll-modifiers-section">
+              <h4>Modificadores Para Manter +1 Dado</h4>
+              <div class="modifiers-list">
+                <label class="modifier-checkbox">
+                  <input type="checkbox" id="mod-empenho">
+                  <span>Empenho (Gasta 1 de Determinação)</span>
+                </label>
+                
+                <label class="modifier-checkbox">
+                  <input type="checkbox" id="mod-origem-ocupacao">
+                  <span>Ativar Ocupação (Origem - 1x/sessão)</span>
+                </label>
+
+                <label class="modifier-checkbox">
+                  <input type="checkbox" id="mod-origem-evento">
+                  <span>Ativar Evento Marcante (Origem - 1x/sessão)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-col-2">
+            <div class="dice-selector-section">
+              <h4>Montar Pilha de Dados</h4>
+              
+              <div class="dice-selector-row">
+                <div class="dice-select-control">
+                  <img src="d6/3%20ou%204%20(D6).webp" class="dice-tag tag-d6" alt="d6">
+                  <label>Instintos</label>
+                  <div class="number-input">
+                    <button class="num-minus">-</button>
+                    <span id="dice-qty-d6" class="dice-qty-span">0</span>
+                    <button class="num-plus">+</button>
+                  </div>
+                </div>
+                
+                <div class="dice-select-control">
+                  <img src="d10/6%20(D10).webp" class="dice-tag tag-d10" alt="d10">
+                  <label>Aptidões</label>
+                  <div class="number-input">
+                    <button class="num-minus">-</button>
+                    <span id="dice-qty-d10" class="dice-qty-span">0</span>
+                    <button class="num-plus">+</button>
+                  </div>
+                </div>
+
+                <div class="dice-select-control">
+                  <img src="d12/11%20(D12).webp" class="dice-tag tag-d12" alt="d12">
+                  <label>Assimilados</label>
+                  <div class="number-input">
+                    <button class="num-minus">-</button>
+                    <span id="dice-qty-d12" class="dice-qty-span">0</span>
+                    <button class="num-plus">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="selected-aptitudes-label" id="current-roll-label">
+                Nenhuma aptidão selecionada na ficha
+              </div>
+
+              <div class="custom-roll-row" style="margin-top: 10px; display: flex; gap: 8px;">
+                <input type="text" id="dice-custom-formula" placeholder="Outros dados (Ex: 1d20+2d8)" style="flex: 1; padding: 6px 10px; font-size: var(--font-size-sm);">
+                <button id="btn-roll-custom" class="btn btn-secondary btn-sm" style="font-size: var(--font-size-xs);">Rolar</button>
+              </div>
             </div>
             
           </div>
-          <div class="roll-chat-section" id="roll-chat">
-              <h3>Chat de Rolagens</h3>
-              <div class="roll-chat-messages" id="roll-chat-messages">
-                <div class="chat-placeholder">Nenhuma rolagem realizada nesta sessão.</div>
-              </div>
-          </div>
+          
         </div>
+        <div>
 
-        <!-- COLUNA 2 -->
-        <div class="drawer-col-2">
-          <!-- Seleção de dados da pilha -->
-          <div class="dice-selector-section">
-            <h4>Montar Pilha de Dados</h4>
-            
-            <div class="dice-selector-row">
-              <div class="dice-select-control">
-                <img src="d6/3%20ou%204%20(D6).webp" class="dice-tag tag-d6" alt="d6">
-                <label>Instintos</label>
-                <div class="number-input">
-                  <button class="num-minus">-</button>
-                  <span id="dice-qty-d6" class="dice-qty-span">0</span>
-                  <button class="num-plus">+</button>
-                </div>
-              </div>
-              
-              <div class="dice-select-control">
-                <img src="d10/6%20(D10).webp" class="dice-tag tag-d10" alt="d10">
-                <label>Aptidões</label>
-                <div class="number-input">
-                  <button class="num-minus">-</button>
-                  <span id="dice-qty-d10" class="dice-qty-span">0</span>
-                  <button class="num-plus">+</button>
-                </div>
-              </div>
-
-              <div class="dice-select-control">
-                <img src="d12/11%20(D12).webp" class="dice-tag tag-d12" alt="d12">
-                <label>Assimilados</label>
-                <div class="number-input">
-                  <button class="num-minus">-</button>
-                  <span id="dice-qty-d12" class="dice-qty-span">0</span>
-                  <button class="num-plus">+</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="selected-aptitudes-label" id="current-roll-label">
-              Nenhuma aptidão selecionada na ficha
-            </div>
-
-            <div class="custom-roll-row" style="margin-top: 10px; display: flex; gap: 8px;">
-              <input type="text" id="dice-custom-formula" placeholder="Outros dados (Ex: 1d20+2d8)" style="flex: 1; padding: 6px 10px; font-size: 13px;">
-              <button id="btn-roll-custom" class="btn btn-secondary btn-sm" style="font-size: 11px;">Rolar</button>
-            </div>
-          </div>
-
-          <!-- Recursos e Modificadores de Rolagem -->
-          <div class="roll-modifiers-section">
-            <h4>Modificadores</h4>
-            <div class="modifiers-list">
-              <label class="modifier-checkbox">
-                <input type="checkbox" id="mod-empenho">
-                <span>Empenho (Gasta 1 de Determinação)</span>
-              </label>
-              
-              <label class="modifier-checkbox">
-                <input type="checkbox" id="mod-origem-ocupacao">
-                <span>Ativar Ocupação (Origem - 1x/sessão - Mantendo +1 dado)</span>
-              </label>
-
-              <label class="modifier-checkbox">
-                <input type="checkbox" id="mod-origem-evento">
-                <span>Ativar Evento Marcante (Origem - 1x/sessão - Mantendo +1 dado)</span>
-              </label>
-            </div>
-            
-          </div>
-
-          <!-- Ação de Rolagem -->
           <div class="roll-action-section">
-            <button id="btn-agir-instinto" class="btn btn-instinto-trigger btn-block">Agir por Instinto</button>
             <button id="btn-roll-action" class="btn btn-success btn-large btn-block">ROLAR DADOS</button>
           </div>
         </div>
       </div>
 
-
-
+      <!-- Conteúdo do Painel Assimilado -->
+      <div id="panel-roller-assimilada" class="hidden">
+        <div class="instinto-panel-content" style="display: flex; flex-direction: column; padding: 12px 0;">
+          <p class="instinto-modal-desc" style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: 8px;">
+            Deixe os instintos guiarem você. Invoque a força do parasita.<br> Os d6 tornam-se d12 e você deve manter no mínimo 2 dados.
+          </p>
+          
+          <div id="instinto-custo-display" style="margin-bottom: 8px;">
+            <!-- Renderizado dinamicamente via JS -->
+          </div>
+          
+          <div class="instinto-selectors" style="display: flex; gap: 16px; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-md);">
+            <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-blue-glow);">1º Instinto</label>
+              <select id="inst-select-1" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
+              <span class="instinto-dice-count" id="inst-count-1" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+            </div>
+            <div class="instinto-divider" style="font-size: var(--font-size-lg); font-weight: bold; color: var(--text-muted);">+</div>
+            <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-blue-glow);">2º Instinto</label>
+              <select id="inst-select-2" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
+              <span class="instinto-dice-count" id="inst-count-2" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+            </div>
+          </div>
+          
+          <div class="instinto-pool-preview" style="font-size: var(--font-size-md); font-family: var(--font-heading); font-weight: bold; text-align: center;">
+            Pilha de Rolagem: <strong id="instinto-pool-label" style="color: var(--color-blue-glow);">—</strong> &nbsp;·&nbsp; Manter: <strong>2</strong>
+          </div>
+          
+          <div class="instinto-restricao" style="font-size: var(--font-size-md); color: var(--color-rust-glow); background: rgba(141,36,40,0.1); border: 1px solid rgba(141,36,40,0.2); padding: 8px 12px; border-radius: var(--radius-sm);">
+            ⚠️ <strong>Restrição:</strong> Sem ajuda de aliados. Adaptações não cancelam Pressões em Ações Simples.
+          </div>
+          
+          <button class="btn btn-success btn-large btn-block" id="btn-panel-agir-instinto">
+            REALIZAR ROLAGEM ASSIMILADA
+          </button>
+          
+          <div class="instinto-results hidden" id="instinto-panel-results" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
+            <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado</h4>
+            <div class="results-dice-grid" id="instinto-panel-dice-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            <div class="roll-summary-inline" id="instinto-panel-summary" style="margin-top:8px; display: flex; gap: 16px;"></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </aside>
+  </div>
+</div>
 
       </div>
     </section>

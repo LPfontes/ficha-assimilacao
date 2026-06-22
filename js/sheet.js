@@ -25,7 +25,7 @@ export function renderAptitudesSheet() {
     
     let bubblesHtml = "";
     for (let i = 1; i <= 4; i++) {
-      bubblesHtml += `<span class="bubble ${i <= val ? 'filled' : ''}"></span>`;
+      bubblesHtml += `<span class="bubble bubble-instinct ${i <= val ? 'filled' : ''}"></span>`;
     }
     
     row.innerHTML = `
@@ -50,7 +50,7 @@ export function renderAptitudesSheet() {
     
     let bubblesHtml = "";
     for (let i = 1; i <= 5; i++) {
-      bubblesHtml += `<span class="bubble ${i <= val ? 'filled' : ''}"></span>`;
+      bubblesHtml += `<span class="bubble bubble-conhecimento ${i <= val ? 'filled' : ''}"></span>`;
     }
     
     row.innerHTML = `
@@ -75,7 +75,7 @@ export function renderAptitudesSheet() {
     
     let bubblesHtml = "";
     for (let i = 1; i <= 5; i++) {
-      bubblesHtml += `<span class="bubble ${i <= val ? 'filled' : ''}"></span>`;
+      bubblesHtml += `<span class="bubble bubble-pratica ${i <= val ? 'filled' : ''}"></span>`;
     }
     
     row.innerHTML = `
@@ -145,14 +145,58 @@ export function renderHealthSheet() {
         <span class="name">${lvlInfo.name}</span>
         <button class="btn-health-lvl-adjust" id="btn-health-lvl-next" title="Descer Nível (Dano)" ${activeLvl === 1 && activeDano === maxPts ? 'disabled' : ''}>▼</button>
       </div>
-      <span class="desc">${lvlInfo.desc}</span>
     </div>
     <div class="health-drops" style="display: flex; align-items: center; gap: 6px;">
       <button class="btn-health-pts-adjust" id="btn-health-pts-dec" title="Perder Vida (-)" ${activeLvl === 1 && activeDano === maxPts ? 'disabled' : ''}>-</button>
       ${dropsHtml}
       <button class="btn-health-pts-adjust" id="btn-health-pts-inc" title="Ganhar Vida (+)" ${activeLvl === 6 && activeDano === 0 ? 'disabled' : ''}>+</button>
+      <input type="text" id="input-health-adjust" class="health-adjust-input" placeholder="±x" title="Digite +1 ou -1 e pressione Enter para alterar a vida">
     </div>
+    <span class="desc">${lvlInfo.desc}</span>
   `;
+  
+  const inputAdjust = row.querySelector("#input-health-adjust");
+  if (inputAdjust) {
+    inputAdjust.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const valStr = inputAdjust.value.trim();
+        const value = parseInt(valStr);
+        if (!isNaN(value) && value !== 0) {
+          const totalHealth = activeLvl * maxPts - activeDano;
+          const newTotalHealth = Math.max(0, Math.min(6 * maxPts, totalHealth + value));
+          
+          if (newTotalHealth === 0) {
+            for (let lvl = 1; lvl <= 6; lvl++) {
+              char.dano[lvl] = maxPts;
+            }
+          } else {
+            const L = Math.ceil(newTotalHealth / maxPts);
+            for (let lvl = 1; lvl <= 6; lvl++) {
+              if (lvl > L) {
+                char.dano[lvl] = maxPts;
+              } else if (lvl < L) {
+                char.dano[lvl] = 0;
+              } else {
+                char.dano[lvl] = L * maxPts - newTotalHealth;
+              }
+            }
+          }
+          
+          saveCurrentCharacter();
+          renderHealthSheet();
+          
+          try {
+            updateDiceDrawerUI();
+          } catch (err) {
+            logger.error("Erro ao atualizar pós-ajuste de vida por input:", err);
+          }
+        } else {
+          inputAdjust.value = "";
+        }
+      }
+    });
+  }
   
   row.querySelectorAll(".health-drop").forEach(drop => {
     drop.addEventListener("click", () => {
@@ -286,74 +330,64 @@ export function renderCaboGuerraSheet() {
   const char = state.currentCharacter;
   if (!char) return;
   
-  el.sheetDetLevel.textContent = `Nível ${char.detNivel}`;
-  el.sheetAssLevel.textContent = `Nível ${char.assNivel}`;
+  if (el.sheetDetLevel) el.sheetDetLevel.textContent = char.detNivel;
+  if (el.sheetAssLevel) el.sheetAssLevel.textContent = char.assNivel;
   
   const ratio = (char.detNivel / 10) * 100;
-  el.caboRatioFill.style.height = `${100 - ratio}%`;
+  if (el.caboRatioFill) {
+    el.caboRatioFill.style.height = `${100 - ratio}%`;
+  }
   
-  // Renderiza controle de Determinação
-  el.sheetDetPoints.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 4px;">
-      <button class="btn-cabo-points-adjust" id="btn-dec-det-pts" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">-</button>
-      <span id="input-det-points" style="display: inline-block; min-width: 24px; height: 22px; line-height: 22px; text-align: center; font-weight: bold; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 3px; font-size: 11px;">${char.detPoints}</span>
-      <button class="btn-cabo-points-adjust" id="btn-inc-det-pts" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">+</button>
-    </div>
-  `;
-  
-  // Renderiza controle de Assimilação
-  el.sheetAssPoints.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 4px;">
-      <button class="btn-cabo-points-adjust" id="btn-dec-ass-pts" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">-</button>
-      <span id="input-ass-points" style="display: inline-block; min-width: 24px; height: 22px; line-height: 22px; text-align: center; font-weight: bold; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); border-radius: 3px; font-size: 11px;">${char.assPoints}</span>
-      <button class="btn-cabo-points-adjust" id="btn-inc-ass-pts" style="width: 20px; height: 20px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">+</button>
-    </div>
-  `;
-  
-  // Bind listeners para botões e inputs de Determinação
-  const btnDecDet = el.sheetDetPoints.querySelector("#btn-dec-det-pts");
-  const btnIncDet = el.sheetDetPoints.querySelector("#btn-inc-det-pts");
-  const inputDet = el.sheetDetPoints.querySelector("#input-det-points");
-  
-  btnDecDet.addEventListener("click", () => {
-    if (char.detPoints > 0) {
-      char.detPoints -= 1;
-      saveCurrentCharacter();
-      renderCaboGuerraSheet();
+  // Renderiza a sequência de símbolos de Determinação (exatamente detNivel de símbolos)
+  if (el.sheetDetPoints) {
+    el.sheetDetPoints.innerHTML = "";
+    for (let i = 1; i <= char.detNivel; i++) {
+      const isFilled = i <= char.detPoints;
+      
+      const point = document.createElement("span");
+      point.className = `cabo-point ${isFilled ? 'filled' : ''}`;
+      point.innerHTML = ICONS.determinacao;
+      
+      point.addEventListener("click", () => {
+        if (isFilled && char.detPoints === i) {
+          char.detPoints = i - 1;
+        } else {
+          char.detPoints = i;
+        }
+        saveCurrentCharacter();
+        renderCaboGuerraSheet();
+      });
+      el.sheetDetPoints.appendChild(point);
     }
-  });
-  btnIncDet.addEventListener("click", () => {
-    if (char.detPoints < char.detNivel) {
-      char.detPoints += 1;
-      saveCurrentCharacter();
-      renderCaboGuerraSheet();
-    }
-  });
+  }
 
-  // Bind listeners para botões e inputs de Assimilação
-  const btnDecAss = el.sheetAssPoints.querySelector("#btn-dec-ass-pts");
-  const btnIncAss = el.sheetAssPoints.querySelector("#btn-inc-ass-pts");
-  const inputAss = el.sheetAssPoints.querySelector("#input-ass-points");
-  
-  btnDecAss.addEventListener("click", () => {
-    if (char.assPoints > 0) {
-      char.assPoints -= 1;
-      saveCurrentCharacter();
-      renderCaboGuerraSheet();
+  // Renderiza a sequência de símbolos de Assimilação (exatamente assNivel de símbolos)
+  if (el.sheetAssPoints) {
+    el.sheetAssPoints.innerHTML = "";
+    for (let i = 1; i <= char.assNivel; i++) {
+      const isFilled = i <= char.assPoints;
+      
+      const point = document.createElement("span");
+      point.className = `cabo-point ${isFilled ? 'filled' : ''}`;
+      point.innerHTML = ICONS.determinacao;
+      
+      point.addEventListener("click", () => {
+        if (isFilled && char.assPoints === i) {
+          char.assPoints = i - 1;
+        } else {
+          char.assPoints = i;
+        }
+        saveCurrentCharacter();
+        renderCaboGuerraSheet();
+      });
+      el.sheetAssPoints.appendChild(point);
     }
-  });
-  btnIncAss.addEventListener("click", () => {
-    if (char.assPoints < char.assNivel) {
-      char.assPoints += 1;
-      saveCurrentCharacter();
-      renderCaboGuerraSheet();
-    }
-  });
+  }
   
   if (char.detPoints === 0) {
-    el.suscetivelAlert.classList.remove("hidden");
+    if (el.suscetivelAlert) el.suscetivelAlert.classList.remove("hidden");
   } else {
-    el.suscetivelAlert.classList.add("hidden");
+    if (el.suscetivelAlert) el.suscetivelAlert.classList.add("hidden");
   }
 }
 
@@ -428,7 +462,7 @@ export function renderMutationsSheet() {
         </div>
         <div class="desc" style="margin-top: 4px;">${mut.desc}</div>
       </div>
-      <button class="btn-remove-mutation" title="Remover mutação" style="font-size: 16px; margin-left: 8px;">
+      <button class="btn-remove-mutation" title="Remover mutação" style="font-size: var(--font-size-md); margin-left: 8px;">
         &times;
       </button>
     `;
@@ -532,3 +566,12 @@ export function executeAssimilacaoAvanco() {
     }
   }
 }
+
+export function restoreDeterminacao() {
+  const char = state.currentCharacter;
+  if (!char) return;
+  char.detPoints = char.detNivel;
+  saveCurrentCharacter();
+  renderCaboGuerraSheet();
+}
+

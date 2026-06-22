@@ -11,17 +11,17 @@
 }
 
 .wizard-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding-bottom: 16px;
   margin-bottom: 24px;
 }
 
 .wizard-header h2 {
   font-family: var(--font-heading);
-  font-size: 28px;
+  font-size: var(--font-size-xxxl);
   font-weight: 700;
   letter-spacing: 1px;
-  color: var(--color-green-glow);
+  color: var(--color-blue-glow);
   text-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
   margin-bottom: 16px;
 }
@@ -39,7 +39,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.1);
   z-index: 1;
   transform: translateY(-50%);
 }
@@ -49,7 +49,7 @@
   height: 32px;
   border-radius: 50%;
   background-color: #1a1f24;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(0, 0, 0, 0.2);
   color: var(--text-secondary);
   font-family: var(--font-heading);
   font-weight: 700;
@@ -62,14 +62,14 @@
 
 .step-indicator.active {
   background-color: var(--bg-main);
-  border-color: var(--color-green-glow);
-  color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
+  color: var(--color-blue-glow);
   box-shadow: var(--glow-shadow);
 }
 
 .step-indicator.complete {
-  background-color: var(--color-green-glow);
-  border-color: var(--color-green-glow);
+  background-color: var(--color-blue-glow);
+  border-color: var(--color-blue-glow);
   color: #000;
 }
 
@@ -90,13 +90,13 @@
 
 .wizard-step h3 {
   font-family: var(--font-heading);
-  font-size: 22px;
+  font-size: var(--font-size-xl);
   margin-bottom: 8px;
 }
 
 .step-help {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   margin-bottom: 20px;
 }
 
@@ -110,7 +110,7 @@
 .form-group label {
   font-family: var(--font-heading);
   font-weight: 500;
-  font-size: 15px;
+  font-size: var(--font-size-md);
 }
 
 .form-group input, .form-group select {
@@ -120,7 +120,7 @@
 .wizard-footer {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 16px;
 }
 
@@ -133,7 +133,7 @@
 
 .instinct-control-box {
   background-color: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-md);
   padding: 16px;
   display: flex;
@@ -145,7 +145,7 @@
 .instinct-control-box .name {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   letter-spacing: 1px;
 }
 
@@ -161,22 +161,22 @@
   background: none;
   border: none;
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   padding: 6px 12px;
   cursor: pointer;
   transition: var(--transition-fast);
 }
 
 .number-input button:hover {
-  color: var(--color-green-glow);
-  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-blue-glow);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .number-input input, .number-input span {
   border: none;
   background: none;
   text-align: center;
-  font-size: 16px;
+  font-size: var(--font-size-md);
   font-weight: bold;
   pointer-events: none;
   display: inline-block;
@@ -196,7 +196,7 @@
 .skills-block-wiz h4 {
   font-family: var(--font-heading);
   color: var(--color-rust-glow);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding-bottom: 6px;
   margin-bottom: 16px;
 }
@@ -214,7 +214,7 @@
   background-color: rgba(0, 0, 0, 0.2);
   padding: 8px 16px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .skill-control-row .name {
@@ -222,7 +222,7 @@
 }
 
 .skill-upgrade-cost {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin-right: 8px;
 }
@@ -244,7 +244,7 @@
 .cabo-slider-box label {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--font-size-lg);
 }
 
 input[type="range"] {
@@ -252,7 +252,7 @@ input[type="range"] {
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   outline: none;
 }
 
@@ -262,7 +262,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--color-green-glow);
+  background: var(--color-blue-glow);
   cursor: pointer;
   box-shadow: var(--glow-shadow);
   transition: var(--transition-fast);
@@ -277,7 +277,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-left: 4px solid var(--color-rust);
   padding: 12px 16px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-size-sm);
 }
 
 /* Saúde Wiz */
@@ -290,13 +290,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .saude-formula {
-  font-size: 20px;
+  font-size: var(--font-size-xl);
   font-family: var(--font-heading);
 }
 
 .saude-formula strong {
-  color: var(--color-green-glow);
-  font-size: 28px;
+  color: var(--color-blue-glow);
+  font-size: var(--font-size-xxxl);
 }
 
 /* Tab Container XP */
@@ -309,7 +309,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .xp-tab-buttons {
   display: flex;
   gap: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding-bottom: 8px;
 }
 
@@ -327,7 +327,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .xp-tab-btn.active {
   background-color: rgba(0, 255, 102, 0.1);
-  color: var(--color-green-glow);
+  color: var(--color-blue-glow);
 }
 
 .xp-tab-content {
@@ -356,7 +356,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .trait-wiz-item {
   background-color: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   padding: 12px 16px;
   border-radius: var(--radius-md);
   display: flex;
@@ -367,7 +367,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .trait-wiz-item.owned {
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
   background-color: rgba(0, 255, 102, 0.03);
 }
 
@@ -385,25 +385,25 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .trait-wiz-item .name {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 16px;
+  font-size: var(--font-size-md);
 }
 
 .trait-wiz-item .tag-cost {
   background-color: var(--color-rust);
   color: #000;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: bold;
   padding: 2px 6px;
   border-radius: 10px;
 }
 
 .trait-wiz-item .req {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--color-rust-glow);
 }
 
 .trait-wiz-item .desc {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
@@ -416,7 +416,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .package-wiz-card {
   background-color: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-md);
   padding: 16px;
   cursor: pointer;
@@ -427,24 +427,24 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .package-wiz-card:hover {
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
   background-color: rgba(0, 255, 102, 0.02);
 }
 
 .package-wiz-card.active {
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
   background-color: rgba(0, 255, 102, 0.05);
   box-shadow: var(--glow-shadow);
 }
 
 .package-wiz-card h4 {
   font-family: var(--font-heading);
-  font-size: 18px;
-  color: var(--color-green-glow);
+  font-size: var(--font-size-lg);
+  color: var(--color-blue-glow);
 }
 
 .package-wiz-card .items {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 

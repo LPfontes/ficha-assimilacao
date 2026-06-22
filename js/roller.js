@@ -1,6 +1,6 @@
 import { el, state, saveCurrentCharacter } from "./state.js";
 import { getCurrentHealthLevel } from "./health.js";
-import { appendRollToChat, renderResultsPanel, updateResultsSummary } from "./chat.js";
+import { appendRollToChat, renderResultsPanel, updateResultsSummary, getDieSymbolsHtml, getDieFaceImgSrc } from "./chat.js";
 import { logger } from "./logger.js";
 
 // ==========================================
@@ -132,12 +132,6 @@ export function updateDiceDrawerUI() {
   }
   
   updateKeepCountDisplay();
-  
-  // Abre a gaveta se estiver fechada para dar feedback
-  if (el.diceDrawer.classList.contains("closed")) {
-    el.diceDrawer.classList.remove("closed");
-    el.btnToggleDrawer.querySelector(".trigger-arrow").textContent = "▶";
-  }
 }
 
 export function resetDiceDrawerSelections() {
@@ -271,11 +265,10 @@ export function execute3DPhysicsRoll() {
       setTimeout(() => {
         el.diceOverlay.classList.add("hidden");
       }, 2500);
-      
-      // Abre a gaveta se estiver fechada para dar feedback
-      if (el.diceDrawer.classList.contains("closed")) {
-        el.diceDrawer.classList.remove("closed");
-        el.btnToggleDrawer.querySelector(".trigger-arrow").textContent = "▶";
+
+      // Abre o modal do painel caso ele esteja fechado para ver o chat do resultado
+      if (el.diceDrawer && el.diceDrawer.classList.contains("hidden")) {
+        el.diceDrawer.classList.remove("hidden");
       }
     }
   );
@@ -465,4 +458,165 @@ function triggerSelectedRollUpdate() {
   state.selectedRoll.d6 = parseInt(el.diceQtyD6.textContent) || 0;
   state.selectedRoll.d10 = parseInt(el.diceQtyD10.textContent) || 0;
   state.selectedRoll.d12 = parseInt(el.diceQtyD12.textContent) || 0;
+}
+
+export function initRolagemAssimiladaPanel() {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  const INSTINTOS = ["Influência", "Percepção", "Potência", "Reação", "Resolução", "Sagacidade"];
+  const select1 = document.getElementById("inst-select-1");
+  const select2 = document.getElementById("inst-select-2");
+  
+  if (!select1 || !select2) return;
+
+  const optionsHtml = INSTINTOS.map(i =>
+    `<option value="${i}">${i} (${char.instintos[i] || 0})</option>`
+  ).join("");
+
+  select1.innerHTML = optionsHtml;
+  select2.innerHTML = optionsHtml;
+
+  // Seleciona o instinto padrão se houver
+  const preInstinto = state.selectedRoll.instinto;
+  if (preInstinto && INSTINTOS.includes(preInstinto)) {
+    select1.value = preInstinto;
+  }
+
+  const podeAssimilacao = char.assPoints >= 1;
+  const podeDeterminacao = char.detPoints >= 2;
+  const podeAtuar = podeAssimilacao || podeDeterminacao;
+
+  const custoDisplay = document.getElementById("instinto-custo-display");
+  if (custoDisplay) {
+    custoDisplay.innerHTML = podeAssimilacao
+      ? `<div class="custo-badge custo-ass" style="background: rgba(0, 162, 255, 0.1); border: 1px solid rgba(0, 162, 255, 0.3); padding: 8px 12px; border-radius: var(--radius-sm); color: #00a2ff; font-weight: bold;">Custo: 1 Ponto de Assimilação (disponível: ${char.assPoints})</div>`
+      : podeDeterminacao
+      ? `<div class="custo-badge custo-det" style="background: rgba(255, 51, 51, 0.1); border: 1px solid rgba(255, 51, 51, 0.3); padding: 8px 12px; border-radius: var(--radius-sm); color: #ff3333; font-weight: bold;">Custo: 2 Pontos de Determinação — Assimilação zerada (disponível: ${char.detPoints})</div>`
+      : `<div class="custo-badge custo-sem" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 8px 12px; border-radius: var(--radius-sm); color: #fca5a5; font-weight: bold;">⛔ Sem recursos! Precisa de 1 Assimilação ou 2 Determinação.</div>`;
+  }
+
+  const btnAgir = document.getElementById("btn-panel-agir-instinto");
+  if (btnAgir) {
+    btnAgir.disabled = !podeAtuar;
+  }
+
+  function updatePoolPreview() {
+    const val1 = char.instintos[select1.value] || 0;
+    const val2 = char.instintos[select2.value] || 0;
+    const instCount1 = document.getElementById("inst-count-1");
+    const instCount2 = document.getElementById("inst-count-2");
+    const poolLabel = document.getElementById("instinto-pool-label");
+
+    if (instCount1) instCount1.textContent = `d12 × ${val1}`;
+    if (instCount2) instCount2.textContent = `d12 × ${val2}`;
+    if (poolLabel) poolLabel.textContent = `${val1 + val2}d12`;
+  }
+
+  select1.removeEventListener("change", updatePoolPreview);
+  select2.removeEventListener("change", updatePoolPreview);
+  select1.addEventListener("change", updatePoolPreview);
+  select2.addEventListener("change", updatePoolPreview);
+  updatePoolPreview();
+
+  const btnPanelAgir = document.getElementById("btn-panel-agir-instinto");
+  if (btnPanelAgir) {
+    const runRoll = () => {
+      if (!podeAtuar) return;
+      const inst1 = select1.value;
+      const inst2 = select2.value;
+      const val1 = char.instintos[inst1] || 0;
+      const val2 = char.instintos[inst2] || 0;
+      const totalD12 = val1 + val2;
+      if (totalD12 === 0) { alert("Selecione instintos com valor maior que 0!"); return; }
+
+      if (podeAssimilacao) { char.assPoints -= 1; }
+      else { char.detPoints -= 2; }
+      saveCurrentCharacter();
+      document.dispatchEvent(new CustomEvent('cabo-guerra-refresh'));
+      
+      // Refresh cost display in panel
+      initRolagemAssimiladaPanel();
+
+      const notationString = `${totalD12}d12`;
+      const box = state.diceBox || window.diceBox;
+      if (!box) { alert("Motor 3D carregando..."); return; }
+
+      btnPanelAgir.disabled = true;
+      btnPanelAgir.textContent = "Rolando...";
+      el.diceOverlay.classList.remove("hidden");
+      setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
+
+      box.setDice(notationString);
+      box.start_throw(null, (notation) => {
+        setTimeout(() => { el.diceOverlay.classList.add("hidden"); }, 3000);
+        if (!notation.result || notation.result.length === 0 || notation.result[0] < 0) {
+          alert("Os dados saíram da mesa! Tente novamente.");
+          btnPanelAgir.disabled = false;
+          btnPanelAgir.textContent = "REALIZAR ROLAGEM ASSIMILADA";
+          return;
+        }
+
+        const results = notation.result.map(val => ({
+          value: val, sides: 12, symbols: DICE_MAP["d12"][val] || []
+        }));
+        const keptIndexes = [...results.map((d, i) => ({ ...d, i }))]
+          .sort((a, b) => b.value - a.value).slice(0, 2).map(d => d.i);
+
+        const container = document.getElementById("instinto-panel-dice-container");
+        if (container) {
+          container.innerHTML = "";
+          results.forEach((die, idx) => {
+            const card = document.createElement("div");
+            card.className = `result-die-card ${keptIndexes.includes(idx) ? "kept" : ""}`;
+            const imgSrc = getDieFaceImgSrc(12, die.value);
+            card.innerHTML = imgSrc
+              ? `<img src="${imgSrc}" class="die-face-img" alt="d12">`
+              : `<span class="die-type-tag d-12">d12</span><span class="die-val-label">${die.value}</span><div class="die-symbol-svg">${getDieSymbolsHtml(die.symbols)}</div>`;
+            container.appendChild(card);
+          });
+        }
+
+        let suc = 0, adp = 0, pre = 0;
+        keptIndexes.forEach(idx => {
+          results[idx].symbols.forEach(s => {
+            if (s === "A") suc++;
+            if (s === "B") adp++;
+            if (s === "C") pre++;
+          });
+        });
+
+        const summary = document.getElementById("instinto-panel-summary");
+        if (summary) {
+          summary.innerHTML = `
+            <span>Sucesso: <strong>${suc}</strong></span>
+            <span>Adaptação: <strong>${adp}</strong></span>
+            <span>Pressão: <strong>${pre}</strong></span>`;
+        }
+
+        const resultsBox = document.getElementById("instinto-panel-results");
+        if (resultsBox) {
+          resultsBox.classList.remove("hidden");
+        }
+
+        const rollEntry = {
+          timestamp: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+          formula: `Instinto: ${inst1} + ${inst2} (${notationString})`,
+          results, keptDiceIndexes: keptIndexes, maxKeep: 2
+        };
+        if (!char.rollHistory) char.rollHistory = [];
+        char.rollHistory.push(rollEntry);
+        if (char.rollHistory.length > 20) char.rollHistory.shift();
+        saveCurrentCharacter();
+        document.dispatchEvent(new CustomEvent('render-chat-history'));
+        btnPanelAgir.textContent = "Rolagem Assimilada";
+        btnPanelAgir.disabled = false;
+        logger.info(`Agir por Instinto: Suc ${suc}, Adp ${adp}, Pre ${pre}`);
+      });
+    };
+    
+    btnPanelAgir.removeEventListener("click", btnPanelAgir._onClick);
+    btnPanelAgir._onClick = runRoll;
+    btnPanelAgir.addEventListener("click", runRoll);
+  }
 }

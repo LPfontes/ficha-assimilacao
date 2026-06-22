@@ -8,11 +8,11 @@
   background-color: var(--bg-header);
   border: 2px solid var(--border-color);
   border-bottom: none;
-  color: var(--color-green-glow);
+  color: var(--color-blue-glow);
   padding: 8px 16px;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   letter-spacing: 1.5px;
   cursor: pointer;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
@@ -28,13 +28,19 @@
 
 .drawer-content {
   flex: 1;
-  padding: 24px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  gap: 20px;
 }
-
+.grid-2-col-d{
+display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  padding-bottom:6px;
+}
 .grid-2-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -59,15 +65,14 @@
 
 .drawer-content h3 {
   font-family: var(--font-heading);
-  font-size: 20px;
-  color: var(--color-green-glow);
+  font-size: var(--font-size-xl);
+  color: var(--color-blue-glow);
   border-bottom: 1px solid rgba(0, 255, 102, 0.15);
   padding-bottom: 6px;
 }
 
 .drawer-content h4 {
   font-family: var(--font-heading);
-  font-size: 14px;
   color: var(--text-secondary);
   letter-spacing: 0.5px;
   margin-bottom: 10px;
@@ -78,7 +83,7 @@
   width: 100%;
   height: 240px;
   background-color: #0c0f12;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-md);
   position: relative;
   overflow: hidden;
@@ -95,7 +100,7 @@
   left: 0;
   width: 100%;
   text-align: center;
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   pointer-events: none;
 }
@@ -110,7 +115,7 @@
 
 .dice-select-control {
   background-color: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   padding: 8px 16px;
   border-radius: var(--radius-md);
   display: flex;
@@ -123,7 +128,7 @@
 .dice-tag {
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   padding: 2px 8px;
   border-radius: 4px;
   color: #000;
@@ -137,33 +142,33 @@ img.dice-tag {
   padding: 0;
   border-radius: 0;
   box-shadow: none;
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.15));
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.15));
   cursor: pointer;
   transition: transform 0.15s ease, filter 0.15s ease;
 }
 
 img.dice-tag:hover {
   transform: scale(1.15);
-  filter: drop-shadow(0 0 8px var(--color-green-glow));
+  filter: drop-shadow(0 0 8px var(--color-blue-glow));
 }
 
 .tag-d6 { background-color: var(--color-rust-glow); }
 .tag-d10 { background-color: var(--color-bronze); }
-.tag-d12 { background-color: var(--color-green-glow); }
+.tag-d12 { background-color: var(--color-blue-glow); }
 
 .dice-select-control label {
   flex: 1;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--text-secondary);
   text-align: left;
 }
 
 .selected-aptitudes-label {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--color-rust-glow);
   text-align: center;
-  background-color: rgba(212, 128, 55, 0.05);
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 6px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(212, 128, 55, 0.1);
@@ -180,7 +185,7 @@ img.dice-tag:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   cursor: pointer;
 }
 
@@ -197,7 +202,7 @@ img.dice-tag:hover {
   width: 54px;
   height: 54px;
   background-color: rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
@@ -214,7 +219,7 @@ img.dice-tag:hover {
 }
 
 .result-die-card.kept {
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
   background-color: rgba(0, 255, 102, 0.1);
   box-shadow: var(--glow-shadow);
 }
@@ -223,13 +228,13 @@ img.dice-tag:hover {
   position: absolute;
   top: 2px;
   left: 4px;
-  font-size: 8px;
+  font-size: var(--font-size-xs);
   font-weight: bold;
   color: var(--text-secondary);
 }
 
 .result-die-card .die-val-label {
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   position: absolute;
   bottom: 2px;
@@ -257,19 +262,19 @@ img.dice-tag:hover {
   height: 100%;
 }
 
-.die-symbol-svg .icon-a { color: var(--color-green-glow); }
+.die-symbol-svg .icon-a { color: var(--color-blue-glow); }
 .die-symbol-svg .icon-b { color: var(--color-bronze); }
 .die-symbol-svg .icon-c { color: #ef4444; }
 
 .summary-results-card {
   background-color: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-md);
   padding: 16px;
 }
 
 .summary-results-card .summary-title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin-bottom: 12px;
 }
@@ -302,18 +307,18 @@ img.dice-tag:hover {
   height: 16px;
 }
 
-.sym-box.sym-a { background-color: rgba(0, 255, 102, 0.1); color: var(--color-green-glow); }
+.sym-box.sym-a { background-color: rgba(0, 255, 102, 0.1); color: var(--color-blue-glow); }
 .sym-box.sym-b { background-color: rgba(212, 175, 55, 0.1); color: var(--color-bronze); }
 .sym-box.sym-c { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
 .symbol-summary-item .sym-count {
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 20px;
+  font-size: var(--font-size-xl);
 }
 
 .symbol-summary-item .sym-name {
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
 }
 
@@ -321,9 +326,9 @@ img.dice-tag:hover {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  border-left: 3px solid var(--color-green-glow);
+  border-left: 3px solid var(--color-blue-glow);
 }
 
 
@@ -334,12 +339,12 @@ img.dice-tag:hover {
   position: fixed;
   top: 80px;
   right: 20px;
-  width: 480px;
-  height: 320px;
+  width: 600px;
+  height: 400px;
   background-color: rgba(12, 15, 18, 0.95);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 2px solid var(--color-green-glow);
+  border: 2px solid var(--color-blue-glow);
   border-radius: var(--radius-lg);
   box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
   z-index: 1000;
@@ -370,8 +375,8 @@ img.dice-tag:hover {
 .overlay-title {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 13px;
-  color: var(--color-green-glow);
+  font-size: var(--font-size-sm);
+  color: var(--color-blue-glow);
   letter-spacing: 1px;
   text-shadow: 0 0 6px rgba(0, 255, 102, 0.4);
 }
@@ -400,7 +405,7 @@ img.dice-tag:hover {
 
 .roll-chat-section h3 {
   font-family: var(--font-heading);
-  font-size: 16px;
+  font-size: var(--font-size-md);
   color: var(--color-rust-glow);
   border-bottom: none !important;
   padding-bottom: 0 !important;
@@ -416,18 +421,18 @@ img.dice-tag:hover {
 }
 
 .chat-placeholder {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   text-align: center;
   padding: 24px 0;
   font-style: italic;
-  border: 1px dashed rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-md);
 }
 
 .chat-message {
   background-color: rgba(22, 28, 35, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: var(--radius-md);
   padding: 12px;
   display: flex;
@@ -443,7 +448,7 @@ img.dice-tag:hover {
 }
 
 .chat-message.active-roll {
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
   background-color: rgba(0, 255, 102, 0.03);
   box-shadow: 0 0 12px rgba(0, 255, 102, 0.05);
 }
@@ -452,8 +457,8 @@ img.dice-tag:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: var(--font-size-xs);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   padding-bottom: 4px;
 }
 
@@ -474,7 +479,7 @@ img.dice-tag:hover {
 }
 
 .roll-formula {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
@@ -495,7 +500,7 @@ img.dice-tag:hover {
   width: 44px;
   height: 44px;
   background-color: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
@@ -508,7 +513,7 @@ img.dice-tag:hover {
 
 .chat-message.active-roll .result-die-card:hover {
   transform: translateY(-1px);
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
 }
 
 .chat-message:not(.active-roll) .result-die-card {
@@ -518,7 +523,7 @@ img.dice-tag:hover {
 }
 
 .chat-message .result-die-card.kept {
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
   background-color: rgba(0, 255, 102, 0.12);
   box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
 }
@@ -527,13 +532,13 @@ img.dice-tag:hover {
   position: absolute;
   top: 1px;
   left: 3px;
-  font-size: 7px;
+  font-size: var(--font-size-xs);
   font-weight: bold;
   color: var(--text-secondary);
 }
 
 .chat-message .result-die-card .die-val-label {
-  font-size: 8px;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   position: absolute;
   bottom: 1px;
@@ -548,11 +553,11 @@ img.dice-tag:hover {
 .chat-message .roll-summary-inline {
   display: flex;
   gap: 12px;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   background-color: rgba(0, 0, 0, 0.25);
   padding: 6px 10px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .chat-message .roll-summary-inline span {
@@ -562,10 +567,10 @@ img.dice-tag:hover {
 }
 
 .chat-message .roll-narrative {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   line-height: 1.4;
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: rgba(0, 0, 0, 0.01);
   padding: 6px;
   border-left: 2px solid var(--color-rust);
   margin-top: 4px;
@@ -575,20 +580,14 @@ img.dice-tag:hover {
    SELEÇÃO RÁPIDA DE HABILIDADES NA GAVETA
    ========================================== */
 .dice-skills-selection {
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .dice-skills-selection h4 {
-  font-family: var(--font-heading);
-  font-size: 13px;
-  color: var(--color-green-glow);
-  margin-bottom: 10px;
-  border-bottom: 1px solid rgba(0, 255, 102, 0.1);
-  padding-bottom: 4px;
+ font-size: var(--font-size-md);
 }
 
 /* ==========================================
@@ -601,7 +600,7 @@ img.dice-tag:hover {
   font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: 0.5px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   margin-bottom: 8px;
   transition: all 0.2s ease;
 }
@@ -621,14 +620,14 @@ img.dice-tag:hover {
   text-shadow: 0 0 10px rgba(160, 60, 255, 0.5);
 }
 .instinto-modal-desc {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   text-align: center;
   margin-bottom: 14px;
 }
 .custo-badge {
   text-align: center;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   padding: 6px 12px;
   border-radius: var(--radius-sm);
@@ -662,14 +661,14 @@ img.dice-tag:hover {
   gap: 6px;
 }
 .instinto-selector-group label {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 .instinto-selector-group label em {
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: 400;
   text-transform: none;
   color: var(--text-muted);
@@ -677,40 +676,39 @@ img.dice-tag:hover {
 .instinto-select {
   width: 100%;
   padding: 7px 10px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   background: rgba(0,0,0,0.4);
   border: 1px solid rgba(160, 60, 255, 0.3);
   color: var(--text-primary);
   border-radius: var(--radius-sm);
 }
 .instinto-dice-count {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-family: var(--font-heading);
   font-weight: 700;
   color: #c080ff;
   text-align: center;
 }
 .instinto-divider {
-  font-size: 24px;
+  font-size: var(--font-size-xxl);
   font-weight: 800;
-  color: rgba(160, 60, 255, 0.5);
-  padding-top: 16px;
+  color: var(--color-blue-glow)
 }
 .instinto-pool-preview {
   background: rgba(80, 0, 120, 0.15);
-  border: 1px solid rgba(160, 60, 255, 0.2);
+  border: 1px solid var(--color-blue-dark);
   border-radius: var(--radius-sm);
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   text-align: center;
   margin-bottom: 12px;
 }
 .instinto-pool-preview strong {
-  color: #c080ff;
+  color: var(--color-blue-glow)
 }
 .instinto-restricao {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   background: rgba(239, 68, 68, 0.05);
   border-left: 2px solid rgba(239, 68, 68, 0.4);
@@ -726,7 +724,7 @@ img.dice-tag:hover {
   font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: 0.5px;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   margin-bottom: 14px;
   transition: all 0.2s ease;
 }

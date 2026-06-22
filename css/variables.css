@@ -1,52 +1,63 @@
 /* Design System & Estilos - Assimilação RPG Sheet Manager */
 
 :root {
-  /* Paleta de Cores Bio-punk */
-  --bg-main: #0c0f12;
-  --bg-card: rgba(22, 28, 35, 0.7);
-  --bg-header: #141a21;
-  --border-color: rgba(0, 255, 102, 0.15);
-  --border-color-glow: rgba(0, 255, 102, 0.4);
+  /* Paleta de Cores Papel Envelhecido Pós-Colapso */
+  --bg-main: transparent;
+  --bg-card: rgba(0, 0, 0, 0.5); /* Cor de papel */
+  --bg-header: rgba(0, 0, 0, 0.3);
+  --border-color: rgba(44, 36, 27, 0.3); /* Tinta desbotada */
+  --border-color-glow: rgba(44, 36, 27, 0.6);
   
   /* Acentos Temáticos */
-  --color-green-glow: #00ff66;
-  --color-green-dark: #0f8f41;
-  --color-rust: #d48037;
-  --color-rust-glow: #ff9d47;
-  --color-bronze: #d4af37;
-  
+  --color-blue-glow: hsl(191.09, 71.88%, 30%); /* Ciano escuro */
+  --color-blue-dark: #0a3a45;
+  --color-rust: #8d2428; /* Vermelho escuro */
+  --color-rust-glow: #be3135;
+  --color-bronze: #8b6508;
+  --color-instintos: hsl(356.79, 50%, 50%);
+  --color-conhecimentos: hsl(204.32, 33.33%, 50%);
+  --color-praticas: hsl(55.14, 16.12%, 50%);
   /* Cores de Alerta de Saúde */
-  --health-6: #00ff66; /* Saudável */
+  --color-health-label: #4c7b12; /* Texto do rótulo da saúde */
+  --health-6: #34bd19; /* Saudável */
   --health-5: #a3e635; /* Escoriação */
   --health-4: #facc15; /* Laceração */
   --health-3: #f97316; /* Ferimentos */
   --health-2: #ef4444; /* Debilitação */
   --health-1: #991b1b; /* Incapacitação */
 
-  /* Cores Neutras */
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-  --bg-input: rgba(10, 14, 18, 0.8);
+  /* Cores Neutras (Inversão) */
+  --text-primary: #ffffff; /* Tinta quase preta */
+  --text-secondary: #f8f7f6; /* Tinta marrom escuro */
+  --text-muted: #cac6c1; /* Tinta desbotada */
+  --bg-input: rgba(0, 0, 0, 0.4);
   
   /* Tipografia */
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
-  
+  --font-size-xs: 10px;
+  --font-size-xm: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  --font-size-xxxl: 28px;
+  --font-size-huge: 36px;
   /* Transições e Bordas */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
-  --glow-shadow: 0 0 12px rgba(0, 255, 102, 0.3);
-  --glow-shadow-rust: 0 0 12px rgba(255, 157, 71, 0.3);
+  --glow-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --glow-shadow-rust: 0 2px 4px rgba(0, 0, 0, 0.15);
 
-  /* Cores Oficiais (New Order Editora - Website) */
-  --color-official-cyan: #0d6e6e;
-  --color-official-cyan-dark: #0a5555;
-  --color-official-glow: #40e0d0;
-  --bg-official-card: #151922;
+  /* Cores Oficiais */
+  --color-official-cyan: #125d6e;
+  --color-official-cyan-dark: #0a3a45;
+  --color-official-glow: #125d6e;
+  --bg-official-card: rgba(230, 220, 200, 0.9);
 }
 
 /* Reset Geral */
@@ -57,11 +68,7 @@
 }
 
 body {
-  background-color: var(--bg-main);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(0, 255, 102, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(212, 128, 55, 0.05) 0px, transparent 50%),
-    linear-gradient(rgba(12, 15, 18, 0.95), rgba(12, 15, 18, 0.95));
+  background-color: #1a1511; /* Cor de fundo base escura do tema */
   color: var(--text-primary);
   font-family: var(--font-body);
   line-height: 1.5;
@@ -69,6 +76,23 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../fundo2.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.3; /* AJUSTE A OPACIDADE AQUI (ex: 0.1 a 1.0) */
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Scrollbars Customizados */
@@ -84,7 +108,7 @@ body {
   border-radius: var(--radius-sm);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-green-glow);
+  background: var(--color-blue-glow);
 }
 
 /* Cabeçalho Principal */
@@ -102,18 +126,18 @@ body {
 .header-logo {
   font-family: var(--font-heading);
   font-weight: 900;
-  font-size: 24px;
+  font-size: var(--font-size-xxl);
   letter-spacing: 2px;
   color: var(--text-primary);
 }
 
 .header-logo .logo-accent {
-  color: var(--color-green-glow);
+  color: var(--color-blue-glow);
   text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
 }
 
 .header-logo .subtitle {
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 400;
   color: var(--color-rust-glow);
 }
@@ -144,63 +168,73 @@ select, input[type="text"], input[type="number"], textarea {
 }
 
 select:focus, input:focus, textarea:focus {
-  border-color: var(--color-green-glow);
+  border-color: var(--color-blue-glow);
   box-shadow: var(--glow-shadow);
 }
 
-/* Botões */
+/* Botões (Estilo Carimbo/Tecla de Máquina) */
 .btn {
   font-family: var(--font-heading);
   font-weight: 600;
   padding: 8px 16px;
   border-radius: var(--radius-sm);
-  border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   transition: var(--transition-fast);
+  
+  /* Padrão de botões (antigo btn-primary) */
+  background-color: var(--color-blue-glow);
+  color: #fff;
+  border: 1px solid var(--color-blue-dark);
+  box-shadow: 2px 2px 0 var(--color-blue-dark);
 }
 
-.btn-primary {
-  background-color: var(--color-green-dark);
-  color: #000;
-  background-image: linear-gradient(135deg, var(--color-green-glow), var(--color-green-dark));
-  box-shadow: var(--glow-shadow);
-}
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: brightness(1.2);
-  box-shadow: 0 0 18px rgba(0, 255, 102, 0.6);
+.btn:hover:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--color-blue-dark);
 }
 
 .btn-secondary {
-  background-color: rgba(212, 128, 55, 0.2);
-  border: 1px solid var(--color-rust);
-  color: var(--color-rust-glow);
+  border: 1px solid var(--color-blue-dark);
+  color: var(--text-primary);
+  box-shadow: 2px 2px 0 var(--color-blue-dark);
 }
 .btn-secondary:hover:not(:disabled) {
-  background-color: var(--color-rust);
-  color: #000;
-  box-shadow: var(--glow-shadow-rust);
+  background-color: rgba(0, 0, 0, 0.4);
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--color-blue-dark);
 }
-
+.export-json{
+  background-color: #4c7b12;
+  border: 1px solid #304e0b;
+  box-shadow: 2px 2px 0 #304e0b;
+}
+.import-json{
+  background-color: #0f325c;
+}
 .btn-success {
-  background-color: #10b981;
+  background-color: var(--color-official-cyan-dark);
   color: #fff;
+  border-color: #052229;
+  box-shadow: 2px 2px 0 #052229;
 }
 .btn-success:hover:not(:disabled) {
-  filter: brightness(1.1);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #052229;
 }
 
 .btn-danger {
-  background-color: #ef4444;
+  background-color: var(--color-rust);
   color: #fff;
+  border-color: #5e1114;
+  box-shadow: 2px 2px 0 #5e1114;
 }
 .btn-danger:hover:not(:disabled) {
-  background-color: #dc2626;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+  background-color: #a0282d;
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #5e1114;
 }
 
 .btn:disabled {
@@ -212,7 +246,7 @@ select:focus, input:focus, textarea:focus {
 
 .btn-sm {
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .btn-block {
@@ -223,7 +257,7 @@ select:focus, input:focus, textarea:focus {
 
 .btn-large {
   padding: 14px 24px;
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   letter-spacing: 1px;
 }
 
@@ -257,13 +291,13 @@ select:focus, input:focus, textarea:focus {
   display: none !important;
 }
 
-/* Efeito de Vidro (Glassmorphism) */
+/* Estilo de Cartão de Papel (Anteriormente Glassmorphism) */
 .card-glass {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
+
 

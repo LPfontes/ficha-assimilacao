@@ -178,7 +178,7 @@ export function renderChatHistory() {
         <span class="roll-time">${roll.timestamp}</span>
       </div>
       <div class="chat-message-body">
-        <div class="roll-formula">Rolo: <strong>${roll.formula}</strong> (Manter: <span class="max-keep-count">${roll.maxKeep}</span>)</div>
+        <div class="roll-formula"><strong>${roll.formula}</strong> (Manter: <span class="max-keep-count">${roll.maxKeep}</span>)</div>
         <div class="results-dice-grid">
           ${diceHtml}
         </div>
@@ -219,7 +219,7 @@ export function updateResultsSummary() {
 // Retorna representação HTML do conjunto de símbolos da face do dado
 export function getDieSymbolsHtml(symbols) {
   if (symbols.length === 0) {
-    return `<span style="font-size: 8px; color: var(--text-muted);">Vazio</span>`;
+    return `<span style="font-size: var(--font-size-xs); color: var(--text-muted);">Vazio</span>`;
   }
   
   return symbols.map(sym => {
@@ -295,4 +295,15 @@ export function getDieFaceImgSrc(sides, value) {
     if (value === 12) return "d12/12 (D12).webp";
   }
   return null;
+}
+
+export function clearChatHistory() {
+  logger.info("Chat: Limpando histórico de rolagens.");
+  if (state.currentCharacter) {
+    state.currentCharacter.rollHistory = [];
+    saveCurrentCharacter();
+  } else {
+    state.tempRollHistory = [];
+  }
+  renderChatHistory();
 }

@@ -1,8 +1,8 @@
 import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish } from "./js/wizard.js";
-import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal, openAgirPorInstinoModal } from "./js/modals.js";
-import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet } from "./js/sheet.js";
+import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
+import { openTraitsModal, openAssimilationTestModal } from "./js/modals.js";
+import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, restoreDeterminacao } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
 
@@ -102,6 +102,85 @@ function setupEventListeners() {
     }
   });
 
+  // Torna o modal arrastável e redefine a posição ao abrir
+  const modalContent = document.querySelector(".modal-content");
+  if (modalContent) {
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    modalContent.addEventListener("mousedown", (e) => {
+      // Não arrasta se clicar em botões, campos de entrada, selects, links ou no botão de fechar
+      const tag = e.target.tagName.toLowerCase();
+      if (
+        tag === "input" || 
+        tag === "button" || 
+        tag === "select" || 
+        tag === "textarea" || 
+        tag === "a" || 
+        e.target.closest(".btn") || 
+        e.target.classList.contains("modal-close")
+      ) {
+        return;
+      }
+      
+      isDragging = true;
+      modalContent.style.cursor = "grabbing";
+      
+      const rect = modalContent.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+      
+      startX = e.clientX;
+      startY = e.clientY;
+      
+      modalContent.style.position = "absolute";
+      modalContent.style.margin = "0";
+      modalContent.style.left = `${initialLeft}px`;
+      modalContent.style.top = `${initialTop}px`;
+      modalContent.style.transform = "none";
+      modalContent.style.animation = "none";
+      
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      
+      modalContent.style.left = `${initialLeft + dx}px`;
+      modalContent.style.top = `${initialTop + dy}px`;
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        modalContent.style.cursor = "grab";
+      }
+    });
+    
+    modalContent.style.cursor = "grab";
+
+    // Observer para recentralizar o modal sempre que for reaberto
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          const isHidden = el.modalContainer.classList.contains("hidden");
+          if (!isHidden) {
+            modalContent.style.position = "";
+            modalContent.style.left = "";
+            modalContent.style.top = "";
+            modalContent.style.transform = "";
+            modalContent.style.margin = "";
+            modalContent.style.animation = "";
+          }
+        }
+      });
+    });
+    observer.observe(el.modalContainer, { attributes: true });
+  }
+
   // Add Trait from Sheet
   el.btnAddTraitSheet.addEventListener("click", openTraitsModal);
   el.btnAssimilationTest.addEventListener("click", openAssimilationTestModal);
@@ -112,18 +191,34 @@ function setupEventListeners() {
   if (el.btnDecAss) el.btnDecAss.addEventListener("click", () => adjustCaboGuerraLevels(1));
   if (el.btnIncAss) el.btnIncAss.addEventListener("click", () => adjustCaboGuerraLevels(-1));
   if (el.btnAvancoAssimilacao) el.btnAvancoAssimilacao.addEventListener("click", executeAssimilacaoAvanco);
+  if (el.btnRestoreDet) el.btnRestoreDet.addEventListener("click", restoreDeterminacao);
 
   // Dice Drawer Trigger
-  el.btnToggleDrawer.addEventListener("click", () => {
-    el.diceDrawer.classList.toggle("closed");
-    el.btnToggleDrawer.querySelector(".trigger-arrow").textContent = el.diceDrawer.classList.contains("closed") ? "◀" : "▶";
-  });
+ // --- SUBSTITUA O BLOCO ANTIGO DE "Dice Drawer Trigger" E "Header Open Roller Trigger" POR ESTE: ---
 
-  // Header Open Roller Trigger
-  el.btnOpenRoller.addEventListener("click", () => {
-    el.diceDrawer.classList.toggle("closed");
-    el.btnToggleDrawer.querySelector(".trigger-arrow").textContent = el.diceDrawer.classList.contains("closed") ? "◀" : "▶";
-  });
+  // Botão "Lançar Dados" no cabeçalho abre o modal do rolador
+  if (el.btnOpenRoller) {
+    el.btnOpenRoller.addEventListener("click", () => {
+      if (el.diceDrawer) el.diceDrawer.classList.remove("hidden");
+    });
+  }
+
+  // Novo botão de fechar (X) dentro do modal do rolador
+  const btnCloseDrawer = document.getElementById("btn-close-drawer");
+  if (btnCloseDrawer) {
+    btnCloseDrawer.addEventListener("click", () => {
+      if (el.diceDrawer) el.diceDrawer.classList.add("hidden");
+    });
+  }
+
+  // Fechar o modal ao clicar na área escura (overlay) de fundo
+  if (el.diceDrawer) {
+    el.diceDrawer.addEventListener("click", (e) => {
+      if (e.target === el.diceDrawer) {
+        el.diceDrawer.classList.add("hidden");
+      }
+    });
+  }
 
   // Seletores rápidos na gaveta
   el.rollSelectInstinto.addEventListener("change", (e) => {
@@ -175,7 +270,29 @@ function setupEventListeners() {
   el.modOrigemOcupacao.addEventListener("change", updateKeepCountDisplay);
   el.modOrigemEvento.addEventListener("change", updateKeepCountDisplay);
   
-  el.btnAgirInstinto.addEventListener("click", openAgirPorInstinoModal);
+  // Alternar abas do Rolador (Normal vs Assimilada)
+  const tabRollerNormal = document.getElementById("tab-roller-normal");
+  const tabRollerAssimilada = document.getElementById("tab-roller-assimilada");
+  const panelRollerNormal = document.getElementById("panel-roller-normal");
+  const panelRollerAssimilada = document.getElementById("panel-roller-assimilada");
+  
+  if (tabRollerNormal && tabRollerAssimilada && panelRollerNormal && panelRollerAssimilada) {
+    const switchToNormal = () => {
+      panelRollerNormal.classList.remove("hidden");
+      panelRollerAssimilada.classList.add("hidden");
+    };
+    
+    const switchToAssimilada = () => {
+      panelRollerAssimilada.classList.remove("hidden");
+      panelRollerNormal.classList.add("hidden");
+      
+      initRolagemAssimiladaPanel();
+    };
+    
+    tabRollerNormal.addEventListener("click", switchToNormal);
+    tabRollerAssimilada.addEventListener("click", switchToAssimilada);
+  }
+
   el.btnRollAction.addEventListener("click", execute3DPhysicsRoll);
   
   // Custom Roll listeners
@@ -270,6 +387,29 @@ function setupEventListeners() {
         logger.error("Erro ao ler o arquivo selecionado:", err);
       };
       reader.readAsDataURL(file);
+    });
+  }
+    // Abrir o modal pelo botão "Lançar Dados" do cabeçalho
+  document.getElementById("btn-open-roller").addEventListener("click", () => {
+    document.getElementById("dice-drawer").classList.remove("hidden");
+  });
+
+  // Fechar o modal pelo botão de fechar X incorporado
+  document.getElementById("btn-close-drawer").addEventListener("click", () => {
+    document.getElementById("dice-drawer").classList.add("hidden");
+  });
+
+  // Fechar ao clicar na área escura de fora do modal
+  document.getElementById("dice-drawer").addEventListener("click", (e) => {
+    if (e.target.id === "dice-drawer") {
+      document.getElementById("dice-drawer").classList.add("hidden");
+    }
+  });
+
+  const btnClearChat = document.getElementById("btn-clear-chat");
+  if (btnClearChat) {
+    btnClearChat.addEventListener("click", () => {
+      import("./js/chat.js").then(({ clearChatHistory }) => clearChatHistory());
     });
   }
 
