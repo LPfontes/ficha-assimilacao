@@ -206,6 +206,183 @@ export function renderChatHistory() {
   
   // Auto scroll to bottom
   container.scrollTop = container.scrollHeight;
+
+  // Sincronizar com o painel de resultados da tab correspondente
+  const normalResultsBox = document.getElementById("normal-panel-results");
+  const instintoResultsBox = document.getElementById("instinto-panel-results");
+  
+  if (history.length > 0) {
+    const lastRoll = history[history.length - 1];
+    state.keptDiceIndexes = [...lastRoll.keptDiceIndexes];
+    const isInstinto = lastRoll.formula && lastRoll.formula.includes("Instinto");
+    
+    if (isInstinto) {
+      if (normalResultsBox) normalResultsBox.classList.add("hidden");
+      if (instintoResultsBox) {
+        instintoResultsBox.classList.remove("hidden");
+        
+        const instintoDiceContainer = document.getElementById("instinto-panel-dice-container");
+        const instintoSummary = document.getElementById("instinto-panel-summary");
+        
+        if (instintoDiceContainer) {
+          instintoDiceContainer.innerHTML = "";
+          lastRoll.results.forEach((die, index) => {
+            const isKept = lastRoll.keptDiceIndexes.includes(index);
+            const card = document.createElement("div");
+            card.className = `result-die-card ${isKept ? 'kept' : ''}`;
+            card.style.cursor = "pointer";
+            
+            const imgSrc = getDieFaceImgSrc(12, die.value);
+            if (imgSrc) {
+              card.innerHTML = `<img src="${imgSrc}" class="die-face-img" alt="d12 face ${die.value}">`;
+            } else {
+              card.innerHTML = `
+                <span class="die-type-tag d-12">d12</span>
+                <span class="die-val-label">${die.value}</span>
+                <div class="die-symbol-svg">
+                  ${getDieSymbolsHtml(die.symbols)}
+                </div>
+              `;
+            }
+            
+            card.addEventListener("click", () => {
+              toggleKeepDie(index);
+            });
+            instintoDiceContainer.appendChild(card);
+          });
+        }
+        
+        // Calculate counts for summary
+        let sucessos = 0;
+        let adaptacoes = 0;
+        let pressoes = 0;
+        lastRoll.keptDiceIndexes.forEach(index => {
+          const die = lastRoll.results[index];
+          if (die) {
+            die.symbols.forEach(sym => {
+              if (sym === "A") sucessos++;
+              if (sym === "B") adaptacoes++;
+              if (sym === "C") pressoes++;
+            });
+          }
+        });
+        
+        if (instintoSummary) {
+          instintoSummary.innerHTML = `
+            <span>Sucesso: <strong class="sum-sucessos">${sucessos}</strong></span>
+            <span>Adaptação: <strong class="sum-adaptacoes">${adaptacoes}</strong></span>
+            <span>Pressão: <strong class="sum-pressoes">${pressoes}</strong></span>
+          `;
+        }
+      }
+    } else {
+      if (instintoResultsBox) instintoResultsBox.classList.add("hidden");
+      if (normalResultsBox) {
+        normalResultsBox.classList.remove("hidden");
+        
+        const normalDiceContainer = document.getElementById("normal-panel-dice-container");
+        const normalSummary = document.getElementById("normal-panel-summary");
+        const normalNarrative = document.getElementById("normal-panel-narrative");
+        
+        if (normalDiceContainer) {
+          normalDiceContainer.innerHTML = "";
+          lastRoll.results.forEach((die, index) => {
+            const isKept = lastRoll.keptDiceIndexes.includes(index);
+            const card = document.createElement("div");
+            card.className = `result-die-card ${isKept ? 'kept' : ''}`;
+            card.style.cursor = "pointer";
+            
+            const imgSrc = getDieFaceImgSrc(die.sides, die.value);
+            if (imgSrc) {
+              card.innerHTML = `<img src="${imgSrc}" class="die-face-img" alt="d${die.sides} face ${die.value}">`;
+            } else {
+              card.innerHTML = `
+                <span class="die-type-tag d-${die.sides}">d${die.sides}</span>
+                <span class="die-val-label">${die.value}</span>
+                <div class="die-symbol-svg">
+                  ${getDieSymbolsHtml(die.symbols)}
+                </div>
+              `;
+            }
+            
+            card.addEventListener("click", () => {
+              toggleKeepDie(index);
+            });
+            normalDiceContainer.appendChild(card);
+          });
+        }
+        
+        // Calculate counts for summary
+        let sucessos = 0;
+        let adaptacoes = 0;
+        let pressoes = 0;
+        lastRoll.keptDiceIndexes.forEach(index => {
+          const die = lastRoll.results[index];
+          if (die) {
+            die.symbols.forEach(sym => {
+              if (sym === "A") sucessos++;
+              if (sym === "B") adaptacoes++;
+              if (sym === "C") pressoes++;
+            });
+          }
+        });
+        
+        let penalidadeA = 0;
+        let penalidadeB = 0;
+        let healthLvlName = "Saudável";
+        const healthLvl = char ? getCurrentHealthLevel(char) : 6;
+        if (healthLvl === 4 || healthLvl === 3) {
+          penalidadeA = 1;
+          healthLvlName = healthLvl === 4 ? "Laceração" : "Ferimentos";
+        } else if (healthLvl === 2) {
+          penalidadeA = 2;
+          healthLvlName = "Debilitação";
+        } else if (healthLvl === 1) {
+          penalidadeB = 2;
+          healthLvlName = "Incapacitação";
+        }
+        
+        const finalSucessos = Math.max(0, sucessos - penalidadeA);
+        const finalAdaptacoes = Math.max(0, adaptacoes - penalidadeB);
+        
+        let sucessosHtml = finalSucessos;
+        if (penalidadeA > 0) {
+          sucessosHtml = `${finalSucessos} <span class="penalty-tag" title="Penalidade de -${penalidadeA} [A] por ${healthLvlName}">(-${penalidadeA})</span>`;
+        }
+        let adaptacoesHtml = finalAdaptacoes;
+        if (penalidadeB > 0) {
+          adaptacoesHtml = `${finalAdaptacoes} <span class="penalty-tag" title="Penalidade de -${penalidadeB} [B] por ${healthLvlName}">(-${penalidadeB})</span>`;
+        }
+        
+        if (normalSummary) {
+          normalSummary.innerHTML = `
+            <span>Sucesso: <strong class="sum-sucessos">${sucessosHtml}</strong></span>
+            <span>Adaptação: <strong class="sum-adaptacoes">${adaptacoesHtml}</strong></span>
+            <span>Pressão: <strong class="sum-pressoes">${pressoes}</strong></span>
+          `;
+        }
+        
+        if (normalNarrative) {
+          let narrativeText = "";
+          if (finalSucessos > 0) {
+            narrativeText += `<strong>${finalSucessos} Sucesso(s)</strong> `;
+          } else {
+            narrativeText += `<strong>Fracasso:</strong> Sem sucessos. `;
+          }
+          if (finalAdaptacoes > 0) {
+            narrativeText += `Obteve <strong>${finalAdaptacoes} Adaptação</strong>. `;
+          }
+          if (pressoes > 0) {
+            narrativeText += `Sofreu <strong>${pressoes} Pressão</strong>. `;
+          }
+          normalNarrative.innerHTML = narrativeText;
+        }
+      }
+    }
+  } else {
+    if (normalResultsBox) normalResultsBox.classList.add("hidden");
+    if (instintoResultsBox) instintoResultsBox.classList.add("hidden");
+  }
 }
 
 export function renderResultsPanel() {

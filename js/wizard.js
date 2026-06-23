@@ -1,5 +1,5 @@
 import { el, state, loadCharacter, saveCurrentCharacter } from "./state.js";
-import { CARACTERISTICAS } from "../data.js";
+import { CARACTERISTICAS } from "./characteristics.js";
 import { ICONS } from "../icons.js";
 import { logger } from "./logger.js";
 
@@ -531,7 +531,7 @@ export function wizardFinish() {
     caracteristicas: state.wizardData.caracteristicas,
     mutações: [],
     notes: "",
-    inventario: Array(10).fill(null).map((_, i) => {
+    inventario: Array(9).fill(null).map((_, i) => {
       const itemsMap = {
         combatente: ["Bebida", "Corda (15 metros)", "Faca", "Lança", "Machado"],
         curandeiro: ["Álcool", "Curativos", "Faca", "Kit de costura", "Serrote"],
@@ -543,8 +543,26 @@ export function wizardFinish() {
         selvagem: ["Faca de osso", "Lança", "Pintura ritualística", "Rede de dormir", "Rede de pesca"],
         sobrevivente: ["Corda (15 metros)", "Faca", "Machado", "Pederneira", "Saco de dormir"]
       };
+      const itemEscassez = {
+        "Bebida": 2, "Corda (15 metros)": 1, "Faca": 1, "Lança": 1, "Machado": 2,
+        "Álcool": 2, "Curativos": 2, "Kit de costura": 2, "Serrote": 2,
+        "Bússola": 3, "Facão": 2, "Mapas úteis": 3, "Saco de dormir": 2, "Tenda desmontável": 3,
+        "Caderno de notas": 2, "Caixa de velas": 2, "Canivete": 4, "Kit de escrita": 2, "Livro (1)": 3, "Livro (2)": 3, "Livro (3)": 3,
+        "Ábaco": 3, "Balança": 2,
+        "Aljava c/ 10 flechas": 2, "Arco": 3, "Manto camuflado": 4, "Sinalizador": 3,
+        "Gazuas": 2, "Pé de cabra": 2,
+        "Faca de osso": 1, "Pintura ritualística": 1, "Rede de dormir": 1, "Rede de pesca": 1,
+        "Pederneira": 2
+      };
       const defaults = itemsMap[state.wizardData.equipamentoPacote] || [];
-      return defaults[i] ? { name: defaults[i], qualidade: false, escassez: false } : { name: "", qualidade: false, escassez: false };
+      const itemName = defaults[i] || "";
+      const esc = itemEscassez[itemName] || (itemName ? 2 : 0);
+      return {
+        name: itemName,
+        qualidade: itemName ? 3 : 3, // Padrão
+        pressao: 0,
+        escassez: esc
+      };
     })
   };
   

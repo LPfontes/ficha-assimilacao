@@ -30,17 +30,20 @@
         
 
         <button id="btn-new-char" class="btn btn-primary" title="Criar Nova Ficha">
-        <span class="btn-icon" data-icon="plus"></span> Nova Ficha
+        <span class="btn-icon" data-icon="plus"></span> <span class="btn-text">Nova Ficha</span>
       </button>
       <button id="btn-import-json" class="btn btn-secondary import-json" title="Importar Ficha JSON">
-        <span class="btn-icon" data-icon="import"></span> Importar
+        <span class="btn-icon" data-icon="import"></span> <span class="btn-text">Importar</span>
       </button>
       <input type="file" id="file-import" accept=".json" style="display: none;">
       <button id="btn-export-json" class="btn btn-secondary export-json" title="Exportar Ficha JSON" disabled>
-        <span class="btn-icon" data-icon="export"></span> Exportar
+        <span class="btn-icon" data-icon="export"></span> <span class="btn-text">Exportar</span>
       </button>
       <button id="btn-delete-char" class="btn btn-danger" title="Apagar Personagem" disabled>
         <span class="btn-icon" data-icon="trash"></span>
+      </button>
+      <button id="btn-settings" class="btn btn-secondary" title="Configurações">
+        <span class="btn-icon" data-icon="settings"></span>
       </button>
     </div>
   </header>
@@ -333,6 +336,9 @@
                       <div id="sheet-det-points" class="cabo-points-tracker">
                         <!-- JS renderiza símbolos -->
                       </div>
+                      <div class="cabo-math-container" style="margin-top: 8px; width: 100%; display: flex; justify-content: center;">
+                        <input type="text" id="input-det-math" class="sheet-input-text cabo-math-input" placeholder="± Determinação" style="width: 100px; text-align: center; font-size: 11px; padding: 4px; height: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
+                      </div>
                     </div>
                     
                     <!-- Coluna Assimilação -->
@@ -346,15 +352,13 @@
                       <div id="sheet-ass-points" class="cabo-points-tracker">
                         <!-- JS renderiza símbolos -->
                       </div>
+                      <div class="cabo-math-container" style="margin-top: 8px; width: 100%; display: flex; justify-content: center;">
+                        <input type="text" id="input-ass-math" class="sheet-input-text cabo-math-input" placeholder="± Assimilação" style="width: 100px; text-align: center; font-size: 11px; padding: 4px; height: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
+                      </div>
                     </div>
                   </div>
                   
-                  <!-- Botão Restaurar Determinação -->
-                  <div style="margin-top: 12px; display: flex; justify-content: center;">
-                    <button id="btn-restore-det" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 10px;" title="Restaurar Determinação para o valor máximo">
-                      Restaurar Determinação
-                    </button>
-                  </div>
+
                   
                   <!-- Estado Suscetível Warning -->
                   <div class="suscetivel-alert hidden" id="suscetivel-alert">
@@ -405,7 +409,7 @@
               
               <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
                 <button id="btn-open-roller" class="btn btn-secondary" title="Abrir Rolador de Dados" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
-                  <span style="font-size: 1.2em; vertical-align: middle; margin-right: 4px;">🎲</span> Lançar Dados
+                  <span style="font-size: 1.2em; vertical-align: middle; margin-right: 4px;">🎲</span><span class="btn-text"> Lançar Dados</span>
                 </button>
               </div>
               
@@ -416,7 +420,10 @@
               <div class="sheet-redesign-tabs-container">
                 <div class="sheet-redesign-tabs-nav card-glass">
                   <button class="sheet-tab-btn active" data-tab="tab-mutacoes">
-                    <span class="tab-btn-icon">♦</span> Características & Mutações
+                    <span class="tab-btn-icon">♦</span> Características
+                  </button>
+                  <button class="sheet-tab-btn" data-tab="tab-assimilacoes">
+                    <span class="tab-btn-icon">🧬</span> Assimilações
                   </button>
                   <button class="sheet-tab-btn" data-tab="tab-inventario">
                     <span class="tab-btn-icon">▲</span> Inventário
@@ -427,25 +434,31 @@
                 </div>
                 
                 <div class="sheet-redesign-tabs-content card-glass">
-                  <!-- Aba 1: Características e Mutações -->
+                  <!-- Aba 1: Características -->
                   <div class="sheet-tab-panel active" id="tab-mutacoes">
                     <!-- Seção de Características Adquiridas -->
                     <div class="sheet-section section-traits">
-                      <h3 class="section-title">CARACTERÍSTICAS</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 12px;">
+                        <h3 class="section-title" style="margin: 0; border: none; padding: 0;">CARACTERÍSTICAS</h3>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                          <div class="xp-counter" style="margin: 0; font-size: var(--font-size-xs); font-family: var(--font-heading);">XP: <strong id="sheet-xp-value">0</strong></div>
+                          <button id="btn-add-trait-sheet" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
+                        </div>
+                      </div>
                       <div class="traits-sheet-grid" id="traits-list-sheet">
                         <!-- Lista de Características da Ficha -->
                       </div>
-                      <div class="traits-sheet-actions">
-                        <button id="btn-add-trait-sheet" class="btn btn-secondary btn-sm">
-                          <span class="btn-icon" data-icon="plus"></span> Adicionar Característica (XP)
-                        </button>
-                        <div class="xp-counter">XP Disponível: <strong id="sheet-xp-value">0</strong></div>
-                      </div>
                     </div>
+                  </div>
 
+                  <!-- Aba 2: Assimilações -->
+                  <div class="sheet-tab-panel" id="tab-assimilacoes">
                     <!-- Seção de Assimilações -->
                     <div class="sheet-section section-assimilations">
-                      <h3 class="section-title">ASSIMILAÇÕES (MUTAÇÕES)</h3>
+                      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 12px;">
+                        <h3 class="section-title" style="margin: 0; border: none; padding: 0;">ASSIMILAÇÕES (MUTAÇÕES)</h3>
+                        <div id="sheet-assimilation-points" style="display: flex; gap: 8px; align-items: center;"></div>
+                      </div>
                       <div class="mutations-sheet-list-single" id="mutations-list-sheet">
                         <!-- Mutações inseridas pelo JS em uma única coluna -->
                       </div>
@@ -457,13 +470,32 @@
                     </div>
                   </div>
                   
-                  <!-- Aba 2: Inventário -->
+                  <!-- Aba 3: Inventário -->
                   <div class="sheet-tab-panel" id="tab-inventario">
                     <div class="inventory-block">
-                      <h3 class="section-title">ESPAÇOS DE INVENTÁRIO</h3>
-                      <p class="inventory-help">10 espaços. Insira qualidade e escassez do equipamento.</p>
-                      <div class="inventory-grid" id="inventory-list-sheet">
-                        <!-- JS renderizará 10 slots -->
+                      <h3 class="section-title">INVENTÁRIO</h3>
+                      <p class="inventory-help" style="margin-bottom: 16px; font-size: var(--font-size-xs); color: var(--text-muted); line-height: 1.4;">
+                        Cada item ocupa um espaço (exceto pequenos objetos). Vestuário, cantil e mochila são automáticos.
+                      </p>
+                      
+                      <!-- Seção No Corpo -->
+                      <div class="inventory-section-wrapper" style="margin-bottom: 20px;">
+                        <h4 style="font-family: var(--font-heading); color: var(--color-blue-glow); font-size: var(--font-size-sm); margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+                          No Corpo (3 Espaços - Mais fáceis de sacar)
+                        </h4>
+                        <div id="inventory-body-list" class="inventory-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                          <!-- JS renderizará 3 slots -->
+                        </div>
+                      </div>
+
+                      <!-- Seção Na Mochila -->
+                      <div class="inventory-section-wrapper">
+                        <h4 style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px;">
+                          Na Mochila (6 Espaços - Devem ser retirados para usar)
+                        </h4>
+                        <div id="inventory-backpack-list" class="inventory-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                          <!-- JS renderizará 6 slots -->
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -543,21 +575,30 @@
             
             <div class="roll-modifiers-section">
               <h4>Modificadores Para Manter +1 Dado</h4>
-              <div class="modifiers-list">
-                <label class="modifier-checkbox">
-                  <input type="checkbox" id="mod-empenho">
-                  <span>Empenho (Gasta 1 de Determinação)</span>
-                </label>
+              <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Empenho (Gasta 1 de Determinação)</span>
+                  <label class="theme-switch">
+                    <input type="checkbox" id="mod-empenho">
+                    <span class="slider"></span>
+                  </label>
+                </div>
                 
-                <label class="modifier-checkbox">
-                  <input type="checkbox" id="mod-origem-ocupacao">
-                  <span>Ativar Ocupação (Origem - 1x/sessão)</span>
-                </label>
+                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Ocupação (Origem - 1x/sessão)</span>
+                  <label class="theme-switch">
+                    <input type="checkbox" id="mod-origem-ocupacao">
+                    <span class="slider"></span>
+                  </label>
+                </div>
 
-                <label class="modifier-checkbox">
-                  <input type="checkbox" id="mod-origem-evento">
-                  <span>Ativar Evento Marcante (Origem - 1x/sessão)</span>
-                </label>
+                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Evento Marcante (Origem - 1x/sessão)</span>
+                  <label class="theme-switch">
+                    <input type="checkbox" id="mod-origem-evento">
+                    <span class="slider"></span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -613,8 +654,16 @@
         </div>
         <div>
 
-          <div class="roll-action-section">
-            <button id="btn-roll-action" class="btn btn-success btn-large btn-block">ROLAR DADOS</button>
+          <div class="roll-action-section" style="display: flex; gap: 8px;">
+            <button id="btn-roll-action" class="btn btn-success btn-large" style="flex: 1; justify-content: center;">ROLAR DADOS</button>
+            <button type="button" class="btn btn-secondary btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
+          </div>
+          
+          <div class="normal-results hidden" id="normal-panel-results" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
+            <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado (Toque nos dados para selecionar quais manter)</h4>
+            <div class="results-dice-grid" id="normal-panel-dice-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            <div class="roll-summary-inline" id="normal-panel-summary" style="margin-top:8px; display: flex; gap: 16px;"></div>
+            <div class="roll-narrative" id="normal-panel-narrative" style="margin-top:8px; font-size: var(--font-size-xs); line-height: 1.4; border-left: 2px solid var(--color-rust); padding-left: 6px;"></div>
           </div>
         </div>
       </div>
@@ -629,35 +678,69 @@
           <div id="instinto-custo-display" style="margin-bottom: 8px;">
             <!-- Renderizado dinamicamente via JS -->
           </div>
-          
-          <div class="instinto-selectors" style="display: flex; gap: 16px; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-md);">
-            <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-blue-glow);">1º Instinto</label>
-              <select id="inst-select-1" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
-              <span class="instinto-dice-count" id="inst-count-1" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+          <div class="instinto-panel-content-flex">
+            <div class="instinto-selectors" style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="instinto-selectors">
+              <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-blue-glow);">1º Instinto</label>
+                <select id="inst-select-1" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
+                <span class="instinto-dice-count" id="inst-count-1" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+              </div>
+              <div class="instinto-divider" style="font-size: var(--font-size-lg); font-weight: bold; color: var(--text-muted);">+</div>
+              <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-blue-glow);">2º Instinto</label>
+                <select id="inst-select-2" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
+                <span class="instinto-dice-count" id="inst-count-2" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+              </div>
             </div>
-            <div class="instinto-divider" style="font-size: var(--font-size-lg); font-weight: bold; color: var(--text-muted);">+</div>
-            <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-              <label style="font-size: var(--font-size-sm); font-weight: bold; color: var(--color-blue-glow);">2º Instinto</label>
-              <select id="inst-select-2" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
-              <span class="instinto-dice-count" id="inst-count-2" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+            
+            <div class="instinto-pool-preview" style="font-size: var(--font-size-md); font-family: var(--font-heading); font-weight: bold; text-align: center;">
+              Pilha de Rolagem: <strong id="instinto-pool-label" style="color: var(--color-blue-glow);">—</strong> <br> Manter: <strong id="instinto-keep-label">2</strong>
             </div>
           </div>
           
-          <div class="instinto-pool-preview" style="font-size: var(--font-size-md); font-family: var(--font-heading); font-weight: bold; text-align: center;">
-            Pilha de Rolagem: <strong id="instinto-pool-label" style="color: var(--color-blue-glow);">—</strong> &nbsp;·&nbsp; Manter: <strong>2</strong>
-          </div>
           
+          <div class="roll-modifiers-section" style="margin-bottom: 12px; padding: 0 4px;">
+            <h4 style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: 8px;">Modificadores Para Manter +1 Dado</h4>
+            <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Empenho (Gasta 1 de Determinação)</span>
+                <label class="theme-switch">
+                  <input type="checkbox" id="mod-empenho-ass">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Ocupação (Origem - 1x/sessão)</span>
+                <label class="theme-switch">
+                  <input type="checkbox" id="mod-origem-ocupacao-ass">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Evento Marcante (Origem - 1x/sessão)</span>
+                <label class="theme-switch">
+                  <input type="checkbox" id="mod-origem-evento-ass">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          </div>
+
           <div class="instinto-restricao" style="font-size: var(--font-size-md); color: var(--color-rust-glow); background: rgba(141,36,40,0.1); border: 1px solid rgba(141,36,40,0.2); padding: 8px 12px; border-radius: var(--radius-sm);">
             ⚠️ <strong>Restrição:</strong> Sem ajuda de aliados. Adaptações não cancelam Pressões em Ações Simples.
           </div>
           
-          <button class="btn btn-success btn-large btn-block" id="btn-panel-agir-instinto">
-            REALIZAR ROLAGEM ASSIMILADA
-          </button>
+          <div class="roll-action-section" style="display: flex; gap: 8px;">
+            <button class="btn btn-success btn-large" id="btn-panel-agir-instinto" style="flex: 1; justify-content: center;">REALIZAR ROLAGEM ASSIMILADA</button>
+            <button type="button" class="btn btn-secondary btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
+          </div>
           
           <div class="instinto-results hidden" id="instinto-panel-results" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
-            <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado</h4>
+            <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado (Toque nos dados para selecionar quais manter)</h4>
             <div class="results-dice-grid" id="instinto-panel-dice-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
             <div class="roll-summary-inline" id="instinto-panel-summary" style="margin-top:8px; display: flex; gap: 16px;"></div>
           </div>
@@ -671,7 +754,14 @@
     </section>
 
   </main>
-
+   <!-- MODAIS FLUTUANTES (Seleção de Mutações, Compra de Características, Confirmação) -->
+  <div id="modal-container" class="modal-overlay hidden">
+    <!-- Modal genérico inserido via JS -->
+    <div class="modal-content card-glass">
+      <button class="modal-close">&times;</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
   <!-- Overlay de Rolagem (Canto Superior Direito) -->
   <div id="dice-overlay" class="dice-overlay hidden">
     <div class="dice-overlay-header">
@@ -681,16 +771,7 @@
       <div id="dice-box-3d"></div>
     </div>
   </div>
-  
 
-  <!-- MODAIS FLUTUANTES (Seleção de Mutações, Compra de Características, Confirmação) -->
-  <div id="modal-container" class="modal-overlay hidden">
-    <!-- Modal genérico inserido via JS -->
-    <div class="modal-content card-glass">
-      <button class="modal-close">&times;</button>
-      <div id="modal-body"></div>
-    </div>
-  </div>
 
   <!-- Scripts -->
   <script src="dice/libs/three.min.js" defer></script>
@@ -698,6 +779,7 @@
   <script src="dice/libs/teal.js" defer></script>
   <script src="dice/dice.js" defer></script>
   <script type="module" src="app.js"></script>
+
 
 </body>
 </html>

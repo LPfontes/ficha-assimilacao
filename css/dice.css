@@ -197,7 +197,12 @@ img.dice-tag:hover {
   justify-content: center;
   margin: 12px 0;
 }
-
+.instinto-panel-content-flex{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  
+}
 .result-die-card {
   width: 54px;
   height: 54px;
@@ -651,8 +656,6 @@ img.dice-tag:hover {
 .instinto-selectors {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
 }
 .instinto-selector-group {
   flex: 1;
@@ -695,14 +698,10 @@ img.dice-tag:hover {
   color: var(--color-blue-glow)
 }
 .instinto-pool-preview {
-  background: rgba(80, 0, 120, 0.15);
-  border: 1px solid var(--color-blue-dark);
   border-radius: var(--radius-sm);
-  padding: 8px 14px;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   text-align: center;
-  margin-bottom: 12px;
 }
 .instinto-pool-preview strong {
   color: var(--color-blue-glow)

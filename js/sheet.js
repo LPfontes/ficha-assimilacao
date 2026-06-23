@@ -1,5 +1,5 @@
 import { el, state, saveCurrentCharacter, loadCharacter } from "./state.js";
-import { CARACTERISTICAS } from "../data.js";
+import { CARACTERISTICAS } from "./characteristics.js";
 import { ICONS } from "../icons.js";
 import { selectRollAptitude, updateDiceDrawerUI } from "./roller.js";
 import { logger } from "./logger.js";
@@ -15,6 +15,33 @@ export function renderAptitudesSheet() {
   if (!char) return;
   
   logger.debug("Renderizando aptidões na ficha...");
+  
+  // Helper para atualizar valores das aptidões quando clica na bolha
+  const updateAptitudeValue = (type, categoryKey, name, newValue) => {
+    char[categoryKey][name] = newValue;
+    
+    // Sincroniza com a seleção de rolagens ativa
+    if (type === "instinto" && state.selectedRoll.instinto === name) {
+      if (state.selectedRoll.agirPorInstinto) {
+        state.selectedRoll.d12 = newValue;
+      } else {
+        state.selectedRoll.d6 = newValue;
+      }
+    } else if (type === "skill" && state.selectedRoll.skill === name) {
+      state.selectedRoll.d10 = newValue;
+    }
+    
+    saveCurrentCharacter();
+    renderAptitudesSheet();
+    
+    // Se mudou Potência ou Resolução, recalcula Saúde
+    if (name === "Potência" || name === "Resolução") {
+      renderHealthSheet();
+    }
+    
+    import("./roller.js").then(({ updateDiceDrawerUI }) => updateDiceDrawerUI());
+  };
+
   // Renders de Instintos
   el.instinctsListSheet.innerHTML = "";
   Object.keys(char.instintos).forEach(name => {
@@ -23,18 +50,27 @@ export function renderAptitudesSheet() {
     row.className = "aptitude-item";
     if (state.selectedRoll.instinto === name) row.classList.add("selected-for-roll");
     
-    let bubblesHtml = "";
-    for (let i = 1; i <= 4; i++) {
-      bubblesHtml += `<span class="bubble bubble-instinct ${i <= val ? 'filled' : ''}"></span>`;
-    }
-    
     row.innerHTML = `
       <span class="name">${name}</span>
-      <div class="value-bubbles">${bubblesHtml}</div>
+      <div class="value-bubbles"></div>
     `;
     
+    const bubblesContainer = row.querySelector(".value-bubbles");
+    for (let i = 1; i <= 4; i++) {
+      const bubble = document.createElement("span");
+      bubble.className = `bubble bubble-instinct ${i <= val ? 'filled' : ''}`;
+      
+      bubble.addEventListener("click", (e) => {
+        e.stopPropagation(); // Impede selecionar para rolagem
+        const newValue = val === i ? i - 1 : i;
+        // Instintos não podem ser menores que 1 no sistema básico, mas conhecimentos/práticas sim
+        updateAptitudeValue("instinto", "instintos", name, Math.max(1, newValue));
+      });
+      bubblesContainer.appendChild(bubble);
+    }
+    
     row.addEventListener("click", () => {
-      selectRollAptitude("instinto", name, val);
+      selectRollAptitude("instinto", name, char.instintos[name]);
     });
     
     el.instinctsListSheet.appendChild(row);
@@ -48,18 +84,26 @@ export function renderAptitudesSheet() {
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
     
-    let bubblesHtml = "";
-    for (let i = 1; i <= 5; i++) {
-      bubblesHtml += `<span class="bubble bubble-conhecimento ${i <= val ? 'filled' : ''}"></span>`;
-    }
-    
     row.innerHTML = `
       <span class="name">${name}</span>
-      <div class="value-bubbles">${bubblesHtml}</div>
+      <div class="value-bubbles"></div>
     `;
     
+    const bubblesContainer = row.querySelector(".value-bubbles");
+    for (let i = 1; i <= 5; i++) {
+      const bubble = document.createElement("span");
+      bubble.className = `bubble bubble-conhecimento ${i <= val ? 'filled' : ''}`;
+      
+      bubble.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const newValue = val === i ? i - 1 : i;
+        updateAptitudeValue("skill", "conhecimentos", name, newValue);
+      });
+      bubblesContainer.appendChild(bubble);
+    }
+    
     row.addEventListener("click", () => {
-      selectRollAptitude("skill", name, val);
+      selectRollAptitude("skill", name, char.conhecimentos[name]);
     });
     
     el.conhecimentosListSheet.appendChild(row);
@@ -73,18 +117,26 @@ export function renderAptitudesSheet() {
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
     
-    let bubblesHtml = "";
-    for (let i = 1; i <= 5; i++) {
-      bubblesHtml += `<span class="bubble bubble-pratica ${i <= val ? 'filled' : ''}"></span>`;
-    }
-    
     row.innerHTML = `
       <span class="name">${name}</span>
-      <div class="value-bubbles">${bubblesHtml}</div>
+      <div class="value-bubbles"></div>
     `;
     
+    const bubblesContainer = row.querySelector(".value-bubbles");
+    for (let i = 1; i <= 5; i++) {
+      const bubble = document.createElement("span");
+      bubble.className = `bubble bubble-pratica ${i <= val ? 'filled' : ''}`;
+      
+      bubble.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const newValue = val === i ? i - 1 : i;
+        updateAptitudeValue("skill", "praticas", name, newValue);
+      });
+      bubblesContainer.appendChild(bubble);
+    }
+    
     row.addEventListener("click", () => {
-      selectRollAptitude("skill", name, val);
+      selectRollAptitude("skill", name, char.praticas[name]);
     });
     
     el.praticasListSheet.appendChild(row);
@@ -434,6 +486,55 @@ export function renderMutationsSheet() {
   const char = state.currentCharacter;
   if (!char) return;
   
+  // Renderizar pontos de assimilação (Sucesso, Adaptação, Pressão)
+  const pointsContainer = document.getElementById("sheet-assimilation-points");
+  if (pointsContainer) {
+    if (char.ptsA === undefined) char.ptsA = 1;
+    if (char.ptsB === undefined) char.ptsB = 0;
+    if (char.ptsC === undefined) char.ptsC = 2;
+    
+    pointsContainer.innerHTML = `
+      <div class="ass-point-badge" style="display: flex; align-items: center; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.2); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-heading);">
+        <span style="color: #00ff66; margin-right: 6px; font-weight: bold;">Sucesso [A]:</span>
+        <button class="btn-point-adjust dec-a" style="background: none; border: none; color: #00ff66; cursor: pointer; padding: 0 4px; font-weight: bold; font-size: 12px; line-height: 1;">-</button>
+        <span style="color: #00ff66; font-weight: bold; min-width: 14px; text-align: center;">${char.ptsA}</span>
+        <button class="btn-point-adjust inc-a" style="background: none; border: none; color: #00ff66; cursor: pointer; padding: 0 4px; font-weight: bold; font-size: 12px; line-height: 1;">+</button>
+      </div>
+      <div class="ass-point-badge" style="display: flex; align-items: center; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.2); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-heading);">
+        <span style="color: #eab308; margin-right: 6px; font-weight: bold;">Adaptação [B]:</span>
+        <button class="btn-point-adjust dec-b" style="background: none; border: none; color: #eab308; cursor: pointer; padding: 0 4px; font-weight: bold; font-size: 12px; line-height: 1;">-</button>
+        <span style="color: #eab308; font-weight: bold; min-width: 14px; text-align: center;">${char.ptsB}</span>
+        <button class="btn-point-adjust inc-b" style="background: none; border: none; color: #eab308; cursor: pointer; padding: 0 4px; font-weight: bold; font-size: 12px; line-height: 1;">+</button>
+      </div>
+      <div class="ass-point-badge" style="display: flex; align-items: center; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-family: var(--font-heading);">
+        <span style="color: #ef4444; margin-right: 6px; font-weight: bold;">Pressão [C]:</span>
+        <button class="btn-point-adjust dec-c" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0 4px; font-weight: bold; font-size: 12px; line-height: 1;">-</button>
+        <span style="color: #ef4444; font-weight: bold; min-width: 14px; text-align: center;">${char.ptsC}</span>
+        <button class="btn-point-adjust inc-c" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0 4px; font-weight: bold; font-size: 12px; line-height: 1;">+</button>
+      </div>
+    `;
+    
+    // Listeners
+    pointsContainer.querySelector(".dec-a").addEventListener("click", () => {
+      if (char.ptsA > 0) { char.ptsA--; saveCurrentCharacter(); renderMutationsSheet(); }
+    });
+    pointsContainer.querySelector(".inc-a").addEventListener("click", () => {
+      char.ptsA++; saveCurrentCharacter(); renderMutationsSheet();
+    });
+    pointsContainer.querySelector(".dec-b").addEventListener("click", () => {
+      if (char.ptsB > 0) { char.ptsB--; saveCurrentCharacter(); renderMutationsSheet(); }
+    });
+    pointsContainer.querySelector(".inc-b").addEventListener("click", () => {
+      char.ptsB++; saveCurrentCharacter(); renderMutationsSheet();
+    });
+    pointsContainer.querySelector(".dec-c").addEventListener("click", () => {
+      if (char.ptsC > 0) { char.ptsC--; saveCurrentCharacter(); renderMutationsSheet(); }
+    });
+    pointsContainer.querySelector(".inc-c").addEventListener("click", () => {
+      char.ptsC++; saveCurrentCharacter(); renderMutationsSheet();
+    });
+  }
+  
   const container = document.getElementById("mutations-list-sheet");
   if (!container) return;
   container.innerHTML = "";
@@ -483,10 +584,34 @@ export function renderInventorySheet() {
   const char = state.currentCharacter;
   if (!char) return;
   
-  el.inventoryListSheet.innerHTML = "";
+  if (el.inventoryBodyList) el.inventoryBodyList.innerHTML = "";
+  if (el.inventoryBackpackList) el.inventoryBackpackList.innerHTML = "";
   
-  if (!char.inventario || char.inventario.length !== 10) {
-    char.inventario = Array(10).fill(null).map(() => ({ name: "", qualidade: false, escassez: false }));
+  if (!char.inventario || char.inventario.length !== 9) {
+    const oldInv = char.inventario || [];
+    char.inventario = Array(9).fill(null).map((_, idx) => {
+      const oldItem = oldInv[idx] || {};
+      let qual = 3; // Padrão
+      if (typeof oldItem.qualidade === 'boolean') {
+        qual = oldItem.qualidade ? 4 : 3;
+      } else if (typeof oldItem.qualidade === 'number') {
+        qual = oldItem.qualidade;
+      }
+      
+      let esc = 2; // Comum
+      if (typeof oldItem.escassez === 'boolean') {
+        esc = oldItem.escassez ? 3 : 2;
+      } else if (typeof oldItem.escassez === 'number') {
+        esc = oldItem.escassez;
+      }
+
+      return {
+        name: oldItem.name || "",
+        qualidade: qual,
+        pressao: oldItem.pressao || 0,
+        escassez: esc
+      };
+    });
     saveCurrentCharacter();
   }
   
@@ -494,39 +619,87 @@ export function renderInventorySheet() {
     const row = document.createElement("div");
     row.className = "inventory-slot";
     
+    const isBody = i < 3;
+    const slotDisplayNum = isBody ? i + 1 : i - 2;
+    
+    let qual = typeof slot.qualidade === 'number' ? slot.qualidade : (slot.qualidade ? 4 : 3);
+    let pressao = typeof slot.pressao === 'number' ? slot.pressao : 0;
+    let esc = typeof slot.escassez === 'number' ? slot.escassez : (slot.escassez ? 3 : 2);
+    
     row.innerHTML = `
-      <span class="slot-num">${i + 1}</span>
-      <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio">
-      <div class="item-props">
-        <label class="prop-checkbox prop-q" data-label="Qualidade">
-          <input type="checkbox" class="chk-q" ${slot.qualidade ? 'checked' : ''}>
-          <span class="checkmark"></span>
-        </label>
-        <label class="prop-checkbox prop-e" data-label="Escassez">
-          <input type="checkbox" class="chk-e" ${slot.escassez ? 'checked' : ''}>
-          <span class="checkmark"></span>
-        </label>
+      <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
+        <span class="slot-num" title="${isBody ? 'Espaço no Corpo' : 'Espaço na Mochila'}" style="color: ${isBody ? 'var(--color-blue-glow)' : 'var(--text-muted)'}; font-weight: bold; font-family: var(--font-heading);">${slotDisplayNum}</span>
+        <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio" style="width: 100%;">
+      </div>
+      
+      <div class="item-props-redesign" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <!-- Qualidade -->
+        <div class="prop-select-wrapper" title="Qualidade do Equipamento">
+          <select class="select-qualidade" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,102,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+            <option value="0" ${qual === 0 ? 'selected' : ''}>Q0: Quebrado</option>
+            <option value="1" ${qual === 1 ? 'selected' : ''}>Q1: Defeituoso</option>
+            <option value="2" ${qual === 2 ? 'selected' : ''}>Q2: Comprometido</option>
+            <option value="3" ${qual === 3 ? 'selected' : ''}>Q3: Padrão</option>
+            <option value="4" ${qual === 4 ? 'selected' : ''}>Q4: Reforçado</option>
+            <option value="5" ${qual === 5 ? 'selected' : ''}>Q5: Superior</option>
+            <option value="6" ${qual === 6 ? 'selected' : ''}>Q6: Obra-Prima</option>
+          </select>
+        </div>
+
+        <!-- C Investidas -->
+        <div class="prop-c-wrapper" title="Pressões" style="display: flex; align-items: center; gap: 4px;">
+          <span style="color: var(--color-rust-glow); font-size: 11px; font-weight: bold;">Desgate:</span>
+          <select class="select-pressao" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(141,36,40,0.3); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; width: 40px; cursor: pointer;">
+            <option value="0" ${pressao === 0 ? 'selected' : ''}>0</option>
+            <option value="1" ${pressao === 1 ? 'selected' : ''}>1</option>
+            <option value="2" ${pressao === 2 ? 'selected' : ''}>2</option>
+            <option value="3" ${pressao === 3 ? 'selected' : ''}>3</option>
+            <option value="4" ${pressao === 4 ? 'selected' : ''}>4</option>
+            <option value="5" ${pressao === 5 ? 'selected' : ''}>5</option>
+            <option value="6" ${pressao === 6 ? 'selected' : ''}>6</option>
+          </select>
+        </div>
+
+        <!-- Escassez -->
+        <div class="prop-select-wrapper" title="Nível de Escassez">
+          <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+            <option value="0" ${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
+            <option value="1" ${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
+            <option value="2" ${esc === 2 ? 'selected' : ''}>E2: Comum</option>
+            <option value="3" ${esc === 3 ? 'selected' : ''}>E3: Incomum</option>
+            <option value="4" ${esc === 4 ? 'selected' : ''}>E4: Atípico</option>
+            <option value="5" ${esc === 5 ? 'selected' : ''}>E5: Raro</option>
+            <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
+          </select>
+        </div>
       </div>
     `;
     
     const inputName = row.querySelector(".item-name");
-    const chkQ = row.querySelector(".chk-q");
-    const chkE = row.querySelector(".chk-e");
+    const selQ = row.querySelector(".select-qualidade");
+    const selP = row.querySelector(".select-pressao");
+    const selE = row.querySelector(".select-escassez");
     
     const saveSlot = () => {
       char.inventario[i] = {
         name: inputName.value,
-        qualidade: chkQ.checked,
-        escassez: chkE.checked
+        qualidade: parseInt(selQ.value),
+        pressao: parseInt(selP.value),
+        escassez: parseInt(selE.value)
       };
       saveCurrentCharacter();
     };
     
     inputName.addEventListener("input", saveSlot);
-    chkQ.addEventListener("change", saveSlot);
-    chkE.addEventListener("change", saveSlot);
+    selQ.addEventListener("change", saveSlot);
+    selP.addEventListener("change", saveSlot);
+    selE.addEventListener("change", saveSlot);
     
-    el.inventoryListSheet.appendChild(row);
+    if (isBody) {
+      if (el.inventoryBodyList) el.inventoryBodyList.appendChild(row);
+    } else {
+      if (el.inventoryBackpackList) el.inventoryBackpackList.appendChild(row);
+    }
   });
 }
 

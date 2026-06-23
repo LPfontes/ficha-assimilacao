@@ -21,6 +21,7 @@ export const el = {
   fileImport: document.getElementById("file-import"),
   btnDeleteChar: document.getElementById("btn-delete-char"),
   btnOpenRoller: document.getElementById("btn-open-roller"),
+  btnSettings: document.getElementById("btn-settings"),
   
   // Wizard Navigation
   btnWizPrev: document.getElementById("btn-wiz-prev"),
@@ -51,13 +52,16 @@ export const el = {
   traitsListSheet: document.getElementById("traits-list-sheet"),
   btnAddTraitSheet: document.getElementById("btn-add-trait-sheet"),
   btnAssimilationTest: document.getElementById("btn-assimilation-test"),
-  inventoryListSheet: document.getElementById("inventory-list-sheet"),
+  inventoryBodyList: document.getElementById("inventory-body-list"),
+  inventoryBackpackList: document.getElementById("inventory-backpack-list"),
   
   // Cabo de Guerra Ficha
   sheetDetLevel: document.getElementById("sheet-det-level"),
   sheetDetPoints: document.getElementById("sheet-det-points"),
   sheetAssLevel: document.getElementById("sheet-ass-level"),
   sheetAssPoints: document.getElementById("sheet-ass-points"),
+  inputDetMath: document.getElementById("input-det-math"),
+  inputAssMath: document.getElementById("input-ass-math"),
   caboRatioFill: document.getElementById("cabo-ratio-fill"),
   suscetivelAlert: document.getElementById("suscetivel-alert"),
   btnDecDet: document.getElementById("btn-dec-det"),
@@ -65,7 +69,7 @@ export const el = {
   btnDecAss: document.getElementById("btn-dec-ass"),
   btnIncAss: document.getElementById("btn-inc-ass"),
   btnAvancoAssimilacao: document.getElementById("btn-avanco-assimilacao"),
-  btnRestoreDet: document.getElementById("btn-restore-det"),
+
   
   // Dice Drawer Controls
   diceDrawer: document.getElementById("dice-drawer"),
@@ -77,6 +81,9 @@ export const el = {
   modEmpenho: document.getElementById("mod-empenho"),
   modOrigemOcupacao: document.getElementById("mod-origem-ocupacao"),
   modOrigemEvento: document.getElementById("mod-origem-evento"),
+  modEmpenhoAss: document.getElementById("mod-empenho-ass"),
+  modOrigemOcupacaoAss: document.getElementById("mod-origem-ocupacao-ass"),
+  modOrigemEventoAss: document.getElementById("mod-origem-evento-ass"),
   btnAgirInstinto: document.getElementById("btn-agir-instinto"),
   btnRollAction: document.getElementById("btn-roll-action"),
   btnRollCustom: document.getElementById("btn-roll-custom"),
@@ -175,6 +182,9 @@ export function createTestCharacter() {
     detPoints: 9,
     assNivel: 1,
     assPoints: 1,
+    ptsA: 1,
+    ptsB: 0,
+    ptsC: 2,
     xp: 3,
     caracteristicas: ["estagio_avancado"],
     mutações: [],
@@ -260,6 +270,9 @@ export function loadCharacter(charId) {
     logger.error(`Tentativa fracassada de carregar personagem inexistente com ID: ${charId}`);
     return;
   }
+  if (char.ptsA === undefined) char.ptsA = 1;
+  if (char.ptsB === undefined) char.ptsB = 0;
+  if (char.ptsC === undefined) char.ptsC = 2;
   state.currentCharacter = char;
   logger.info(`Carregando ficha da personagem: "${char.name}" (ID: ${charId})`);
   updateCharSelector();

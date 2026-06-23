@@ -1,32 +1,497 @@
 /* RESPONSIVIDADE (MOBILE & TABLET) */
+
+/* TABLETS (Largura até 1024px) */
 @media (max-width: 1024px) {
-  .sheet-layout-grid {
-    grid-template-columns: 1fr;
-    overflow-y: auto;
-  }
-  
-  .sheet-page {
-    overflow-y: visible;
-    height: auto;
-  }
-  
   body {
-    overflow-y: auto;
-    height: auto;
+    overflow-y: auto !important;
+    height: auto !important;
   }
   
   .main-content {
-    height: auto;
-    overflow-y: visible;
+    height: auto !important;
+    overflow-y: visible !important;
+    padding: 12px !important;
+  }
+
+  #sheet-screen,
+  .sheet-layout-grid,
+  .sheet-pages-column {
+    height: auto !important;
+    overflow: visible !important;
   }
   
+  .sheet-redesign-container {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    gap: 16px !important;
+  }
+  
+  .sheet-redesign-left, 
+  .sheet-redesign-center, 
+  .sheet-redesign-right {
+    height: auto !important;
+    overflow-y: visible !important;
+    padding-right: 0 !important;
+  }
+
   .dice-drawer {
-    width: 100%;
-    transform: translateX(100%);
+    width: 100% !important;
+    transform: none !important;
+    position: relative !important;
   }
   
   .dice-drawer.closed {
-    transform: translateX(100%);
+    transform: none !important;
   }
 }
 
+/* SMARTPHONES (Largura até 768px) */
+@media (max-width: 768px) {
+  /* Cabeçalho Responsivo */
+  .main-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    text-align: center;
+  }
+
+  .header-logo {
+    justify-content: center !important;
+  }
+
+  .header-logo img {
+    height: 32px !important;
+  }
+
+  .header-controls {
+    width: 100% !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .selector-container {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  #char-selector {
+    flex-grow: 1 !important;
+    max-width: none !important;
+  }
+
+  /* Ocultar texto nos botões do cabeçalho */
+  .btn-text {
+    display: none !important;
+  }
+
+   .btn {
+    padding: 8px 12px !important;
+  }
+
+  /* Botão flutuante (FAB) do rolador de dados no mobile */
+  #btn-open-roller {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 9999 !important;
+    border-radius: 50% !important;
+    width: 60px !important;
+    height: 60px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 20px rgba(0, 255, 102, 0.4), var(--glow-shadow) !important;
+    background: rgba(10, 58, 69, 0.9) !important;
+    border: 2px solid var(--color-blue-glow) !important;
+    transition: transform var(--transition-fast) !important;
+  }
+
+  #btn-open-roller:hover {
+    transform: scale(1.1) !important;
+  }
+
+  #btn-open-roller span {
+    margin-right: 0 !important;
+    font-size: 1.8em !important;
+  }
+
+  /* Grades da Ficha */
+  .status-cards-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .aptitudes-columns-container {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Painel de Rolagem (Dice Drawer) em Telas Pequenas */
+  .modal-content {
+    width: 95% !important;
+    max-width: none !important;
+    max-height: 90vh !important;
+    margin: 20px auto !important;
+    padding: 16px !important;
+    
+    /* Desativa comportamento absoluto do drag */
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    cursor: default !important;
+  }
+
+  .grid-2-col-d, 
+  .grid-2-col {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    height: auto !important;
+  }
+
+  .roll-action-section {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .drawer-col-1, 
+  .drawer-col-2 {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .dice-box-canvas-container {
+    height: 180px !important;
+  }
+
+  .dice-selector-row {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+  }
+
+  .dice-select-control {
+    flex: 1 1 calc(50% - 8px) !important;
+    min-width: 130px !important;
+    padding: 8px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .dice-select-control label {
+    text-align: center !important;
+  }
+
+  /* Modificadores de dados empilhados no mobile */
+  .modifiers-list {
+    gap: 10px !important;
+  }
+
+  .modifier-checkbox {
+    font-size: var(--font-size-xs) !important;
+  }
+
+  /* Estilização especial e Premium do Empenho no Mobile */
+  .modifier-checkbox:has(#mod-empenho),
+  .modifier-checkbox:has(#mod-empenho-ass) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: rgba(141, 36, 40, 0.15) !important;
+    border: 1px solid rgba(255, 100, 100, 0.15) !important;
+    padding: 12px 16px !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: 8px !important;
+    font-weight: bold !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    position: relative !important;
+  }
+
+  .modifier-checkbox:has(#mod-empenho) input,
+  .modifier-checkbox:has(#mod-empenho-ass) input {
+    display: none !important;
+  }
+
+  /* Fundo do Toggle Switch */
+  .modifier-checkbox:has(#mod-empenho)::after,
+  .modifier-checkbox:has(#mod-empenho-ass)::after {
+    content: "" !important;
+    display: inline-block !important;
+    width: 44px !important;
+    height: 24px !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    flex-shrink: 0 !important;
+    margin-left: 12px !important;
+  }
+
+  /* Botão deslizante (Pino) */
+  .modifier-checkbox:has(#mod-empenho)::before,
+  .modifier-checkbox:has(#mod-empenho-ass)::before {
+    content: "" !important;
+    position: absolute !important;
+    right: 38px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 18px !important;
+    height: 18px !important;
+    background-color: var(--text-muted) !important;
+    border-radius: 50% !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 2 !important;
+  }
+
+  /* Estado Ativo (Checked) */
+  .modifier-checkbox:has(#mod-empenho):has(:checked),
+  .modifier-checkbox:has(#mod-empenho-ass):has(:checked) {
+    background: rgba(141, 36, 40, 0.4) !important;
+    border-color: var(--color-rust-glow) !important;
+    box-shadow: 0 0 12px rgba(190, 49, 53, 0.25) !important;
+  }
+
+  .modifier-checkbox:has(#mod-empenho):has(:checked)::after,
+  .modifier-checkbox:has(#mod-empenho-ass):has(:checked)::after {
+    background-color: var(--color-rust-glow) !important;
+    border-color: var(--color-rust-glow) !important;
+  }
+
+  .modifier-checkbox:has(#mod-empenho):has(:checked)::before,
+  .modifier-checkbox:has(#mod-empenho-ass):has(:checked)::before {
+    right: 18px !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Estilização especial de Ocupação e Evento (Origens) no Mobile */
+  .modifier-checkbox:has(#mod-origem-ocupacao),
+  .modifier-checkbox:has(#mod-origem-ocupacao-ass),
+  .modifier-checkbox:has(#mod-origem-evento),
+  .modifier-checkbox:has(#mod-origem-evento-ass) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: rgba(18, 93, 110, 0.15) !important;
+    border: 1px solid rgba(0, 162, 255, 0.15) !important;
+    padding: 12px 16px !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: 8px !important;
+    font-weight: bold !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    position: relative !important;
+  }
+
+  .modifier-checkbox:has(#mod-origem-ocupacao) input,
+  .modifier-checkbox:has(#mod-origem-ocupacao-ass) input,
+  .modifier-checkbox:has(#mod-origem-evento) input,
+  .modifier-checkbox:has(#mod-origem-evento-ass) input {
+    display: none !important;
+  }
+
+  /* Fundo do Toggle Switch */
+  .modifier-checkbox:has(#mod-origem-ocupacao)::after,
+  .modifier-checkbox:has(#mod-origem-ocupacao-ass)::after,
+  .modifier-checkbox:has(#mod-origem-evento)::after,
+  .modifier-checkbox:has(#mod-origem-evento-ass)::after {
+    content: "" !important;
+    display: inline-block !important;
+    width: 44px !important;
+    height: 24px !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    flex-shrink: 0 !important;
+    margin-left: 12px !important;
+  }
+
+  /* Botão deslizante (Pino) */
+  .modifier-checkbox:has(#mod-origem-ocupacao)::before,
+  .modifier-checkbox:has(#mod-origem-ocupacao-ass)::before,
+  .modifier-checkbox:has(#mod-origem-evento)::before,
+  .modifier-checkbox:has(#mod-origem-evento-ass)::before {
+    content: "" !important;
+    position: absolute !important;
+    right: 38px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 18px !important;
+    height: 18px !important;
+    background-color: var(--text-muted) !important;
+    border-radius: 50% !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 2 !important;
+  }
+
+  /* Estado Ativo (Checked) */
+  .modifier-checkbox:has(#mod-origem-ocupacao):has(:checked),
+  .modifier-checkbox:has(#mod-origem-ocupacao-ass):has(:checked),
+  .modifier-checkbox:has(#mod-origem-evento):has(:checked),
+  .modifier-checkbox:has(#mod-origem-evento-ass):has(:checked) {
+    background: rgba(18, 93, 110, 0.4) !important;
+    border-color: var(--color-blue-glow) !important;
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.2) !important;
+  }
+
+  .modifier-checkbox:has(#mod-origem-ocupacao):has(:checked)::after,
+  .modifier-checkbox:has(#mod-origem-ocupacao-ass):has(:checked)::after,
+  .modifier-checkbox:has(#mod-origem-evento):has(:checked)::after,
+  .modifier-checkbox:has(#mod-origem-evento-ass):has(:checked)::after {
+    background-color: var(--color-blue-glow) !important;
+    border-color: var(--color-blue-glow) !important;
+  }
+
+  .modifier-checkbox:has(#mod-origem-ocupacao):has(:checked)::before,
+  .modifier-checkbox:has(#mod-origem-ocupacao-ass):has(:checked)::before,
+  .modifier-checkbox:has(#mod-origem-evento):has(:checked)::before,
+  .modifier-checkbox:has(#mod-origem-evento-ass):has(:checked)::before {
+    right: 18px !important;
+    background-color: #ffffff !important;
+  }
+
+  /* 3D Dice Overlay responsivo */
+  .dice-overlay {
+    width: 90% !important;
+    height: 300px !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+  }
+
+  .dice-overlay.hidden {
+    transform: translate(-50%, -50%) scale(0.9) !important;
+  }
+
+  /* Assistente de Criação (Wizard) Responsivo */
+  #wizard-screen {
+    max-height: none !important;
+    height: auto !important;
+    width: 95% !important;
+    margin: 10px auto !important;
+    padding: 16px !important;
+  }
+
+  .wizard-progress {
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  .wizard-progress::before {
+    display: none !important;
+  }
+
+  .step-indicator {
+    width: 10px !important;
+    height: 10px !important;
+    font-size: 0 !important; /* Oculta número */
+    border-width: 1px !important;
+  }
+
+  .wizard-steps-container {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
+  .skills-wizard-container {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  .instincts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .packages-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+/* CELULARES PORTRAIT (Largura até 480px) */
+@media (max-width: 480px) {
+  .portrait-wrapper {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .portrait-side-fields {
+    width: 100% !important;
+  }
+
+  .polaroid-frame {
+    transform: none !important;
+    width: 140px !important;
+    height: 180px !important;
+  }
+
+  .polaroid-frame:hover {
+    transform: scale(1.02) !important;
+  }
+
+  .sheet-redesign-tabs-nav {
+    flex-wrap: wrap !important;
+    padding: 6px 6px 0 6px !important;
+  }
+
+  .sheet-tab-btn {
+    padding: 6px 10px !important;
+    font-size: 9px !important;
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+  }
+
+  #tab-inventario .inventory-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cabo-guerra-display {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+
+  .cabo-side {
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+  }
+
+  .cabo-side:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .cabo-points-tracker {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
+
+  .health-drops {
+    justify-content: center !important;
+  }
+
+  .health-level-row {
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .btn-cabo-adjust {
+    opacity: 1 !important; /* Sempre visível no mobile */
+  }
+
+  /* Modais de Mutações e Características */
+  .traits-wizard-list, 
+  .mutations-sheet-list-single {
+    max-height: 250px !important;
+  }
+}

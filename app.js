@@ -1,8 +1,8 @@
 import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal } from "./js/modals.js";
-import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, restoreDeterminacao } from "./js/sheet.js";
+import { openTraitsModal, openAssimilationTestModal, openSettingsModal } from "./js/modals.js";
+import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
 
@@ -63,6 +63,9 @@ function setupEventListeners() {
   });
   el.btnNewChar.addEventListener("click", startWizard);
   el.btnDeleteChar.addEventListener("click", deleteActiveCharacter);
+  if (el.btnSettings) {
+    el.btnSettings.addEventListener("click", openSettingsModal);
+  }
   
   // Export/Import JSON
   el.btnExportJson.addEventListener("click", exportActiveCharacter);
@@ -191,7 +194,59 @@ function setupEventListeners() {
   if (el.btnDecAss) el.btnDecAss.addEventListener("click", () => adjustCaboGuerraLevels(1));
   if (el.btnIncAss) el.btnIncAss.addEventListener("click", () => adjustCaboGuerraLevels(-1));
   if (el.btnAvancoAssimilacao) el.btnAvancoAssimilacao.addEventListener("click", executeAssimilacaoAvanco);
-  if (el.btnRestoreDet) el.btnRestoreDet.addEventListener("click", restoreDeterminacao);
+
+  const handlePointsMath = (inputEl, type) => {
+    if (!state.currentCharacter || !inputEl) return;
+    const valueStr = inputEl.value.trim();
+    if (!valueStr) return;
+
+    let delta = 0;
+    let isRelative = false;
+    if (valueStr.startsWith("+")) {
+      delta = parseInt(valueStr.slice(1).trim(), 10);
+      isRelative = true;
+    } else if (valueStr.startsWith("-")) {
+      delta = parseInt(valueStr.trim(), 10);
+      isRelative = true;
+    } else {
+      delta = parseInt(valueStr, 10);
+    }
+
+    if (isNaN(delta)) return;
+
+    if (type === "det") {
+      const current = state.currentCharacter.detPoints;
+      const max = state.currentCharacter.detNivel;
+      let target = isRelative ? current + delta : delta;
+      state.currentCharacter.detPoints = Math.max(0, Math.min(max, target));
+    } else if (type === "ass") {
+      const current = state.currentCharacter.assPoints;
+      const max = state.currentCharacter.assNivel;
+      let target = isRelative ? current + delta : delta;
+      state.currentCharacter.assPoints = Math.max(0, Math.min(max, target));
+    }
+
+    saveCurrentCharacter();
+    renderCaboGuerraSheet();
+    inputEl.value = "";
+  };
+
+  if (el.inputDetMath) {
+    el.inputDetMath.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handlePointsMath(el.inputDetMath, "det");
+      }
+    });
+  }
+
+  if (el.inputAssMath) {
+    el.inputAssMath.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handlePointsMath(el.inputAssMath, "ass");
+      }
+    });
+  }
+
 
   // Dice Drawer Trigger
  // --- SUBSTITUA O BLOCO ANTIGO DE "Dice Drawer Trigger" E "Header Open Roller Trigger" POR ESTE: ---
@@ -210,6 +265,13 @@ function setupEventListeners() {
       if (el.diceDrawer) el.diceDrawer.classList.add("hidden");
     });
   }
+
+  // Botões inferiores "FECHAR PAINEL"
+  document.querySelectorAll(".btn-close-roller-panel").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (el.diceDrawer) el.diceDrawer.classList.add("hidden");
+    });
+  });
 
   // Fechar o modal ao clicar na área escura (overlay) de fundo
   if (el.diceDrawer) {
@@ -269,6 +331,10 @@ function setupEventListeners() {
   el.modEmpenho.addEventListener("change", updateKeepCountDisplay);
   el.modOrigemOcupacao.addEventListener("change", updateKeepCountDisplay);
   el.modOrigemEvento.addEventListener("change", updateKeepCountDisplay);
+  
+  if (el.modEmpenhoAss) el.modEmpenhoAss.addEventListener("change", initRolagemAssimiladaPanel);
+  if (el.modOrigemOcupacaoAss) el.modOrigemOcupacaoAss.addEventListener("change", initRolagemAssimiladaPanel);
+  if (el.modOrigemEventoAss) el.modOrigemEventoAss.addEventListener("change", initRolagemAssimiladaPanel);
   
   // Alternar abas do Rolador (Normal vs Assimilada)
   const tabRollerNormal = document.getElementById("tab-roller-normal");
