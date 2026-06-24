@@ -1,10 +1,11 @@
 import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen } from "./js/modals.js";
-import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet } from "./js/sheet.js";
+import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal } from "./js/modals.js";
+import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
+import { initLandingScreen, showLandingScreen, renderCharactersList } from "./js/landing.js";
 
 // ==========================================
 // INICIALIZAÇÃO DA APLICAÇÃO
@@ -16,12 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initDiceBox();
   setupEventListeners();
   
-  // Se houver personagens, carrega o primeiro, senão abre o wizard
-  if (state.characters.length > 0) {
-    loadCharacter(state.characters[0].id);
-  } else {
-    startWizard();
-  }
+  // Inicializa a tela de entrada (Landing)
+  initLandingScreen();
+  showLandingScreen();
 });
 
 // Renderização dos ícones SVG inline baseados em data-icon
@@ -67,6 +65,14 @@ function setupEventListeners() {
     el.btnSettings.addEventListener("click", openSettingsModal);
   }
   
+  // Logo home button - volta para landing screen
+  const btnHome = document.getElementById("btn-home");
+  if (btnHome) {
+    btnHome.addEventListener("click", () => {
+      goToLanding();
+    });
+  }
+
   // Export/Import JSON
   el.btnExportJson.addEventListener("click", exportActiveCharacter);
   el.btnImportJson.addEventListener("click", () => el.fileImport.click());
@@ -175,7 +181,7 @@ function setupEventListeners() {
   el.btnWizFinish.addEventListener("click", wizardFinish);
   
   // Ficha Auto-save inputs
-  const autoSaveInputs = [el.charName, el.charOcupacao, el.charEvento, el.charPropP1, el.charPropP2, el.charPropCol, el.charNotes];
+  const autoSaveInputs = [el.charName, el.charOcupacao, el.charEvento, el.charPropP1, el.charPropP2, el.charPropCol, el.charPropCol2, el.charNotes];
   autoSaveInputs.forEach(input => {
     input.addEventListener("input", () => {
       if (state.currentCharacter) {
@@ -185,6 +191,7 @@ function setupEventListeners() {
         state.currentCharacter.propP1 = el.charPropP1.value;
         state.currentCharacter.propP2 = el.charPropP2.value;
         state.currentCharacter.propCol = el.charPropCol.value;
+        state.currentCharacter.propCol2 = el.charPropCol2.value;
         state.currentCharacter.notes = el.charNotes.value;
         saveCurrentCharacter();
         
@@ -284,7 +291,14 @@ function setupEventListeners() {
   // Add Trait from Sheet
   el.btnAddTraitSheet.addEventListener("click", openTraitsModal);
   el.btnAssimilationTest.addEventListener("click", openAssimilationTestModal);
+
+  // Add Item to Inventory
+  const btnAddItem = document.getElementById("btn-add-item");
+  if (btnAddItem) btnAddItem.addEventListener("click", openAddItemModal);
   
+  if (el.btnIncBodySlot) el.btnIncBodySlot.addEventListener("click", addBodySlot);
+  if (el.btnIncBackpackSlot) el.btnIncBackpackSlot.addEventListener("click", addBackpackSlot);
+
   const btnAssimilationTestSheet = document.getElementById("btn-assimilation-test-sheet");
   if (btnAssimilationTestSheet) {
     btnAssimilationTestSheet.addEventListener("click", openAssimilationTestModal);
@@ -325,6 +339,26 @@ function setupEventListeners() {
   if (el.btnDecAss) el.btnDecAss.addEventListener("click", () => adjustCaboGuerraLevels(1));
   if (el.btnIncAss) el.btnIncAss.addEventListener("click", () => adjustCaboGuerraLevels(-1));
   if (el.btnAvancoAssimilacao) el.btnAvancoAssimilacao.addEventListener("click", executeAssimilacaoAvanco);
+
+  // XP Adjustments
+  if (el.btnDecXp) {
+    el.btnDecXp.addEventListener("click", () => {
+      if (state.currentCharacter) {
+        state.currentCharacter.xp = Math.max(0, (state.currentCharacter.xp || 0) - 1);
+        saveCurrentCharacter();
+        loadCharacter(state.currentCharacter.id);
+      }
+    });
+  }
+  if (el.btnIncXp) {
+    el.btnIncXp.addEventListener("click", () => {
+      if (state.currentCharacter) {
+        state.currentCharacter.xp = (state.currentCharacter.xp || 0) + 1;
+        saveCurrentCharacter();
+        loadCharacter(state.currentCharacter.id);
+      }
+    });
+  }
 
   const handlePointsMath = (inputEl, type) => {
     if (!state.currentCharacter || !inputEl) return;
@@ -649,5 +683,11 @@ function setupEventListeners() {
   });
   document.addEventListener("render-chat-history", () => {
     import("./js/chat.js").then(({ renderChatHistory }) => renderChatHistory());
+  });
+}
+
+function goToLanding() {
+  import("./js/landing.js").then(({ showLandingScreen, renderCharactersList }) => {
+    showLandingScreen();
   });
 }

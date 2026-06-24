@@ -484,7 +484,12 @@
     align-items: center !important;
     text-align: center !important;
   }
-
+  .header-assimilations{
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
   .instinto-panel-content-flex {
     grid-template-columns: 1fr !important;
   }

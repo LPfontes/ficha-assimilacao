@@ -142,12 +142,12 @@ export function renderChatHistory() {
     
     let sucessosHtml = finalSucessos;
     if (penalidadeA > 0) {
-      sucessosHtml = `${finalSucessos} <span class="penalty-tag" title="Penalidade de -${penalidadeA} [A] por ${healthLvlName}">(-${penalidadeA})</span>`;
+      sucessosHtml = `${finalSucessos} <span class="penalty-tag" title="Penalidade de -${penalidadeA} [S] por ${healthLvlName}">(-${penalidadeA})</span>`;
     }
     
     let adaptacoesHtml = finalAdaptacoes;
     if (penalidadeB > 0) {
-      adaptacoesHtml = `${finalAdaptacoes} <span class="penalty-tag" title="Penalidade de -${penalidadeB} [B] por ${healthLvlName}">(-${penalidadeB})</span>`;
+      adaptacoesHtml = `${finalAdaptacoes} <span class="penalty-tag" title="Penalidade de -${penalidadeB} [A] por ${healthLvlName}">(-${penalidadeB})</span>`;
     }
     
     let narrativeText = "";
@@ -166,11 +166,11 @@ export function renderChatHistory() {
     }
     
     if (healthLvl === 4 || healthLvl === 3) {
-      narrativeText += `<div class="roll-health-warning health-warning-orange">⚠️ <strong>Penalidade de Saúde (${healthLvlName}):</strong> -1 Sucesso [A] aplicado.</div>`;
+      narrativeText += `<div class="roll-health-warning health-warning-orange">⚠️ <strong>Penalidade de Saúde (${healthLvlName}):</strong> -1 Sucesso [S] aplicado.</div>`;
     } else if (healthLvl === 2) {
-      narrativeText += `<div class="roll-health-warning health-warning-red">⚠️ <strong>Penalidade de Saúde (Debilitação):</strong> -2 Sucessos [A] aplicados. Incapaz de agir sem gastar 1 Determinação.</div>`;
+      narrativeText += `<div class="roll-health-warning health-warning-red">⚠️ <strong>Penalidade de Saúde (Debilitação):</strong> -2 Sucessos [S] aplicados. Incapaz de agir sem gastar 1 Determinação.</div>`;
     } else if (healthLvl === 1) {
-      narrativeText += `<div class="roll-health-warning health-warning-darkred">⚠️ <strong>Penalidade de Saúde (Incapacitação):</strong> Personagem em coma. Conversa exige 1 Determinação/rodada. Ação exige +2 B.</div>`;
+      narrativeText += `<div class="roll-health-warning health-warning-darkred">⚠️ <strong>Penalidade de Saúde (Incapacitação):</strong> Personagem em coma. Conversa exige 1 Determinação/rodada. Ação exige +2 A.</div>`;
     }
     
     msg.innerHTML = `
@@ -348,11 +348,11 @@ export function renderChatHistory() {
         
         let sucessosHtml = finalSucessos;
         if (penalidadeA > 0) {
-          sucessosHtml = `${finalSucessos} <span class="penalty-tag" title="Penalidade de -${penalidadeA} [A] por ${healthLvlName}">(-${penalidadeA})</span>`;
+          sucessosHtml = `${finalSucessos} <span class="penalty-tag" title="Penalidade de -${penalidadeA} [S] por ${healthLvlName}">(-${penalidadeA})</span>`;
         }
         let adaptacoesHtml = finalAdaptacoes;
         if (penalidadeB > 0) {
-          adaptacoesHtml = `${finalAdaptacoes} <span class="penalty-tag" title="Penalidade de -${penalidadeB} [B] por ${healthLvlName}">(-${penalidadeB})</span>`;
+          adaptacoesHtml = `${finalAdaptacoes} <span class="penalty-tag" title="Penalidade de -${penalidadeB} [A] por ${healthLvlName}">(-${penalidadeB})</span>`;
         }
         
         if (normalSummary) {

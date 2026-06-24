@@ -263,7 +263,7 @@ select:focus, input:focus, textarea:focus {
 /* Área Principal */
 .main-content {
   flex: 1;
-  padding: 24px;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -279,6 +279,13 @@ select:focus, input:focus, textarea:focus {
   display: flex;
   flex-direction: column;
   transition: var(--transition-normal);
+}
+
+/* Wizard e Sheet precisam do padding que main-content tinha antes */
+.screen.card-glass {
+  margin: 24px;
+  width: calc(100% - 48px);
+  height: calc(100% - 48px);
 }
 
 .hidden {

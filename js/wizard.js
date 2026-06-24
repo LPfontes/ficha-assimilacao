@@ -35,6 +35,7 @@ export function startWizard() {
   document.getElementById("wiz-prop-col").value = "";
   document.getElementById("wiz-det-slider").value = 1;
   
+  document.getElementById("landing-screen")?.classList.add("hidden");
   el.wizardScreen.classList.remove("hidden");
   el.sheetScreen.classList.add("hidden");
   
@@ -114,13 +115,15 @@ export function validateWizardStep(step) {
     const p1 = document.getElementById("wiz-prop-p1").value.trim();
     const p2 = document.getElementById("wiz-prop-p2").value.trim();
     const col = document.getElementById("wiz-prop-col").value.trim();
-    if (!p1 || !p2 || !col) {
-      alert("Preencha todos os três propósitos (2 Pessoais e 1 Coletivo).");
+    const col2 = document.getElementById("wiz-prop-col2").value.trim();
+    if (!p1 || !p2 || !col || !col2) {
+      alert("Preencha todos os quatro propósitos (2 Pessoais e 2 Coletivos).");
       return false;
     }
     state.wizardData.propP1 = p1;
     state.wizardData.propP2 = p2;
     state.wizardData.propCol = col;
+    state.wizardData.propCol2 = col2;
   }
   
   if (step === 4) {
@@ -520,6 +523,7 @@ export function wizardFinish() {
     propP1: state.wizardData.propP1,
     propP2: state.wizardData.propP2,
     propCol: state.wizardData.propCol,
+    propCol2: state.wizardData.propCol2,
     instintos: state.wizardData.instintos,
     conhecimentos: state.wizardData.conhecimentos,
     praticas: state.wizardData.praticas,

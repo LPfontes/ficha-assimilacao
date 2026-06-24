@@ -42,7 +42,7 @@ function parseCost(costStr) {
 }
 
 import { el, state, saveCurrentCharacter, loadCharacter } from "./state.js";
-import { renderMutationsSheet, renderCaboGuerraSheet } from "./sheet.js";
+import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet } from "./sheet.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
 import { ICONS } from "../icons.js";
@@ -291,7 +291,7 @@ export function openAssimilationTestModal() {
         document.getElementById("ass-count-b").textContent = b;
         document.getElementById("ass-count-c").textContent = c;
         
-        logger.info(`Modal: Teste de Assimilação concluído - Sucesso [A]: ${a}, Adaptação [B]: ${b}, Pressão [C]: ${c}.`);
+        logger.info(`Modal: Teste de Assimilação concluído - Sucesso [S]: ${a}, Adaptação [A]: ${b}, Pressão [P]: ${c}.`);
         
         // Calcula Morte por Assimilação Completa (Pág 124)
         const prevC = char.mutações.filter(m => m.suit === "inoportunas").length;
@@ -399,9 +399,9 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         </p>
 
         <div class="points-badge-row">
-          <div class="points-badge a">Sucesso [A]: ${ptsA}</div>
-          <div class="points-badge b">Adaptação [B]: ${ptsB}</div>
-          <div class="points-badge c">Pressão [C]: ${ptsC}</div>
+          <div class="points-badge a">Sucesso [S]: ${ptsA}</div>
+          <div class="points-badge b">Adaptação [A]: ${ptsB}</div>
+          <div class="points-badge c">Pressão [P]: ${ptsC}</div>
         </div>
 
         <div class="singulares-config-box">
@@ -676,9 +676,9 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         <h3>🔮 Selecionar Mutações Sorteadas</h3>
         <p style="font-size: 11px; color: var(--text-secondary); margin: 0;">Toque em cada carta para revelar e ver as opções de mutação.</p>
         <div class="points-bar">
-          <span style="color:#00ff66;">[A] Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
-          <span style="color:#eab308;">[B] Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
-          <span style="color:#ef4444;">[C] Pressões: <strong id="val-pts-c">${ptsC}</strong></span>
+          <span style="color:#00ff66;">[S] Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
+          <span style="color:#eab308;">[A] Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
+          <span style="color:#ef4444;">[P] Pressões: <strong id="val-pts-c">${ptsC}</strong></span>
         </div>
       </div>
 
@@ -1031,4 +1031,127 @@ export function openSettingsModal() {
   document.getElementById("btn-save-settings").addEventListener("click", () => {
     el.modalContainer.classList.add("hidden");
   });
+}
+
+// ==========================================
+// MODAL: ADICIONAR ITEM NO INVENTÁRIO
+// ==========================================
+export function openAddItemModal() {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  el.modalContainer.classList.remove("hidden");
+  el.modalBody.innerHTML = `
+    <h3 class="modal-title" style="margin-bottom:8px;">Adicionar Item ao Inventário</h3>
+    <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+      Preencha os dados do novo item. Ele será colocado no primeiro espaço vazio.
+    </p>
+    <div class="add-item-form" style="display:flex; flex-direction:column; gap:14px;">
+      <div class="form-group">
+        <label for="add-item-name" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Nome do Item</label>
+        <input type="text" id="add-item-name" placeholder="Ex: Faca, Corda, Kit de primeiros socorros..." style="width:100%; padding:8px 12px;">
+      </div>
+      <div class="form-group">
+        <label for="add-item-efeito" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Efeito / Descrição</label>
+        <input type="text" id="add-item-efeito" placeholder="Ex: +1 dado em Furtividade, Arma leve, Silenciosa..." style="width:100%; padding:8px 12px;">
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px;">
+        <div class="form-group">
+          <label for="add-item-qualidade" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Qualidade</label>
+          <select id="add-item-qualidade" style="width:100%; padding:6px 8px;">
+            <option value="0">Q0: Quebrado</option>
+            <option value="1">Q1: Defeituoso</option>
+            <option value="2">Q2: Comprometido</option>
+            <option value="3" selected>Q3: Padrão</option>
+            <option value="4">Q4: Reforçado</option>
+            <option value="5">Q5: Superior</option>
+            <option value="6">Q6: Obra-Prima</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="add-item-pressao" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Desgaste</label>
+          <select id="add-item-pressao" style="width:100%; padding:6px 8px;">
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="add-item-escassez" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Escassez</label>
+          <select id="add-item-escassez" style="width:100%; padding:6px 8px;">
+            <option value="0">E0: Abundante</option>
+            <option value="1">E1: Corriqueiro</option>
+            <option value="2" selected>E2: Comum</option>
+            <option value="3">E3: Incomum</option>
+            <option value="4">E4: Atípico</option>
+            <option value="5">E5: Raro</option>
+            <option value="6">E6: Quase Extinto</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+        <button id="btn-cancel-add-item" class="btn" style="padding:10px 20px;">Cancelar</button>
+        <button id="btn-confirm-add-item" class="btn btn-success" style="padding:10px 20px;">
+          ${ICONS.plus} Adicionar
+        </button>
+      </div>
+    </div>
+  `;
+
+  const nameInput = document.getElementById("add-item-name");
+  const efeitoInput = document.getElementById("add-item-efeito");
+  const qualSelect = document.getElementById("add-item-qualidade");
+  const pressaoSelect = document.getElementById("add-item-pressao");
+  const escSelect = document.getElementById("add-item-escassez");
+
+  const closeModal = () => el.modalContainer.classList.add("hidden");
+
+  document.getElementById("btn-cancel-add-item").addEventListener("click", closeModal, { once: true });
+
+  document.getElementById("btn-confirm-add-item").addEventListener("click", () => {
+    const name = nameInput.value.trim();
+    if (!name) {
+      nameInput.focus();
+      nameInput.style.borderColor = "var(--color-rust)";
+      return;
+    }
+
+    const inv = char.inventario;
+    const emptyIndex = inv.findIndex(s => !s.name || s.name.trim() === "");
+    if (emptyIndex === -1) {
+      alert("Inventário cheio! Remova ou troque itens antes de adicionar novos.");
+      return;
+    }
+
+    inv[emptyIndex] = {
+      name: name,
+      qualidade: parseInt(qualSelect.value),
+      pressao: parseInt(pressaoSelect.value),
+      escassez: parseInt(escSelect.value),
+      efeito: efeitoInput.value.trim()
+    };
+
+    saveCurrentCharacter();
+    renderInventorySheet();
+    closeModal();
+  }, { once: true });
+
+  const closeBtn = el.modalContainer.querySelector(".modal-close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeModal, { once: true });
+  }
+
+  const handleOverlay = (e) => {
+    if (e.target === el.modalContainer) {
+      closeModal();
+      el.modalContainer.removeEventListener("click", handleOverlay);
+    }
+  };
+  el.modalContainer.addEventListener("click", handleOverlay, { once: true });
+
+  nameInput.focus();
 }

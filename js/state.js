@@ -38,6 +38,7 @@ export const el = {
   charPropP1: document.getElementById("char-prop-p1"),
   charPropP2: document.getElementById("char-prop-p2"),
   charPropCol: document.getElementById("char-prop-col"),
+  charPropCol2: document.getElementById("char-prop-col2"),
   charNotes: document.getElementById("char-notes"),
   sheetXpValue: document.getElementById("sheet-xp-value"),
   
@@ -57,9 +58,13 @@ export const el = {
   btnSaudeModInc: document.getElementById("btn-saude-mod-inc"),
   traitsListSheet: document.getElementById("traits-list-sheet"),
   btnAddTraitSheet: document.getElementById("btn-add-trait-sheet"),
+  btnDecXp: document.getElementById("btn-dec-xp"),
+  btnIncXp: document.getElementById("btn-inc-xp"),
   btnAssimilationTest: document.getElementById("btn-assimilation-test"),
   inventoryBodyList: document.getElementById("inventory-body-list"),
   inventoryBackpackList: document.getElementById("inventory-backpack-list"),
+  btnIncBodySlot: document.getElementById("btn-add-body-slot"),
+  btnIncBackpackSlot: document.getElementById("btn-add-backpack-slot"),
   
   // Cabo de Guerra Ficha
   sheetDetLevel: document.getElementById("sheet-det-level"),
@@ -132,6 +137,7 @@ export const state = {
     propP1: "",
     propP2: "",
     propCol: "",
+    propCol2: "",
     instintos: { Influência: 1, Percepção: 1, Potência: 1, Reação: 1, Resolução: 1, Sagacidade: 1 },
     conhecimentos: { Biologia: 0, Erudição: 0, Engenharia: 0, Geografia: 0, Medicina: 0, Segurança: 0 },
     praticas: { Armas: 0, Atletismo: 0, Expressão: 0, Furtividade: 0, Manufaturas: 0, Sobrevivência: 0 },
@@ -164,7 +170,7 @@ export function loadCharactersFromStorage() {
   }
   
   if (!state.characters || state.characters.length === 0) {
-    createTestCharacter();
+    // Sem personagens - landing screen mostrará empty state
   }
   
   updateCharSelector();
@@ -182,6 +188,7 @@ export function createTestCharacter() {
     propP1: "Achar comida",
     propP2: "Encontrar abrigo",
     propCol: "Proteger refúgio",
+    propCol2: "Ajudar necessitados",
     instintos: { Influência: 2, Percepção: 2, Potência: 2, Reação: 2, Resolução: 2, Sagacidade: 2 },
     conhecimentos: { Biologia: 1, Erudição: 1, Engenharia: 1, Geografia: 1, Medicina: 1, Segurança: 1 },
     praticas: { Armas: 1, Atletismo: 1, Expressão: 1, Furtividade: 1, Manufaturas: 1, Sobrevivência: 1 },
@@ -285,6 +292,7 @@ export function loadCharacter(charId) {
   updateCharSelector();
   
   // Atualiza as Telas
+  document.getElementById("landing-screen")?.classList.add("hidden");
   el.wizardScreen.classList.add("hidden");
   el.sheetScreen.classList.remove("hidden");
   
@@ -296,6 +304,7 @@ export function loadCharacter(charId) {
   el.charPropP1.value = char.propP1 || "";
   el.charPropP2.value = char.propP2 || "";
   el.charPropCol.value = char.propCol || "";
+  el.charPropCol2.value = char.propCol2 || "";
   el.charNotes.value = char.notes || "";
   el.sheetXpValue.textContent = char.xp;
   
@@ -337,8 +346,13 @@ export function deleteActiveCharacter() {
         loadCharacter(state.characters[0].id);
       } else {
         state.currentCharacter = null;
-        const event = new CustomEvent("start-wizard");
-        document.dispatchEvent(event);
+        el.sheetScreen.classList.add("hidden");
+        el.wizardScreen.classList.add("hidden");
+        const landingScreen = document.getElementById("landing-screen");
+        if (landingScreen) {
+          landingScreen.classList.remove("hidden");
+          import("./landing.js").then(({ renderCharactersList }) => renderCharactersList());
+        }
       }
     }
   }

@@ -500,6 +500,30 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
+  cursor: grab;
+  user-select: none;
+  transition: border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+#tab-inventario .inventory-slot:active {
+  cursor: grabbing;
+}
+
+#tab-inventario .inventory-slot.dragging {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+#tab-inventario .inventory-slot.drag-over {
+  border-color: var(--color-blue-glow) !important;
+  background: rgba(0, 162, 255, 0.1) !important;
+  box-shadow: 0 0 12px rgba(0, 162, 255, 0.3);
+  transform: scale(1.02);
+}
+
+#tab-inventario .inventory-slot.drag-over-target {
+  border-color: var(--color-rust-glow) !important;
+  background: rgba(141, 36, 40, 0.1) !important;
 }
 
 /* Anotações Customizadas */
@@ -640,7 +664,9 @@
   padding-bottom: 6px;
   margin-bottom: 12px;
 }
-
+.header-assimilations{
+  display: flex; align-items: center; gap: 8px;
+}
 .section-title-clean {
   margin: 0 !important;
   border: none !important;
@@ -701,5 +727,10 @@
   font-weight: bold;
   font-size: 12px;
   line-height: 1;
+}
+
+/* Drag & Drop Inventory */
+.drag-container {
+  min-height: 60px;
 }
 

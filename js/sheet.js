@@ -10,6 +10,9 @@ export { getCurrentHealthLevel } from "./health.js";
 // ==========================================
 // RENDERS DA FICHA INTERATIVA
 // ==========================================
+
+let dragSourceIndex = -1;
+
 export function renderAptitudesSheet() {
   const char = state.currentCharacter;
   if (!char) return;
@@ -518,19 +521,19 @@ export function renderMutationsSheet() {
     
     pointsContainer.innerHTML = `
       <div class="ass-point-badge success-badge">
-        <span class="badge-label">Sucesso [A]:</span>
+        <span class="badge-label">Sucesso [S]:</span>
         <button class="btn-point-adjust dec-a">-</button>
         <span class="badge-val">${char.ptsA}</span>
         <button class="btn-point-adjust inc-a">+</button>
       </div>
       <div class="ass-point-badge adaptation-badge">
-        <span class="badge-label">Adaptação [B]:</span>
+        <span class="badge-label">Adaptação [A]:</span>
         <button class="btn-point-adjust dec-b">-</button>
         <span class="badge-val">${char.ptsB}</span>
         <button class="btn-point-adjust inc-b">+</button>
       </div>
       <div class="ass-point-badge pressure-badge">
-        <span class="badge-label">Pressão [C]:</span>
+        <span class="badge-label">Pressão [P]:</span>
         <button class="btn-point-adjust dec-c">-</button>
         <span class="badge-val">${char.ptsC}</span>
         <button class="btn-point-adjust inc-c">+</button>
@@ -610,9 +613,13 @@ export function renderInventorySheet() {
   if (el.inventoryBodyList) el.inventoryBodyList.innerHTML = "";
   if (el.inventoryBackpackList) el.inventoryBackpackList.innerHTML = "";
   
-  if (!char.inventario || char.inventario.length !== 9) {
+  if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
+  if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
+  const expectedLength = char.bodySlotsCount + char.backpackSlotsCount;
+  
+  if (!char.inventario || char.inventario.length !== expectedLength) {
     const oldInv = char.inventario || [];
-    char.inventario = Array(9).fill(null).map((_, idx) => {
+    char.inventario = Array(expectedLength).fill(null).map((_, idx) => {
       const oldItem = oldInv[idx] || {};
       let qual = 3; // Padrão
       if (typeof oldItem.qualidade === 'boolean') {
@@ -632,18 +639,30 @@ export function renderInventorySheet() {
         name: oldItem.name || "",
         qualidade: qual,
         pressao: oldItem.pressao || 0,
-        escassez: esc
+        escassez: esc,
+        efeito: oldItem.efeito || ""
       };
     });
     saveCurrentCharacter();
   }
   
+  const labelBody = document.getElementById("label-body-slots");
+  const labelBackpack = document.getElementById("label-backpack-slots");
+  if (labelBody) {
+    labelBody.textContent = `No Corpo (${char.bodySlotsCount} Espaços - Mais fáceis de sacar)`;
+  }
+  if (labelBackpack) {
+    labelBackpack.textContent = `Na Mochila (${char.backpackSlotsCount} Espaços - Devem ser retirados para usar)`;
+  }
+  
   char.inventario.forEach((slot, i) => {
     const row = document.createElement("div");
     row.className = "inventory-slot";
+    row.draggable = true;
+    row.dataset.index = i;
     
-    const isBody = i < 3;
-    const slotDisplayNum = isBody ? i + 1 : i - 2;
+    const isBody = i < char.bodySlotsCount;
+    const slotDisplayNum = isBody ? i + 1 : i - char.bodySlotsCount + 1;
     
     let qual = typeof slot.qualidade === 'number' ? slot.qualidade : (slot.qualidade ? 4 : 3);
     let pressao = typeof slot.pressao === 'number' ? slot.pressao : 0;
@@ -695,6 +714,10 @@ export function renderInventorySheet() {
             <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
           </select>
         </div>
+        <!-- Efeito -->
+        <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
+          <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 140px;" title="Efeito do item">
+        </div>
       </div>
     `;
     
@@ -702,13 +725,15 @@ export function renderInventorySheet() {
     const selQ = row.querySelector(".select-qualidade");
     const selP = row.querySelector(".select-pressao");
     const selE = row.querySelector(".select-escassez");
+    const inputEffect = row.querySelector(".item-effect");
     
     const saveSlot = () => {
       char.inventario[i] = {
         name: inputName.value,
         qualidade: parseInt(selQ.value),
         pressao: parseInt(selP.value),
-        escassez: parseInt(selE.value)
+        escassez: parseInt(selE.value),
+        efeito: inputEffect.value
       };
       saveCurrentCharacter();
     };
@@ -717,6 +742,54 @@ export function renderInventorySheet() {
     selQ.addEventListener("change", saveSlot);
     selP.addEventListener("change", saveSlot);
     selE.addEventListener("change", saveSlot);
+    inputEffect.addEventListener("input", saveSlot);
+    
+    // Drag & Drop handlers
+    row.addEventListener("dragstart", (e) => {
+      dragSourceIndex = i;
+      row.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(i));
+    });
+    
+    row.addEventListener("dragend", () => {
+      dragSourceIndex = -1;
+      row.classList.remove("dragging");
+      document.querySelectorAll("#tab-inventario .inventory-slot").forEach(s => {
+        s.classList.remove("drag-over", "drag-over-target");
+      });
+    });
+    
+    row.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    });
+    
+    row.addEventListener("dragenter", (e) => {
+      e.preventDefault();
+      if (dragSourceIndex === i || dragSourceIndex === -1 || row.classList.contains("dragging")) return;
+      row.classList.add("drag-over");
+    });
+    
+    row.addEventListener("dragleave", () => {
+      row.classList.remove("drag-over");
+    });
+    
+    row.addEventListener("drop", (e) => {
+      e.preventDefault();
+      row.classList.remove("drag-over");
+      
+      const fromIdx = dragSourceIndex;
+      if (fromIdx === -1 || fromIdx === i) return;
+      
+      // Swap items
+      const temp = char.inventario[fromIdx];
+      char.inventario[fromIdx] = char.inventario[i];
+      char.inventario[i] = temp;
+      
+      saveCurrentCharacter();
+      renderInventorySheet();
+    });
     
     if (isBody) {
       if (el.inventoryBodyList) el.inventoryBodyList.appendChild(row);
@@ -769,5 +842,39 @@ export function restoreDeterminacao() {
   char.detPoints = char.detNivel;
   saveCurrentCharacter();
   renderCaboGuerraSheet();
+}
+
+export function addBodySlot() {
+  const char = state.currentCharacter;
+  if (!char) return;
+  
+  if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
+  if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
+  
+  const newItem = { name: "", qualidade: 3, pressao: 0, escassez: 2, efeito: "" };
+  
+  // Insert at index bodySlotsCount (after current body slots, before backpack slots)
+  char.inventario.splice(char.bodySlotsCount, 0, newItem);
+  char.bodySlotsCount++;
+  
+  saveCurrentCharacter();
+  renderInventorySheet();
+}
+
+export function addBackpackSlot() {
+  const char = state.currentCharacter;
+  if (!char) return;
+  
+  if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
+  if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
+  
+  const newItem = { name: "", qualidade: 3, pressao: 0, escassez: 2, efeito: "" };
+  
+  // Add at the end of backpack slots (end of inventario array)
+  char.inventario.push(newItem);
+  char.backpackSlotsCount++;
+  
+  saveCurrentCharacter();
+  renderInventorySheet();
 }
 

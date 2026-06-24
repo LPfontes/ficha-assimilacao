@@ -19,9 +19,9 @@ Este é um gerenciador de fichas interativo e simulador de rolagens 3D para o si
   * Aba exclusiva para gerenciar as mutações adquiridas pelo personagem.
   * Modal interativo de sorteio de cartas de mutação inspirado na leitura de Tarô (cartas viradas para baixo com o sigil de Assimilação).
   * O sorteio gera cartas dinamicamente de acordo com os resultados do teste de repouso:
-    * **Sucessos [A]**: Cartas de Assimilações Evolutivas.
-    * **Adaptações [B]**: Cartas de Assimilações Adaptativas.
-    * **Pressões [C]**: Cartas de Assimilações Inoportunas.
+    * **Sucessos [S]**: Cartas de Assimilações Evolutivas.
+    * **Adaptações [A]**: Cartas de Assimilações Adaptativas.
+    * **Pressões [P]**: Cartas de Assimilações Inoportunas.
   * Suporte para incluir cartas de **Mutações Singulares** (Região dos Paus) durante o sorteio.
   * Validação automática de custos de pressão e aptidão antes de comprar as cartas.
 

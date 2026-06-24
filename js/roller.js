@@ -118,11 +118,11 @@ export function updateDiceDrawerUI() {
       else if (healthLvl === 1) lvlName = "Incapacitação";
       
       if (healthLvl === 4 || healthLvl === 3) {
-        warningEl.innerHTML = `⚠️ <strong>${lvlName}:</strong> -1 Sucesso [A] em todos os testes.`;
+        warningEl.innerHTML = `⚠️ <strong>${lvlName}:</strong> -1 Sucesso [S] em todos os testes.`;
       } else if (healthLvl === 2) {
-        warningEl.innerHTML = `⚠️ <strong>Debilitação:</strong> -2 Sucessos [A]. Incapaz de agir sem gastar 1 Determinação.`;
+        warningEl.innerHTML = `⚠️ <strong>Debilitação:</strong> -2 Sucessos [S]. Incapaz de agir sem gastar 1 Determinação.`;
       } else if (healthLvl === 1) {
-        warningEl.innerHTML = `⚠️ <strong>Incapacitação:</strong> Quase morte. Conversa exige 1 Determinação/rodada. Ação exige +2 B.`;
+        warningEl.innerHTML = `⚠️ <strong>Incapacitação:</strong> Quase morte. Conversa exige 1 Determinação/rodada. Ação exige +2 A.`;
       }
     } else {
       if (warningEl) warningEl.remove();
