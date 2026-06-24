@@ -693,7 +693,8 @@ export function initRolagemAssimiladaPanel() {
         const rollEntry = {
           timestamp: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
           formula: `Instinto: ${inst1} + ${inst2} (${notationString})`,
-          results, keptDiceIndexes: keptIndexes, maxKeep: maxKeep
+          results, keptDiceIndexes: keptIndexes, maxKeep: maxKeep,
+          healthLvl: char ? getCurrentHealthLevel(char) : 6
         };
         if (!char.rollHistory) char.rollHistory = [];
         char.rollHistory.push(rollEntry);
@@ -771,7 +772,8 @@ export function initRolagemAssimiladaPanel() {
         const rollEntry = {
           timestamp: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
           formula: `Instinto: ${inst1} + ${inst2} (${notationString})`,
-          results, keptDiceIndexes: keptIndexes, maxKeep: maxKeep
+          results, keptDiceIndexes: keptIndexes, maxKeep: maxKeep,
+          healthLvl: char ? getCurrentHealthLevel(char) : 6
         };
         if (!char.rollHistory) char.rollHistory = [];
         char.rollHistory.push(rollEntry);

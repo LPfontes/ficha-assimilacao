@@ -1,0 +1,16 @@
+{
+  "short_name": "Assimilação",
+  "name": "Assimilação RPG - Gerenciador de Fichas",
+  "icons": [
+    {
+      "src": "assets/logoAssimilacao.webp",
+      "type": "image/webp",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#121214",
+  "theme_color": "#8c1d1d",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}

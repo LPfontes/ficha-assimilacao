@@ -124,6 +124,51 @@ function setupEventListeners() {
     });
   });
   
+  // Saude Lock Toggle
+  const btnLockSaude = document.querySelector(".btn-lock-toggle-saude");
+  if (btnLockSaude) {
+    btnLockSaude.addEventListener("click", () => {
+      const card = document.getElementById("saude-card-container");
+      if (card) {
+        const isLocked = card.classList.toggle("locked");
+        const iconSpan = btnLockSaude.querySelector("[data-icon]");
+        if (iconSpan) {
+          iconSpan.setAttribute("data-icon", isLocked ? "lock" : "unlock");
+          import("./icons.js").then(({ ICONS }) => {
+            const iconName = iconSpan.getAttribute("data-icon");
+            if (ICONS[iconName]) {
+              iconSpan.innerHTML = ICONS[iconName];
+            }
+          });
+        }
+        if (el.saudeEditControls) {
+          el.saudeEditControls.style.display = isLocked ? "none" : "flex";
+        }
+      }
+    });
+  }
+
+  // Saude Modifier Buttons
+  if (el.btnSaudeModDec) {
+    el.btnSaudeModDec.addEventListener("click", () => {
+      if (state.currentCharacter) {
+        state.currentCharacter.saudeMod = (state.currentCharacter.saudeMod || 0) - 1;
+        saveCurrentCharacter();
+        import("./js/sheet.js").then(({ renderHealthSheet }) => renderHealthSheet());
+      }
+    });
+  }
+
+  if (el.btnSaudeModInc) {
+    el.btnSaudeModInc.addEventListener("click", () => {
+      if (state.currentCharacter) {
+        state.currentCharacter.saudeMod = (state.currentCharacter.saudeMod || 0) + 1;
+        saveCurrentCharacter();
+        import("./js/sheet.js").then(({ renderHealthSheet }) => renderHealthSheet());
+      }
+    });
+  }
+
   // Wizard Navigation
   el.btnWizPrev.addEventListener("click", wizardPrevStep);
   el.btnWizNext.addEventListener("click", wizardNextStep);
@@ -239,27 +284,39 @@ function setupEventListeners() {
   // Add Trait from Sheet
   el.btnAddTraitSheet.addEventListener("click", openTraitsModal);
   el.btnAssimilationTest.addEventListener("click", openAssimilationTestModal);
+  
+  const btnAssimilationTestSheet = document.getElementById("btn-assimilation-test-sheet");
+  if (btnAssimilationTestSheet) {
+    btnAssimilationTestSheet.addEventListener("click", openAssimilationTestModal);
+  }
+
+  const handleOpenTarot = () => {
+    const char = state.currentCharacter;
+    if (!char) return;
+    
+    // Verifica se possui pontos pendentes
+    const ptsA = char.ptsA || 0;
+    const ptsB = char.ptsB || 0;
+    const ptsC = char.ptsC || 0;
+    
+    if (ptsA === 0 && ptsB === 0 && ptsC === 0) {
+      alert("Você não possui pontos de Sucesso, Adaptação ou Pressão pendentes para realizar a leitura do Tarot!");
+      return;
+    }
+    
+    // Reseta o cache de cartas sorteadas para forçar uma nova tiragem
+    state.drawnMutationCards = null;
+    openMutationSelectionScreen(ptsA, ptsB, ptsC);
+  };
 
   const btnOpenTarotAgain = document.getElementById("btn-open-tarot-again");
   if (btnOpenTarotAgain) {
-    btnOpenTarotAgain.addEventListener("click", () => {
-      const char = state.currentCharacter;
-      if (!char) return;
-      
-      // Verifica se possui pontos pendentes
-      const ptsA = char.ptsA || 0;
-      const ptsB = char.ptsB || 0;
-      const ptsC = char.ptsC || 0;
-      
-      if (ptsA === 0 && ptsB === 0 && ptsC === 0) {
-        alert("Você não possui pontos de Sucesso [A], Adaptação [B] ou Pressão [C] pendentes para realizar a leitura do Tarot!");
-        return;
-      }
-      
-      // Reseta o cache de cartas sorteadas para forçar uma nova tiragem
-      state.drawnMutationCards = null;
-      openMutationSelectionScreen(ptsA, ptsB, ptsC);
-    });
+    btnOpenTarotAgain.addEventListener("click", handleOpenTarot);
+  }
+  
+  const btnOpenTarotAgainSheet = document.getElementById("btn-open-tarot-again-sheet");
+  if (btnOpenTarotAgainSheet) {
+    btnOpenTarotAgainSheet.addEventListener("click", handleOpenTarot);
   }
 
   // Cabo de Guerra Adjustments

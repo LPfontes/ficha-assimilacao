@@ -94,7 +94,7 @@ export function openTraitsModal() {
         <div class="desc">${trait.descricao}</div>
       </div>
       <div class="action">
-        <button class="btn ${isOwned ? 'btn-danger' : 'btn-primary'} btn-sm modal-buy-trait-btn" 
+        <button class="btn ${isOwned ? 'btn-danger' : ''} btn-sm modal-buy-trait-btn" 
           data-id="${trait.id}" ${(!meetsReqs && !isOwned) ? 'disabled' : ''}>
           ${isOwned ? 'Remover' : 'Adquirir'}
         </button>
@@ -174,7 +174,7 @@ export function openAssimilationTestModal() {
         O teste é realizado ao aumentar seu nível de Assimilação. Os símbolos Sucesso, Presão e Adaptação sorteados determinam suas opções de mutações no repouso.
       </p>
       
-      <button class="btn btn-primary" id="btn-modal-roll-ass">ROLAR TESTE DE ASSIMILAÇÃO</button>
+      <button class="btn" id="btn-modal-roll-ass">ROLAR TESTE DE ASSIMILAÇÃO</button>
       
       <div class="test-results-box hidden" id="ass-test-results">
         <h4>Resultados do Teste</h4>
@@ -509,19 +509,47 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         border: 1px solid rgba(255,255,255,0.05);
         margin-top: 6px;
       }
+      .tarot-carousel-group {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      .tarot-carousel-title {
+        font-family: var(--font-heading);
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 4px;
+      }
       .tarot-spread {
         display: flex;
-        justify-content: center;
         gap: 16px;
-        margin: 20px 0;
+        padding: 10px 0;
         perspective: 1000px;
         width: 100%;
-        flex-wrap: wrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-blue-glow) rgba(0,0,0,0.3);
+      }
+      .tarot-spread::-webkit-scrollbar {
+        height: 6px;
+      }
+      .tarot-spread::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.3);
+        border-radius: 3px;
+      }
+      .tarot-spread::-webkit-scrollbar-thumb {
+        background: var(--color-blue-glow);
+        border-radius: 3px;
       }
       .tarot-card-wrapper {
         width: 120px;
         height: 190px;
         cursor: pointer;
+        flex: 0 0 auto;
+        scroll-snap-align: center;
       }
       .tarot-card {
         width: 100%;
@@ -654,27 +682,45 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         </div>
       </div>
 
-      <div class="tarot-spread">
-        ${state.drawnMutationCards.map((item, idx) => {
-          const type = item.category;
-          const isFlipped = item.flipped;
-          const isSelected = state.activeCardIndex === idx;
-          const symbol = type === "evolutivas" ? "♥" : type === "adaptativas" ? "♦" : type === "inoportunas" ? "♠" : "♣";
+      <div style="width: 100%; margin-top: 10px;">
+        ${["evolutivas", "adaptativas", "inoportunas", "singulares"].map(cat => {
+          const catCards = state.drawnMutationCards.map((item, idx) => ({item, idx})).filter(o => o.item.category === cat);
+          if (catCards.length === 0) return "";
+          
+          let title = "Evolutivas";
+          let color = "#00ff66";
+          if (cat === "adaptativas") { title = "Adaptativas"; color = "#eab308"; }
+          if (cat === "inoportunas") { title = "Inoportunas"; color = "#ef4444"; }
+          if (cat === "singulares") { title = "Singulares"; color = "#a855f7"; }
           
           return `
-            <div class="tarot-card-wrapper" data-index="${idx}">
-              <div class="tarot-card ${isFlipped ? 'flipped' : ''} ${isSelected ? 'active-selection' : ''}">
-                <!-- Back (face down) -->
-                <div class="tarot-card-face tarot-card-back">
-                  <img src="assets/logoAssimilacao.webp" alt="Assimilação RPG Logo" style="width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.45); object-fit: cover; animation: pulse 2s infinite alternate;">
-                  <div class="back-text">Destino</div>
-                </div>
-                <!-- Front (face up) -->
-                <div class="tarot-card-face tarot-card-front ${type}">
-                  <span class="card-suit-symbol">${symbol}</span>
-                  <span class="card-name-title">${item.cardData.nome}</span>
-                  <span class="card-type-tag">${type}</span>
-                </div>
+            <div class="tarot-carousel-group">
+              <div class="tarot-carousel-title" style="color: ${color}; border-color: ${color}40;">${title}</div>
+              <div class="tarot-spread">
+                ${catCards.map(({item, idx}) => {
+                  const type = item.category;
+                  const isFlipped = item.flipped;
+                  const isSelected = state.activeCardIndex === idx;
+                  const symbol = type === "evolutivas" ? "♥" : type === "adaptativas" ? "♦" : type === "inoportunas" ? "♠" : "♣";
+                  
+                  return `
+                    <div class="tarot-card-wrapper" data-index="${idx}">
+                      <div class="tarot-card ${isFlipped ? 'flipped' : ''} ${isSelected ? 'active-selection' : ''}">
+                        <!-- Back (face down) -->
+                        <div class="tarot-card-face tarot-card-back">
+                          <img src="assets/logoAssimilacao.webp" alt="Assimilação RPG Logo" style="width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.45); object-fit: cover; animation: pulse 2s infinite alternate;">
+                          <div class="back-text">Destino</div>
+                        </div>
+                        <!-- Front (face up) -->
+                        <div class="tarot-card-face tarot-card-front ${type}">
+                          <span class="card-suit-symbol">${symbol}</span>
+                          <span class="card-name-title">${item.cardData.nome}</span>
+                          <span class="card-type-tag">${type}</span>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
               </div>
             </div>
           `;
@@ -753,7 +799,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
             btnHtml = `<span style="font-size:12px; color:var(--text-muted); font-weight:bold;">Adquirido</span>`;
           } else {
             btnHtml = `
-              <button class="btn btn-primary btn-sm btn-buy-mut-tarot" data-m-idx="${mIdx}" ${!canBuy ? "disabled" : ""}>
+              <button class="btn btn-sm btn-buy-mut-tarot" data-m-idx="${mIdx}" ${!canBuy ? "disabled" : ""}>
                 Adquirir
               </button>
             `;
@@ -911,9 +957,29 @@ export function openSettingsModal() {
           </label>
         </div>
       </div>
+
+      <div class="setting-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+        <div class="setting-info" style="flex: 1; padding-right: 16px;">
+          <div class="setting-label" style="font-weight: 600; font-size: var(--font-size-md); color: var(--text-primary);">Apagar Fichas (Local Storage)</div>
+          <div class="setting-desc" style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: 4px;">Remove todos os personagens e dados locais criados neste navegador.</div>
+        </div>
+        <div class="setting-control">
+          <button id="btn-clear-local-storage" class="btn btn-danger btn-sm" style="white-space: nowrap;">Apagar Dados</button>
+        </div>
+      </div>
+
+      <div class="setting-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+        <div class="setting-info" style="flex: 1; padding-right: 16px;">
+          <div class="setting-label" style="font-weight: 600; font-size: var(--font-size-md); color: var(--text-primary);">Forçar Recarregamento (PWA Cache)</div>
+          <div class="setting-desc" style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: 4px;">Limpa o cache offline e força o download da versão mais recente dos arquivos.</div>
+        </div>
+        <div class="setting-control">
+          <button id="btn-clear-pwa-cache" class="btn btn-danger btn-sm" style="white-space: nowrap;">Forçar Recarga</button>
+        </div>
+      </div>
       
       <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
-        <button id="btn-save-settings" class="btn btn-primary btn-md">Fechar</button>
+        <button id="btn-save-settings" class="btn btn-md">Fechar</button>
       </div>
     </div>
   `;
@@ -922,6 +988,44 @@ export function openSettingsModal() {
   checkbox.addEventListener("change", (e) => {
     localStorage.setItem("assimilação_disable_3d", e.target.checked ? "true" : "false");
     logger.info(`Configurações: assimilação_disable_3d alterada para ${e.target.checked}`);
+  });
+
+  const clearStorageBtn = document.getElementById("btn-clear-local-storage");
+  clearStorageBtn.addEventListener("click", () => {
+    if (confirm("Tem certeza que deseja apagar todos os personagens salvos localmente? Essa ação não pode ser desfeita.")) {
+      logger.info("Configurações: Apagando localStorage e sessionStorage.");
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.reload();
+    }
+  });
+
+  const clearCacheBtn = document.getElementById("btn-clear-pwa-cache");
+  clearCacheBtn.addEventListener("click", () => {
+    if (confirm("Tem certeza que deseja limpar o cache do aplicativo e forçar o recarregamento? Os personagens salvos localmente serão preservados.")) {
+      logger.info("Configurações: Limpando Cache Storage e desregistrando Service Workers.");
+      
+      const unregisterPromises = [];
+      if ('serviceWorker' in navigator) {
+        unregisterPromises.push(
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            return Promise.all(registrations.map(reg => reg.unregister()));
+          })
+        );
+      }
+      
+      if ('caches' in window) {
+        unregisterPromises.push(
+          caches.keys().then(keys => {
+            return Promise.all(keys.map(key => caches.delete(key)));
+          })
+        );
+      }
+
+      Promise.all(unregisterPromises).finally(() => {
+        window.location.reload(true);
+      });
+    }
   });
   
   document.getElementById("btn-save-settings").addEventListener("click", () => {

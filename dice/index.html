@@ -81,5 +81,16 @@
     <script src="libs/teal.js"></script>
     <script src="dice.js"></script>
     <script src="main.js"></script>
+
+    <!-- Registro de Service Worker para suporte offline -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('../sw.js')
+            .then(reg => console.log('Service Worker do Dado registrado com sucesso:', reg.scope))
+            .catch(err => console.error('Erro ao registrar Service Worker no Dado:', err));
+        });
+      }
+    </script>
 </body>
 </html>

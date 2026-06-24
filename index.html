@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Assimilação RPG - Gerenciador de Fichas</title>
   <link rel="icon" type="image/webp" href="assets/logoAssimilacao.webp">
+  <link rel="apple-touch-icon" href="assets/logoAssimilacao.webp">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8c1d1d">
   <!-- Fontes do Google: Outfit (Títulos/Militar/Industrial) e Inter (Legibilidade) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,26 +38,26 @@
         </div>
         
 
-        <button id="btn-new-char" class="btn btn-primary" title="Criar Nova Ficha">
+        <button id="btn-new-char" class="btn" title="Criar Nova Ficha">
         <span class="btn-icon" data-icon="plus"></span> <span class="btn-text">Nova Ficha</span>
       </button>
-      <button id="btn-import-json" class="btn btn-secondary import-json" title="Importar Ficha JSON">
+      <button id="btn-import-json" class="btn import-json" title="Importar Ficha JSON">
         <span class="btn-icon" data-icon="import"></span> <span class="btn-text">Importar</span>
       </button>
       <input type="file" id="file-import" accept=".json" style="display: none;">
-      <button id="btn-export-json" class="btn btn-secondary export-json" title="Exportar Ficha JSON" disabled>
+      <button id="btn-export-json" class="btn export-json" title="Exportar Ficha JSON" disabled>
         <span class="btn-icon" data-icon="export"></span> <span class="btn-text">Exportar</span>
       </button>
-      <button id="btn-assimilation-test" class="btn btn-primary" title="Realizar Teste de Assimilação">
+      <button id="btn-assimilation-test" class="btn hide-on-desktop" title="Realizar Teste de Assimilação">
         <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text">Teste de Assimilação</span>
       </button>
-      <button id="btn-open-tarot-again" class="btn btn-secondary" title="Refazer Leitura (Tarot)">
+      <button id="btn-open-tarot-again" class="btn hide-on-desktop" title="Refazer Leitura (Tarot)">
         <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text">Refazer Tarot</span>
       </button>
       <button id="btn-delete-char" class="btn btn-danger" title="Apagar Personagem" disabled>
         <span class="btn-icon" data-icon="trash"></span>
       </button>
-      <button id="btn-settings" class="btn btn-secondary" title="Configurações">
+      <button id="btn-settings" class="btn" title="Configurações">
         <span class="btn-icon" data-icon="settings"></span>
       </button>
     </div>
@@ -167,7 +170,7 @@
               <span id="wiz-det-val" class="label-value">9</span>
             </div>
             <div class="cabo-slider-center">
-              <input type="range" id="wiz-det-slider" min="1" max="9" value="1" step="1">
+              <input type="range" id="wiz-det-slider" min="0" max="10" value="1" step="1">
             </div>
             <div class="cabo-label-side ass-side-label">
               <span class="label-title">ASSIMILAÇÃO</span>
@@ -249,8 +252,8 @@
 
       <!-- Navegação do Wizard -->
       <div class="wizard-footer">
-        <button id="btn-wiz-prev" class="btn btn-secondary" disabled>Anterior</button>
-        <button id="btn-wiz-next" class="btn btn-primary">Próximo</button>
+        <button id="btn-wiz-prev" class="btn" disabled>Anterior</button>
+        <button id="btn-wiz-next" class="btn">Próximo</button>
         <button id="btn-wiz-finish" class="btn btn-success hidden">Finalizar & Salvar</button>
       </div>
     </section>
@@ -268,7 +271,7 @@
               <div class="profile-card card-glass">
                 <div class="portrait-wrapper">
                   <div class="polaroid-frame" id="portrait-frame" title="Clique para alterar a foto do personagem">
-                    <img id="char-portrait-img" src="default_avatar.png" alt="Avatar do Personagem">
+                    <img id="char-portrait-img" src="./assets/avatar.png" alt="Avatar do Personagem">
                     <div class="portrait-overlay">
                       <span>Alterar Foto</span>
                     </div>
@@ -321,7 +324,7 @@
               <div class="roll-chat-section" id="roll-chat">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <h3 style="margin: 0; padding: 0;">Chat de Rolagens</h3>
-                    <button class="btn btn-secondary btn-sm btn-danger" id="btn-clear-chat" title="Limpar Histórico de Rolagens">Limpar</button>
+                     <button class="btn btn-sm btn-danger" id="btn-clear-chat" title="Limpar Histórico de Rolagens">Limpar</button>
                   </div>
                   <div class="roll-chat-messages" id="roll-chat-messages">
                     <div class="chat-placeholder">Nenhuma rolagem realizada nesta sessão.</div>
@@ -378,20 +381,37 @@
                   
                   <!-- Estado Suscetível Warning -->
                   <div class="suscetivel-alert hidden" id="suscetivel-alert">
-                    <div><strong>ESTADO SUSCETÍVEL!</strong> Seus pontos de Determinação zeraram.</div>
-                    <button id="btn-avanco-assimilacao" class="btn btn-danger btn-sm" style="margin-top: 8px; width: 100%; font-family: var(--font-heading); font-weight: bold;">
-                      Avanço da Assimilação (+1 Nível de Assimilação)
+                    <div><strong>ESTADO SUSCETÍVEL!</strong><br>Seus pontos de Determinação zeraram.</div>
+                    <button id="btn-avanco-assimilacao" class="btn btn-danger btn-sm">
+                       <span class="btn-text" style="font-size: 11px;">Avanço da Assimilação</span>
                     </button>
+                    
+                  </div>
+                  
+                  <!-- Assimilação 10 Warning -->
+                  <div class="suscetivel-alert hidden" id="assimilacao-total-alert" style="background: rgba(141,36,40,0.3); border-color: #8d2428;">
+                    <div><strong>ASSIMILAÇÃO TOTAL!</strong> O parasita assumiu o controle completo. A personagem agora é uma criatura.</div>
                   </div>
                 </div>
               
               
               <!-- CARD SAÚDE -->
-              <div class="saude-card card-glass" style="margin-bottom: 0;">
-                <h3 class="status-header">
-                  <span class="header-icon" data-icon="saude"></span> SAÚDE
-                  <span class="health-formula-info">(1 + Potência + Resolução)</span>
+              <div class="saude-card card-glass locked" id="saude-card-container" style="margin-bottom: 0;">
+                <h3 class="status-header" style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <span class="header-icon" data-icon="saude"></span> SAÚDE
+                    <span class="health-formula-info">(1 + Potência + Resolução)</span>
+                  </div>
+                  <button class="btn-lock-toggle-saude" title="Desbloquear Edição" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
+                    <span data-icon="lock" style="width:16px; height:16px; display:inline-block;"></span>
+                  </button>
                 </h3>
+                <div class="saude-edit-controls" style="display: none; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 6px;">
+                  <span style="font-size: 12px; color: var(--text-secondary);">Modificador de Vida Max:</span>
+                   <button id="btn-saude-mod-dec" class="btn btn-sm" style="padding: 2px 8px;">-</button>
+                  <strong id="val-saude-mod" style="font-size: 14px; min-width: 20px; text-align: center;">0</strong>
+                  <button id="btn-saude-mod-inc" class="btn btn-sm" style="padding: 2px 8px;">+</button>
+                </div>
                 <div class="health-levels-container" id="health-levels-sheet">
                   <!-- JS renderiza dinamicamente as gotas de saúde -->
                 </div>
@@ -439,7 +459,7 @@
               </div>
               
               <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
-                <button id="btn-open-roller" class="btn btn-secondary" title="Abrir Rolador de Dados" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
+                 <button id="btn-open-roller" class="btn" title="Abrir Rolador de Dados" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
                   <span style="font-size: 1.2em; vertical-align: middle; margin-right: 4px;">🎲</span><span class="btn-text"> Lançar Dados</span>
                 </button>
               </div>
@@ -473,7 +493,7 @@
                         <h3 class="section-title section-title-clean">CARACTERÍSTICAS</h3>
                         <div style="display: flex; gap: 8px; align-items: center;">
                           <div class="xp-counter" style="margin: 0; font-size: var(--font-size-xs); font-family: var(--font-heading);">XP: <strong id="sheet-xp-value">0</strong></div>
-                          <button id="btn-add-trait-sheet" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
+                           <button id="btn-add-trait-sheet" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
                         </div>
                       </div>
                       <div class="traits-sheet-grid" id="traits-list-sheet">
@@ -486,14 +506,25 @@
                   <div class="sheet-tab-panel" id="tab-assimilacoes">
                     <!-- Seção de Assimilações -->
                     <div class="sheet-section section-assimilations">
-                      <div class="sheet-section-header">
-                        <h3 class="section-title section-title-clean">ASSIMILAÇÕES (MUTAÇÕES)</h3>
-                        <div id="sheet-assimilation-points" class="assimilation-points-container"></div>
+                      <div class="sheet-section-header" style="flex-wrap: wrap; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <h3 class="section-title section-title-clean" style="margin: 0;">ASSIMILAÇÕES (MUTAÇÕES)</h3>
+                          <div id="sheet-assimilation-points" class="assimilation-points-container"></div>
+                        </div>
+                        
                       </div>
                       <div class="mutations-sheet-list-single" id="mutations-list-sheet">
                         <!-- Mutações inseridas pelo JS em uma única coluna -->
                       </div>
                     </div>
+                    <div style="display: flex; gap: 8px;">
+                          <button id="btn-assimilation-test-sheet" class="btn btn-sm" title="Realizar Teste de Assimilação">
+                            <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text" style="font-size: 11px;">Teste de Assimilação</span>
+                          </button>
+                          <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
+                            <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text" style="font-size: 11px;">Leitura de Tarot</span>
+                          </button>
+                        </div>
                   </div>
                   
                   <!-- Aba 3: Inventário -->
@@ -550,8 +581,8 @@
       
       <!-- Tabs de Navegação -->
       <div class="roller-tabs-nav" style="display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-        <button id="tab-roller-normal" class="btn btn-secondary" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Normal</button>
-        <button id="tab-roller-assimilada" class="btn btn-secondary" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Assimilada (Instinto)</button>
+        <button id="tab-roller-normal" class="btn" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Normal</button>
+        <button id="tab-roller-assimilada" class="btn" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Assimilada (Instinto)</button>
       </div>
 
       <!-- Conteúdo do Painel Normal -->
@@ -635,7 +666,7 @@
               
               <div class="dice-selector-row">
                 <div class="dice-select-control">
-                  <img src="assets/d6/3%20ou%204%20(D6).webp" class="dice-tag tag-d6" alt="d6">
+                  <img src="assets/d6/3-4(D6).webp" class="dice-tag tag-d6" alt="d6">
                   <label>Instintos</label>
                   <div class="number-input">
                     <button class="num-minus">-</button>
@@ -645,7 +676,7 @@
                 </div>
                 
                 <div class="dice-select-control">
-                  <img src="assets/d10/6%20(D10).webp" class="dice-tag tag-d10" alt="d10">
+                  <img src="assets/d10/6(D10).webp" class="dice-tag tag-d10" alt="d10">
                   <label>Aptidões</label>
                   <div class="number-input">
                     <button class="num-minus">-</button>
@@ -655,7 +686,7 @@
                 </div>
 
                 <div class="dice-select-control">
-                  <img src="assets/d12/11%20(D12).webp" class="dice-tag tag-d12" alt="d12">
+                  <img src="assets/d12/11(D12).webp" class="dice-tag tag-d12" alt="d12">
                   <label>Assimilados</label>
                   <div class="number-input">
                     <button class="num-minus">-</button>
@@ -671,7 +702,7 @@
 
               <div class="custom-roll-row" style="margin-top: 10px; display: flex; gap: 8px;">
                 <input type="text" id="dice-custom-formula" placeholder="Outros dados (Ex: 1d20+2d8)" style="flex: 1; padding: 6px 10px; font-size: var(--font-size-sm);">
-                <button id="btn-roll-custom" class="btn btn-secondary btn-sm" style="font-size: var(--font-size-xs);">Rolar</button>
+                <button id="btn-roll-custom" class="btn btn-sm" style="font-size: var(--font-size-xs);">Rolar</button>
               </div>
             </div>
             
@@ -682,7 +713,7 @@
 
           <div class="roll-action-section" style="display: flex; gap: 8px;">
             <button id="btn-roll-action" class="btn btn-success btn-large" style="flex: 1; justify-content: center;">ROLAR DADOS</button>
-            <button type="button" class="btn btn-secondary btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
+            <button type="button" class="btn btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
           </div>
           
           <div class="normal-results hidden" id="normal-panel-results" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
@@ -762,7 +793,7 @@
           
           <div class="roll-action-section" style="display: flex; gap: 8px;">
             <button class="btn btn-success btn-large" id="btn-panel-agir-instinto" style="flex: 1; justify-content: center;">REALIZAR ROLAGEM ASSIMILADA</button>
-            <button type="button" class="btn btn-secondary btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
+            <button type="button" class="btn btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
           </div>
           
           <div class="instinto-results hidden" id="instinto-panel-results" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
@@ -806,6 +837,15 @@
   <script src="dice/dice.js" defer></script>
   <script type="module" src="app.js"></script>
 
-
+  <!-- Registro de Service Worker para suporte offline -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registrado com sucesso:', reg.scope))
+          .catch(err => console.error('Erro ao registrar Service Worker:', err));
+      });
+    }
+  </script>
 </body>
 </html>

@@ -354,7 +354,7 @@ export function renderWizardTraits() {
         <div class="desc">${trait.descricao}</div>
       </div>
       <div class="action">
-        <button class="btn ${isOwned ? 'btn-danger' : 'btn-primary'} btn-sm wiz-buy-trait-btn" 
+        <button class="btn ${isOwned ? 'btn-danger' : ''} btn-sm wiz-buy-trait-btn" 
           data-id="${trait.id}" ${(!meetsReqs && !isOwned) ? 'disabled' : ''}>
           ${isOwned ? 'Remover' : 'Adquirir'}
         </button>
@@ -428,7 +428,7 @@ export function renderWizardSkillUpgrades() {
       <span class="name">${name} (${curVal})</span>
       <div style="display:flex; align-items:center;">
         <span class="skill-upgrade-cost">Custo: ${cost} XP</span>
-        <button class="btn btn-primary btn-sm wiz-upgrade-con-btn" data-name="${name}" ${state.wizardData.xp < cost ? 'disabled' : ''}>
+        <button class="btn btn-sm wiz-upgrade-con-btn" data-name="${name}" ${state.wizardData.xp < cost ? 'disabled' : ''}>
           Subir para ${targetVal}
         </button>
       </div>
@@ -455,7 +455,7 @@ export function renderWizardSkillUpgrades() {
       <span class="name">${name} (${curVal})</span>
       <div style="display:flex; align-items:center;">
         <span class="skill-upgrade-cost">Custo: ${cost} XP</span>
-        <button class="btn btn-primary btn-sm wiz-upgrade-pra-btn" data-name="${name}" ${state.wizardData.xp < cost ? 'disabled' : ''}>
+        <button class="btn btn-sm wiz-upgrade-pra-btn" data-name="${name}" ${state.wizardData.xp < cost ? 'disabled' : ''}>
           Subir para ${targetVal}
         </button>
       </div>

@@ -627,7 +627,10 @@
   padding-bottom: 6px; 
   margin-bottom: 12px;
 }
-    
+.btn-text{
+    display: flex;
+    align-items: center;
+  }    
 /* Cabecalhos de Secao com Layout Flex */
 .sheet-section-header {
   display: flex;

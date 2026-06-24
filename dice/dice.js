@@ -507,10 +507,10 @@ const DICE = (function() {
             return tex;
         }
         var textures = {
-            '1_2': loadTex('d6/1 ou 2 (D6).webp'),
-            '3_4': loadTex('d6/3 ou 4 (D6).webp'),
-            '5': loadTex('d6/5 (D6).webp'),
-            '6': loadTex('d6/6 (D6).webp')
+            '1_2': loadTex('d6/1-2(D6).webp'),
+            '3_4': loadTex('d6/3-4(D6).webp'),
+            '5': loadTex('d6/5(D6).webp'),
+            '6': loadTex('d6/6(D6).webp')
         };
         var materials = [];
         var baseOpts = $t.copyto(vars.material_options, {});
@@ -543,14 +543,14 @@ const DICE = (function() {
             return tex;
         }
         var textures = {
-            '1_2': loadTex('d10/1 ou 2 (D10).webp'),
-            '3_4': loadTex('d10/3 ou 4 (D10).webp'),
-            '5': loadTex('d10/5 (D10).webp'),
-            '6': loadTex('d10/6 (D10).webp'),
-            '7': loadTex('d10/7 (D10).webp'),
-            '8': loadTex('d10/8 (D10).webp'),
-            '9': loadTex('d10/9 (D10).webp'),
-            '10': loadTex('d10/10 (D10).webp')
+            '1_2': loadTex('d10/1-2(D10).webp'),
+            '3_4': loadTex('d10/3-4(D10).webp'),
+            '5': loadTex('d10/5(D10).webp'),
+            '6': loadTex('d10/6(D10).webp'),
+            '7': loadTex('d10/7(D10).webp'),
+            '8': loadTex('d10/8(D10).webp'),
+            '9': loadTex('d10/9(D10).webp'),
+            '10': loadTex('d10/10(D10).webp')
         };
         var materials = [];
         var baseOpts = $t.copyto(vars.material_options, {});
@@ -613,16 +613,16 @@ const DICE = (function() {
             return tex;
         }
         var textures = {
-            '1_2': loadTex('d12/1 ou 2 (D12).webp'),
-            '3_4': loadTex('d12/3 ou 4 (D12).webp'),
-            '5': loadTex('d12/5 (D12).webp'),
-            '6': loadTex('d12/6 (D12).webp'),
-            '7': loadTex('d12/7 (D12).webp'),
-            '8': loadTex('d12/8 (D12).webp'),
-            '9': loadTex('d12/9 (D12).webp'),
-            '10': loadTex('d12/10 (D12).webp'),
-            '11': loadTex('d12/11 (D12).webp'),
-            '12': loadTex('d12/12 (D12).webp')
+            '1_2': loadTex('d12/1-2(D12).webp'),
+            '3_4': loadTex('d12/3-4(D12).webp'),
+            '5': loadTex('d12/5(D12).webp'),
+            '6': loadTex('d12/6(D12).webp'),
+            '7': loadTex('d12/7(D12).webp'),
+            '8': loadTex('d12/8(D12).webp'),
+            '9': loadTex('d12/9(D12).webp'),
+            '10': loadTex('d12/10(D12).webp'),
+            '11': loadTex('d12/11(D12).webp'),
+            '12': loadTex('d12/12(D12).webp')
         };
         var materials = [];
         var baseOpts = $t.copyto(vars.material_options, {});

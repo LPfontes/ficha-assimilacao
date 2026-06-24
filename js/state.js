@@ -51,6 +51,10 @@ export const el = {
   conhecimentosListSheet: document.getElementById("conhecimentos-list-sheet"),
   praticasListSheet: document.getElementById("praticas-list-sheet"),
   healthLevelsSheet: document.getElementById("health-levels-sheet"),
+  saudeEditControls: document.querySelector(".saude-edit-controls"),
+  btnSaudeModDec: document.getElementById("btn-saude-mod-dec"),
+  valSaudeMod: document.getElementById("val-saude-mod"),
+  btnSaudeModInc: document.getElementById("btn-saude-mod-inc"),
   traitsListSheet: document.getElementById("traits-list-sheet"),
   btnAddTraitSheet: document.getElementById("btn-add-trait-sheet"),
   btnAssimilationTest: document.getElementById("btn-assimilation-test"),
@@ -66,6 +70,7 @@ export const el = {
   inputAssMath: document.getElementById("input-ass-math"),
   caboRatioFill: document.getElementById("cabo-ratio-fill"),
   suscetivelAlert: document.getElementById("suscetivel-alert"),
+  assimilacaoTotalAlert: document.getElementById("assimilacao-total-alert"),
   btnDecDet: document.getElementById("btn-dec-det"),
   btnIncDet: document.getElementById("btn-inc-det"),
   btnDecAss: document.getElementById("btn-dec-ass"),
@@ -295,7 +300,7 @@ export function loadCharacter(charId) {
   el.sheetXpValue.textContent = char.xp;
   
   if (el.portraitImg) {
-    el.portraitImg.src = char.portrait || "default_avatar.png";
+    el.portraitImg.src = char.portrait || "";
   }
   
   // Renderiza componentes

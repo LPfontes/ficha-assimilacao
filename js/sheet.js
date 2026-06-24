@@ -154,23 +154,29 @@ export function renderHealthSheet() {
   const char = state.currentCharacter;
   if (!char) return;
   
-  const maxPts = 1 + char.instintos.Potência + char.instintos.Resolução;
+  if (char.saudeMod === undefined) char.saudeMod = 0;
+  
+  const basePts = 1 + char.instintos.Potência + char.instintos.Resolução;
+  const maxPts = Math.max(1, basePts + char.saudeMod);
+  
+  if (el.valSaudeMod) el.valSaudeMod.textContent = char.saudeMod;
   
   // Hide health formula or update it dynamically
   const formulaInfo = document.querySelector(".health-formula-info");
   if (formulaInfo) {
-    formulaInfo.textContent = `(${maxPts} Caixas por Nível)`;
+    let saudeModText = char.saudeMod !== 0 ? ` ${char.saudeMod >= 0 ? '+' : ''}${char.saudeMod}` : "";
+    formulaInfo.textContent = `(${basePts}${saudeModText} Caixas por Nível)`;
   }
   
   el.healthLevelsSheet.innerHTML = "";
   
   const levels = [
-    { key: "6", name: "6. Saudável", desc: "Plenamente funcional, sem modificadores" },
-    { key: "5", name: "5. Escoriação", desc: "Plenamente funcional, sem modificadores" },
-    { key: "4", name: "4. Laceração", desc: "Penalidade de -1 A (Sucesso) em todos os testes" },
-    { key: "3", name: "3. Ferimentos", desc: "Penalidade de -1 A (Sucesso) em todos os testes" },
-    { key: "2", name: "2. Debilitação", desc: "Penalidade de -2 A. Incapaz de agir sem gastar 1 Determinação" },
-    { key: "1", name: "1. Incapacitação", desc: "Coma. Gasta 1 Determinação/rodada para falar. Ação: +2 B" }
+    { key: "6", name: "6. Saudável", desc: "Plenamente funcional." },
+    { key: "5", name: "5. Escoriação", desc: "Apenas arranhões ou cortes leves." },
+    { key: "4", name: "4. Laceração", desc: "Penalidade: -1 Sucesso nos testes.<br>Ignore gastando 1 Determinação ou 1 Adaptação na rolagem." },
+    { key: "3", name: "3. Ferimentos", desc: "Penalidade: -1 Sucesso nos testes.<br>Ignore gastando 1 Determinação ou 1 Adaptação na rolagem." },
+    { key: "2", name: "2. Debilitação", desc: "Custa 1 Determinação para agir (mantém penalidade de -2 Sucessos).<br>Ignore a penalidade de Sucessos gastando 1 Adaptação na rolagem. Requer tratamento." },
+    { key: "1", name: "1. Incapacitação", desc: "Crítico. Gaste 1 Determinação/rodada para falar/manter consciência (sem Ação).<br>Para agir: +1 Determinação e exige 2 Adaptações na rolagem para ter sucesso. Requer tratamento." }
   ];
   
   if (!char.dano) {
@@ -206,7 +212,9 @@ export function renderHealthSheet() {
     </div>
     <div class="health-drops" style="display: flex; align-items: center; gap: 6px;">
       <button type="button" class="btn-health-pts-adjust" id="btn-health-pts-dec" title="Perder Vida (-)" ${activeLvl === 1 && activeDano === maxPts ? 'disabled' : ''}>-</button>
-      ${dropsHtml}
+      <div style="display: grid; grid-template-columns: repeat(6, auto); gap: 4px;">
+        ${dropsHtml}
+      </div>
       <button type="button" class="btn-health-pts-adjust" id="btn-health-pts-inc" title="Ganhar Vida (+)" ${activeLvl === 6 && activeDano === 0 ? 'disabled' : ''}>+</button>
       <input type="text" id="input-health-adjust" class="health-adjust-input" placeholder="±x" title="Digite +1 ou -1 e pressione Enter para alterar a vida">
     </div>
@@ -446,10 +454,15 @@ export function renderCaboGuerraSheet() {
     }
   }
   
-  if (char.detPoints === 0) {
+  if (char.detNivel === 0) {
+    if (el.suscetivelAlert) el.suscetivelAlert.classList.add("hidden");
+    if (el.assimilacaoTotalAlert) el.assimilacaoTotalAlert.classList.remove("hidden");
+  } else if (char.detPoints === 0) {
     if (el.suscetivelAlert) el.suscetivelAlert.classList.remove("hidden");
+    if (el.assimilacaoTotalAlert) el.assimilacaoTotalAlert.classList.add("hidden");
   } else {
     if (el.suscetivelAlert) el.suscetivelAlert.classList.add("hidden");
+    if (el.assimilacaoTotalAlert) el.assimilacaoTotalAlert.classList.add("hidden");
   }
 }
 
@@ -471,7 +484,7 @@ export function renderCharacteristicsSheet() {
     card.className = "trait-sheet-card";
     card.innerHTML = `
       <div style="flex:1;">
-        <div class="name">${trait.nome} <span style="font-size:10px; color:var(--text-secondary);">(${trait.custo} XP)</span></div>
+        <div class="name">${trait.nome}  <span style="font-size:10px; color:var(--text-secondary);"> (${trait.custo} XP)</span></div>
         <div class="desc">${trait.descricao}</div>
       </div>
       <button class="btn-delete-trait" data-id="${trait.id}" title="Remover Característica e recuperar XP">
@@ -718,7 +731,7 @@ export function adjustCaboGuerraLevels(changeDet) {
   if (!char) return;
   
   const newDet = char.detNivel + changeDet;
-  if (newDet >= 1 && newDet <= 9) {
+  if (newDet >= 0 && newDet <= 10) {
     char.detNivel = newDet;
     char.assNivel = 10 - newDet;
     
@@ -736,7 +749,7 @@ export function executeAssimilacaoAvanco() {
   if (!char) return;
   
   if (char.detPoints === 0) {
-    if (char.detNivel > 1) {
+    if (char.detNivel > 0) {
       char.detNivel -= 1;
       char.assNivel += 1;
       char.detPoints = char.detNivel; // Restabelece Determinação ao novo máximo
@@ -745,7 +758,7 @@ export function executeAssimilacaoAvanco() {
       renderCaboGuerraSheet();
       alert(`A infecção avançou! Determinação Máxima agora é Nível ${char.detNivel} e Assimilação Máxima é Nível ${char.assNivel}. Seus pontos de Determinação foram restaurados.`);
     } else {
-      alert("Sua Determinação já está no nível mínimo (1). A infecção não pode avançar mais sem que o controle seja totalmente perdido!");
+      alert("Sua Determinação já está no nível mínimo (0). A infecção não pode avançar mais sem que o controle seja totalmente perdido!");
     }
   }
 }

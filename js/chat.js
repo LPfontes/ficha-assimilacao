@@ -34,7 +34,8 @@ export function appendRollToChat(formula) {
     formula: formula,
     maxKeep: maxKeep,
     results: JSON.parse(JSON.stringify(state.activeRollResults)),
-    keptDiceIndexes: JSON.parse(JSON.stringify(state.keptDiceIndexes))
+    keptDiceIndexes: JSON.parse(JSON.stringify(state.keptDiceIndexes)),
+    healthLvl: state.currentCharacter ? getCurrentHealthLevel(state.currentCharacter) : 6
   };
   
   if (state.currentCharacter) {
@@ -120,11 +121,11 @@ export function renderChatHistory() {
       }
     });
     
-    // Calculate health penalties dynamically
+    // Calculate health penalties dynamically based on saved health level at roll time
     let penalidadeA = 0;
     let penalidadeB = 0;
     let healthLvlName = "Saudável";
-    const healthLvl = char ? getCurrentHealthLevel(char) : 6;
+    const healthLvl = roll.healthLvl !== undefined ? roll.healthLvl : (char ? getCurrentHealthLevel(char) : 6);
     if (healthLvl === 4 || healthLvl === 3) {
       penalidadeA = 1;
       healthLvlName = healthLvl === 4 ? "Laceração" : "Ferimentos";
@@ -330,7 +331,7 @@ export function renderChatHistory() {
         let penalidadeA = 0;
         let penalidadeB = 0;
         let healthLvlName = "Saudável";
-        const healthLvl = char ? getCurrentHealthLevel(char) : 6;
+        const healthLvl = lastRoll.healthLvl !== undefined ? lastRoll.healthLvl : (char ? getCurrentHealthLevel(char) : 6);
         if (healthLvl === 4 || healthLvl === 3) {
           penalidadeA = 1;
           healthLvlName = healthLvl === 4 ? "Laceração" : "Ferimentos";
@@ -446,30 +447,30 @@ export function toggleKeepDie(index) {
 
 export function getDieFaceImgSrc(sides, value) {
   if (sides === 6) {
-    if (value === 1 || value === 2) return "assets/d6/1 ou 2 (D6).webp";
-    if (value === 3 || value === 4) return "assets/d6/3 ou 4 (D6).webp";
-    if (value === 5) return "assets/d6/5 (D6).webp";
-    if (value === 6) return "assets/d6/6 (D6).webp";
+    if (value === 1 || value === 2) return "assets/d6/1-2(D6).webp";
+    if (value === 3 || value === 4) return "assets/d6/3-4(D6).webp";
+    if (value === 5) return "assets/d6/5(D6).webp";
+    if (value === 6) return "assets/d6/6(D6).webp";
   } else if (sides === 10) {
-    if (value === 1 || value === 2) return "assets/d10/1 ou 2 (D10).webp";
-    if (value === 3 || value === 4) return "assets/d10/3 ou 4 (D10).webp";
-    if (value === 5) return "assets/d10/5 (D10).webp";
-    if (value === 6) return "assets/d10/6 (D10).webp";
-    if (value === 7) return "assets/d10/7 (D10).webp";
-    if (value === 8) return "assets/d10/8 (D10).webp";
-    if (value === 9) return "assets/d10/9 (D10).webp";
-    if (value === 10) return "assets/d10/10 (D10).webp";
+    if (value === 1 || value === 2) return "assets/d10/1-2(D10).webp";
+    if (value === 3 || value === 4) return "assets/d10/3-4(D10).webp";
+    if (value === 5) return "assets/d10/5(D10).webp";
+    if (value === 6) return "assets/d10/6(D10).webp";
+    if (value === 7) return "assets/d10/7(D10).webp";
+    if (value === 8) return "assets/d10/8(D10).webp";
+    if (value === 9) return "assets/d10/9(D10).webp";
+    if (value === 10) return "assets/d10/10(D10).webp";
   } else if (sides === 12) {
-    if (value === 1 || value === 2) return "assets/d12/1 ou 2 (D12).webp";
-    if (value === 3 || value === 4) return "assets/d12/3 ou 4 (D12).webp";
-    if (value === 5) return "assets/d12/5 (D12).webp";
-    if (value === 6) return "assets/d12/6 (D12).webp";
-    if (value === 7) return "assets/d12/7 (D12).webp";
-    if (value === 8) return "assets/d12/8 (D12).webp";
-    if (value === 9) return "assets/d12/9 (D12).webp";
-    if (value === 10) return "assets/d12/10 (D12).webp";
-    if (value === 11) return "assets/d12/11 (D12).webp";
-    if (value === 12) return "assets/d12/12 (D12).webp";
+    if (value === 1 || value === 2) return "assets/d12/1-2(D12).webp";
+    if (value === 3 || value === 4) return "assets/d12/3-4(D12).webp";
+    if (value === 5) return "assets/d12/5(D12).webp";
+    if (value === 6) return "assets/d12/6(D12).webp";
+    if (value === 7) return "assets/d12/7(D12).webp";
+    if (value === 8) return "assets/d12/8(D12).webp";
+    if (value === 9) return "assets/d12/9(D12).webp";
+    if (value === 10) return "assets/d12/10(D12).webp";
+    if (value === 11) return "assets/d12/11(D12).webp";
+    if (value === 12) return "assets/d12/12(D12).webp";
   }
   return null;
 }
