@@ -541,15 +541,15 @@
                     <!-- Seção de Características Adquiridas -->
                     <div class="sheet-section section-traits">
                       <div class="sheet-section-header">
+                        <button id="btn-add-trait-sheet" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
                         <h3 class="section-title section-title-clean">CARACTERÍSTICAS</h3>
-                        <div>
-                          <div class="xp-counter" style="margin: 0; font-size: var(--font-size-xs); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <div class="xp-counter" style="margin: 0; font-size: var(--font-size-md); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
                             XP: 
-                            <button id="btn-dec-xp" class="btn btn-sm" style="padding: 2px 6px; font-weight: bold; font-size: 11px; line-height: 1; border-radius: 4px;" title="Diminuir XP">-</button>
-                            <strong id="sheet-xp-value">0</strong>
-                            <button id="btn-inc-xp" class="btn btn-sm" style="padding: 2px 6px; font-weight: bold; font-size: 11px; line-height: 1; border-radius: 4px;" title="Aumentar XP">+</button>
+                            <button id="btn-dec-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Diminuir XP">-</button>
+                            <strong id="sheet-xp-value" style="font-size: var(--font-size-lg); vertical-align: middle;">0</strong>
+                            <button id="btn-inc-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Aumentar XP">+</button>
                           </div>
-                           <button id="btn-add-trait-sheet" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
                         </div>
                       </div>
                       <div class="traits-sheet-grid" id="traits-list-sheet">
@@ -597,10 +597,14 @@
                           <h4 id="label-body-slots" style="font-family: var(--font-heading); color: var(--color-blue-glow); font-size: var(--font-size-sm); margin: 0;">
                             No Corpo
                           </h4>
-
-                          <button id="btn-add-body-slot" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; height: 22px; border-color: rgba(0,255,102,0.3); color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot no Corpo">
-                            + Slot
-                          </button>
+                          <div style="display: flex; gap: 8px;">
+                            <button id="btn-add-body-slot" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot no Corpo">
+                              + Slot
+                            </button>
+                            <button id="btn-add-item-body" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Item">
+                              + Item
+                            </button>
+                          </div>
                         </div>
                         <div id="inventory-body-list" class="inventory-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                           <!-- JS renderizará 3 slots -->

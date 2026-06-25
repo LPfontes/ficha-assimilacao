@@ -481,7 +481,10 @@
   padding-bottom: 4px;
   margin-bottom: 12px;
 }
-
+.sheet-xp-value{
+  font-size: var(--font-size-xs);
+  padding: 2px;
+}
 /* Inventário Customizado */
 #tab-inventario .inventory-grid {
   grid-template-columns: 1fr;

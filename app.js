@@ -305,6 +305,9 @@ function setupEventListeners() {
   if (el.btnIncBodySlot) el.btnIncBodySlot.addEventListener("click", addBodySlot);
   if (el.btnIncBackpackSlot) el.btnIncBackpackSlot.addEventListener("click", addBackpackSlot);
 
+  const btnAddItemBody = document.getElementById("btn-add-item-body");
+  if (btnAddItemBody) btnAddItemBody.addEventListener("click", openAddItemModal);
+
   const btnAssimilationTestSheet = document.getElementById("btn-assimilation-test-sheet");
   if (btnAssimilationTestSheet) {
     btnAssimilationTestSheet.addEventListener("click", openAssimilationTestModal);
