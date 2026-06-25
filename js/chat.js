@@ -28,6 +28,8 @@ export function appendRollToChat(formula) {
   if (el.modOrigemOcupacao.checked) maxKeep++;
   if (el.modOrigemEvento.checked) maxKeep++;
   if (state.selectedRoll.agirPorInstinto) maxKeep++;
+  const bonusKeep = parseInt(el.modBonusKeep?.value) || 0;
+  maxKeep += Math.max(0, bonusKeep);
   
   const rollEntry = {
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),

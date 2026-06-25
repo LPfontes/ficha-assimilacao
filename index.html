@@ -15,6 +15,7 @@
   
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/world-sheets.css">
 </head>
 <body>
 
@@ -708,7 +709,10 @@
             
             <div class="roll-modifiers-section">
               <h4>Modificadores Para Manter +1 Dado</h4>
-              <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:var(--font-size-sm);color:var(--text-secondary);">
+                <span>Total que pode manter: <strong id="max-keep-count">1</strong></span>
+              </div>
+              <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
                   <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Empenho (Gasta 1 de Determinação)</span>
                   <label class="theme-switch">
@@ -731,6 +735,11 @@
                     <input type="checkbox" id="mod-origem-evento">
                     <span class="slider"></span>
                   </label>
+                </div>
+
+                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Dados Bônus para Manter</span>
+                  <input type="number" id="mod-bonus-keep" min="0" max="10" value="0" style="width:60px;padding:4px 6px;text-align:center;font-size:var(--font-size-sm);">
                 </div>
               </div>
             </div>
@@ -859,6 +868,11 @@
                   <span class="slider"></span>
                 </label>
               </div>
+
+              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
+                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Dados Bônus para Manter</span>
+                <input type="number" id="mod-bonus-keep-ass" min="0" max="10" value="0" style="width:60px;padding:4px 6px;text-align:center;font-size:var(--font-size-sm);">
+              </div>
             </div>
           </div>
           </div>
@@ -885,6 +899,18 @@
 
       </div>
     </section>
+
+    <!-- TELA 3: FICHA DE REFÚGIO -->
+    <section id="refugio-screen" class="screen hidden"></section>
+
+    <!-- TELA 4: FICHA DE REGIÃO -->
+    <section id="regiao-screen" class="screen hidden"></section>
+
+    <!-- TELA 5: FICHA DE CONFLITO -->
+    <section id="conflito-screen" class="screen hidden"></section>
+
+    <!-- TELA 6: FICHA DE LOCAL -->
+    <section id="local-screen" class="screen hidden"></section>
 
   </main>
    <!-- MODAIS FLUTUANTES (Seleção de Mutações, Compra de Características, Confirmação) -->

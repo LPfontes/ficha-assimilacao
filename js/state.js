@@ -1,7 +1,6 @@
 import { renderAptitudesSheet, renderHealthSheet, renderCaboGuerraSheet, renderCharacteristicsSheet, renderMutationsSheet, renderInventorySheet } from "./sheet.js";
 import { resetDiceDrawerSelections } from "./roller.js";
 import { logger } from "./logger.js";
-import { renderChatHistory } from "./chat.js";
 
 // ==========================================
 // SELETORES DOM
@@ -96,6 +95,8 @@ export const el = {
   modEmpenhoAss: document.getElementById("mod-empenho-ass"),
   modOrigemOcupacaoAss: document.getElementById("mod-origem-ocupacao-ass"),
   modOrigemEventoAss: document.getElementById("mod-origem-evento-ass"),
+  modBonusKeep: document.getElementById("mod-bonus-keep"),
+  modBonusKeepAss: document.getElementById("mod-bonus-keep-ass"),
   btnAgirInstinto: document.getElementById("btn-agir-instinto"),
   btnRollAction: document.getElementById("btn-roll-action"),
   btnRollCustom: document.getElementById("btn-roll-custom"),
@@ -322,9 +323,6 @@ export function loadCharacter(charId) {
   
   // Reseta seleção de rolagem
   resetDiceDrawerSelections();
-
-  // Renderiza histórico de rolagens do chat
-  renderChatHistory();
 }
 
 export function deleteActiveCharacter() {
@@ -344,6 +342,7 @@ export function deleteActiveCharacter() {
       loadCharactersFromStorage();
       if (state.characters.length > 0) {
         loadCharacter(state.characters[0].id);
+        import("./chat.js").then(({ renderChatHistory }) => renderChatHistory());
       } else {
         state.currentCharacter = null;
         el.sheetScreen.classList.add("hidden");
@@ -391,6 +390,7 @@ export function importCharacterFile(e) {
       logger.info(`Ficha de "${charObj.name}" importada com sucesso com novo ID: ${charObj.id}`);
       loadCharactersFromStorage();
       loadCharacter(charObj.id);
+      import("./chat.js").then(({ renderChatHistory }) => renderChatHistory());
       alert(`Ficha de ${charObj.name} importada com sucesso!`);
     } catch (err) {
       logger.error("Erro ao analisar arquivo JSON importado:", err);

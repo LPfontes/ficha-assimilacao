@@ -143,6 +143,7 @@ export function resetDiceDrawerSelections() {
   el.modEmpenho.checked = false;
   el.modOrigemOcupacao.checked = false;
   el.modOrigemEvento.checked = false;
+  if (el.modBonusKeep) el.modBonusKeep.value = 0;
 
   if (el.rollSelectInstinto) el.rollSelectInstinto.value = "";
   if (el.rollSelectSkill) el.rollSelectSkill.value = "";
@@ -159,6 +160,8 @@ export function updateKeepCountDisplay() {
   if (el.modEmpenho.checked) maxKeep++;
   if (el.modOrigemOcupacao.checked) maxKeep++;
   if (el.modOrigemEvento.checked) maxKeep++;
+  const bonusVal = parseInt(el.modBonusKeep?.value) || 0;
+  maxKeep += Math.max(0, bonusVal);
   
   // Obter o maxKeepCount da gaveta ou da mensagem ativa
   const maxKeepCountDrawer = document.getElementById("max-keep-count");
@@ -588,6 +591,8 @@ export function initRolagemAssimiladaPanel() {
     if (el.modEmpenhoAss && el.modEmpenhoAss.checked) maxKeep++;
     if (el.modOrigemOcupacaoAss && el.modOrigemOcupacaoAss.checked) maxKeep++;
     if (el.modOrigemEventoAss && el.modOrigemEventoAss.checked) maxKeep++;
+    const bonusKeepAss = parseInt(el.modBonusKeepAss?.value) || 0;
+    maxKeep += Math.max(0, bonusKeepAss);
     if (keepLabel) keepLabel.textContent = maxKeep;
   }
 
@@ -650,6 +655,8 @@ export function initRolagemAssimiladaPanel() {
         if (el.modEmpenhoAss && el.modEmpenhoAss.checked) maxKeep++;
         if (el.modOrigemOcupacaoAss && el.modOrigemOcupacaoAss.checked) maxKeep++;
         if (el.modOrigemEventoAss && el.modOrigemEventoAss.checked) maxKeep++;
+        const bonusKeepAss = parseInt(el.modBonusKeepAss?.value) || 0;
+        maxKeep += Math.max(0, bonusKeepAss);
 
         const keptIndexes = [...results.map((d, i) => ({ ...d, i }))]
           .sort((a, b) => b.value - a.value).slice(0, maxKeep).map(d => d.i);
@@ -729,6 +736,8 @@ export function initRolagemAssimiladaPanel() {
         if (el.modEmpenhoAss && el.modEmpenhoAss.checked) maxKeep++;
         if (el.modOrigemOcupacaoAss && el.modOrigemOcupacaoAss.checked) maxKeep++;
         if (el.modOrigemEventoAss && el.modOrigemEventoAss.checked) maxKeep++;
+        const bonusKeepAss3d = parseInt(el.modBonusKeepAss?.value) || 0;
+        maxKeep += Math.max(0, bonusKeepAss3d);
 
         const keptIndexes = [...results.map((d, i) => ({ ...d, i }))]
           .sort((a, b) => b.value - a.value).slice(0, maxKeep).map(d => d.i);

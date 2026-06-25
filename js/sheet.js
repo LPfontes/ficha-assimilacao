@@ -205,7 +205,16 @@ export function renderHealthSheet() {
     `;
   }
   
+  const totalMax = 6 * maxPts;
+  let totalCurrent = 0;
+  for (let lvl = 1; lvl <= 6; lvl++) {
+    totalCurrent += maxPts - (char.dano[lvl] || 0);
+  }
+
   row.innerHTML = `
+    <div class="health-total-label">
+      <span>Vida Total: <strong id="vida-total-value">${totalCurrent}</strong> / <strong id="vida-max-value">${totalMax}</strong></span>
+    </div>
     <div class="health-level-label">
       <div style="display: flex; align-items: center; gap: 8px;">
         <button type="button" class="btn-health-lvl-adjust" id="btn-health-lvl-prev" title="Subir Nível (Curar)" ${activeLvl === 6 ? 'disabled' : ''}>▲</button>

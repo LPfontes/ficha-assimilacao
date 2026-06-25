@@ -6,6 +6,7 @@ import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco,
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
 import { initLandingScreen, showLandingScreen, renderCharactersList } from "./js/landing.js";
+import { worldState, loadAllWorldData } from "./js/world-state.js";
 
 // ==========================================
 // INICIALIZAÇÃO DA APLICAÇÃO
@@ -14,6 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
   logger.info("Aplicação carregada. Inicializando components...");
   renderIcons();
   loadCharactersFromStorage();
+
+  // Carrega todos os novos tipos de ficha do mundo
+  loadAllWorldData();
+  // Expõe para uso em landing.js (acesso síncrono sem import dinâmico)
+  window._worldState = worldState;
+
   initDiceBox();
   setupEventListeners();
   
@@ -505,10 +512,12 @@ function setupEventListeners() {
   el.modEmpenho.addEventListener("change", updateKeepCountDisplay);
   el.modOrigemOcupacao.addEventListener("change", updateKeepCountDisplay);
   el.modOrigemEvento.addEventListener("change", updateKeepCountDisplay);
+  el.modBonusKeep?.addEventListener("input", updateKeepCountDisplay);
   
   if (el.modEmpenhoAss) el.modEmpenhoAss.addEventListener("change", initRolagemAssimiladaPanel);
   if (el.modOrigemOcupacaoAss) el.modOrigemOcupacaoAss.addEventListener("change", initRolagemAssimiladaPanel);
   if (el.modOrigemEventoAss) el.modOrigemEventoAss.addEventListener("change", initRolagemAssimiladaPanel);
+  if (el.modBonusKeepAss) el.modBonusKeepAss.addEventListener("input", initRolagemAssimiladaPanel);
   
   // Alternar abas do Rolador (Normal vs Assimilada)
   const tabRollerNormal = document.getElementById("tab-roller-normal");
@@ -708,6 +717,13 @@ function goToLanding() {
 function updateXpDisplay() {
   const char = state.currentCharacter;
   if (!char) return;
+  // Modal de características (aberto via openTraitsModal)
   const xpEl = document.getElementById("xp-value");
   if (xpEl) xpEl.textContent = char.xp;
+  // Contador de XP na aba da ficha (sempre visível na sheet-screen)
+  const sheetXpEl = document.getElementById("sheet-xp-value");
+  if (sheetXpEl) sheetXpEl.textContent = char.xp;
+  // Modal de upgrade de aptidões (se estiver aberto)
+  const upgradeXpEl = document.getElementById("modal-xp-value-upgrade");
+  if (upgradeXpEl) upgradeXpEl.textContent = char.xp;
 }

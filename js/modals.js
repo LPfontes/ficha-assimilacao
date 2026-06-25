@@ -1164,7 +1164,7 @@ export function openUpgradeAptitudesModal() {
   if (!char) return;
 
   const categories = [
-    { key: "instintos", label: "Instintos", max: 4, color: "var(--color-instintos)" },
+    { key: "instintos", label: "Instintos", max: 5, color: "var(--color-instintos)" },
     { key: "conhecimentos", label: "Conhecimentos", max: 5, color: "var(--color-conhecimentos)" },
     { key: "praticas", label: "Práticas", max: 5, color: "var(--color-praticas)" }
   ];
@@ -1197,7 +1197,7 @@ export function openUpgradeAptitudesModal() {
 
       Object.keys(char[cat.key]).forEach(name => {
         const curVal = char[cat.key][name];
-        const cost = (curVal + 1) * 2;
+        const cost = (curVal + 1) * (cat.key === "instintos" ? 3 : 2);
         const canUpgrade = curVal < cat.max && char.xp >= cost;
         const atMax = curVal >= cat.max;
 
@@ -1247,12 +1247,14 @@ export function openUpgradeAptitudesModal() {
         const name = btn.dataset.name;
         const curVal = char[cat][name];
         const targetVal = curVal + 1;
-        const cost = targetVal * 2;
+        const cost = targetVal * (cat.key === "instintos" ? 3 : 2);
 
         if (char.xp >= cost) {
           char[cat][name] = targetVal;
           char.xp -= cost;
           saveCurrentCharacter();
+          const sheetXpEl = document.getElementById("sheet-xp-value");
+          if (sheetXpEl) sheetXpEl.textContent = char.xp;
           render();
           renderAptitudesSheet();
         }
