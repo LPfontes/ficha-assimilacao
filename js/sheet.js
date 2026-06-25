@@ -649,10 +649,10 @@ export function renderInventorySheet() {
   const labelBody = document.getElementById("label-body-slots");
   const labelBackpack = document.getElementById("label-backpack-slots");
   if (labelBody) {
-    labelBody.textContent = `No Corpo (${char.bodySlotsCount} Espaços - Mais fáceis de sacar)`;
+    labelBody.textContent = `No Corpo`;
   }
   if (labelBackpack) {
-    labelBackpack.textContent = `Na Mochila (${char.backpackSlotsCount} Espaços - Devem ser retirados para usar)`;
+    labelBackpack.textContent = `Na Mochila`;
   }
   
   char.inventario.forEach((slot, i) => {

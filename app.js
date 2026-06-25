@@ -111,6 +111,12 @@ function setupEventListeners() {
     });
   }
 
+  // Voltar button in mobile sidebar
+  const btnVoltar = document.getElementById("btn-voltar-landing");
+  if (btnVoltar) {
+    btnVoltar.addEventListener("click", goToLanding);
+  }
+
   // Aptitude Columns Lock Toggles
   document.querySelectorAll(".btn-lock-toggle").forEach(btn => {
     btn.addEventListener("click", (e) => {

@@ -31,6 +31,10 @@
     </button>
     
       <div class="header-controls">
+        <button id="btn-voltar-landing" class="btn hide-on-desktop" title="Voltar ao início" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span class="btn-text">Voltar</span>
+        </button>
         <div class="selector-container">
           <label for="char-selector">Personagem:</label>
           <select id="char-selector">
@@ -538,7 +542,7 @@
                     <div class="sheet-section section-traits">
                       <div class="sheet-section-header">
                         <h3 class="section-title section-title-clean">CARACTERÍSTICAS</h3>
-                        <div style="display: flex; gap: 8px; align-items: center;">
+                        <div>
                           <div class="xp-counter" style="margin: 0; font-size: var(--font-size-xs); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
                             XP: 
                             <button id="btn-dec-xp" class="btn btn-sm" style="padding: 2px 6px; font-weight: bold; font-size: 11px; line-height: 1; border-radius: 4px;" title="Diminuir XP">-</button>
@@ -559,7 +563,7 @@
                     <!-- Seção de Assimilações -->
                     <div class="sheet-section section-assimilations">
                       <div class="sheet-section-header" style="flex-wrap: wrap; justify-content: space-between;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        <div>
                           <h3 class="section-title section-title-clean" style="margin: 0;">ASSIMILAÇÕES (MUTAÇÕES)</h3>
                           <div id="sheet-assimilation-points" class="assimilation-points-container"></div>
                         </div>
@@ -591,8 +595,9 @@
                       <div class="inventory-section-wrapper" style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
                           <h4 id="label-body-slots" style="font-family: var(--font-heading); color: var(--color-blue-glow); font-size: var(--font-size-sm); margin: 0;">
-                            No Corpo (3 Espaços - Mais fáceis de sacar)
+                            No Corpo
                           </h4>
+
                           <button id="btn-add-body-slot" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; height: 22px; border-color: rgba(0,255,102,0.3); color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot no Corpo">
                             + Slot
                           </button>
@@ -606,7 +611,7 @@
                       <div class="inventory-section-wrapper">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
                           <h4 id="label-backpack-slots" style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
-                            Na Mochila (6 Espaços - Devem ser retirados para usar)
+                            Na Mochila
                           </h4>
                           <button id="btn-add-backpack-slot" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; height: 22px; border-color: rgba(255,255,255,0.2); color: var(--text-secondary); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot na Mochila">
                             + Slot

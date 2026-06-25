@@ -15,6 +15,7 @@
     height: auto !important;
     overflow-y: visible !important;
     padding: 12px !important;
+    z-index: 1;
   }
 
   #sheet-screen,
@@ -120,7 +121,7 @@
     padding: 80px 20px 20px 20px !important;
     gap: 20px !important;
     transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 1000 !important;
+    z-index: 1002 !important;
   }
 
   .header-controls.active {
