@@ -1,7 +1,7 @@
 import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal } from "./js/modals.js";
+import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal } from "./js/modals.js";
 import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
@@ -355,7 +355,7 @@ function setupEventListeners() {
       if (state.currentCharacter) {
         state.currentCharacter.xp = Math.max(0, (state.currentCharacter.xp || 0) - 1);
         saveCurrentCharacter();
-        loadCharacter(state.currentCharacter.id);
+        updateXpDisplay();
       }
     });
   }
@@ -364,7 +364,7 @@ function setupEventListeners() {
       if (state.currentCharacter) {
         state.currentCharacter.xp = (state.currentCharacter.xp || 0) + 1;
         saveCurrentCharacter();
-        loadCharacter(state.currentCharacter.id);
+        updateXpDisplay();
       }
     });
   }
@@ -660,6 +660,10 @@ function setupEventListeners() {
     document.getElementById("dice-drawer").classList.remove("hidden");
   });
 
+  // Botão Evoluir Aptidões (XP)
+  const btnUpgradeApt = document.getElementById("btn-upgrade-aptitudes");
+  if (btnUpgradeApt) btnUpgradeApt.addEventListener("click", openUpgradeAptitudesModal);
+
   // Fechar o modal pelo botão de fechar X incorporado
   document.getElementById("btn-close-drawer").addEventListener("click", () => {
     document.getElementById("dice-drawer").classList.add("hidden");
@@ -699,4 +703,11 @@ function goToLanding() {
   import("./js/landing.js").then(({ showLandingScreen, renderCharactersList }) => {
     showLandingScreen();
   });
+}
+
+function updateXpDisplay() {
+  const char = state.currentCharacter;
+  if (!char) return;
+  const xpEl = document.getElementById("xp-value");
+  if (xpEl) xpEl.textContent = char.xp;
 }

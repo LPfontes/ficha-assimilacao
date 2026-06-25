@@ -21,7 +21,9 @@
   <!-- Barra de Controle Principal (Superior) -->
   <header class="main-header">
     <div class="header-logo" style="display: flex; align-items: center;">
-      <img src="assets/logotipoAssimilacao.webp" alt="Assimilação RPG Logo" style="height: 40px; width: auto; max-width: 100%;">
+      <button id="btn-home" type="button" style="background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center;">
+        <img src="assets/logotipoAssimilacao.webp" alt="Assimilação RPG Logo" style="height: 40px; width: auto; max-width: 100%; display:block;">
+      </button>
     </div>
     
     <button id="btn-mobile-menu" type="button" class="btn-mobile-menu" title="Abrir Menu">
@@ -392,7 +394,7 @@
                 
                 <!-- CARD CABO DE GUERRA -->
                 <div class="cabo-guerra-card card-glass" style="margin-bottom: 0;">
-                  <h3 class="status-header" style="background: linear-gradient(to right, var(--color-rust-glow) 30%, var(--color-blue-glow) 70%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CABO DE GUERRA</h3>
+                  <h3 class="status-header" style="background: linear-gradient(to right, var(--color-rust-glow) 30%, var(--color-blue-glow) 70%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">CABO DE GUERRA</h3>
                   
                   <div class="cabo-guerra-display">
                     <!-- Coluna Determinação -->
@@ -509,7 +511,10 @@
                 </div>
               </div>
               
-              <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+              <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+                 <button id="btn-upgrade-aptitudes" class="btn" title="Gastar XP para evoluir Aptidões" style="border-color: var(--color-bronze); color: var(--color-bronze); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
+                  <span class="btn-text">Evoluir Aptidões (XP)</span>
+                </button>
                  <button id="btn-open-roller" class="btn" title="Abrir Rolador de Dados" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
                   <span style="font-size: 1.2em; vertical-align: middle; margin-right: 4px;">🎲</span><span class="btn-text"> Lançar Dados</span>
                 </button>

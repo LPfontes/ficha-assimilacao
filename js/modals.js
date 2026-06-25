@@ -42,7 +42,7 @@ function parseCost(costStr) {
 }
 
 import { el, state, saveCurrentCharacter, loadCharacter } from "./state.js";
-import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet } from "./sheet.js";
+import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet } from "./sheet.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
 import { ICONS } from "../icons.js";
@@ -661,20 +661,20 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         gap: 8px;
         margin-bottom: 3px;
       }
-      .mut-title { font-weight: bold; font-size: 13px; }
+      .mut-title { font-weight: bold; font-size: var(--font-size-lg); }
       .mut-cost { font-size: 10px; font-family: var(--font-heading); padding: 1px 6px; border-radius: 4px; font-weight: bold; }
       .mut-cost.evolutivas { background: rgba(0,255,102,0.15); color: #00ff66; border: 1px solid rgba(0,255,102,0.3); }
       .mut-cost.adaptativas { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
       .mut-cost.inoportunas { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
       .mut-cost.singulares { background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
-      .mut-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.3; }
-      .mut-req { font-size: 10px; color: var(--color-rust-glow); margin-top: 3px; font-weight: 500; }
+      .mut-desc { font-size: var(--font-size-md); color: var(--text-secondary); line-height: 1.3; }
+      .mut-req { font-size: var(--font-size-md); color: var(--color-blue-glow); margin-top: 3px; font-weight: 500; }
     </style>
 
     <div class="tarot-modal-container">
       <div class="tarot-header">
         <h3>🔮 Selecionar Mutações Sorteadas</h3>
-        <p style="font-size: 11px; color: var(--text-secondary); margin: 0;">Toque em cada carta para revelar e ver as opções de mutação.</p>
+        <p style="font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0;">Toque em cada carta para revelar e ver as opções de mutação.</p>
         <div class="points-bar">
           <span style="color:#00ff66;">[S] Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
           <span style="color:#eab308;">[A] Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
@@ -808,7 +808,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
           let reqLabel = "";
           if (mut.req) {
             const hasReq = char.assNivel >= mut.req;
-            reqLabel = `<div class="mut-req" style="color: ${hasReq ? 'var(--color-blue-glow)' : 'var(--color-rust)'}">
+            reqLabel = `<div class="mut-req" style="color: var(--color-blue-glow)">
               Requer Assimilação Nível ${mut.req} (Atual: ${char.assNivel})
             </div>`;
           }
@@ -1154,4 +1154,124 @@ export function openAddItemModal() {
   el.modalContainer.addEventListener("click", handleOverlay, { once: true });
 
   nameInput.focus();
+}
+
+// ==========================================
+// MODAL: EVOLUIR APTIDÕES (GASTAR XP)
+// ==========================================
+export function openUpgradeAptitudesModal() {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  const categories = [
+    { key: "instintos", label: "Instintos", max: 4, color: "var(--color-instintos)" },
+    { key: "conhecimentos", label: "Conhecimentos", max: 5, color: "var(--color-conhecimentos)" },
+    { key: "praticas", label: "Práticas", max: 5, color: "var(--color-praticas)" }
+  ];
+
+  let activeTab = categories[0].key;
+
+  const render = () => {
+    let html = `
+      <h3 class="modal-title" style="margin-bottom:4px;">Evoluir Aptidões</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+        XP disponível: <strong id="modal-xp-value-upgrade" style="color:var(--color-blue-glow);">${char.xp}</strong>
+      </p>
+      <div class="upgrade-tabs" style="display:flex; gap:4px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px;">
+    `;
+
+    categories.forEach(cat => {
+      const isActive = cat.key === activeTab;
+      html += `
+        <button class="btn btn-sm upgrade-tab-btn" data-tab="${cat.key}" style="flex:1; justify-content:center; padding:6px 8px; font-size:var(--font-size-sm); font-family:var(--font-heading); font-weight:bold; ${isActive ? 'border-color:' + cat.color + '; color:' + cat.color + '; background:rgba(0,0,0,0.3);' : 'border-color:transparent; color:var(--text-muted);'}">
+          ${cat.label}
+        </button>
+      `;
+    });
+
+    html += `</div><div class="upgrade-panels">`;
+
+    categories.forEach(cat => {
+      const isActive = cat.key === activeTab;
+      html += `<div class="upgrade-panel" data-panel="${cat.key}" style="display:${isActive ? 'flex' : 'none'}; flex-direction:column; gap:2px;">`;
+
+      Object.keys(char[cat.key]).forEach(name => {
+        const curVal = char[cat.key][name];
+        const cost = (curVal + 1) * 2;
+        const canUpgrade = curVal < cat.max && char.xp >= cost;
+        const atMax = curVal >= cat.max;
+
+        html += `
+          <div class="upgrade-row" style="display:flex; align-items:center; justify-content:space-between; padding:6px 8px; border-radius:var(--radius-sm);" data-cat="${cat.key}" data-name="${name}">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:var(--font-size-md);">${name}</span>
+              <span style="font-size:var(--font-size-md); color:var(--text-muted); background:rgba(0,0,0,0.3); padding:1px 6px; border-radius:8px;">${curVal}/${cat.max}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${atMax ? '<span style="font-size:var(--font-size-md); color:var(--text-muted);">MÁXIMO</span>' : `
+                <span style="font-size:var(--font-size-md); color:var(--text-secondary);">${cost} XP</span>
+                <button class="btn btn-sm btn-upgrade-apt" data-cat="${cat.key}" data-name="${name}" ${canUpgrade ? '' : 'disabled'} style="padding:2px 10px; font-size:var(--font-size-md); ${canUpgrade ? 'border-color:' + cat.color + '; color:' + cat.color + ';' : ''}">
+                  ${char.xp >= cost ? `Subir para ${curVal + 1}` : 'XP insuf.'}
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+    });
+
+    html += `
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08);">
+        <button id="btn-close-upgrade" class="btn" style="padding:10px 20px;">Fechar</button>
+      </div>
+    `;
+
+    el.modalBody.innerHTML = html;
+    el.modalContainer.classList.remove("hidden");
+
+    // Tab listeners
+    document.querySelectorAll(".upgrade-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeTab = btn.dataset.tab;
+        render();
+      });
+    });
+
+    // Upgrade listeners
+    document.querySelectorAll(".btn-upgrade-apt").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const cat = btn.dataset.cat;
+        const name = btn.dataset.name;
+        const curVal = char[cat][name];
+        const targetVal = curVal + 1;
+        const cost = targetVal * 2;
+
+        if (char.xp >= cost) {
+          char[cat][name] = targetVal;
+          char.xp -= cost;
+          saveCurrentCharacter();
+          render();
+          renderAptitudesSheet();
+        }
+      });
+    });
+
+    document.getElementById("btn-close-upgrade").addEventListener("click", () => {
+      el.modalContainer.classList.add("hidden");
+    }, { once: true });
+
+    const closeBtn = el.modalContainer.querySelector(".modal-close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => el.modalContainer.classList.add("hidden"), { once: true });
+    }
+
+    el.modalContainer.addEventListener("click", (e) => {
+      if (e.target === el.modalContainer) el.modalContainer.classList.add("hidden");
+    }, { once: true });
+  };
+
+  render();
 }

@@ -59,7 +59,7 @@ export function renderAptitudesSheet() {
     `;
     
     const bubblesContainer = row.querySelector(".value-bubbles");
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= 5; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-instinct ${i <= val ? 'filled' : ''}`;
       
