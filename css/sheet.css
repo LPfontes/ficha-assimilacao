@@ -526,6 +526,29 @@
   background: rgba(141, 36, 40, 0.1) !important;
 }
 
+.btn-delete-slot {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.btn-delete-slot:hover {
+  color: var(--color-rust-glow);
+  background: rgba(141, 36, 40, 0.15);
+}
+
+.btn-delete-slot svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
 /* Anotações Customizadas */
 .notes-block {
   display: flex;

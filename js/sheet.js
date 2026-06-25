@@ -675,50 +675,59 @@ export function renderInventorySheet() {
       </div>
       
       <div class="item-props-redesign" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <!-- Qualidade -->
-        <div class="prop-select-wrapper" title="Qualidade do Equipamento">
-          <select class="select-qualidade" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,102,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
-            <option value="0" ${qual === 0 ? 'selected' : ''}>Q0: Quebrado</option>
-            <option value="1" ${qual === 1 ? 'selected' : ''}>Q1: Defeituoso</option>
-            <option value="2" ${qual === 2 ? 'selected' : ''}>Q2: Comprometido</option>
-            <option value="3" ${qual === 3 ? 'selected' : ''}>Q3: Padrão</option>
-            <option value="4" ${qual === 4 ? 'selected' : ''}>Q4: Reforçado</option>
-            <option value="5" ${qual === 5 ? 'selected' : ''}>Q5: Superior</option>
-            <option value="6" ${qual === 6 ? 'selected' : ''}>Q6: Obra-Prima</option>
-          </select>
-        </div>
+        
+        <div class="row" style="display: flex; flex-direction: row; gap: 4px;">  
+          <!-- Qualidade -->
+            <div class="prop-select-wrapper" title="Qualidade do Equipamento">
+              <select class="select-qualidade" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,102,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+                <option value="0" ${qual === 0 ? 'selected' : ''}>Q0: Quebrado</option>
+                <option value="1" ${qual === 1 ? 'selected' : ''}>Q1: Defeituoso</option>
+                <option value="2" ${qual === 2 ? 'selected' : ''}>Q2: Comprometido</option>
+                <option value="3" ${qual === 3 ? 'selected' : ''}>Q3: Padrão</option>
+                <option value="4" ${qual === 4 ? 'selected' : ''}>Q4: Reforçado</option>
+                <option value="5" ${qual === 5 ? 'selected' : ''}>Q5: Superior</option>
+                <option value="6" ${qual === 6 ? 'selected' : ''}>Q6: Obra-Prima</option>
+              </select>
+            </div>
 
-        <!-- C Investidas -->
-        <div class="prop-c-wrapper" title="Pressões" style="display: flex; align-items: center; gap: 4px;">
-          <span style="color: var(--color-rust-glow); font-size: 11px; font-weight: bold;">Desgate:</span>
-          <select class="select-pressao" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(141,36,40,0.3); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; width: 40px; cursor: pointer;">
-            <option value="0" ${pressao === 0 ? 'selected' : ''}>0</option>
-            <option value="1" ${pressao === 1 ? 'selected' : ''}>1</option>
-            <option value="2" ${pressao === 2 ? 'selected' : ''}>2</option>
-            <option value="3" ${pressao === 3 ? 'selected' : ''}>3</option>
-            <option value="4" ${pressao === 4 ? 'selected' : ''}>4</option>
-            <option value="5" ${pressao === 5 ? 'selected' : ''}>5</option>
-            <option value="6" ${pressao === 6 ? 'selected' : ''}>6</option>
-          </select>
-        </div>
+            <!-- C Investidas -->
+            <div class="prop-c-wrapper" title="Pressões" style="display: flex; align-items: center; gap: 4px;">
+              <span style="color: var(--color-rust-glow); font-size: 11px; font-weight: bold;">Desgate:</span>
+              <select class="select-pressao" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(141,36,40,0.3); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; width: 40px; cursor: pointer;">
+                <option value="0" ${pressao === 0 ? 'selected' : ''}>0</option>
+                <option value="1" ${pressao === 1 ? 'selected' : ''}>1</option>
+                <option value="2" ${pressao === 2 ? 'selected' : ''}>2</option>
+                <option value="3" ${pressao === 3 ? 'selected' : ''}>3</option>
+                <option value="4" ${pressao === 4 ? 'selected' : ''}>4</option>
+                <option value="5" ${pressao === 5 ? 'selected' : ''}>5</option>
+                <option value="6" ${pressao === 6 ? 'selected' : ''}>6</option>
+              </select>
+            </div>
+          </div>
 
-        <!-- Escassez -->
-        <div class="prop-select-wrapper" title="Nível de Escassez">
-          <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
-            <option value="0" ${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
-            <option value="1" ${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
-            <option value="2" ${esc === 2 ? 'selected' : ''}>E2: Comum</option>
-            <option value="3" ${esc === 3 ? 'selected' : ''}>E3: Incomum</option>
-            <option value="4" ${esc === 4 ? 'selected' : ''}>E4: Atípico</option>
-            <option value="5" ${esc === 5 ? 'selected' : ''}>E5: Raro</option>
-            <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
-          </select>
-        </div>
-        <!-- Efeito -->
-        <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
-          <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 140px;" title="Efeito do item">
+          <div class="colum" style="display: flex; flex-direction: column; gap: 4px;">
+            <!-- Escassez -->
+            <div class="prop-select-wrapper" title="Nível de Escassez">
+              <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+                <option value="0" ${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
+                <option value="1" ${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
+                <option value="2" ${esc === 2 ? 'selected' : ''}>E2: Comum</option>
+                <option value="3" ${esc === 3 ? 'selected' : ''}>E3: Incomum</option>
+                <option value="4" ${esc === 4 ? 'selected' : ''}>E4: Atípico</option>
+                <option value="5" ${esc === 5 ? 'selected' : ''}>E5: Raro</option>
+                <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
+              </select>
+            </div>
+            <!-- Efeito -->
+            <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
+              <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
+            </div>
+          </div>
         </div>
       </div>
+      <button class="btn-delete-slot" title="Remover item deste espaço" type="button">
+        ${ICONS.trash}
+      </button>
     `;
     
     const inputName = row.querySelector(".item-name");
@@ -743,6 +752,21 @@ export function renderInventorySheet() {
     selP.addEventListener("change", saveSlot);
     selE.addEventListener("change", saveSlot);
     inputEffect.addEventListener("input", saveSlot);
+    
+    // Delete slot button
+    const btnDelete = row.querySelector(".btn-delete-slot");
+    btnDelete.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // Remove o slot do array e ajusta o contador correspondente
+      char.inventario.splice(i, 1);
+      if (i < char.bodySlotsCount) {
+        char.bodySlotsCount = Math.max(0, char.bodySlotsCount - 1);
+      } else {
+        char.backpackSlotsCount = Math.max(0, char.backpackSlotsCount - 1);
+      }
+      saveCurrentCharacter();
+      renderInventorySheet();
+    });
     
     // Drag & Drop handlers
     row.addEventListener("dragstart", (e) => {
