@@ -539,6 +539,9 @@
                   <button class="sheet-tab-btn" data-tab="tab-anotacoes">
                     <span class="tab-btn-icon">✏️</span> Anotações
                   </button>
+                  <button class="sheet-tab-btn" data-tab="tab-homebrew">
+                    <span class="tab-btn-icon">⚙️</span> Homebrew
+                  </button>
                 </div>
                 
                 <div class="sheet-redesign-tabs-content card-glass">
@@ -585,6 +588,9 @@
                           </button>
                           <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
                             <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text" style="font-size: 11px;">Leitura de Tarot</span>
+                          </button>
+                          <button id="btn-open-assimilation-library" class="btn btn-sm" title="Biblioteca de Assimilações">
+                            <span class="btn-text" style="font-size: 11px;">📖 Biblioteca</span>
                           </button>
                         </div>
                   </div>
@@ -639,6 +645,41 @@
                     <div class="notes-block">
                       <h3 class="section-title">ANOTAÇÕES</h3>
                       <textarea id="char-notes" class="notes-textarea" placeholder="Descreva eventos importantes, refúgios conhecidos, recursos coletados ou segredos de campanha..." style="min-height: 400px; width: 100%;"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Aba 4: Homebrew -->
+                  <div class="sheet-tab-panel" id="tab-homebrew">
+                    <div class="homebrew-block">
+                      <h3 class="section-title">HOMEBREW</h3>
+                      <p class="homebrew-help">Crie e gerencie conteúdos personalizados para suas campanhas.</p>
+
+                      <div class="homebrew-section">
+                        <div class="homebrew-section-header">
+                          <h4>Características Personalizadas</h4>
+                          <button id="btn-create-homebrew-trait" class="btn btn-sm btn-success">+ Criar</button>
+                        </div>
+                        <div id="homebrew-trait-list" class="homebrew-list"></div>
+                      </div>
+
+                      <div class="homebrew-section">
+                        <div class="homebrew-section-header">
+                          <h4>Mutações Personalizadas</h4>
+                          <button id="btn-create-homebrew-mutation" class="btn btn-sm btn-success">+ Criar</button>
+                        </div>
+                        <div id="homebrew-mutation-list" class="homebrew-list"></div>
+                      </div>
+
+                      <div class="homebrew-section">
+                        <div class="homebrew-section-header">
+                          <h4>Pacotes</h4>
+                        </div>
+                        <div class="homebrew-package-actions">
+                          <button id="btn-import-homebrew" class="btn btn-sm">📥 Importar Pacote</button>
+                          <input type="file" id="file-import-homebrew" accept=".json" style="display:none">
+                          <button id="btn-export-homebrew" class="btn btn-sm">📤 Exportar Pacote</button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

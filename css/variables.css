@@ -280,6 +280,7 @@ select:focus, input:focus, textarea:focus {
   display: flex;
   flex-direction: column;
   transition: var(--transition-normal);
+  padding: 10px;
 }
 
 /* Wizard e Sheet precisam do padding que main-content tinha antes */

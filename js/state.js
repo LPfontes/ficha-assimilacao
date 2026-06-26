@@ -1,4 +1,4 @@
-import { renderAptitudesSheet, renderHealthSheet, renderCaboGuerraSheet, renderCharacteristicsSheet, renderMutationsSheet, renderInventorySheet } from "./sheet.js";
+import { renderAptitudesSheet, renderHealthSheet, renderCaboGuerraSheet, renderCharacteristicsSheet, renderMutationsSheet, renderInventorySheet, renderHomebrewSheet } from "./sheet.js";
 import { resetDiceDrawerSelections } from "./roller.js";
 import { logger } from "./logger.js";
 
@@ -320,6 +320,7 @@ export function loadCharacter(charId) {
   renderCharacteristicsSheet();
   renderMutationsSheet();
   renderInventorySheet();
+  renderHomebrewSheet();
   
   // Reseta seleção de rolagem
   resetDiceDrawerSelections();
@@ -398,6 +399,24 @@ export function importCharacterFile(e) {
     }
   };
   reader.readAsText(file);
+}
+
+// ==========================================
+// HOME BREW — DADOS PERSONALIZADOS
+// ==========================================
+export function getCustomTraits() {
+  try { return JSON.parse(localStorage.getItem("assimilação_homebrew_traits") || "[]"); }
+  catch { return []; }
+}
+export function saveCustomTraits(traits) {
+  localStorage.setItem("assimilação_homebrew_traits", JSON.stringify(traits));
+}
+export function getCustomMutations() {
+  try { return JSON.parse(localStorage.getItem("assimilação_homebrew_mutations") || "[]"); }
+  catch { return []; }
+}
+export function saveCustomMutations(mutations) {
+  localStorage.setItem("assimilação_homebrew_mutations", JSON.stringify(mutations));
 }
 
 // Persistir salvamentos pendentes ao fechar/recarregar a página

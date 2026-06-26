@@ -266,3 +266,201 @@
   background-color: #000;
 }
 
+/* BIBLIOTECA DE ASSIMILAÇÕES */
+.lib-points-bar {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  background: rgba(0,0,0,0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 16px;
+}
+.library-modal-list {
+  max-height: 55vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+}
+.lib-category {
+  background: rgba(0,0,0,0.15);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.lib-category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.lib-cat-symbol {
+  font-size: 18px;
+}
+.lib-cat-title {
+  font-weight: bold;
+}
+.lib-card {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  padding: 8px 12px 8px 20px;
+}
+.lib-card:last-child {
+  border-bottom: none;
+}
+.lib-card-title {
+  font-size: 11px;
+  font-family: var(--font-heading);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.lib-mutations {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lib-mutation {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+.lib-mutation.owned {
+  border-color: rgba(0,255,102,0.15);
+  background: rgba(0,255,102,0.03);
+}
+.lib-mut-info {
+  flex: 1;
+  min-width: 0;
+}
+.lib-mut-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+}
+.lib-mut-name {
+  font-weight: 600;
+  font-size: 12px;
+}
+.lib-mut-cost {
+  font-size: 10px;
+  font-family: var(--font-heading);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  border: 1px solid;
+  background: rgba(0,0,0,0.2);
+}
+.lib-owned-badge {
+  font-size: 10px;
+  color: #00ff66;
+  font-weight: bold;
+}
+.lib-mut-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+.lib-req {
+  font-size: 10px;
+  color: var(--color-blue-glow);
+  margin-top: 2px;
+  display: block;
+}
+.lib-mut-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.lib-mut-action .btn {
+  padding: 2px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Library modal tabs */
+.lib-tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.lib-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 4px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  border-radius: var(--radius-sm);
+}
+.lib-tab:hover {
+  background: rgba(255,255,255,0.05);
+}
+.lib-tab.active {
+  background: rgba(255,255,255,0.06);
+}
+#lib-tab-content .library-modal-list {
+  max-height: 45vh;
+}
+
+/* HOME BREW — FORMULÁRIOS DE CRIAÇÃO */
+.homebrew-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+.homebrew-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.homebrew-form .form-group label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.homebrew-form .form-group input,
+.homebrew-form .form-group select,
+.homebrew-form .form-group textarea {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 12px;
+  transition: border-color 0.2s;
+}
+.homebrew-form .form-group input:focus,
+.homebrew-form .form-group select:focus,
+.homebrew-form .form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-blue-glow);
+  box-shadow: 0 0 6px rgba(0,162,255,0.2);
+}
+

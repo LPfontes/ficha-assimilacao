@@ -529,6 +529,12 @@
     width: 140px !important;
     height: 180px !important;
   }
+  .w-300 {
+    width: 300px;
+  }
+  .h-300 {
+    height: 300px;
+  }
 
   .polaroid-frame:hover {
     transform: scale(1.02) !important;

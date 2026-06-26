@@ -1,8 +1,10 @@
-import { el, state, saveCurrentCharacter, loadCharacter } from "./state.js";
+import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, getCustomMutations, saveCustomTraits, saveCustomMutations } from "./state.js";
 import { CARACTERISTICAS } from "./characteristics.js";
+import { ASSIMILACOES } from "./assimilations.js";
 import { ICONS } from "../icons.js";
 import { selectRollAptitude, updateDiceDrawerUI } from "./roller.js";
 import { logger } from "./logger.js";
+import { esc } from "./screen-utils.js";
 import { updateResultsSummary } from "./chat.js";
 import { getCurrentHealthLevel } from "./health.js";
 export { getCurrentHealthLevel } from "./health.js";
@@ -488,8 +490,10 @@ export function renderCharacteristicsSheet() {
     return;
   }
   
+  const customTraits = getCustomTraits();
+
   char.caracteristicas.forEach(traitId => {
-    const trait = CARACTERISTICAS.find(c => c.id === traitId);
+    const trait = CARACTERISTICAS.find(c => c.id === traitId) || customTraits.find(c => c.id === traitId);
     if (!trait) return;
     
     const card = document.createElement("div");
@@ -909,5 +913,79 @@ export function addBackpackSlot() {
   
   saveCurrentCharacter();
   renderInventorySheet();
+}
+
+// ==========================================
+// HOME BREW TAB
+// ==========================================
+export function renderHomebrewSheet() {
+  const traitList = document.getElementById("homebrew-trait-list");
+  const mutationList = document.getElementById("homebrew-mutation-list");
+  if (!traitList || !mutationList) return;
+
+  const customTraits = getCustomTraits();
+  const customMutations = getCustomMutations();
+
+  traitList.innerHTML = "";
+  if (customTraits.length === 0) {
+    traitList.innerHTML = `<div class="homebrew-empty">Nenhuma característica personalizada criada.</div>`;
+  } else {
+    customTraits.forEach(t => {
+      const item = document.createElement("div");
+      item.className = "homebrew-item";
+      item.innerHTML = `
+        <div class="homebrew-item-info">
+          <div class="homebrew-item-title-row">
+            <span class="homebrew-item-name">${esc(t.nome)}</span>
+            <span class="homebrew-item-cost">${t.custo} XP</span>
+          </div>
+          <div class="homebrew-item-desc">${esc(t.descricao)}</div>
+          ${t.requisitoText ? `<div class="homebrew-item-req">${esc(t.requisitoText)}</div>` : ""}
+          <div class="homebrew-item-id">ID: ${t.id}</div>
+        </div>
+        <button class="btn btn-sm btn-danger homebrew-delete-trait" data-id="${t.id}" title="Remover">${ICONS.trash}</button>
+      `;
+      item.querySelector(".homebrew-delete-trait").addEventListener("click", () => {
+        if (confirm(`Remover característica "${t.nome}" permanentemente?`)) {
+          saveCustomTraits(customTraits.filter(x => x.id !== t.id));
+          renderHomebrewSheet();
+        }
+      });
+      traitList.appendChild(item);
+    });
+  }
+
+  mutationList.innerHTML = "";
+  if (customMutations.length === 0) {
+    mutationList.innerHTML = `<div class="homebrew-empty">Nenhuma mutação personalizada criada.</div>`;
+  } else {
+    const suitLabels = { evolutivas: "Evolutiva", adaptativas: "Adaptativa", inoportunas: "Inoportuna", singulares: "Singular" };
+    const suitColors = { evolutivas: "#00ff66", adaptativas: "#eab308", inoportunas: "#ef4444", singulares: "#a855f7" };
+
+    customMutations.forEach(m => {
+      const item = document.createElement("div");
+      item.className = "homebrew-item";
+      item.innerHTML = `
+        <div class="homebrew-item-info">
+          <div class="homebrew-item-title-row">
+            <span class="homebrew-item-name">${esc(m.name)}</span>
+            <span class="homebrew-mut-suit" style="color:${suitColors[m.suit] || '#888'};">${suitLabels[m.suit] || m.suit}</span>
+            <span class="homebrew-item-cost">${esc(m.cost)}</span>
+          </div>
+          <div class="homebrew-item-desc">${esc(m.desc)}</div>
+          ${m.req ? `<div class="homebrew-item-req">Nível de Assimilação ${m.req}+</div>` : ""}
+          <div class="homebrew-item-id">ID: ${m.id}</div>
+        </div>
+        <button class="btn btn-sm btn-danger homebrew-delete-mutation" data-id="${m.id}" title="Remover">${ICONS.trash}</button>
+      `;
+      item.querySelector(".homebrew-delete-mutation").addEventListener("click", () => {
+        if (confirm(`Remover mutação "${m.name}" permanentemente?`)) {
+          saveCustomMutations(customMutations.filter(x => x.id !== m.id));
+          renderHomebrewSheet();
+        }
+      });
+      mutationList.appendChild(item);
+    });
+  }
 }
 

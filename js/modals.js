@@ -41,14 +41,15 @@ function parseCost(costStr) {
   return { a, b, c, singular };
 }
 
-import { el, state, saveCurrentCharacter, loadCharacter } from "./state.js";
-import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet } from "./sheet.js";
+import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations } from "./state.js";
+import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet } from "./sheet.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
 import { ICONS } from "../icons.js";
 import { getDieSymbolsHtml, getDieFaceImgSrc } from "./chat.js";
 import { DICE_MAP } from "./roller.js";
 import { logger } from "./logger.js";
+import { esc } from "./screen-utils.js";
 
 // ==========================================
 // MODAL: SELETOR DE CARACTERÍSTICAS
@@ -65,19 +66,26 @@ export function openTraitsModal() {
     <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
       Você possui <strong><span id="modal-xp-value">${char.xp}</span> pontos de XP</strong> disponíveis.
     </p>
-    <div class="traits-modal-grid">
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <button id="btn-open-create-trait-from-modal" class="btn btn-sm btn-success">+ Criar Característica</button>
+    </div>
+    <div class="traits-modal-grid" id="traits-modal-grid">
       <!-- JS insere os itens -->
     </div>
   `;
   
-  const grid = el.modalBody.querySelector(".traits-modal-grid");
+  document.getElementById("btn-open-create-trait-from-modal").addEventListener("click", () => {
+    el.modalContainer.classList.add("hidden");
+    setTimeout(() => openCreateTraitModal(), 100);
+  }, { once: true });
+
+  const grid = el.modalBody.querySelector("#traits-modal-grid");
   
-  CARACTERISTICAS.forEach(trait => {
-    // Esconder característica de criação se já iniciou
-    if (trait.id === "estagio_avancado") return;
+  const renderTraitRow = (trait, isCustom) => {
+    if (!isCustom && trait.id === "estagio_avancado") return;
     
     const isOwned = char.caracteristicas.includes(trait.id);
-    const meetsReqs = checkCharacterTraitPrerequisites(char, trait.requisitos);
+    const meetsReqs = isCustom ? true : checkCharacterTraitPrerequisites(char, trait.requisitos);
     
     const row = document.createElement("div");
     row.className = `trait-modal-row ${isOwned ? 'owned' : ''}`;
@@ -86,12 +94,13 @@ export function openTraitsModal() {
     row.innerHTML = `
       <div class="info">
         <div class="title-row">
-          <span class="title">${trait.nome}</span>
+          <span class="title">${esc(trait.nome)}</span>
           <span class="cost-badge">${trait.custo} XP</span>
           ${isOwned ? '<span style="color:#00ff66; font-size:10px; font-weight:bold;">Adquirido</span>' : ''}
+          ${isCustom ? '<span style="color:#a855f7; font-size:10px; margin-left:4px;">⚙️</span>' : ''}
         </div>
-        <div class="req">Requisito: ${trait.requisitoText}</div>
-        <div class="desc">${trait.descricao}</div>
+        <div class="req">${trait.requisitoText ? 'Requisito: ' + esc(trait.requisitoText) : ''}</div>
+        <div class="desc">${esc(trait.descricao)}</div>
       </div>
       <div class="action">
         <button class="btn ${isOwned ? 'btn-danger' : ''} btn-sm modal-buy-trait-btn" 
@@ -108,7 +117,7 @@ export function openTraitsModal() {
         char.xp += trait.custo;
         saveCurrentCharacter();
         loadCharacter(char.id);
-        openTraitsModal(); // Recarrega
+        openTraitsModal();
       } else {
         if (char.xp >= trait.custo) {
           logger.info(`Modal: Adquirindo característica "${trait.nome}" (Custo: ${trait.custo} XP).`);
@@ -125,7 +134,19 @@ export function openTraitsModal() {
     });
     
     grid.appendChild(row);
-  });
+  };
+
+  CARACTERISTICAS.forEach(trait => renderTraitRow(trait, false));
+
+  // Custom traits
+  const customTraits = getCustomTraits();
+  if (customTraits.length > 0) {
+    const sep = document.createElement("div");
+    sep.style.cssText = "grid-column:1/-1; border-top:1px solid rgba(255,255,255,0.08); margin:8px 0 4px 0; padding-top:8px; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;";
+    sep.textContent = "⚙️ Personalizadas";
+    grid.appendChild(sep);
+    customTraits.forEach(trait => renderTraitRow(trait, true));
+  }
 }
 
 
@@ -1276,4 +1297,371 @@ export function openUpgradeAptitudesModal() {
   };
 
   render();
+}
+
+// ==========================================
+// MODAL: CRIAR CARACTERÍSTICA PERSONALIZADA
+// ==========================================
+export function openCreateTraitModal() {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  el.modalContainer.classList.remove("hidden");
+  el.modalBody.innerHTML = `
+    <h3 class="modal-title">Criar Característica Personalizada</h3>
+    <div class="homebrew-form">
+      <div class="form-group">
+        <label>Nome da Característica</label>
+        <input type="text" id="hb-trait-name" placeholder="Ex: Sangue de Fogo" style="width:100%; padding:8px 12px;">
+      </div>
+      <div class="form-group">
+        <label>Custo em XP (1-5)</label>
+        <input type="number" id="hb-trait-cost" min="1" max="5" value="1" style="width:80px; padding:8px 12px;">
+      </div>
+      <div class="form-group">
+        <label>Descrição (efeito mecânico)</label>
+        <textarea id="hb-trait-desc" rows="4" placeholder="Descreva o efeito completo..." style="width:100%; padding:8px 12px; resize:vertical;"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Requisito (opcional, texto livre)</label>
+        <input type="text" id="hb-trait-req" placeholder="Ex: Potência 3+" style="width:100%; padding:8px 12px;">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="btn-cancel-create-trait">Cancelar</button>
+        <button class="btn btn-success" id="btn-confirm-create-trait">Criar Característica</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btn-cancel-create-trait").addEventListener("click", () => {
+    el.modalContainer.classList.add("hidden");
+  }, { once: true });
+
+  document.getElementById("btn-confirm-create-trait").addEventListener("click", () => {
+    const name = document.getElementById("hb-trait-name").value.trim();
+    const cost = parseInt(document.getElementById("hb-trait-cost").value) || 1;
+    const desc = document.getElementById("hb-trait-desc").value.trim();
+    const reqText = document.getElementById("hb-trait-req").value.trim();
+
+    if (!name) { alert("O nome é obrigatório."); return; }
+    if (!desc) { alert("A descrição é obrigatória."); return; }
+    if (cost < 1 || cost > 5) { alert("O custo deve ser entre 1 e 5."); return; }
+
+    const customTraits = getCustomTraits();
+    const newTrait = {
+      id: "custom_" + Date.now(),
+      nome: name,
+      custo: cost,
+      descricao: desc,
+      requisitoText: reqText || ""
+    };
+    customTraits.push(newTrait);
+    saveCustomTraits(customTraits);
+    logger.info(`Homebrew: Característica "${name}" criada (ID: ${newTrait.id}).`);
+    el.modalContainer.classList.add("hidden");
+    renderHomebrewSheet();
+  });
+}
+
+// ==========================================
+// MODAL: CRIAR MUTAÇÃO PERSONALIZADA
+// ==========================================
+export function openCreateMutationModal() {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  el.modalContainer.classList.remove("hidden");
+  el.modalBody.innerHTML = `
+    <h3 class="modal-title">Criar Mutação Personalizada</h3>
+    <div class="homebrew-form">
+      <div class="form-group">
+        <label>Nome da Mutação</label>
+        <input type="text" id="hb-mut-name" placeholder="Ex: Toque Biótico" style="width:100%; padding:8px 12px;">
+      </div>
+      <div class="form-group">
+        <label>Categoria (naipe)</label>
+        <select id="hb-mut-suit" style="width:100%; padding:8px 12px;">
+          <option value="evolutivas">♥ Evolutivas (Sucesso)</option>
+          <option value="adaptativas">♦ Adaptativas (Adaptação)</option>
+          <option value="inoportunas">♠ Inoportunas (Pressão)</option>
+          <option value="singulares">♣ Singulares (Paus)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Custo (texto livre, ex: "2 sucessos e 1 adaptação")</label>
+        <input type="text" id="hb-mut-cost" placeholder="Ex: 2 sucessos e 1 pressão" style="width:100%; padding:8px 12px;">
+      </div>
+      <div class="form-group">
+        <label>Nível de Assimilação Requerido (opcional)</label>
+        <input type="number" id="hb-mut-req" min="1" max="10" placeholder="Deixe em branco se não houver requisito" style="width:120px; padding:8px 12px;">
+      </div>
+      <div class="form-group">
+        <label>Descrição (efeito mecânico)</label>
+        <textarea id="hb-mut-desc" rows="4" placeholder="Descreva o efeito completo..." style="width:100%; padding:8px 12px; resize:vertical;"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="btn-cancel-create-mutation">Cancelar</button>
+        <button class="btn btn-success" id="btn-confirm-create-mutation">Criar Mutação</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btn-cancel-create-mutation").addEventListener("click", () => {
+    el.modalContainer.classList.add("hidden");
+  }, { once: true });
+
+  document.getElementById("btn-confirm-create-mutation").addEventListener("click", () => {
+    const name = document.getElementById("hb-mut-name").value.trim();
+    const suit = document.getElementById("hb-mut-suit").value;
+    const cost = document.getElementById("hb-mut-cost").value.trim();
+    const reqVal = document.getElementById("hb-mut-req").value.trim();
+    const desc = document.getElementById("hb-mut-desc").value.trim();
+
+    if (!name) { alert("O nome é obrigatório."); return; }
+    if (!cost) { alert("O custo é obrigatório."); return; }
+    if (!desc) { alert("A descrição é obrigatória."); return; }
+
+    const customMutations = getCustomMutations();
+    const newMut = {
+      id: "mut_" + Date.now(),
+      suit: suit,
+      name: name,
+      cost: cost,
+      desc: desc,
+      req: reqVal ? parseInt(reqVal) : undefined
+    };
+    customMutations.push(newMut);
+    saveCustomMutations(customMutations);
+    logger.info(`Homebrew: Mutação "${name}" criada (ID: ${newMut.id}, categoria: ${suit}).`);
+    el.modalContainer.classList.add("hidden");
+    renderHomebrewSheet();
+  });
+}
+
+// ==========================================
+// MODAL: BIBLIOTECA DE ASSIMILAÇÕES
+// ==========================================
+export function openAssimilationLibraryModal() {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  logger.info("Modal: Abrindo Biblioteca de Assimilações.");
+
+  const ptsA = char.ptsA || 0;
+  const ptsB = char.ptsB || 0;
+  const ptsC = char.ptsC || 0;
+
+  const categories = [
+    { key: "evolutivas",   label: "Evolutivas",   color: "#00ff66", suitSymbol: "♥" },
+    { key: "adaptativas",  label: "Adaptativas",  color: "#eab308", suitSymbol: "♦" },
+    { key: "inoportunas",  label: "Inoportunas",  color: "#ef4444", suitSymbol: "♠" },
+    { key: "singulares",   label: "Singulares",   color: "#a855f7", suitSymbol: "♣" }
+  ];
+
+  let activeTab = 0;
+
+  const renderCategoryContent = (catIndex) => {
+    const cat = categories[catIndex];
+    const curA = char.ptsA || 0;
+    const curB = char.ptsB || 0;
+    const curC = char.ptsC || 0;
+
+    let html = `<div class="library-modal-list">`;
+
+    const assimData = ASSIMILACOES[cat.key];
+    if (assimData && assimData.cartas) {
+      assimData.cartas.forEach(card => {
+        html += `
+          <div class="lib-card">
+            <div class="lib-card-title">${card.carta} — ${card.nome}</div>
+            <div class="lib-mutations">
+        `;
+
+        card.mutações.forEach(mut => {
+          const isOwned = char.mutações.some(m => m.name === mut.name);
+          const reqs = parseCost(mut.cost);
+          const meetsLevelReq = !mut.req || char.assNivel >= mut.req;
+
+          let isAffordable = false;
+          if (reqs.singular > 0) {
+            isAffordable = (curA + curB + curC) >= reqs.singular;
+          } else {
+            isAffordable = curA >= reqs.a && curB >= reqs.b && curC >= reqs.c;
+          }
+
+          const canBuy = !isOwned && isAffordable && meetsLevelReq;
+
+          let reqLabel = "";
+          if (mut.req) {
+            reqLabel = `<span class="lib-req">Requer Assimilação Nível ${mut.req} (Atual: ${char.assNivel})</span>`;
+          }
+
+          html += `
+            <div class="lib-mutation ${isOwned ? 'owned' : ''}">
+              <div class="lib-mut-info">
+                <div class="lib-mut-title-row">
+                  <span class="lib-mut-name">${mut.name}</span>
+                  <span class="lib-mut-cost" style="border-color:${cat.color}; color:${cat.color};">${mut.cost}</span>
+                  ${isOwned ? '<span class="lib-owned-badge">Adquirido</span>' : ''}
+                </div>
+                <div class="lib-mut-desc">${mut.desc}</div>
+                ${reqLabel}
+              </div>
+              <div class="lib-mut-action">
+                ${isOwned ? '' : `<button class="btn btn-sm lib-buy-btn" data-cat="${cat.key}" data-card="${card.carta}" data-mut-name="${mut.name}" data-mut-cost="${mut.cost}" data-mut-desc="${mut.desc}" ${canBuy ? '' : 'disabled'}>Adquirir</button>`}
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      });
+    }
+
+    // Custom mutations for this category
+    const catCustomMuts = getCustomMutations().filter(m => m.suit === cat.key);
+    if (catCustomMuts.length > 0) {
+      html += `
+        <div class="lib-card">
+          <div class="lib-card-title" style="color:${cat.color};">⚙️ Personalizadas</div>
+          <div class="lib-mutations">
+      `;
+      catCustomMuts.forEach(mut => {
+        const isOwned = char.mutações.some(m => m.name === mut.name);
+        const reqs = parseCost(mut.cost);
+        const meetsLevelReq = !mut.req || char.assNivel >= mut.req;
+
+        let isAffordable = false;
+        if (reqs.singular > 0) {
+          isAffordable = (curA + curB + curC) >= reqs.singular;
+        } else {
+          isAffordable = curA >= reqs.a && curB >= reqs.b && curC >= reqs.c;
+        }
+
+        const canBuy = !isOwned && isAffordable && meetsLevelReq;
+
+        let reqLabel = "";
+        if (mut.req) {
+          reqLabel = `<span class="lib-req">Requer Assimilação Nível ${mut.req} (Atual: ${char.assNivel})</span>`;
+        }
+
+        html += `
+          <div class="lib-mutation ${isOwned ? 'owned' : ''}">
+            <div class="lib-mut-info">
+              <div class="lib-mut-title-row">
+                <span class="lib-mut-name">${esc(mut.name)}</span>
+                <span class="lib-mut-cost" style="border-color:${cat.color}; color:${cat.color};">${esc(mut.cost)}</span>
+                ${isOwned ? '<span class="lib-owned-badge">Adquirido</span>' : ''}
+              </div>
+              <div class="lib-mut-desc">${esc(mut.desc)}</div>
+              ${reqLabel}
+            </div>
+            <div class="lib-mut-action">
+              ${isOwned ? '' : `<button class="btn btn-sm lib-buy-btn" data-cat="${cat.key}" data-card="Personalizada" data-mut-name="${esc(mut.name)}" data-mut-cost="${esc(mut.cost)}" data-mut-desc="${esc(mut.desc)}" ${canBuy ? '' : 'disabled'}>Adquirir</button>`}
+            </div>
+          </div>
+        `;
+      });
+      html += `</div></div>`;
+    }
+
+    html += `</div>`;
+    return html;
+  };
+
+  const renderLibrary = () => {
+    const curA = char.ptsA || 0;
+    const curB = char.ptsB || 0;
+    const curC = char.ptsC || 0;
+
+    let html = `
+      <h3 class="modal-title">Biblioteca de Assimilações</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+        Selecione mutações para adquirir com seus pontos disponíveis.
+      </p>
+      <div class="lib-points-bar">
+        <span style="color:#00ff66;">♥ Sucesso: <strong>${curA}</strong></span>
+        <span style="color:#eab308;">♦ Adaptação: <strong>${curB}</strong></span>
+        <span style="color:#ef4444;">♠ Pressão: <strong>${curC}</strong></span>
+      </div>
+      <div class="lib-tab-bar">
+        ${categories.map((cat, i) =>
+          `<button class="lib-tab ${i === activeTab ? 'active' : ''}" data-tab-index="${i}" style="${i === activeTab ? `border-color:${cat.color}; color:${cat.color};` : ''}">${cat.suitSymbol} ${cat.label}</button>`
+        ).join('')}
+      </div>
+      <div id="lib-tab-content">
+        ${renderCategoryContent(activeTab)}
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="btn-close-library">Fechar</button>
+      </div>
+    `;
+
+    el.modalContainer.classList.remove("hidden");
+    el.modalBody.innerHTML = html;
+
+    // Bind acquire buttons
+    // Tab switching
+    el.modalBody.querySelectorAll(".lib-tab").forEach(tabBtn => {
+      tabBtn.addEventListener("click", () => {
+        activeTab = parseInt(tabBtn.dataset.tabIndex, 10);
+        renderLibrary();
+      });
+    });
+
+    el.modalBody.querySelectorAll(".lib-buy-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const cat = btn.dataset.cat;
+        const name = btn.dataset.mutName;
+        const costStr = btn.dataset.mutCost;
+        const desc = btn.dataset.mutDesc;
+        const reqs = parseCost(costStr);
+
+        logger.info(`Modal: Adquirindo mutação "${name}" via Biblioteca.`);
+
+        // Deduz pontos
+        if (reqs.singular > 0) {
+          let remSing = reqs.singular;
+          if (ptsA >= remSing) { ptsA -= remSing; remSing = 0; }
+          else { remSing -= ptsA; ptsA = 0; }
+          if (remSing > 0) { if (ptsB >= remSing) { ptsB -= remSing; remSing = 0; } else { remSing -= ptsB; ptsB = 0; } }
+          if (remSing > 0) { if (ptsC >= remSing) { ptsC -= remSing; remSing = 0; } else { remSing -= ptsC; ptsC = 0; } }
+        } else {
+          ptsA -= reqs.a;
+          ptsB -= reqs.b;
+          ptsC -= reqs.c;
+        }
+
+        char.ptsA = ptsA;
+        char.ptsB = ptsB;
+        char.ptsC = ptsC;
+
+        char.mutações.push({
+          suit: cat,
+          name: name,
+          cost: costStr,
+          desc: desc
+        });
+
+        saveCurrentCharacter();
+        renderMutationsSheet();
+        renderLibrary();
+      });
+    });
+
+    document.getElementById("btn-close-library").addEventListener("click", () => {
+      el.modalContainer.classList.add("hidden");
+    }, { once: true });
+
+    const closeBtn = el.modalContainer.querySelector(".modal-close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => el.modalContainer.classList.add("hidden"), { once: true });
+    }
+
+    el.modalContainer.addEventListener("click", (e) => {
+      if (e.target === el.modalContainer) el.modalContainer.classList.add("hidden");
+    }, { once: true });
+  };
+
+  renderLibrary();
 }

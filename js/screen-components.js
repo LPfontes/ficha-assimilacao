@@ -130,3 +130,103 @@ export function renderHeader(backId, titleInputId, titleValue, placeholder, dele
     </div>
   `;
 }
+
+export function renderProfileCard(entity, prefix, config) {
+  const { imageKey = 'imagem', sideFields = [], gridFields = [] } = config;
+
+  const imgContent = entity[imageKey]
+    ? `<img src="${entity[imageKey]}" alt="Imagem">`
+    : `<div class="local-image-placeholder">${IMAGE_PLACEHOLDER_SVG}<span>Clique para adicionar imagem</span></div>`;
+
+  const renderField = (field, value) => {
+    const { id, label, type, options = [], valueKey, dataset = {}, attrs = {} } = field;
+    const attrStr = Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(' ');
+    const dataAttrs = Object.entries(dataset).map(([k, v]) => `data-${k}="${v}"`).join(' ');
+
+    if (type === 'select') {
+      const optsHtml = options.map(o => `<option value="${o.value}" ${o.value === value ? 'selected' : ''}>${o.label}</option>`).join('');
+      return `
+        <div class="profile-attr-row">
+          <label for="${id}">${label}</label>
+          <select id="${id}" ${dataAttrs} ${attrStr}>${optsHtml}</select>
+        </div>
+      `;
+    }
+    if (type === 'textarea') {
+      return `
+        <div class="profile-attr-row" style="align-items: flex-start; gap: 8px;">
+          <label for="${id}" style="margin-top: 4px;">${label}</label>
+          <textarea id="${id}" class="ws-textarea" ${attrStr} ${dataAttrs}>${esc(value || '')}</textarea>
+        </div>
+      `;
+    }
+    return `
+      <div class="profile-attr-row">
+        <label for="${id}">${label}</label>
+        <input type="text" id="${id}" class="sheet-input-text" value="${esc(value || '')}" ${attrStr} ${dataAttrs}>
+      </div>
+    `;
+  };
+
+  const getNestedValue = (obj, path) => {
+    return path.split('.').reduce((acc, part) => acc?.[part], obj);
+  };
+
+  function renderFields(fields) {
+    let html = '';
+    let group = null;
+    let groupHtml = '';
+    for (const f of fields) {
+      const val = getNestedValue(entity, f.valueKey);
+      const isNewGroup = f.group && f.group !== group;
+      if (isNewGroup && groupHtml) {
+        html += `<div class="profile-field-group" data-group="${group}">${groupHtml}</div>`;
+        groupHtml = '';
+      }
+      if (isNewGroup) {
+        group = f.group;
+        if (f.groupLabel) {
+          groupHtml += `<p class="ws-label" style="margin:8px 0 4px;">${esc(f.groupLabel)}</p>`;
+        }
+        groupHtml += renderField(f, val);
+      } else if (!f.group && group) {
+        if (groupHtml) {
+          html += `<div class="profile-field-group" data-group="${group}">${groupHtml}</div>`;
+          groupHtml = '';
+        }
+        group = null;
+        html += renderField(f, val);
+      } else if (f.group) {
+        groupHtml += renderField(f, val);
+      } else {
+        group = null;
+        html += renderField(f, val);
+      }
+    }
+    if (groupHtml) {
+      html += `<div class="profile-field-group" data-group="${group}">${groupHtml}</div>`;
+    }
+    return html;
+  }
+
+  const sideFieldsHtml = renderFields(sideFields);
+  const gridFieldsHtml = renderFields(gridFields);
+
+  return `
+    <div class="profile-card card-glass">
+      <div class="portrait-wrapper">
+        <div class="polaroid-frame" id="${prefix}-image-frame" title="Clique para alterar a imagem">
+          ${imgContent}
+          <div class="portrait-overlay"><span>Alterar Foto</span></div>
+        </div>
+        <input type="file" id="${prefix}-image-input" accept="image/*" style="display:none;">
+        <div class="portrait-side-fields">
+          ${sideFieldsHtml}
+        </div>
+      </div>
+      <div class="profile-fields-grid">
+        ${gridFieldsHtml}
+      </div>
+    </div>
+  `;
+}

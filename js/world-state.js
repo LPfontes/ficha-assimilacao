@@ -126,7 +126,7 @@ export function createNewRegiao(name = "Nova Região") {
     perigo: 2,
     habitacao: 1,
     recursosNaturais: 0,
-    tiposRecursos: [],  // ["Água","Plantas","Animais","Madeira","Minerais","Biomassa"]
+    tiposRecursos: {},  // { "Água": "inexistente", "Plantas": "inexistente", ... }
     contaminacao: 1,
     deslocamento: 3,
     marcosGeograficos: [], // [{nome, descricao}]

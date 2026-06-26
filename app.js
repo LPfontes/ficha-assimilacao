@@ -1,7 +1,7 @@
-import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile } from "./js/state.js";
+import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal } from "./js/modals.js";
+import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal } from "./js/modals.js";
 import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
@@ -347,6 +347,76 @@ function setupEventListeners() {
   const btnOpenTarotAgainSheet = document.getElementById("btn-open-tarot-again-sheet");
   if (btnOpenTarotAgainSheet) {
     btnOpenTarotAgainSheet.addEventListener("click", handleOpenTarot);
+  }
+
+  const btnOpenAssimilationLibrary = document.getElementById("btn-open-assimilation-library");
+  if (btnOpenAssimilationLibrary) {
+    btnOpenAssimilationLibrary.addEventListener("click", openAssimilationLibraryModal);
+  }
+
+  // Homebrew buttons
+  const btnCreateHomebrewTrait = document.getElementById("btn-create-homebrew-trait");
+  if (btnCreateHomebrewTrait) {
+    btnCreateHomebrewTrait.addEventListener("click", openCreateTraitModal);
+  }
+  const btnCreateHomebrewMutation = document.getElementById("btn-create-homebrew-mutation");
+  if (btnCreateHomebrewMutation) {
+    btnCreateHomebrewMutation.addEventListener("click", openCreateMutationModal);
+  }
+
+  // Homebrew import/export
+  const btnExportHomebrew = document.getElementById("btn-export-homebrew");
+  if (btnExportHomebrew) {
+    btnExportHomebrew.addEventListener("click", () => {
+      const pkg = {
+        format: "assimilacao_homebrew_package",
+        version: 1,
+        name: "Homebrew Pack",
+        traits: getCustomTraits(),
+        mutations: getCustomMutations()
+      };
+      const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "homebrew_pack.json";
+      a.click();
+      URL.revokeObjectURL(blob);
+    });
+  }
+  const btnImportHomebrew = document.getElementById("btn-import-homebrew");
+  const fileImportHomebrew = document.getElementById("file-import-homebrew");
+  if (btnImportHomebrew && fileImportHomebrew) {
+    btnImportHomebrew.addEventListener("click", () => fileImportHomebrew.click());
+    fileImportHomebrew.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const pkg = JSON.parse(evt.target.result);
+          if (pkg.format !== "assimilacao_homebrew_package") {
+            alert("Formato de pacote inválido.");
+            return;
+          }
+          if (pkg.traits && Array.isArray(pkg.traits)) {
+            const existing = getCustomTraits();
+            const merged = [...existing, ...pkg.traits];
+            localStorage.setItem("assimilação_homebrew_traits", JSON.stringify(merged));
+          }
+          if (pkg.mutations && Array.isArray(pkg.mutations)) {
+            const existing = getCustomMutations();
+            const merged = [...existing, ...pkg.mutations];
+            localStorage.setItem("assimilação_homebrew_mutations", JSON.stringify(merged));
+          }
+          alert(`Pacote "${pkg.name || 'Homebrew'}" importado com ${(pkg.traits||[]).length} características e ${(pkg.mutations||[]).length} mutações.`);
+          import("./js/sheet.js").then(({ renderHomebrewSheet }) => renderHomebrewSheet());
+        } catch (err) {
+          alert("Erro ao ler pacote: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
   }
 
   // Cabo de Guerra Adjustments

@@ -182,7 +182,7 @@
 
 .world-sheet-body {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 0.8fr 0.8fr;
   gap: 20px;
 }
 
@@ -293,35 +293,7 @@
   padding: 4px 8px;
 }
 
-/* Checkboxes de recursos naturais */
-.resources-checkboxes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-}
-.resource-chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(0,0,0,0.35);
-  cursor: pointer;
-  font-size: var(--font-size-xs);
-  font-family: var(--font-heading);
-  font-weight: 600;
-  transition: background 0.15s, border-color 0.15s;
-  user-select: none;
-}
-.resource-chip input[type="checkbox"] { display: none; }
-.resource-chip.checked {
-  background: rgba(20,60,100,0.5);
-  border-color: var(--color-regiao);
-  color: var(--text-primary);
-}
-.resource-chip:hover { border-color: rgba(255,255,255,0.3); }
+/* Recursos naturais — cada tipo com seu select */
 
 /* ----------------------------------------------------------
    LISTAS CRUD GENÉRICAS (Crises, Marcos, Conflitos ref., Itens)
@@ -598,6 +570,86 @@
   color: #fff;
   letter-spacing: 1px;
   text-transform: uppercase;
+}
+
+/* --- Polaroid Frame por Tipo de Entidade --- */
+#regiao-screen .polaroid-frame {
+  width: 250px !important;
+  height: 250px !important;
+  border-color: var(--color-regiao-border);
+}
+#regiao-screen .polaroid-frame:hover {
+  border-color: var(--color-regiao);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 20px rgba(20,80,140,0.25);
+}
+
+#refugio-screen .polaroid-frame {
+  width: 250px !important;
+  height: 250px !important;
+  border-color: var(--color-refugio-border);
+}
+#refugio-screen .polaroid-frame:hover {
+  border-color: var(--color-refugio);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 20px rgba(180,90,20,0.25);
+}
+
+#conflito-screen .polaroid-frame {
+  border-color: var(--color-conflito-border);
+}
+#conflito-screen .polaroid-frame:hover {
+  border-color: var(--color-conflito);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 20px rgba(160,30,30,0.25);
+}
+
+#local-screen .polaroid-frame {
+  width: 250px !important;
+  height: 250px !important;
+  border-color: var(--color-local-border);
+}
+#local-screen .polaroid-frame:hover {
+  border-color: var(--color-local);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 20px rgba(100,30,160,0.25);
+}
+
+/* --- Select / Option por Tipo de Entidade --- */
+#regiao-screen .profile-attr-row select:focus,
+#regiao-screen .select-attr-row select:focus {
+  border-color: var(--color-regiao);
+}
+#regiao-screen .profile-attr-row select option,
+#regiao-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #b0c4de;
+}
+
+#refugio-screen .profile-attr-row select:focus,
+#refugio-screen .select-attr-row select:focus {
+  border-color: var(--color-refugio);
+}
+#refugio-screen .profile-attr-row select option,
+#refugio-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #deb887;
+}
+
+#conflito-screen .profile-attr-row select:focus,
+#conflito-screen .select-attr-row select:focus {
+  border-color: var(--color-conflito);
+}
+#conflito-screen .profile-attr-row select option,
+#conflito-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #d4a0a0;
+}
+
+#local-screen .profile-attr-row select:focus,
+#local-screen .select-attr-row select:focus {
+  border-color: var(--color-local);
+}
+#local-screen .profile-attr-row select option,
+#local-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #c8a0d4;
 }
 
 /* Itens do Local */

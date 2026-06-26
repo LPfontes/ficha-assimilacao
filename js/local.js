@@ -1,9 +1,38 @@
 import { worldState, saveLocal, deleteLocal, createNewLocal } from "./world-state.js";
 import { hideAllScreens, goToLanding, esc, setupImageUpload } from "./screen-utils.js";
-import { renderHeader, renderImageFrame, renderRefPanelSingle, renderRefPanelMulti, renderCrudListEmpty } from "./screen-components.js";
+import { renderHeader, renderProfileCard, renderRefPanelSingle, renderRefPanelMulti, renderCrudListEmpty } from "./screen-components.js";
 
 const TIPO_LOCAL = ["Cidade","Floresta","Ponte","Ruína","Edifício","Estrada","Caverna","Acampamento","Costa","Outro"];
 const ESCASSEZ_OPTS = ["E0: Abundante","E1: Corriqueiro","E2: Comum","E3: Incomum","E4: Atípico","E5: Raro","E6: Quase Extinto"];
+
+const LOCAL_SHEET_CONFIG = {
+  imageKey: 'imagem',
+  sideFields: [
+    {
+      id: 'local-tipo',
+      label: 'Tipo',
+      type: 'select',
+      options: TIPO_LOCAL.map(t => ({ value: t, label: t })),
+      valueKey: 'tipoLocal'
+    }
+  ],
+  gridFields: [
+    {
+      id: 'local-descricao',
+      label: 'Descrição Narrativa',
+      type: 'textarea',
+      valueKey: 'descricao',
+      attrs: { placeholder: 'Descreva o local...', style: 'min-height:100px;' }
+    },
+    {
+      id: 'local-notas',
+      label: 'Anotações',
+      type: 'textarea',
+      valueKey: 'notas',
+      attrs: { placeholder: 'Notas da sessão...', style: 'min-height:60px;' }
+    }
+  ]
+};
 
 function getScreen() { return document.getElementById("local-screen"); }
 
@@ -24,23 +53,7 @@ export function renderLocalSheet() {
     <div class="world-sheet-screen">
       ${renderHeader("btn-local-back", "local-nome", l.nome, "Nome do Local", "btn-local-delete")}
       <div class="world-sheet-body">
-        <div class="card-glass" style="padding:16px;display:flex;flex-direction:column;gap:12px;">
-          ${renderImageFrame(l, "local")}
-          <div class="select-attr-row">
-            <label for="local-tipo">Tipo</label>
-            <select id="local-tipo">
-              ${TIPO_LOCAL.map(t => `<option ${t === l.tipoLocal ? "selected" : ""}>${t}</option>`).join("")}
-            </select>
-          </div>
-          <div>
-            <label class="ws-label" style="display:block;margin-bottom:4px;">Descrição Narrativa</label>
-            <textarea id="local-descricao" class="ws-textarea" style="min-height:100px;" placeholder="Descreva o local...">${esc(l.descricao)}</textarea>
-          </div>
-          <div>
-            <label class="ws-label" style="display:block;margin-bottom:4px;">Anotações</label>
-            <textarea id="local-notas" class="ws-textarea" style="min-height:60px;" placeholder="Notas da sessão...">${esc(l.notas)}</textarea>
-          </div>
-        </div>
+        ${renderProfileCard(l, "local", LOCAL_SHEET_CONFIG)}
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div class="card-glass" style="padding:16px;">
             <div class="world-list-section">
@@ -100,7 +113,7 @@ function _attachListeners(l) {
   screen.querySelector("#local-descricao")?.addEventListener("input", e => { l.descricao = e.target.value; saveLocal(l); });
   screen.querySelector("#local-notas")?.addEventListener("input", e => { l.notas = e.target.value; saveLocal(l); });
 
-  setupImageUpload("local-image-frame", "local-image-input", l, saveLocal);
+  setupImageUpload("local-image-frame", "local-image-input", l, saveLocal, "portrait-overlay");
 
   screen.querySelector("#btn-add-item-local")?.addEventListener("click", () => {
     if (!l.itens) l.itens = [];

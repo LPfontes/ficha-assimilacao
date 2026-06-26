@@ -17,7 +17,7 @@ export function esc(str) {
   return d.innerHTML;
 }
 
-export function setupImageUpload(imageFrameId, inputId, entity, saveFn) {
+export function setupImageUpload(imageFrameId, inputId, entity, saveFn, overlayClass) {
   const frame = document.getElementById(imageFrameId);
   const input = document.getElementById(inputId);
   if (!frame || !input) return;
@@ -30,7 +30,7 @@ export function setupImageUpload(imageFrameId, inputId, entity, saveFn) {
       entity.imagem = evt.target.result;
       saveFn(entity);
       const alt = entity.nome || "Imagem";
-      frame.innerHTML = `<img src="${entity.imagem}" alt="${alt}"><div class="local-image-overlay"><span>Alterar Imagem</span></div>`;
+      frame.innerHTML = `<img src="${entity.imagem}" alt="${alt}"><div class="${overlayClass || "local-image-overlay"}"><span>Alterar Imagem</span></div>`;
     };
     reader.readAsDataURL(file);
   });
