@@ -1447,9 +1447,9 @@ export function openAssimilationLibraryModal() {
 
   logger.info("Modal: Abrindo Biblioteca de Assimilações.");
 
-  const ptsA = char.ptsA || 0;
-  const ptsB = char.ptsB || 0;
-  const ptsC = char.ptsC || 0;
+  let ptsA = char.ptsA || 0;
+  let ptsB = char.ptsB || 0;
+  let ptsC = char.ptsC || 0;
 
   const categories = [
     { key: "evolutivas",   label: "Evolutivas",   color: "#00ff66", suitSymbol: "♥" },
