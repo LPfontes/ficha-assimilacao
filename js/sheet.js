@@ -164,7 +164,8 @@ export function renderAptitudesSheet() {
     `;
 
     const bubblesContainer = row.querySelector(".value-bubbles");
-    for (let i = 1; i <= 5; i++) {
+    const maxBubbles = char.maxValueBubbles || 5;
+    for (let i = 1; i <= maxBubbles; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-instinct ${i <= val ? 'filled' : ''}`;
 
@@ -200,7 +201,8 @@ export function renderAptitudesSheet() {
     `;
 
     const bubblesContainer = row.querySelector(".value-bubbles");
-    for (let i = 1; i <= 5; i++) {
+    const maxBubbles = char.maxValueBubbles || 5;
+    for (let i = 1; i <= maxBubbles; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-conhecimento ${i <= val ? 'filled' : ''}`;
 
@@ -235,7 +237,8 @@ export function renderAptitudesSheet() {
     `;
 
     const bubblesContainer = row.querySelector(".value-bubbles");
-    for (let i = 1; i <= 5; i++) {
+    const maxBubbles = char.maxValueBubbles || 5;
+    for (let i = 1; i <= maxBubbles; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-pratica ${i <= val ? 'filled' : ''}`;
 

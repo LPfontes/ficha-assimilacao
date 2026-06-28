@@ -21,6 +21,7 @@ export const el = {
   btnDeleteChar: document.getElementById("btn-delete-char"),
   btnOpenRoller: document.getElementById("btn-open-roller"),
   btnSettings: document.getElementById("btn-settings"),
+  btnCloudSync: document.getElementById("btn-cloud-sync"),
   btnMobileMenu: document.getElementById("btn-mobile-menu"),
   headerControls: document.querySelector(".header-controls"),
   
@@ -118,6 +119,8 @@ export const state = {
   characters: [],
   currentCharacter: null,
   diceBox: null,
+  currentUser: JSON.parse(localStorage.getItem("assimilação_mock_user")) || null,
+  hasUnsavedCloudChanges: localStorage.getItem("assimilação_has_unsaved_changes") === "true",
   // Pilha de dados selecionada para rolagem
   selectedRoll: {
     instinto: "",
@@ -220,6 +223,19 @@ export function createTestCharacter() {
   }
 }
 
+export function updateCloudSyncBadge() {
+  const badge = document.getElementById("cloud-sync-badge");
+  if (badge) {
+    if (state.currentUser && state.hasUnsavedCloudChanges) {
+      badge.style.display = "block";
+      localStorage.setItem("assimilação_has_unsaved_changes", "true");
+    } else {
+      badge.style.display = "none";
+      localStorage.setItem("assimilação_has_unsaved_changes", "false");
+    }
+  }
+}
+
 export function saveCurrentCharacter() {
   if (!state.currentCharacter) return;
   const index = state.characters.findIndex(c => c.id === state.currentCharacter.id);
@@ -236,6 +252,10 @@ export function saveCurrentCharacter() {
     try {
       localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
       logger.info(`[DEBOUNCED SAVE] Ficha de "${state.currentCharacter.name}" salva com sucesso.`);
+      if (state.currentUser) {
+        state.hasUnsavedCloudChanges = true;
+        updateCloudSyncBadge();
+      }
     } catch (e) {
       logger.error("Erro ao salvar personagem no LocalStorage:", e);
     }
@@ -248,6 +268,10 @@ export function saveCurrentCharacterImmediate() {
   try {
     localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
     logger.info(`[IMMEDIATE SAVE] Ficha de "${state.currentCharacter.name}" persistida imediatamente.`);
+    if (state.currentUser) {
+      state.hasUnsavedCloudChanges = true;
+      updateCloudSyncBadge();
+    }
   } catch (e) {
     logger.error("Erro ao salvar personagem imediatamente no LocalStorage:", e);
   }

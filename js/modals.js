@@ -3,9 +3,9 @@
 function parseCost(costStr) {
   let a = 0, b = 0, c = 0, singular = 0;
   if (!costStr) return { a, b, c, singular };
-  
+
   const s = costStr.toLowerCase();
-  
+
   // Sucessos (Sucesso / Sucessos)
   const succMatch = s.match(/(\d+)\s*sucesso/);
   if (succMatch) {
@@ -13,7 +13,7 @@ function parseCost(costStr) {
   } else if (s.includes("sucesso")) {
     a = (s.match(/sucesso/g) || []).length;
   }
-  
+
   // Adaptações / Adptações (Qualquer variação de adapt/adpt)
   const adaptMatch = s.match(/(\d+)\s*(?:ad[a-z]*ptaç|adapt|adpt)/);
   if (adaptMatch) {
@@ -21,7 +21,7 @@ function parseCost(costStr) {
   } else if (s.includes("adapt") || s.includes("adpt")) {
     b = (s.match(/(?:adapt|adpt)/g) || []).length;
   }
-  
+
   // Pressões (Pressão / Pressões)
   const pressMatch = s.match(/(\d+)\s*press/);
   if (pressMatch) {
@@ -37,11 +37,12 @@ function parseCost(costStr) {
   } else if (s.includes("singular")) {
     singular = (s.match(/singular/g) || []).length;
   }
-  
+
   return { a, b, c, singular };
 }
 
-import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations } from "./state.js";
+import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations, updateCloudSyncBadge, updateCharSelector } from "./state.js";
+import { getFirebaseConfig } from "./config.js";
 import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet, renderSavedMacrosSheet } from "./sheet.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
@@ -57,9 +58,9 @@ import { esc } from "./screen-utils.js";
 export function openTraitsModal() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   logger.info("Modal: Abrindo modal de características.");
-  
+
   el.modalContainer.classList.remove("hidden");
   el.modalBody.innerHTML = `
     <h3 class="modal-title">Adquirir Característica</h3>
@@ -73,24 +74,24 @@ export function openTraitsModal() {
       <!-- JS insere os itens -->
     </div>
   `;
-  
+
   document.getElementById("btn-open-create-trait-from-modal").addEventListener("click", () => {
     el.modalContainer.classList.add("hidden");
     setTimeout(() => openCreateTraitModal(), 100);
   }, { once: true });
 
   const grid = el.modalBody.querySelector("#traits-modal-grid");
-  
+
   const renderTraitRow = (trait, isCustom) => {
     if (!isCustom && trait.id === "estagio_avancado") return;
-    
+
     const isOwned = char.caracteristicas.includes(trait.id);
     const meetsReqs = isCustom ? true : checkCharacterTraitPrerequisites(char, trait.requisitos);
-    
+
     const row = document.createElement("div");
     row.className = `trait-modal-row ${isOwned ? 'owned' : ''}`;
     if (!meetsReqs && !isOwned) row.style.opacity = "0.5";
-    
+
     row.innerHTML = `
       <div class="info">
         <div class="title-row">
@@ -109,7 +110,7 @@ export function openTraitsModal() {
         </button>
       </div>
     `;
-    
+
     row.querySelector(".modal-buy-trait-btn").addEventListener("click", () => {
       if (isOwned) {
         logger.info(`Modal: Removendo característica "${trait.nome}" (Custo devolvido: ${trait.custo} XP).`);
@@ -132,7 +133,7 @@ export function openTraitsModal() {
         }
       }
     });
-    
+
     grid.appendChild(row);
   };
 
@@ -166,7 +167,7 @@ export function checkCharacterTraitPrerequisites(char, reqs) {
       continue;
     }
     if (key === "val") continue;
-    
+
     if (char.instintos[key] !== undefined) {
       if (char.instintos[key] < value) return false;
     } else {
@@ -183,9 +184,9 @@ export function checkCharacterTraitPrerequisites(char, reqs) {
 export function openAssimilationTestModal() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   logger.info("Modal: Abrindo modal de Teste de Assimilação.");
-  
+
   el.modalContainer.classList.remove("hidden");
   el.modalBody.innerHTML = `
     <h3 class="modal-title">Realizar Teste de Assimilação</h3>
@@ -226,20 +227,20 @@ export function openAssimilationTestModal() {
       </div>
     </div>
   `;
-  
+
   const btnRoll = document.getElementById("btn-modal-roll-ass");
   const resultsBox = document.getElementById("ass-test-results");
-  
+
   btnRoll.addEventListener("click", () => {
     btnRoll.disabled = true;
-    
+
     // Executa a rolagem utilizando o motor 3D local
     const pool = ["1d10"];
     for (let i = 0; i < char.assNivel; i++) pool.push("1d12");
     const notationString = pool.join("+");
-    
+
     logger.info(`Modal: Iniciando rolagem do Teste de Assimilação com pool "${notationString}".`);
-    
+
     const box = state.diceBox || window.diceBox;
 
     if (!box) {
@@ -247,7 +248,7 @@ export function openAssimilationTestModal() {
       btnRoll.disabled = false;
       return;
     }
-    
+
     el.diceOverlay.classList.remove("hidden");
     setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
 
@@ -257,11 +258,11 @@ export function openAssimilationTestModal() {
       (notation) => {
         btnRoll.disabled = false;
         resultsBox.classList.remove("hidden");
-        
+
         setTimeout(() => {
           el.diceOverlay.classList.add("hidden");
         }, 3000);
-        
+
         if (!notation.result || notation.result.length === 0 || notation.result[0] < 0) {
           console.error("Erro na simulação do Dice Box: os dados caíram da mesa.");
           alert("Ops! Os dados saíram da mesa de rolagem. Tente novamente.");
@@ -274,7 +275,7 @@ export function openAssimilationTestModal() {
           const sides = parseInt(type.substring(1));
           return { value: val, sides: sides, symbols: symbols };
         });
-        
+
         // Renderiza os dados no modal
         const container = document.getElementById("ass-test-dice-container");
         container.innerHTML = "";
@@ -295,7 +296,7 @@ export function openAssimilationTestModal() {
           d.innerHTML = contentHtml;
           container.appendChild(d);
         });
-        
+
         // Conta símbolos
         let a = 0;
         let b = 0;
@@ -307,17 +308,17 @@ export function openAssimilationTestModal() {
             if (sym === "C") c++;
           });
         });
-        
+
         document.getElementById("ass-count-a").textContent = a;
         document.getElementById("ass-count-b").textContent = b;
         document.getElementById("ass-count-c").textContent = c;
-        
+
         logger.info(`Modal: Teste de Assimilação concluído - Sucesso [S]: ${a}, Adaptação [A]: ${b}, Pressão [P]: ${c}.`);
-        
+
         // Calcula Morte por Assimilação Completa (Pág 124)
         const prevC = char.mutações.filter(m => m.suit === "inoportunas").length;
         const totalC = prevC + c;
-        
+
         if (totalC >= 10) {
           logger.error(`Modal: A personagem "${char.name}" atingiu ou excedeu 10 pressões no total (${totalC}/10). Tornou-se um NPC do Assimilador.`);
           document.getElementById("death-alert").classList.remove("hidden");
@@ -329,7 +330,7 @@ export function openAssimilationTestModal() {
           char.ptsC = (char.ptsC || 0) + c;
           saveCurrentCharacter();
           renderMutationsSheet();
-          
+
           document.getElementById("ass-modal-mutation-action").classList.remove("hidden");
           const oldBtn = document.getElementById("btn-draw-mutations");
           const newBtn = oldBtn.cloneNode(true);
@@ -443,7 +444,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
 
     document.getElementById("btn-draw-mutations-tarot").addEventListener("click", () => {
       const includeSingulares = document.getElementById("chk-include-singulares").checked;
-      
+
       const drawnCards = [];
       const shuffle = (array) => array.sort(() => Math.random() - 0.5);
 
@@ -497,7 +498,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
   // Se já tiver cartas sorteadas, renderiza a tela do Taro
   logger.info(`Modal: Renderizando spread de taro com 3 cartas.`);
   el.modalContainer.classList.remove("hidden");
-  
+
   // Render de estilos CSS e HTML para as cartas de taro
   el.modalBody.innerHTML = `
     <style>
@@ -705,26 +706,26 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
 
       <div style="width: 100%; margin-top: 10px;">
         ${["evolutivas", "adaptativas", "inoportunas", "singulares"].map(cat => {
-          const catCards = state.drawnMutationCards.map((item, idx) => ({item, idx})).filter(o => o.item.category === cat);
-          if (catCards.length === 0) return "";
-          
-          let title = "Evolutivas";
-          let color = "#00ff66";
-          if (cat === "adaptativas") { title = "Adaptativas"; color = "#eab308"; }
-          if (cat === "inoportunas") { title = "Inoportunas"; color = "#ef4444"; }
-          if (cat === "singulares") { title = "Singulares"; color = "#a855f7"; }
-          
-          return `
+    const catCards = state.drawnMutationCards.map((item, idx) => ({ item, idx })).filter(o => o.item.category === cat);
+    if (catCards.length === 0) return "";
+
+    let title = "Evolutivas";
+    let color = "#00ff66";
+    if (cat === "adaptativas") { title = "Adaptativas"; color = "#eab308"; }
+    if (cat === "inoportunas") { title = "Inoportunas"; color = "#ef4444"; }
+    if (cat === "singulares") { title = "Singulares"; color = "#a855f7"; }
+
+    return `
             <div class="tarot-carousel-group">
               <div class="tarot-carousel-title" style="color: ${color}; border-color: ${color}40;">${title}</div>
               <div class="tarot-spread">
-                ${catCards.map(({item, idx}) => {
-                  const type = item.category;
-                  const isFlipped = item.flipped;
-                  const isSelected = state.activeCardIndex === idx;
-                  const symbol = type === "evolutivas" ? "♥" : type === "adaptativas" ? "♦" : type === "inoportunas" ? "♠" : "♣";
-                  
-                  return `
+                ${catCards.map(({ item, idx }) => {
+      const type = item.category;
+      const isFlipped = item.flipped;
+      const isSelected = state.activeCardIndex === idx;
+      const symbol = type === "evolutivas" ? "♥" : type === "adaptativas" ? "♦" : type === "inoportunas" ? "♠" : "♣";
+
+      return `
                     <div class="tarot-card-wrapper" data-index="${idx}">
                       <div class="tarot-card ${isFlipped ? 'flipped' : ''} ${isSelected ? 'active-selection' : ''}">
                         <!-- Back (face down) -->
@@ -741,11 +742,11 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
                       </div>
                     </div>
                   `;
-                }).join("")}
+    }).join("")}
               </div>
             </div>
           `;
-        }).join("")}
+  }).join("")}
       </div>
 
       <div class="tarot-details-panel" id="tarot-details-panel">
@@ -766,13 +767,13 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
     wrapper.addEventListener("click", () => {
       const idx = parseInt(wrapper.getAttribute("data-index"), 10);
       const cardItem = state.drawnMutationCards[idx];
-      
+
       if (!cardItem.flipped) {
         cardItem.flipped = true;
         // Toca animação e aguarda
         const cardInner = wrapper.querySelector(".tarot-card");
         cardInner.classList.add("flipped");
-        
+
         setTimeout(() => {
           state.activeCardIndex = idx;
           openMutationSelectionScreen(ptsA, ptsB, ptsC);
@@ -798,43 +799,43 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       </div>
       <div class="mutation-buy-list">
         ${cardData.mutações.map((mut, mIdx) => {
-          const isOwned = char.mutações.some(m => m.id && mut.id ? m.id === mut.id : m.name === mut.name);
-          const reqs = parseCost(mut.cost);
+      const isOwned = char.mutações.some(m => m.id && mut.id ? m.id === mut.id : m.name === mut.name);
+      const reqs = parseCost(mut.cost);
 
-          // Verifica se cumpre o requisito de Nível de Assimilação
-          const meetsLevelReq = !mut.req || char.assNivel >= mut.req;
+      // Verifica se cumpre o requisito de Nível de Assimilação
+      const meetsLevelReq = !mut.req || char.assNivel >= mut.req;
 
-          // Verifica se tem recursos suficientes
-          let isAffordable = false;
-          if (reqs.singular > 0) {
-            // Singular custa qualquer ponto
-            isAffordable = (ptsA + ptsB + ptsC) >= reqs.singular;
-          } else {
-            isAffordable = ptsA >= reqs.a && ptsB >= reqs.b && ptsC >= reqs.c;
-          }
+      // Verifica se tem recursos suficientes
+      let isAffordable = false;
+      if (reqs.singular > 0) {
+        // Singular custa qualquer ponto
+        isAffordable = (ptsA + ptsB + ptsC) >= reqs.singular;
+      } else {
+        isAffordable = ptsA >= reqs.a && ptsB >= reqs.b && ptsC >= reqs.c;
+      }
 
-          const canBuy = !isOwned && isAffordable && meetsLevelReq;
+      const canBuy = !isOwned && isAffordable && meetsLevelReq;
 
-          let btnHtml = "";
-          if (isOwned) {
-            btnHtml = `<span style="font-size:12px; color:var(--text-muted); font-weight:bold;">Adquirido</span>`;
-          } else {
-            btnHtml = `
+      let btnHtml = "";
+      if (isOwned) {
+        btnHtml = `<span style="font-size:12px; color:var(--text-muted); font-weight:bold;">Adquirido</span>`;
+      } else {
+        btnHtml = `
               <button class="btn btn-sm btn-buy-mut-tarot" data-m-idx="${mIdx}" ${!canBuy ? "disabled" : ""}>
                 Adquirir
               </button>
             `;
-          }
+      }
 
-          let reqLabel = "";
-          if (mut.req) {
-            const hasReq = char.assNivel >= mut.req;
-            reqLabel = `<div class="mut-req" style="color: var(--color-blue-glow)">
+      let reqLabel = "";
+      if (mut.req) {
+        const hasReq = char.assNivel >= mut.req;
+        reqLabel = `<div class="mut-req" style="color: var(--color-blue-glow)">
               Requer Assimilação Nível ${mut.req} (Atual: ${char.assNivel})
             </div>`;
-          }
+      }
 
-          return `
+      return `
             <div class="mutation-buy-item">
               <div class="mutation-buy-info">
                 <div class="mut-title-row">
@@ -849,7 +850,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
               </div>
             </div>
           `;
-        }).join("")}
+    }).join("")}
       </div>
     `;
 
@@ -914,7 +915,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
 
         saveCurrentCharacter();
         renderMutationsSheet();
-        
+
         // Recarrega
         openMutationSelectionScreen(ptsA, ptsB, ptsC);
       });
@@ -925,7 +926,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
   document.getElementById("btn-close-mutation-selection").addEventListener("click", () => {
     // Alerta se ainda restarem pontos de mutação e houver opções disponíveis
     const hasRemainingPoints = ptsA > 0 || ptsB > 0 || ptsC > 0;
-    
+
     if (hasRemainingPoints) {
       const confirmFinalize = confirm("Você ainda possui pontos de Assimilação/Sucesso para gastar. Tem certeza que deseja finalizar e perder estes pontos?");
       if (!confirmFinalize) return;
@@ -937,10 +938,10 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
     char.ptsA = 0;
     char.ptsB = 0;
     char.ptsC = 0;
-    
+
     state.drawnMutationCards = null;
     state.activeCardIndex = null;
-    
+
     saveCurrentCharacter();
     renderCaboGuerraSheet();
     renderMutationsSheet();
@@ -961,9 +962,11 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
 export function openSettingsModal() {
   logger.info("Modal: Abrindo modal de configurações.");
   el.modalContainer.classList.remove("hidden");
-  
+
   const disable3D = localStorage.getItem("assimilação_disable_3d") === "true";
-  
+  const char = state.currentCharacter;
+  const currentMaxBubbles = (char && char.maxValueBubbles) || parseInt(localStorage.getItem("assimilação_max_value_bubbles")) || 5;
+
   el.modalBody.innerHTML = `
     <h3 class="modal-title">Configurações</h3>
     <div class="settings-modal-content" style="margin-top: 16px;">
@@ -977,6 +980,18 @@ export function openSettingsModal() {
             <input type="checkbox" id="settings-disable-3d" ${disable3D ? "checked" : ""}>
             <span class="slider"></span>
           </label>
+        </div>
+      </div>
+
+      <div class="setting-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+        <div class="setting-info" style="flex: 1; padding-right: 16px;">
+          <div class="setting-label" style="font-weight: 600; font-size: var(--font-size-md); color: var(--text-primary);">Máximo de Bolhas de Valor (Aptidões)</div>
+          <div class="setting-desc" style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: 4px;">Define a quantidade máxima de bolhas para Instintos, Conhecimentos e Práticas (Mínimo: 5).</div>
+        </div>
+        <div class="setting-control" style="display: flex; align-items: center; gap: 8px;">
+          <button id="btn-bubbles-dec" class="btn btn-sm" style="padding: 2px 8px;">-</button>
+          <strong id="val-bubbles-max" style="font-size: 14px; min-width: 20px; text-align: center;">${currentMaxBubbles}</strong>
+          <button id="btn-bubbles-inc" class="btn btn-sm" style="padding: 2px 8px;">+</button>
         </div>
       </div>
 
@@ -1005,11 +1020,32 @@ export function openSettingsModal() {
       </div>
     </div>
   `;
-  
+
   const checkbox = document.getElementById("settings-disable-3d");
   checkbox.addEventListener("change", (e) => {
     localStorage.setItem("assimilação_disable_3d", e.target.checked ? "true" : "false");
     logger.info(`Configurações: assimilação_disable_3d alterada para ${e.target.checked}`);
+  });
+
+  const updateBubblesMax = (newVal) => {
+    newVal = Math.max(5, newVal);
+    document.getElementById("val-bubbles-max").textContent = newVal;
+    localStorage.setItem("assimilação_max_value_bubbles", newVal.toString());
+    if (char) {
+      char.maxValueBubbles = newVal;
+      saveCurrentCharacter();
+      renderAptitudesSheet();
+    }
+  };
+
+  document.getElementById("btn-bubbles-dec").addEventListener("click", () => {
+    const curVal = (char && char.maxValueBubbles) || parseInt(localStorage.getItem("assimilação_max_value_bubbles")) || 5;
+    updateBubblesMax(curVal - 1);
+  });
+
+  document.getElementById("btn-bubbles-inc").addEventListener("click", () => {
+    const curVal = (char && char.maxValueBubbles) || parseInt(localStorage.getItem("assimilação_max_value_bubbles")) || 5;
+    updateBubblesMax(curVal + 1);
   });
 
   const clearStorageBtn = document.getElementById("btn-clear-local-storage");
@@ -1026,7 +1062,7 @@ export function openSettingsModal() {
   clearCacheBtn.addEventListener("click", () => {
     if (confirm("Tem certeza que deseja limpar o cache do aplicativo e forçar o recarregamento? Os personagens salvos localmente serão preservados.")) {
       logger.info("Configurações: Limpando Cache Storage e desregistrando Service Workers.");
-      
+
       const unregisterPromises = [];
       if ('serviceWorker' in navigator) {
         unregisterPromises.push(
@@ -1035,7 +1071,7 @@ export function openSettingsModal() {
           })
         );
       }
-      
+
       if ('caches' in window) {
         unregisterPromises.push(
           caches.keys().then(keys => {
@@ -1049,7 +1085,7 @@ export function openSettingsModal() {
       });
     }
   });
-  
+
   document.getElementById("btn-save-settings").addEventListener("click", () => {
     el.modalContainer.classList.add("hidden");
   });
@@ -1571,10 +1607,10 @@ export function openAssimilationLibraryModal() {
   let ptsC = char.ptsC || 0;
 
   const categories = [
-    { key: "evolutivas",   label: "Evolutivas",   color: "#00ff66", suitSymbol: "♥" },
-    { key: "adaptativas",  label: "Adaptativas",  color: "#eab308", suitSymbol: "♦" },
-    { key: "inoportunas",  label: "Inoportunas",  color: "#ef4444", suitSymbol: "♠" },
-    { key: "singulares",   label: "Singulares",   color: "#a855f7", suitSymbol: "♣" }
+    { key: "evolutivas", label: "Evolutivas", color: "#00ff66", suitSymbol: "♥" },
+    { key: "adaptativas", label: "Adaptativas", color: "#eab308", suitSymbol: "♦" },
+    { key: "inoportunas", label: "Inoportunas", color: "#ef4444", suitSymbol: "♠" },
+    { key: "singulares", label: "Singulares", color: "#a855f7", suitSymbol: "♣" }
   ];
 
   let activeTab = 0;
@@ -1585,7 +1621,7 @@ export function openAssimilationLibraryModal() {
     const assimData = ASSIMILACOES[cat.key];
     const catCustomMuts = getCustomMutations().filter(m => m.suit === cat.key);
     if ((!assimData || !assimData.cartas || assimData.cartas.length === 0) && catCustomMuts.length === 0) return "";
-    
+
     let html = `
       <div class="lib-sub-tab-bar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; padding:6px; background:rgba(0,0,0,0.25); border-radius:4px; border:1px solid rgba(255,255,255,0.05); overflow-x:auto;">
         <button class="lib-sub-tab" data-sub-tab="Todas" style="padding:4px 8px; font-size:11px; font-family:var(--font-heading); border-radius:3px; background:${activeSubTab === 'Todas' ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${activeSubTab === 'Todas' ? 'var(--border-color)' : 'transparent'}; color:${activeSubTab === 'Todas' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">Todas</button>
@@ -1735,8 +1771,8 @@ export function openAssimilationLibraryModal() {
       </div>
       <div class="lib-tab-bar">
         ${categories.map((cat, i) =>
-          `<button class="lib-tab ${i === activeTab ? 'active' : ''}" data-tab-index="${i}" style="${i === activeTab ? `border-color:${cat.color}; color:${cat.color};` : ''}">${cat.suitSymbol} ${cat.label}</button>`
-        ).join('')}
+      `<button class="lib-tab ${i === activeTab ? 'active' : ''}" data-tab-index="${i}" style="${i === activeTab ? `border-color:${cat.color}; color:${cat.color};` : ''}">${cat.suitSymbol} ${cat.label}</button>`
+    ).join('')}
       </div>
       ${renderSubTabsHtml(activeTab)}
       <div id="lib-tab-content">
@@ -2044,3 +2080,448 @@ export function openCustomRollModal(macroToEdit = null) {
     closeForm();
   });
 }
+
+// ============================================================================
+// SISTEMA DE SINCRONIZAÇÃO EM NUVEM E LIMITAÇÃO DE ESPAÇO (SIMULADO / FIREBASE)
+// ============================================================================
+
+const MOCK_CLOUD_DB_KEY = "assimilação_mock_cloud_db";
+let cloudCharactersCache = [];
+
+let firebaseApp = null;
+let firebaseAuth = null;
+let firebaseDb = null;
+
+async function initRealFirebase() {
+  if (firebaseApp) return { auth: firebaseAuth, db: firebaseDb };
+
+  const config = await getFirebaseConfig();
+  if (!config) return null;
+
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+    const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+    const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+
+    firebaseApp = initializeApp(config);
+    firebaseAuth = getAuth(firebaseApp);
+    firebaseDb = getFirestore(firebaseApp);
+
+    return { auth: firebaseAuth, db: firebaseDb };
+  } catch (e) {
+    console.error("Falha ao inicializar o Firebase Real:", e);
+    return null;
+  }
+}
+
+export function getCloudStorageInfo() {
+  const sheets = state.useRealFirebase ? cloudCharactersCache : (getMockCloudDB()[state.currentUser?.uid] || []);
+  const count = sheets.length;
+  const jsonStr = JSON.stringify(sheets);
+  const sizeBytes = new Blob([jsonStr]).size; // tamanho em bytes
+  const sizeKB = (sizeBytes / 1024);
+
+  return {
+    count,
+    maxCount: 5,
+    sizeKB: sizeKB,
+    maxSizeKB: 100
+  };
+}
+
+function getMockCloudDB() {
+  return JSON.parse(localStorage.getItem(MOCK_CLOUD_DB_KEY)) || {};
+}
+
+function saveMockCloudDB(db) {
+  localStorage.setItem(MOCK_CLOUD_DB_KEY, JSON.stringify(db));
+}
+
+export async function openCloudSyncModal() {
+  logger.info("Modal: Abrindo modal de sincronização em nuvem.");
+  el.modalContainer.classList.remove("hidden");
+
+  // Detectar se há configurações no .env
+  const config = await getFirebaseConfig();
+  state.useRealFirebase = !!config;
+
+  if (state.useRealFirebase && state.currentUser) {
+    try {
+      const firebase = await initRealFirebase();
+      if (firebase) {
+        const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
+        const snap = await getDocs(q);
+        const cloudSheets = [];
+        snap.forEach(d => cloudSheets.push(d.data()));
+        cloudCharactersCache = cloudSheets;
+      }
+    } catch (e) {
+      console.warn("Erro ao ler dados reais do Firestore para o cache:", e);
+    }
+  }
+
+  updateCloudSyncModalUI();
+}
+
+function updateCloudSyncModalUI() {
+  if (!state.currentUser) {
+    // Tela de login
+    el.modalBody.innerHTML = `
+      <h3 class="modal-title">Sincronização em Nuvem</h3>
+      <div style="margin-top: 16px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 16px; color: var(--color-blue-glow);">☁️</div>
+        <p style="font-size: var(--font-size-md); color: var(--text-primary); margin-bottom: 8px;">Salve suas fichas na nuvem de forma segura.</p>
+        <p style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-bottom: 24px; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+          Conecte-se com sua conta Google para enviar suas fichas locais e acessá-las em qualquer outro navegador ou dispositivo móvel.
+        </p>
+        
+        <button id="btn-google-sign-in" class="btn" style="background: #fff; color: #1f1f1f; border-color: #fff; padding: 10px 20px; font-weight: bold; border-radius: 4px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+          <svg width="18" height="18" viewBox="0 0 18 18">
+            <path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.9c1.7-1.56 2.69-3.86 2.69-6.57zm-8.64 6.8c1.89 0 3.48-.63 4.64-1.7l-2.9-2.24c-.8.54-1.84.86-2.9.86-2.23 0-4.12-1.51-4.8-3.53H.07v2.32C1.23 14 5.02 16 9 16zm-4.8-7.93c-.17-.5-.26-1.03-.26-1.57s.09-1.07.26-1.57V2.63H.07C-.48 3.74-.8 4.97-.8 6.28s.32 2.54.87 3.65l3.27-2.53zm4.8-4.87c1.03 0 1.95.35 2.68 1.05l2.01-2.01C11.53.86 9.89.5 9 .5 5.02.5 1.23 2.5.07 6.28l3.27 2.53c.68-2.02 2.57-3.53 4.8-3.53z" fill="#4285F4"/>
+          </svg>
+          Entrar com o Google
+        </button>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px;">
+          <button id="btn-close-sync" class="btn btn-md">Fechar</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("btn-google-sign-in").addEventListener("click", async () => {
+      if (state.useRealFirebase) {
+        try {
+          const firebase = await initRealFirebase();
+          if (firebase) {
+            const { signInWithPopup, GoogleAuthProvider } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(firebase.auth, provider);
+
+            state.currentUser = {
+              uid: result.user.uid,
+              displayName: result.user.displayName,
+              email: result.user.email
+            };
+            localStorage.setItem("assimilação_mock_user", JSON.stringify(state.currentUser));
+            logger.info(`Autenticação: Logado via Google (Real) - ${state.currentUser.displayName}`);
+
+            // Recarregar cache
+            const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+            const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
+            const snap = await getDocs(q);
+            const cloudSheets = [];
+            snap.forEach(d => cloudSheets.push(d.data()));
+            cloudCharactersCache = cloudSheets;
+
+            updateCloudSyncModalUI();
+            updateCloudSyncBadge();
+          }
+        } catch (error) {
+          logger.error("Erro no login real do Google:", error);
+          alert("Falha no login com Google. Verifique seu arquivo .env.");
+        }
+      } else {
+        const name = prompt("Digite seu nome para simular o login do Google:", "Jogador Assimilado");
+        if (name === null) return;
+        const email = prompt("Digite seu e-mail do Google:", "jogador@gmail.com");
+        if (!email) return;
+
+        const mockUser = {
+          uid: "google_user_" + Math.random().toString(36).substr(2, 9),
+          displayName: name,
+          email: email
+        };
+
+        state.currentUser = mockUser;
+        localStorage.setItem("assimilação_mock_user", JSON.stringify(mockUser));
+        logger.info("Autenticação: Login efetuado com sucesso via conta Google (Simulado).");
+        updateCloudSyncModalUI();
+        updateCloudSyncBadge();
+      }
+    });
+
+    document.getElementById("btn-close-sync").addEventListener("click", () => {
+      el.modalContainer.classList.add("hidden");
+    });
+  } else {
+    // Usuário logado
+    const stats = getCloudStorageInfo();
+    const sizePercent = Math.min(100, (stats.sizeKB / stats.maxSizeKB) * 100);
+    const countPercent = Math.min(100, (stats.count / stats.maxCount) * 100);
+
+    el.modalBody.innerHTML = `
+      <h3 class="modal-title">Sincronização em Nuvem ${state.useRealFirebase ? "(Firebase)" : "(Simulado)"}</h3>
+      <div style="margin-top: 16px;">
+        <!-- Perfil do Usuário -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; background:rgba(255,255,255,0.04); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
+          <div style="width:40px; height:40px; border-radius:50%; background:var(--color-blue-glow); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:#fff;">
+            ${state.currentUser.displayName.charAt(0).toUpperCase()}
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:600; color:var(--text-primary); font-size:var(--font-size-md);">${state.currentUser.displayName}</div>
+            <div style="font-size:var(--font-size-xs); color:var(--text-secondary);">${state.currentUser.email}</div>
+          </div>
+          <button id="btn-google-sign-out" class="btn btn-sm btn-danger" style="padding: 4px 8px;">Sair</button>
+        </div>
+        
+        <!-- Status de Mudanças Locais -->
+        ${state.hasUnsavedCloudChanges ? `
+          <div style="background:rgba(255, 102, 0, 0.1); border:1px solid var(--color-orange); color:var(--color-orange); padding:10px; border-radius:6px; font-size:var(--font-size-xs); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+            <span>⚠️</span>
+            <span>Você tem modificações locais não sincronizadas na nuvem!</span>
+          </div>
+        ` : `
+          <div style="background:rgba(0, 255, 102, 0.08); border:1px solid var(--color-praticas); color:var(--color-praticas); padding:10px; border-radius:6px; font-size:var(--font-size-xs); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+            <span>✔️</span>
+            <span>Suas fichas estão sincronizadas com a nuvem!</span>
+          </div>
+        `}
+        
+        <!-- Estatísticas de Armazenamento -->
+        <h4 style="font-size: var(--font-size-sm); margin-bottom: 12px; color: var(--text-primary); font-family:var(--font-heading);">Limites de Armazenamento</h4>
+        
+        <!-- Espaço em Disco (KB) -->
+        <div style="margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; font-size:var(--font-size-xs); color:var(--text-secondary); margin-bottom:4px;">
+            <span>Espaço Usado:</span>
+            <strong>${stats.sizeKB.toFixed(2)} KB / ${stats.maxSizeKB} KB (${sizePercent.toFixed(1)}%)</strong>
+          </div>
+          <div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
+            <div style="width:${sizePercent}%; height:100%; background:${sizePercent > 90 ? 'var(--color-danger)' : sizePercent > 70 ? 'var(--color-orange)' : 'var(--color-blue-glow)'}; border-radius:4px; transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+        
+        <!-- Limite de Quantidade de Fichas -->
+        <div style="margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; font-size:var(--font-size-xs); color:var(--text-secondary); margin-bottom:4px;">
+            <span>Fichas na Nuvem:</span>
+            <strong>${stats.count} / ${stats.maxCount} (${countPercent.toFixed(0)}%)</strong>
+          </div>
+          <div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
+            <div style="width:${countPercent}%; height:100%; background:${countPercent > 80 ? 'var(--color-orange)' : 'var(--color-blue-glow)'}; border-radius:4px; transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+        
+        <!-- Ações principais -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+          <button id="btn-cloud-push" class="btn" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-weight: bold; background: rgba(0,162,255,0.05); padding: 12px 10px; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <span style="font-size:20px;">📤</span>
+            <span>Enviar Ficha Atual</span>
+            <small style="font-size:9px; font-weight:normal; color:var(--text-muted);">Salvar esta ficha na nuvem</small>
+          </button>
+          
+          <button id="btn-cloud-pull" class="btn" style="border-color: var(--color-praticas); color: var(--color-praticas); font-weight: bold; background: rgba(0,255,102,0.05); padding: 12px 10px; display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <span style="font-size:20px;">📥</span>
+            <span>Puxar da Nuvem</span>
+            <small style="font-size:9px; font-weight:normal; color:var(--text-muted);">Importar fichas da nuvem</small>
+          </button>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px;">
+          <button id="btn-close-sync" class="btn btn-md">Fechar</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("btn-google-sign-out").addEventListener("click", async () => {
+      if (confirm("Tem certeza que deseja sair de sua conta Google? Suas fichas locais permanecerão salvas no navegador.")) {
+        if (state.useRealFirebase) {
+          try {
+            const firebase = await initRealFirebase();
+            if (firebase) {
+              const { signOut } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+              await signOut(firebase.auth);
+            }
+          } catch (e) {
+            console.error("Erro ao deslogar do Firebase:", e);
+          }
+        }
+        state.currentUser = null;
+        state.hasUnsavedCloudChanges = false;
+        cloudCharactersCache = [];
+        localStorage.removeItem("assimilação_mock_user");
+        localStorage.removeItem("assimilação_has_unsaved_changes");
+        logger.info("Autenticação: Desconexão efetuada.");
+        updateCloudSyncModalUI();
+        updateCloudSyncBadge();
+      }
+    });
+
+    document.getElementById("btn-close-sync").addEventListener("click", () => {
+      el.modalContainer.classList.add("hidden");
+    });
+
+    document.getElementById("btn-cloud-push").addEventListener("click", async () => {
+      if (!state.currentCharacter) {
+        alert("Crie ou selecione um personagem primeiro!");
+        return;
+      }
+
+      if (state.useRealFirebase) {
+        try {
+          const firebase = await initRealFirebase();
+          if (!firebase) return;
+
+          const { doc, setDoc, getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+
+          // Buscar fichas atuais do Firestore para validação de limites
+          const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
+          const snap = await getDocs(q);
+          const cloudSheets = [];
+          snap.forEach(d => cloudSheets.push(d.data()));
+
+          const characterId = state.currentCharacter.id;
+          const exists = cloudSheets.some(c => c.id === characterId);
+
+          // Validação de limite de quantidade (máximo 5)
+          if (!exists && cloudSheets.length >= stats.maxCount) {
+            alert(`Erro de Limite: Você atingiu o limite de ${stats.maxCount} fichas salvas na nuvem. Apague uma ficha no Firestore antes de adicionar outra.`);
+            return;
+          }
+
+          // Validação de limite de espaço (máximo 100 KB)
+          const updatedSheets = [...cloudSheets.filter(c => c.id !== characterId), state.currentCharacter];
+          const newSizeBytes = new Blob([JSON.stringify(updatedSheets)]).size;
+          const newSizeKB = newSizeBytes / 1024;
+          if (newSizeKB > stats.maxSizeKB) {
+            alert(`Erro de Espaço: Limite de armazenamento de ${stats.maxSizeKB} KB excedido (tamanho necessário: ${newSizeKB.toFixed(2)} KB). Reduza o tamanho de anotações ou remova outras fichas.`);
+            return;
+          }
+
+          // Gravação no Firestore
+          const docData = {
+            ...state.currentCharacter,
+            userId: state.currentUser.uid,
+            lastUpdated: Date.now()
+          };
+          await setDoc(doc(firebase.db, "characters", characterId), docData);
+
+          // Atualiza cache e UI
+          cloudCharactersCache = updatedSheets;
+          state.hasUnsavedCloudChanges = false;
+          localStorage.setItem("assimilação_has_unsaved_changes", "false");
+          logger.info(`Sincronização Firestore: Ficha de "${state.currentCharacter.name}" salva com sucesso.`);
+
+          alert(`Ficha de "${state.currentCharacter.name}" salva no Firestore com sucesso!`);
+          updateCloudSyncModalUI();
+          updateCloudSyncBadge();
+        } catch (err) {
+          logger.error("Erro ao salvar no Firestore:", err);
+          alert("Erro ao gravar dados na nuvem real. Verifique sua conexão e regras do Firestore.");
+        }
+      } else {
+        // Modo simulado
+        const db = getMockCloudDB();
+        const uid = state.currentUser.uid;
+        const userSheets = db[uid] || [];
+
+        const characterId = state.currentCharacter.id;
+        const existsIndex = userSheets.findIndex(c => c.id === characterId);
+
+        const pendingSheets = [...userSheets];
+        if (existsIndex !== -1) {
+          pendingSheets[existsIndex] = state.currentCharacter;
+        } else {
+          pendingSheets.push(state.currentCharacter);
+        }
+
+        // Valida limite de quantidade
+        if (existsIndex === -1 && userSheets.length >= stats.maxCount) {
+          alert(`Erro de Limite: Você atingiu o limite de ${stats.maxCount} fichas salvas na nuvem. Apague uma ficha no banco antes de adicionar outra.`);
+          return;
+        }
+
+        // Valida limite de espaço (100 KB)
+        const newSizeBytes = new Blob([JSON.stringify(pendingSheets)]).size;
+        const newSizeKB = newSizeBytes / 1024;
+        if (newSizeKB > stats.maxSizeKB) {
+          alert(`Erro de Espaço: Limite de armazenamento de ${stats.maxSizeKB} KB excedido (tamanho necessário: ${newSizeKB.toFixed(2)} KB). Reduza o tamanho de anotações ou remova outras fichas.`);
+          return;
+        }
+
+        // Salva
+        db[uid] = pendingSheets;
+        saveMockCloudDB(db);
+
+        state.hasUnsavedCloudChanges = false;
+        localStorage.setItem("assimilação_has_unsaved_changes", "false");
+        logger.info(`Sincronização: Ficha de "${state.currentCharacter.name}" sincronizada com a nuvem.`);
+
+        alert(`Ficha de "${state.currentCharacter.name}" enviada com sucesso!`);
+        updateCloudSyncModalUI();
+        updateCloudSyncBadge();
+      }
+    });
+
+    document.getElementById("btn-cloud-pull").addEventListener("click", async () => {
+      let cloudSheets = [];
+
+      if (state.useRealFirebase) {
+        try {
+          const firebase = await initRealFirebase();
+          if (!firebase) return;
+
+          const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+          const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
+          const snap = await getDocs(q);
+          snap.forEach(d => cloudSheets.push(d.data()));
+          cloudCharactersCache = cloudSheets;
+        } catch (err) {
+          logger.error("Erro ao puxar dados do Firestore:", err);
+          alert("Não foi possível conectar ao Firestore. Verifique seu arquivo .env.");
+          return;
+        }
+      } else {
+        const db = getMockCloudDB();
+        const uid = state.currentUser.uid;
+        cloudSheets = db[uid] || [];
+      }
+
+      if (cloudSheets.length === 0) {
+        alert("Nenhuma ficha encontrada na nuvem para esta conta.");
+        return;
+      }
+
+      if (confirm(`Encontramos ${cloudSheets.length} fichas na nuvem. Deseja importá-las? Fichas locais com o mesmo ID serão substituídas.`)) {
+        cloudSheets.forEach(cloudChar => {
+          const localIndex = state.characters.findIndex(c => c.id === cloudChar.id);
+          if (localIndex !== -1) {
+            state.characters[localIndex] = cloudChar;
+          } else {
+            state.characters.push(cloudChar);
+          }
+        });
+
+        localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
+        updateCharSelector();
+
+        if (state.currentCharacter) {
+          const reloadedChar = state.characters.find(c => c.id === state.currentCharacter.id);
+          if (reloadedChar) {
+            loadCharacter(reloadedChar.id);
+          }
+        } else if (state.characters.length > 0) {
+          loadCharacter(state.characters[0].id);
+        }
+
+        state.hasUnsavedCloudChanges = false;
+        localStorage.setItem("assimilação_has_unsaved_changes", "false");
+        logger.info("Sincronização: Fichas carregadas da nuvem.");
+
+        alert("Fichas importadas da nuvem com sucesso!");
+        updateCloudSyncModalUI();
+        updateCloudSyncBadge();
+      }
+    });
+  }
+}
+
+// Ouvinte do evento beforeunload para alertar antes de fechar a aba
+window.addEventListener("beforeunload", (e) => {
+  if (state.currentUser && state.hasUnsavedCloudChanges) {
+    e.preventDefault();
+    e.returnValue = "Você possui alterações na ficha que não foram salvas na nuvem. Sincronize antes de sair!";
+    return e.returnValue;
+  }
+});

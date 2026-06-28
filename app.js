@@ -1,7 +1,7 @@
-import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations } from "./js/state.js";
+import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations, updateCloudSyncBadge } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal } from "./js/modals.js";
+import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal, openCloudSyncModal } from "./js/modals.js";
 import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   logger.info("Aplicação carregada. Inicializando components...");
   renderIcons();
   loadCharactersFromStorage();
+  updateCloudSyncBadge();
 
   // Carrega todos os novos tipos de ficha do mundo
   loadAllWorldData();
@@ -71,6 +72,9 @@ function setupEventListeners() {
   if (el.btnSettings) {
     el.btnSettings.addEventListener("click", openSettingsModal);
   }
+  if (el.btnCloudSync) {
+    el.btnCloudSync.addEventListener("click", openCloudSyncModal);
+  }
   
   // Logo home button - volta para landing screen
   const btnHome = document.getElementById("btn-home");
@@ -124,12 +128,12 @@ function setupEventListeners() {
     btnVoltar.addEventListener("click", goToLanding);
   }
 
-  // Aptitude Columns Lock Toggles
   document.querySelectorAll(".btn-lock-toggle").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const card = e.target.closest(".aptitude-column-card");
       if (card) {
         const isLocked = card.classList.toggle("locked");
+        card.classList.toggle("card-glass", isLocked);
         const iconSpan = btn.querySelector("[data-icon]");
         if (iconSpan) {
           iconSpan.setAttribute("data-icon", isLocked ? "lock" : "unlock");
