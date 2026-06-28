@@ -23,17 +23,17 @@ export const ITEM_CATEGORIAS = {
   fragil: {
     nome: "Frágil",
     cat: -1,
-    desc: "Característica de Categoria -1. Cai de nível de Qualidade com 1 C a menos; nível 1 se torna Quebrado no próximo uso."
+    desc: "Característica de Categoria -1. Cai de nível de Qualidade com 1 Pressão a menos; nível 1 se torna Quebrado no próximo uso."
   },
   improvisado: {
     nome: "Improvisado",
     cat: -1,
-    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 A, que pode ser cancelado investindo uma B."
+    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 Sucesso, que pode ser cancelado investindo uma Adaptação."
   },
   pesado: {
     nome: "Pesado",
     cat: -1,
-    desc: "Característica de Categoria -1. Reduz a mobilidade, cancelando 1 A em testes de movimento ou furtividade; ocupa 2 espaços de inventário."
+    desc: "Característica de Categoria -1. Reduz a mobilidade, cancelando 1 Sucesso em testes de movimento ou furtividade; ocupa 2 espaços de inventário."
   },
   uso_unico: {
     nome: "Uso Único",
@@ -63,7 +63,7 @@ export const ITEM_CATEGORIAS = {
   letal: {
     nome: "Letal",
     cat: 1,
-    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar uma B por um A; uso extra concede +1 A, mas reduz 1 nível de Qualidade."
+    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar uma Adaptação por um Sucesso; uso extra concede +1 Sucesso, mas reduz 1 nível de Qualidade."
   },
   protetivo: {
     nome: "Protetivo",
@@ -78,12 +78,12 @@ export const ITEM_CATEGORIAS = {
   eficiente: {
     nome: "Eficiente",
     cat: 2,
-    desc: "Característica de Categoria 2. Item prático e ergonômico; uma vez por dia, permite trocar 16 por 11 em um teste. Uso extra no mesmo dia reduz 1 nível de Qualidade."
+    desc: "Característica de Categoria 2. Item prático e ergonômico; uma vez por dia, permite trocar 1d6 por 1d10 em um teste. Uso extra no mesmo dia reduz 1 nível de Qualidade."
   },
   duravel: {
     nome: "Durável",
     cat: 2,
-    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer uma C adicional para reduzir 1 nível de Qualidade."
+    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer uma Pressão adicional para reduzir 1 nível de Qualidade."
   },
   adrenalina: {
     nome: "Adrenalina",
@@ -103,12 +103,12 @@ export const ITEM_CATEGORIAS = {
   inflamavel: {
     nome: "Inflamável",
     cat: 4,
-    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem investir A e B ou recebem 2d6 adicionais no final do turno."
+    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem investir um Sucesso e uma Adaptação ou recebem 2d6 adicionais no final do turno."
   },
   medicinal: {
     nome: "Medicinal",
     cat: 4,
-    desc: "Característica de Categoria 4. Itens médicos ou medicamentosos com 6 usos; cada uso cancela 1C em testes de Tratamento Médico, limitado à graduação em Medicina. Itens de Uso Único podem cancelar até 2C em um teste."
+    desc: "Característica de Categoria 4. Itens médicos ou medicamentosos com 6 usos; cada uso cancela 1 Pressão em testes de Tratamento Médico, limitado à graduação em Medicina. Itens de Uso Único podem cancelar até 2 Pressões em um teste."
   }
 };
 
@@ -789,15 +789,26 @@ export function renderInventorySheet() {
     let qual = typeof slot.qualidade === 'number' ? slot.qualidade : (slot.qualidade ? 4 : 3);
     let pressao = typeof slot.pressao === 'number' ? slot.pressao : 0;
     let esc = typeof slot.escassez === 'number' ? slot.escassez : (slot.escassez ? 3 : 2);
-    let categoria = slot.categoria || 'nenhuma';
+    let slotCats = slot.categorias || (slot.categoria && slot.categoria !== 'nenhuma' ? [slot.categoria] : []);
+    if (!slot.categorias) {
+      slot.categorias = slotCats;
+    }
 
     row.innerHTML = `
       <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
         <span class="slot-num" title="${isBody ? 'Espaço no Corpo' : 'Espaço na Mochila'}" style="color: ${isBody ? 'var(--color-blue-glow)' : 'var(--text-muted)'}; font-weight: bold; font-family: var(--font-heading);">${slotDisplayNum}</span>
         <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio" style="width: 100%;">
-        <span class="item-category-badge" style="font-size: 8px; padding: 2px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); display: ${categoria === 'nenhuma' ? 'none' : 'inline-block'}; white-space: nowrap;">
-          ${ITEM_CATEGORIAS[categoria]?.nome || ''}
-        </span>
+        <div class="item-category-badges-container" style="display: flex; gap: 4px; flex-wrap: wrap; margin-left: 6px;">
+          ${slotCats.map(catKey => {
+            const cat = ITEM_CATEGORIAS[catKey];
+            if (!cat) return '';
+            return `
+              <span class="item-category-badge" style="font-size: 8px; padding: 2px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); white-space: nowrap;">
+                ${cat.nome}
+              </span>
+            `;
+          }).join('')}
+        </div>
       </div>
       
       <div class="item-props-redesign" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -815,7 +826,7 @@ export function renderInventorySheet() {
                 <option value="6" ${qual === 6 ? 'selected' : ''}>Q6: Obra-Prima</option>
               </select>
             </div>
-
+ 
             <!-- C Investidas -->
             <div class="prop-c-wrapper" title="Pressões" style="display: flex; align-items: center; gap: 4px;">
               <span style="color: var(--color-rust-glow); font-size: 11px; font-weight: bold;">Desgate:</span>
@@ -830,7 +841,7 @@ export function renderInventorySheet() {
               </select>
             </div>
           </div>
-
+ 
           <div class="colum" style="display: flex; flex-direction: column; gap: 4px;">
             <div class="row" style="display: flex; flex-direction: row; gap: 6px; align-items: center;">
               <!-- Escassez -->
@@ -845,26 +856,49 @@ export function renderInventorySheet() {
                   <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
                 </select>
               </div>
-
+ 
               <!-- Categoria/Característica -->
-              <div class="prop-select-wrapper prop-categoria-wrapper" title="${ITEM_CATEGORIAS[categoria]?.desc || ''}">
-                <select class="select-categoria" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer; max-width: 140px;">
-                  ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => `
-                    <option value="${key}" ${categoria === key ? 'selected' : ''}>
-                      ${cat.nome} ${cat.cat !== 0 && cat.cat !== "Especial" ? `(Cat: ${cat.cat})` : ''}
-                    </option>
-                  `).join("")}
-                </select>
+              <div class="prop-categoria-container" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                <div class="selected-categorias-badges" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  ${slotCats.map(catKey => {
+                    const cat = ITEM_CATEGORIAS[catKey];
+                    if (!cat) return '';
+                    return `
+                      <span class="category-badge-item" data-cat-key="${catKey}" title="${cat.desc}" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255, 165, 0, 0.15); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); font-weight: bold; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                        ${cat.nome}
+                        <span class="remove-cat-btn" style="cursor: pointer; color: #ef4444; font-weight: bold; margin-left: 2px;">&times;</span>
+                      </span>
+                    `;
+                  }).join('')}
+                </div>
+                <div class="prop-select-wrapper prop-categoria-wrapper">
+                  <select class="select-categoria" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer; max-width: 140px;">
+                    <option value="nenhuma">+ Categoria</option>
+                    ${Object.entries(ITEM_CATEGORIAS).filter(([key]) => key !== 'nenhuma' && !slotCats.includes(key)).map(([key, cat]) => `
+                      <option value="${key}">
+                        ${cat.nome} ${cat.cat !== 0 && cat.cat !== "Especial" ? `(Cat: ${cat.cat})` : ''}
+                      </option>
+                    `).join("")}
+                  </select>
+                </div>
               </div>
             </div>
             <!-- Efeito -->
             <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
               <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
             </div>
-            <!-- Texto da Categoria -->
-            <span class="category-desc-text" style="font-size: 10px; color: var(--color-gold-glow); opacity: 0.85; max-width: 300px; display: ${categoria === 'nenhuma' ? 'none' : 'block'}; font-style: italic;">
-              ${ITEM_CATEGORIAS[categoria]?.desc || ''}
-            </span>
+            <!-- Texto das Categorias -->
+            <div class="category-descs-container" style="display: flex; flex-direction: column; gap: 4px; max-width: 300px; margin-top: 4px;">
+              ${slotCats.map(catKey => {
+                const cat = ITEM_CATEGORIAS[catKey];
+                if (!cat) return '';
+                return `
+                  <span class="category-desc-text" data-cat-key="${catKey}" style="font-size: 10px; color: var(--color-gold-glow); opacity: 0.85; font-style: italic;">
+                    <strong>${cat.nome}</strong>: ${cat.desc}
+                  </span>
+                `;
+              }).join('')}
+            </div>
           </div>
         </div>
       </div>
@@ -872,7 +906,7 @@ export function renderInventorySheet() {
         ${ICONS.trash}
       </button>
     `;
-
+ 
     const inputName = row.querySelector(".item-name");
     const selQ = row.querySelector(".select-qualidade");
     const selP = row.querySelector(".select-pressao");
@@ -885,45 +919,44 @@ export function renderInventorySheet() {
         qualidade: parseInt(selQ.value),
         pressao: parseInt(selP.value),
         escassez: parseInt(selE.value),
-        categoria: selCat.value,
+        categoria: slot.categoria || 'nenhuma',
+        categorias: slot.categorias || [],
         efeito: inputEffect.value
       };
       saveCurrentCharacter();
     };
-
+ 
     inputName.addEventListener("input", saveSlot);
     selQ.addEventListener("change", saveSlot);
     selP.addEventListener("change", saveSlot);
     selE.addEventListener("change", saveSlot);
+    
     selCat.addEventListener("change", e => {
       const selectedKey = e.target.value;
-      const catWrapper = row.querySelector(".prop-categoria-wrapper");
-      if (catWrapper) {
-        catWrapper.title = ITEM_CATEGORIAS[selectedKey].desc;
-      }
-      
-      const badge = row.querySelector(".item-category-badge");
-      if (badge) {
-        if (selectedKey !== "nenhuma") {
-          badge.textContent = ITEM_CATEGORIAS[selectedKey].nome;
-          badge.style.display = "inline-block";
-        } else {
-          badge.style.display = "none";
+      if (selectedKey !== "nenhuma") {
+        const slotCats = slot.categorias || (slot.categoria && slot.categoria !== 'nenhuma' ? [slot.categoria] : []);
+        if (!slotCats.includes(selectedKey)) {
+          slotCats.push(selectedKey);
         }
+        slot.categorias = slotCats;
+        slot.categoria = selectedKey;
+        saveSlot();
+        renderInventorySheet();
       }
-
-      const descText = row.querySelector(".category-desc-text");
-      if (descText) {
-        if (selectedKey !== "nenhuma") {
-          descText.textContent = ITEM_CATEGORIAS[selectedKey].desc;
-          descText.style.display = "block";
-        } else {
-          descText.style.display = "none";
-        }
-      }
-      
-      saveSlot();
     });
+
+    row.querySelectorAll(".remove-cat-btn").forEach(btn => {
+      btn.addEventListener("click", e => {
+        e.stopPropagation();
+        const catKey = btn.closest(".category-badge-item").dataset.catKey;
+        const slotCats = slot.categorias || (slot.categoria && slot.categoria !== 'nenhuma' ? [slot.categoria] : []);
+        slot.categorias = slotCats.filter(k => k !== catKey);
+        slot.categoria = slot.categorias.length > 0 ? slot.categorias[slot.categorias.length - 1] : 'nenhuma';
+        saveSlot();
+        renderInventorySheet();
+      });
+    });
+ 
     inputEffect.addEventListener("input", saveSlot);
 
     // Delete slot button

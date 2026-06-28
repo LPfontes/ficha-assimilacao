@@ -213,18 +213,18 @@ export function renderProfileCard(entity, prefix, config) {
   const gridFieldsHtml = renderFields(gridFields);
 
   return `
-    <div class="profile-card card-glass">
-      <div class="portrait-wrapper">
-        <div class="polaroid-frame" id="${prefix}-image-frame" title="Clique para alterar a imagem">
+    <div class="profile-card card-glass" style="display:flex; flex-direction:column; gap:20px; align-items:stretch; width:100%;">
+      <div class="portrait-centered-wrapper" style="display:flex; justify-content:center; padding:10px 0; width:100%;">
+        <div class="polaroid-frame" id="${prefix}-image-frame" title="Clique para alterar a imagem" style="margin: 0 auto; flex-shrink:0;">
           ${imgContent}
           <div class="portrait-overlay"><span>Alterar Foto</span></div>
         </div>
         <input type="file" id="${prefix}-image-input" accept="image/*" style="display:none;">
-        <div class="portrait-side-fields">
-          ${sideFieldsHtml}
-        </div>
       </div>
-      <div class="profile-fields-grid">
+      <div class="portrait-side-fields" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+        ${sideFieldsHtml}
+      </div>
+      <div class="profile-fields-grid" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
         ${gridFieldsHtml}
       </div>
     </div>

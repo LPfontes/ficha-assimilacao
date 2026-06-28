@@ -998,4 +998,109 @@
   align-items: center;
 }
 
+/* ==========================================
+   MELHORIA DE HIERARQUIA VISUAL DAS FICHAS DE MUNDO
+   ========================================== */
+
+/* Grid de Recursos Naturais */
+.profile-field-group[data-group="recursos"] {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 165, 0, 0.12) !important;
+  border-radius: var(--radius-md) !important;
+  margin-top: 16px;
+}
+
+.profile-field-group[data-group="recursos"] .ws-label {
+  grid-column: 1 / -1;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  color: var(--color-gold-glow);
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 165, 0, 0.2);
+  padding-bottom: 6px;
+  margin: 0 0 8px 0 !important;
+}
+
+.profile-field-group[data-group="recursos"] .profile-attr-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  margin-bottom: 0;
+}
+
+.profile-field-group[data-group="recursos"] .profile-attr-row label {
+  min-width: auto;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.profile-field-group[data-group="recursos"] .profile-attr-row select {
+  font-size: 12px;
+  color: var(--text-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  padding: 2px 0;
+}
+
+/* Customização Premium dos Atributos Gerais da Coluna Esquerda */
+.profile-attr-row {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.profile-attr-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.profile-attr-row label {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.profile-attr-row select,
+.profile-attr-row input[type="text"] {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 2px 0;
+  outline: none;
+}
+
+/* Modificações específicas para selects com foco em cada tela */
+#regiao-screen .profile-attr-row:focus-within {
+  border-color: rgba(0, 162, 255, 0.3);
+}
+
+#regiao-screen .profile-attr-row select:focus,
+#regiao-screen .profile-attr-row input[type="text"]:focus {
+  border-bottom-color: var(--color-regiao);
+}
+
+#local-screen .profile-attr-row:focus-within {
+  border-color: rgba(200, 160, 212, 0.3);
+}
+
+#local-screen .profile-attr-row select:focus,
+#local-screen .profile-attr-row input[type="text"]:focus {
+  border-bottom-color: var(--color-local);
+}
+
 
