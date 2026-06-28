@@ -135,7 +135,7 @@ export const CARACTERISTICAS = [
     custo: 2,
     requisitoText: "Geografia 2+",
     requisitos: { Geografia: 2 },
-    descricao: "Capaz de explorar a Região na metade do tempo Ponto de e encontra marcos geográficos com sucesso em teste de Geografia ou Sobrevivência."
+    descricao: "Capaz de explorar a Região na metade do tempo Ponto  Ponto de Assimilação encontra marcos geográficos com sucesso em teste de Geografia ou Sobrevivência."
   },
   {
     id: "disciplinado",
