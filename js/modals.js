@@ -217,7 +217,7 @@ export function openAssimilationTestModal() {
         </div>
 
         <div class="c-alert-message hidden" id="death-alert">
-          <strong>ATENÇÃO:</strong> O total de C acumuladas atingiu ou excedeu 10! A personagem perdeu toda a consciência humana e agora se tornou uma criatura sob controle definitivo do Assimilador (NPC).
+          <strong>ATENÇÃO:</strong> O total  PRESSÃO acumuladas atingiu ou excedeu 10! A personagem perdeu toda a consciência humana e agora se tornou uma criatura sob controle definitivo do Assimilador (NPC).
         </div>
 
         <div class="modal-actions hidden" id="ass-modal-mutation-action">
@@ -312,7 +312,7 @@ export function openAssimilationTestModal() {
         document.getElementById("ass-count-b").textContent = b;
         document.getElementById("ass-count-c").textContent = c;
         
-        logger.info(`Modal: Teste de Assimilação concluído - Sucesso [S]: ${a}, Adaptação [A]: ${b}, Pressão [P]: ${c}.`);
+        logger.info(`Modal: Teste de Assimilação concluído - Sucesso [S]: ${a}, Adaptação [AS]: ${b}, Pressão [P]: ${c}.`);
         
         // Calcula Morte por Assimilação Completa (Pág 124)
         const prevC = char.mutações.filter(m => m.suit === "inoportunas").length;
@@ -697,8 +697,8 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         <h3>🔮 Selecionar Mutações Sorteadas</h3>
         <p style="font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0;">Toque em cada carta para revelar e ver as opções de mutação.</p>
         <div class="points-bar">
-          <span style="color:#00ff66;">[S] Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
-          <span style="color:#eab308;">[A] Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
+          <span style="color:#00ff66;">[Níveis de Saúde] Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
+          <span style="color:#eab308;">[SUCESSO] Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
           <span style="color:#ef4444;">[P] Pressões: <strong id="val-pts-c">${ptsC}</strong></span>
         </div>
       </div>
@@ -1077,7 +1077,7 @@ const ITEM_CATEGORIAS = {
   improvisado: {
     nome: "Improvisado",
     cat: -1,
-    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 A, que pode ser cancelado investindo uma B."
+    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 A, que pode ser cancelado investindo  ADAPTAÇÃO."
   },
   pesado: {
     nome: "Pesado",
@@ -1112,7 +1112,7 @@ const ITEM_CATEGORIAS = {
   letal: {
     nome: "Letal",
     cat: 1,
-    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar uma B por um A; uso extra concede +1 A, mas reduz 1 nível de Qualidade."
+    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar  ADAPTAÇÃO por  SUCESSO; uso extra concede +1 A, mas reduz 1 nível de Qualidade."
   },
   protetivo: {
     nome: "Protetivo",
@@ -1132,7 +1132,7 @@ const ITEM_CATEGORIAS = {
   duravel: {
     nome: "Durável",
     cat: 2,
-    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer uma C adicional para reduzir 1 nível de Qualidade."
+    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer  PRESSÃO adicional para reduzir 1 nível de Qualidade."
   },
   adrenalina: {
     nome: "Adrenalina",
@@ -1152,7 +1152,7 @@ const ITEM_CATEGORIAS = {
   inflamavel: {
     nome: "Inflamável",
     cat: 4,
-    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem investir A e B ou recebem 2d6 adicionais no final do turno."
+    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem  SUCESSO e B ou recebem 2d6 adicionais no final do turno."
   },
   medicinal: {
     nome: "Medicinal",

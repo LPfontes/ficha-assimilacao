@@ -11,7 +11,7 @@ export const ASSIMILACOES = {
         mutações: [
           { cost: "1 sucesso", name: "Sensibilidade", desc: "Gasta 1 Ponto de Determinação para sentir a presença de criaturas assimiladas em até 30m pela cena." },
           { cost: "2 sucessos", name: "Consciência", desc: "Mantenha um dado adicional em qualquer teste que inclua Percepção." },
-          { cost: "3 sucessos", name: "Discernimento", desc: "Adicione Adaptação a um dado mantido que já possua Adaptação nos testes de Ação." },
+          { cost: "3 sucessos", name: "Discernimento", desc: "Adicione Adaptação a um dado mantido que já possua Adaptação nos testes  SUCESSOção." },
           { cost: "4 sucessos", name: "Presciência", req: 3, desc: "3+ Ponto de Assimilação: No início da sessão, rola 2 dados Ponto de Determinação substitui por rolagens da mesa posteriormente." },
           { cost: "5 sucessos", name: "Complicar", req: 5, desc: "5+ Ponto de Assimilação: Gasta 1 Ponto de Determinação para fazer alguém rolar novamente um dado." },
           { cost: "6 sucessos", name: "Vidência", req: 7, desc: "7+ Ponto de Assimilação: Prevê Crises, permitindo ao Assimilador adiar seu efeito por até 24h para contra-medidas." }
@@ -93,8 +93,8 @@ export const ASSIMILACOES = {
         carta: "8 de Sucesso",
         nome: "Assimilação Regenerativa",
         mutações: [
-          { cost: "1 sucesso", name: "Resistente", desc: "Ignora a penalidade do S 4 (Laceração)." },
-          { cost: "2 sucessos", name: "Resiliente", desc: "Pode se Regenerar sem ajuda médica mesmo quando reduzido ao S 2 (Debilitação) no Tempo de Recuperação de uma semana." },
+          { cost: "1 sucesso", name: "Resistente", desc: "Ignora a penalidade  Nível de Saúde 4 (Laceração)." },
+          { cost: "2 sucessos", name: "Resiliente", desc: "Pode se Regenerar sem ajuda médica mesmo quando reduzido  Nível de Saúde 2 (Debilitação) no Tempo de Recuperação de uma semana." },
           { cost: "3 sucessos", name: "Vigoroso", desc: "Recebe um ponto de vida adicional em cada Nível de Gravidade." },
           { cost: "4 sucessos", name: "Restauração", req: 3, desc: "3+ Ponto de Assimilação: Ao concluir uma Recuperação, dobre os pontos de vida Regenerados." },
           { cost: "5 sucessos", name: "Recuperação", req: 5, desc: "5+ Ponto de Assimilação: Regenera uma quantidade de pontos de vida igual à soma de Resolução Ponto de Determinação Potência após cada cena." },
@@ -174,7 +174,7 @@ export const ASSIMILACOES = {
         nome: "Assimilação Anatômica",
         mutações: [
           { cost: "1 adptação", name: "Presas Aumentadas", desc: "Gasta um Ponto de Determinação para usar a característica Letal ao morder. Depois de ingerir carne crua, ignora o custo pelas próximas 4 horas." },
-          { cost: "2 adptações", name: "Nadadeiras", desc: "Gasta um e para se deslocar debaixo d'água na velocidade normal. Perde um nível em Furtividade (mínimo 0)." },
+          { cost: "2 adptações", name: "Nadadeiras", desc: "Gasta  Ponto de Assimilação para se deslocar debaixo d'água na velocidade normal. Perde um nível em Furtividade (mínimo 0)." },
           { cost: "3 adptações", name: "Guelras", desc: "Guelras funcionais se formam nas laterais do pescoço, permitindo respirar debaixo d’água, porém consome o dobro de água." },
           { cost: "4 adptações", name: "Braços Alongados", req: 3, desc: "3+ Ponto de Assimilação: Os braços se alongam. Quando investe em Neutralizar Ameaça, o alvo perde Pressão no turno seguinte. Perde um nível em Manufaturas (mínimo 0)." },
           { cost: "5 adptações", name: "Poder de carga", req: 5, desc: "5+ Ponto de Assimilação: Permite carregar o triplo da carga normal e dobra os pontos investidos em Neutralização de Ameaça. Perde permanentemente todos os níveis em Manufaturas." },
@@ -189,7 +189,7 @@ export const ASSIMILACOES = {
           { cost: "2 adptações", name: "Pele Ajustável", desc: "Mantenha um dado a mais em Furtividade em baixa luz. Sofre penalidade de um Sucesso em testes de Expressão sob luz direta." },
           { cost: "3 adptações", name: "Sentir Vibrações", desc: "Epiderme altamente sensível. Adicione um Sucesso em testes de Percepção tátil. Estímulos inesperados reduzem em um Sucesso testes de Reação." },
           { cost: "4 adptações", name: "Cheiro Nocivo", req: 3, desc: "3+ Ponto de Assimilação: Libera compostos que geram Pressão a seres vivos pelo restante da cena. Provoca redução de um Sucesso em testes sociais do Infectado por 2 cenas." },
-          { cost: "5 adptações", name: "Mudar Corpo", req: 5, desc: "5+ Ponto de Assimilação: Gaste um e para adicionar 2 Sucessos em um teste de Furtividade, disfarce ou atuação. Roupas no tronco anulam o efeito." },
+          { cost: "5 adptações", name: "Mudar Corpo", req: 5, desc: "5+ Ponto de Assimilação: Gaste  Ponto de Assimilação para adicionar 2 Sucessos em um teste de Furtividade, disfarce ou atuação. Roupas no tronco anulam o efeito." },
           { cost: "6 adptações", name: "Sentir o Ar", req: 7, desc: "7+ Ponto de Assimilação: Detecta sinais elétricos, calor e vibrações em raio de 3km. A pele queima sob sol direto, levando à perda de 3 pontos de vida por hora." }
         ]
       },
@@ -202,7 +202,7 @@ export const ASSIMILACOES = {
           { cost: "1 sucesso e 2 adptações", name: "Camuflagem", desc: "Reage reflexivamente a padrões visuais para se ocultar. Os dados de Furtividade são substituídos por 2." },
           { cost: "2 adptações e 2 pressões", name: "Visão Periférica", req: 3, desc: "3+ Ponto de Assimilação: Olhos saltam aumentando visão. +1 em Percepção (pode ultrapassar o limite). Sofre penalidade de Adaptação em testes de pontaria." },
           { cost: "2 adptações e 1 pressão", name: "Malemolência", req: 5, desc: "5+ Ponto de Assimilação: Adiciona 2 Sucessos em interações sociais. Se tentar esconder informações, sofre penalidade de Pressão adicional." },
-          { cost: "2 sucessos e 4 adptações", name: "Invisibilidade", req: 7, desc: "7+ Ponto de Assimilação: Gasta um e para ficar completamente invisível pelo restante da cena. Não pode voltar a ficar visível antes do fim da cena." }
+          { cost: "2 sucessos e 4 adptações", name: "Invisibilidade", req: 7, desc: "7+ Ponto de Assimilação: Gasta  Ponto de Assimilação para ficar completamente invisível pelo restante da cena. Não pode voltar a ficar visível antes do fim da cena." }
         ]
       },
       {
@@ -247,7 +247,7 @@ export const ASSIMILACOES = {
         mutações: [
           { cost: "1 adptação", name: "Pulmão Grosso", desc: "Respira fumaça/detritos sem penalidades. Adiciona Pressão em Furtividade por respiração ruidosa." },
           { cost: "1 sucesso e 1 adptação", name: "Fôlego Estendido", desc: "Prende a respiração por 5 minutos. Odores fortes causam perda de 1 Ponto de Determinação." },
-          { cost: "2 adptações e 1 pressão", name: "Sopro Poderoso", desc: "Gasta um e para expirar forte, empurrando Ameaças e dando 2 Sucessos para Fuga. Fala estrondosa reduz Adaptação em testes sociais com Furtividade." },
+          { cost: "2 adptações e 1 pressão", name: "Sopro Poderoso", desc: "Gasta  Ponto de Assimilação para expirar forte, empurrando Ameaças e dando 2 Sucessos para Fuga. Fala estrondosa reduz Adaptação em testes sociais com Furtividade." },
           { cost: "4 adptações", name: "Fôlego Inumano", req: 3, desc: "3+ Ponto de Assimilação: Com inspiração profunda, pode Agir por Instinto sem custo de Assimilação. Sofre penalidade de um dado mantido em Conhecimentos." },
           { cost: "5 adptações", name: "Fôlego Reparador", req: 5, desc: "5+ Ponto de Assimilação: Ao perder Determinação, pode perder um Ponto de Assimilação no lugar (apenas para perdas, não usos ativos)." },
           { cost: "2 sucessos e 4 adptações", name: "Fôlego Infinito", req: 7, desc: "7+ Ponto de Assimilação: Sobrevive sem ar indefinidamente. Dobra o efeito de venenos ou intoxicação por vias aéreas." }
@@ -259,8 +259,8 @@ export const ASSIMILACOES = {
         mutações: [
           { cost: "1 adptação", name: "Resistência Térmica", desc: "Imune a frio/calor moderados. Sudorese ácida constante. Contato físico faz aliados adicionarem Pressão a testes até o fim da cena." },
           { cost: "2 adptações", name: "Conduzir Calor", desc: "Absorve calor, impedindo hipotermia de aliados. Regeneração de vida reduzida pela metade sem fontes de calor." },
-          { cost: "1 sucesso e 2 adptações", name: "Gerar Calor", desc: "Gasta um e para aumentar temperatura, penalizando presentes em um Sucesso em Resolução/Potência ou adiciona Pressão a Ativações de Ameaça." },
-          { cost: "1 sucesso e 3 adptações", name: "Sangue Quente", req: 3, desc: "3+ Ponto de Assimilação: Gasta um e para manter 2 dados adicionais em Reação, mas perde um Ponto de Determinação em ações físicas na cena." },
+          { cost: "1 sucesso e 2 adptações", name: "Gerar Calor", desc: "Gasta  Ponto de Assimilação para aumentar temperatura, penalizando presentes em um Sucesso em Resolução/Potência ou adiciona Pressão a Ativações de Ameaça." },
+          { cost: "1 sucesso e 3 adptações", name: "Sangue Quente", req: 3, desc: "3+ Ponto de Assimilação: Gasta  Ponto de Assimilação para manter 2 dados adicionais em Reação, mas perde um Ponto de Determinação em ações físicas na cena." },
           { cost: "1 sucesso e 4 adptações", name: "Exala Vapor", req: 5, desc: "5+ Ponto de Assimilação: Emite vapor, ofuscando visão (ataques na área sofrem duas Pressões, aumentando custos em duas Pressões ou perdendo 2 Sucessos)." },
           { cost: "6 adptações", name: "Esquentar/Esfriar Região", req: 7, desc: "7+ Ponto de Assimilação: Gastando todos os e, altera temperatura de uma região em 3°C por ponto investido." }
         ]
@@ -269,10 +269,10 @@ export const ASSIMILACOES = {
         carta: "9 de Adaptação",
         nome: "Assimilação Neural",
         mutações: [
-          { cost: "1 adptação", name: "Pulso Mental", desc: "Gasta um e para repetir teste de Conhecimentos. Sobrecarga causa insônia: só restaura Determinação em ambiente totalmente isolado." },
+          { cost: "1 adptação", name: "Pulso Mental", desc: "Gasta  Ponto de Assimilação para repetir teste de Conhecimentos. Sobrecarga causa insônia: só restaura Determinação em ambiente totalmente isolado." },
           { cost: "2 adptações", name: "Prever Dano", desc: "Reduz dano sofrido em 1 ponto em ataques repetidos. Perde um Ponto de Determinação se estímulos visuais/sonoros simultâneos ocorrerem." },
-          { cost: "1 sucesso e 2 adptações", name: "Prever Ameaça", desc: "Gasta um e em Reação/Sagacidade para agir antes da Ameaça; Sucessos/Adaptações anulam Pressões/resultados da Ameaça." },
-          { cost: "4 adptações", name: "Sintonia Mental", req: 3, desc: "3+ Ponto de Assimilação: Gasta um e para dar Adaptação a aliado fora de Conflito. Gera penalidade de Pressão em Influência/Expressão do Infectado." },
+          { cost: "1 sucesso e 2 adptações", name: "Prever Ameaça", desc: "Gasta  Ponto de Assimilação em Reação/Sagacidade para agir antes da Ameaça; Sucessos/Adaptações anulam Pressões/resultados da Ameaça." },
+          { cost: "4 adptações", name: "Sintonia Mental", req: 3, desc: "3+ Ponto de Assimilação: Gasta  Ponto de Assimilação para dar Adaptação a aliado fora de Conflito. Gera penalidade de Pressão em Influência/Expressão do Infectado." },
           { cost: "1 sucesso e 4 adptações", name: "Visão Mental", req: 5, desc: "5+ Ponto de Assimilação: Ao obter 2 Sucessos em Conhecimento, ganha informação vital sobre o tema. Recebe Pressão adicional em rolagens criativas/improvisadas." },
           { cost: "2 sucessos e 4 adptações", name: "Visão Verdadeira", req: 7, desc: "7+ Ponto de Assimilação: Pede informação oculta ao Assimilador sem testes, gastando Pontos de Assimilação. Precisão aumenta com e gasto." }
         ]
@@ -283,7 +283,7 @@ export const ASSIMILACOES = {
         mutações: [
           { cost: "1 adptação", name: "Sangue Frio", desc: "Imune a penalidades por tensão, medo ou risco. Penalidade de Adaptação em testes de Manufaturas pela sensibilidade reduzida." },
           { cost: "2 adptações", name: "Transe", desc: "Restaura o dobro de Determinação em Recuperações se estiver com vida completa." },
-          { cost: "1 sucesso e 2 adptações", name: "Sangue Furioso", desc: "Gasta um e para manter 2 dados adicionais em Potência/Atletismo, mas perde 1 ponto de vida no fim da rodada." },
+          { cost: "1 sucesso e 2 adptações", name: "Sangue Furioso", desc: "Gasta  Ponto de Assimilação para manter 2 dados adicionais em Potência/Atletismo, mas perde 1 ponto de vida no fim da rodada." },
           { cost: "4 adptações", name: "Fingir Morte", req: 3, desc: "3+ Ponto de Assimilação: Quase para o coração por 5 minutos. Dieta pobre em ferro piora penalidades de vida como se fosse um nível inferior." },
           { cost: "4 adptações e 1 pressão", name: "Sangue Regenerativo", req: 5, desc: "5+ Ponto de Assimilação: Gasta um Ponto de Determinação para manter dado adicional e regenerar um ponto de vida. Não pode anular Pressões nesse teste." },
           { cost: "2 sucessos e 4 adptações", name: "Sangue Potente", req: 7, desc: "7+ Ponto de Assimilação: Gasta todos os e para manter um dado adicional por ponto gasto em ações físicas pelo restante da cena." }
@@ -293,12 +293,12 @@ export const ASSIMILACOES = {
         carta: "Valete de Adaptação",
         nome: "Assimilação Fitomórfica",
         mutações: [
-          { cost: "1 adptação", name: "Sintonia Verde", desc: "Sente vida vegetal num raio de 30m gastando um e, desde que descalço no solo." },
+          { cost: "1 adptação", name: "Sintonia Verde", desc: "Sente vida vegetal num raio de 30m gastando  Ponto de Assimilação, desde que descalço no solo." },
           { cost: "2 adptações", name: "Casca Grossa", desc: "+1 em Resolução (pode ultrapassar o limite). Sofre dano de queimadura dobrado." },
           { cost: "3 adptações", name: "Fotorreceptores", desc: "Pelos viram folhas e faz fotossíntese. Não precisa comer, apenas água, solo e 2h de sol diárias (ou perde um Ponto de Determinação)." },
           { cost: "4 adptações", name: "Raízes", req: 3, desc: "3+ Ponto de Assimilação: Cria raízes ao repousar para extrair água. Dormir sem contato direto com o solo impede restaurar Determinação." },
           { cost: "5 adptações", name: "Curar o Solo", req: 5, desc: "5+ Ponto de Assimilação: Reduz um nível de vida completo para nutrir um bioma. Vislumbrar sua degradação causa perda de 1 Ponto de Determinação." },
-          { cost: "6 adptações", name: "Cura Comunal", req: 7, desc: "7+ Ponto de Assimilação: Gasta dois e para fazer o solo regenerar 1 ponto de vida por rodada a aliados na cena." }
+          { cost: "6 adptações", name: "Cura Comunal", req: 7, desc: "7+ Ponto de Assimilação: Gasta  Pontos de Assimilação para fazer o solo regenerar 1 ponto de vida por rodada a aliados na cena." }
         ]
       },
       {
@@ -308,7 +308,7 @@ export const ASSIMILACOES = {
           { cost: "1 adptação", name: "Faro Apurado", desc: "Identifica compostos químicos e feromônios. Odores intensos por 5 minutos causam desconforto e perda de 1 Ponto de Determinação." },
           { cost: "2 adptações", name: "Farejar Toxinas", desc: "Detecta toxinas antes de tocá-las/ingeri-las. Impede comer pratos temperados/com cheiro sob pena de não restaurar Determinação." },
           { cost: "1 sucesso e 2 adptações", name: "Farejar Rastros", desc: "Adiciona 2 Sucessos em testes de Furtividade/Sobrevivência/Engenharia analisando locais alterados. Percepção sofre penalidade de Adaptação." },
-          { cost: "3 adptações e 1 pressão", name: "Farejar Sentimentos", req: 3, desc: "3+ Ponto de Assimilação: Gasta um e para detectar emoções/mentiras. Adiciona Percepção a Expressão/Influência. Penalidade de Pressão se mais de 5 pessoas." },
+          { cost: "3 adptações e 1 pressão", name: "Farejar Sentimentos", req: 3, desc: "3+ Ponto de Assimilação: Gasta  Ponto de Assimilação para detectar emoções/mentiras. Adiciona Percepção a Expressão/Influência. Penalidade de Pressão se mais de 5 pessoas." },
           { cost: "5 adptações", name: "Secreções", req: 5, desc: "5+ Ponto de Assimilação: CUTÂNEA. Marca trilha ou alvo por 24h. Seguir o odor penaliza em 2 Sucessos testes de Furtividade contra farejadores." },
           { cost: "4 adptações e 2 pressões", name: "Farejar Psicometria", req: 7, desc: "7+ Ponto de Assimilação: Gaste 3 e para ler o estado químico de área/objeto/cadáver, revelando fatos biológicos ocultos. Penalidade de 2 Adaptações em Resolução." }
         ]
@@ -321,7 +321,7 @@ export const ASSIMILACOES = {
           { cost: "1 adptação e 1 pressão", name: "Metabolismo Afiado", desc: "Mantém dado adicional em Reação/Potência/Resolução física. Penalidade de Pressão em Conhecimentos." },
           { cost: "1 sucesso e 2 adptações", name: "Metabolismo Regenerativo", desc: "Gaste dois Ponto de Determinação para regenerar 4 pontos de vida. Sofre penalidade de um Sucesso em testes físicos na cena (não em Conflito)." },
           { cost: "2 adptações e 2 pressões", name: "Imunidade Metabólica", req: 3, desc: "3+ Ponto de Assimilação: Imune a hipóxia/intoxicação leve. Sem ingestão diária de eletrólitos sofre penalidade cumulativa de Adaptação por dia." },
-          { cost: "5 adptações", name: "Metabolismo Eficiente", req: 5, desc: "5+ Ponto de Assimilação: Gaste dois e para manter 2 dados adicionais em teste físico. Perde 1 ponto de vida para cada Pressão mantida." },
+          { cost: "5 adptações", name: "Metabolismo Eficiente", req: 5, desc: "5+ Ponto de Assimilação: Gaste  Pontos de Assimilação para manter 2 dados adicionais em teste físico. Perde 1 ponto de vida para cada Pressão mantida." },
           { cost: "6 adptações", name: "Metabolizar Instintos", req: 7, desc: "7+ Ponto de Assimilação: Gaste todos os e para elevar Potência/Reação/Resolução ao seu nível de Assimilação. Sofre dano de 1 ponto de vida por rodada." }
         ]
       }
@@ -501,117 +501,117 @@ export const ASSIMILACOES = {
         carta: "Ás de Paus",
         nome: "Assimilação do Bosque",
         mutações: [
-          { cost: "1 singular", name: "BA — Embaúba", desc: "A cada hora imóvel com os pés ou mãos em contato direto com vegetação viva ou solo úmido, entra em estado de simbiose e Regenera um s. Dobra todo dano sofrido nesse período. Sofrer dano interrompe o efeito." },
-          { cost: "2 singulares", name: "AC — Eucalyptus", desc: "Se for reduzido aos S 1 ou 2, o(a) Infectado(a) pode optar por permanecer imóvel por 6 horas em contato com solo fértil para habilitar sua Recuperação como se estivesse no S 3. Se for interrompido durante o processo, qualquer teste de Medicina para viabilizar a Recuperação receberá C adicional no resultado." },
-          { cost: "3 singulares", name: "BC — Araucária", desc: "Se passar mais de 24 horas sem contato direto com vegetação viva ou solo fértil, o(a) Infectado(a) sofre uma penalidade de A em todo teste que inclua Sobrevivência até restabelecer esse contato por pelo menos 1 hora." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Embaúba", desc: "A cada hora imóvel com os pés ou mãos em contato direto com vegetação viva ou solo úmido, entra em estado de simbiose e Regenera um ponto de vida. Dobra todo dano sofrido nesse período. Sofrer dano interrompe o efeito." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Eucalyptus", desc: "Se for reduzido aos  1 ou 2, o(a) Infectado(a) pode optar por permanecer imóvel por 6 horas em contato com solo fértil para habilitar sua Recuperação como se estivesse  Nível de Saúde 3. Se for interrompido durante o processo, qualquer teste de Medicina para viabilizar a Recuperação receberá C adicional no resultado." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Araucária", desc: "Se passar mais de 24 horas sem contato direto com vegetação viva ou solo fértil, o(a) Infectado(a) sofre uma  SUCESSO em todo teste que inclua Sobrevivência até restabelecer esse contato por pelo menos 1 hora." }
         ]
       },
       {
         carta: "2 de Paus",
         nome: "Assimilação da Campina",
         mutações: [
-          { cost: "1 singular", name: "BA — Alecrim", desc: "Durante o dia, enquanto estiver exposto à luz solar direta por pelo menos 1 hora, pode gastar um d para dispensar a necessidade de alimentação e água por 24 horas. Esse efeito não se acumula e é anulado por ambientes sem luz natural (interiores, subsolo ou neblina densa)." },
-          { cost: "2 singulares", name: "AC — Cágado", desc: "A epiderme do(a) Infectado(a) se torna parcialmente transparente para otimizar a absorção solar. Enquanto exposto ao sol, Recupera um s por cena automaticamente. Contudo, sofre um 1 de ataques baseados em calor ou luz intensa (como fogo, laser ou clarões bioluminescentes)." },
-          { cost: "3 singulares", name: "BC — Maria-da-campina", desc: "A pele fotossintética do(a) Infectado(a) não tolera bem a ausência de luz natural. A cada dia passado sem exposição direta ao sol (ou fonte equivalente), sofre uma penalidade de A em testes de Resolução até que a exposição seja restabelecida por ao menos 1 hora." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Alecrim", desc: "Durante o dia, enquanto estiver exposto à luz solar direta por pelo menos 1 hora, pode gastar  Ponto de Determinação para dispensar a necessidade de alimentação e água por 24 horas. Esse efeito não se acumula e é anulado por ambientes sem luz natural (interiores, subsolo ou neblina densa)." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Cágado", desc: "A epiderme do(a) Infectado(a) se torna parcialmente transparente para otimizar a absorção solar. Enquanto exposto ao sol, Recupera  Ponto de Saúde por cena automaticamente. Contudo, sofre um 1 de ataques baseados em calor ou luz intensa (como fogo, laser ou clarões bioluminescentes)." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Maria-da-campina", desc: "A pele fotossintética do(a) Infectado(a) não tolera bem a ausência de luz natural. A cada dia passado sem exposição direta ao sol (ou fonte equivalente), sofre uma  SUCESSO em testes de Resolução até que a exposição seja restabelecida por ao menos 1 hora." }
         ]
       },
       {
         carta: "3 de Paus",
         nome: "Assimilação do Cerrado",
         mutações: [
-          { cost: "1 singular", name: "BA — Tatu-canastra", desc: "Enquanto estiver sob sol forte ou clima seco, você recebe um ponto de dano a menos de ataques físicos. Esse bônus se perde se estiver em clima úmido, submerso ou sob chuva intensa." },
-          { cost: "2 singulares", name: "AC — Mandacaru", desc: "Sempre que sofrer dois ou mais pontos de dano em um mesmo ataque, a camada externa de sua carapaça se fragmenta em estilhaços, ferindo quem estiver em alcance corpo a corpo. O atacante sofre um ponto de dano direto, mas você também sofre uma penalidade de A em testes de Reação até a carapaça regenerar (o que só ocorre após o fim da cena)." },
-          { cost: "3 singulares", name: "BC — Lobo-guará", desc: "Sua anatomia reage mal à umidade. Sempre que entrar em contato prolongado com água (chuva intensa, submersão, clima encharcado), sofre uma penalidade de A em testes que incluam Potência ou Furtividade até se secar completamente." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Tatu-canastra", desc: "Enquanto estiver sob sol forte ou clima seco, você recebe um ponto de dano a menos de ataques físicos. Esse bônus se perde se estiver em clima úmido, submerso ou sob chuva intensa." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Mandacaru", desc: "Sempre que sofrer dois ou mais pontos de dano em um mesmo ataque, a camada externa de sua carapaça se fragmenta em estilhaços, ferindo quem estiver em alcance corpo a corpo. O atacante sofre um ponto de dano direto, mas você também sofre uma  SUCESSO em testes de Reação até a carapaça regenerar (o que só ocorre após o fim da cena)." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Lobo-guará", desc: "Sua anatomia reage mal à umidade. Sempre que entrar em contato prolongado com água (chuva intensa, submersão, clima encharcado), sofre uma  SUCESSO em testes que incluam Potência ou Furtividade até se secar completamente." }
         ]
       },
       {
         carta: "4 de Paus",
         nome: "Assimilação da Colina",
         mutações: [
-          { cost: "1 singular", name: "BA — Caxinguelê", desc: "Ignora penalidades por terreno inclinado, escorregadio ou irregular durante deslocamentos e escaladas. Sempre que investir A em Fuga, adicione A. Além disso, não pode ser derrubado ou desequilibrado por meios físicos, a menos que o ataque cause dano." },
-          { cost: "2 singulares", name: "AC — Porco-do-mato", desc: "Recebe A adicional em testes que incluam Atletismo ao correr, saltar ou escalar, mas sofre a penalidade de C adicional em testes que incluam Furtividade devido à rigidez dos movimentos." },
-          { cost: "3 singulares", name: "BC — Jabuti-piranga", desc: "Em ambientes planos ou excessivamente nivelados (ambientes urbanos, corredores, pisos industriais), sofre menos A em testes que incluam Reação até deixar o local ou se adaptar por uma cena inteira." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Caxinguelê", desc: "Ignora penalidades por terreno inclinado, escorregadio ou irregular durante deslocamentos e escaladas. Sempre que  SUCESSO em Fuga, adicione A. Além disso, não pode ser derrubado ou desequilibrado por meios físicos, a menos que o ataque cause dano." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Porco-do-mato", desc: "Recebe A adicional em testes que incluam Atletismo ao correr, saltar ou escalar, mas sofre a  PRESSÃO adicional em testes que incluam Furtividade devido à rigidez dos movimentos." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Jabuti-piranga", desc: "Em ambientes planos ou excessivamente nivelados (ambientes urbanos, corredores, pisos industriais), sofre  SUCESSO em testes que incluam Reação até deixar o local ou se adaptar por uma cena inteira." }
         ]
       },
       {
         carta: "5 de Paus",
         nome: "Assimilação Desértica",
         mutações: [
-          { cost: "1 singular", name: "BA — Suculenta", desc: "Pode permanecer até 5 dias sem consumir água sem sofrer penalidades." },
-          { cost: "2 singulares", name: "AC — Diabo-espinhoso", desc: "O corpo libera secreções que irritam olhos e mucosas. Agressores corpo a corpo sofrem 1 de dano ou A adicional em neutralização da Ameaça. Toda C mantida pelo resto da cena causa 1 de dano a um aliado próximo." },
-          { cost: "3 singulares", name: "BC — Esquilo Terrestre", desc: "Passa a cavar buracos para dormir em segurança, perde um d se não dormir em uma toca." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Suculenta", desc: "Pode permanecer até 5 dias sem consumir água sem sofrer penalidades." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Diabo-espinhoso", desc: "O corpo libera secreções que irritam olhos e mucosas. Agressores corpo a corpo sofrem 1 de dano ou A adicional em neutralização da Ameaça. Toda C mantida pelo resto da cena causa 1 de dano a um aliado próximo." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Esquilo Terrestre", desc: "Passa a cavar buracos para dormir em segurança, perde  Ponto de Determinação se não dormir em uma toca." }
         ]
       },
       {
         carta: "6 de Paus",
         nome: "Assimilação Florestal",
         mutações: [
-          { cost: "1 singular", name: "BA — Morcego-narigudo", desc: "Passa a ignorar penalidades por baixa luminosidade natural, incluindo crepúsculo, sombra densa ou penumbra. Esse efeito não se aplica à escuridão total nem à ausência de luz artificial." },
-          { cost: "2 singulares", name: "AC — Sucuri", desc: "Os sons são absorvidos pela pele. Recebe B adicional em testes que incluem Furtividade ao se mover em vegetação densa, mas sofre C em testes que incluem Expressão, pois a vocalização do(a) Infectado(a) se torna abafada e pouco audível." },
-          { cost: "3 singulares", name: "BC — Rato-do-mato", desc: "Ao sair abruptamente de ambiente sombreado para um muito iluminado, sofre uma penalidade de A em testes que incluem Percepção por 1 cena, devido à saturação do nervo óptico." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Morcego-narigudo", desc: "Passa a ignorar penalidades por baixa luminosidade natural, incluindo crepúsculo, sombra densa ou penumbra. Esse efeito não se aplica à escuridão total nem à ausência de luz artificial." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Sucuri", desc: "Os sons são absorvidos pela pele. Recebe B adicional em testes que incluem Furtividade ao se mover em vegetação densa, mas  PRESSÃO em testes que incluem Expressão, pois a vocalização do(a) Infectado(a) se torna abafada e pouco audível." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Rato-do-mato", desc: "Ao sair abruptamente de ambiente sombreado para um muito iluminado, sofre uma  SUCESSO em testes que incluem Percepção por 1 cena, devido à saturação do nervo óptico." }
         ]
       },
       {
         carta: "7 de Paus",
         nome: "Assimilação do Manguezal",
         mutações: [
-          { cost: "1 singular", name: "BA — Mangue-vermelho", desc: "Pode consumir água salobra ou salina sem qualquer prejuízo." },
-          { cost: "2 singulares", name: "AC — Caramujo-do-mangue", desc: "Consegue respirar parcialmente pela pele em ambientes alagadiços, permanecendo submerso por até 10 minutos. No entanto, a pele do(a) Infectado(a) torna-se vulnerável, sofrendo um ponto de dano adicional contra ataques físicos." },
-          { cost: "3 singulares", name: "BC — Sururu", desc: "Ao passar mais de 6 horas em ambientes secos (ambiente urbano, cerrado, alta montanha), a pele começa a rachar. Sofre uma penalidade de A em testes que incluam Reação até ser reidratado por imersão ou umidade ambiental." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Mangue-vermelho", desc: "Pode consumir água salobra ou salina sem qualquer prejuízo." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Caramujo-do-mangue", desc: "Consegue respirar parcialmente pela pele em ambientes alagadiços, permanecendo submerso por até 10 minutos. No entanto, a pele do(a) Infectado(a) torna-se vulnerável, sofrendo um ponto de dano adicional contra ataques físicos." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Sururu", desc: "Ao passar mais de 6 horas em ambientes secos (ambiente urbano, cerrado, alta montanha), a pele começa a rachar. Sofre uma  SUCESSO em testes que incluam Reação até ser reidratado por imersão ou umidade ambiental." }
         ]
       },
       {
         carta: "8 de Paus",
         nome: "Assimilação Marinha",
         mutações: [
-          { cost: "1 singular", name: "BA — Toninha", desc: "Você se move duas vezes mais rápido na água do que um humano comum, e não precisa testar Atletismo para nadar, exceto em tempestades ou redemoinhos. Dobre todos os A investidos em Fuga nadando." },
-          { cost: "2 singulares", name: "AC — Biguá", desc: "Tem A adicional em testes que incluem Atletismo na água ou areia fofa, e adiciona C em testes que incluem Manufaturas, pois a motricidade fina dos dedos foi comprometida." },
-          { cost: "3 singulares", name: "BC — Tartaruga-aruanã", desc: "Sempre que estiver correndo ou saltando em pisos rígidos (metal, concreto, pedra), sofre C em testes que incluem Potência, devido ao formato instável das extremidades." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Toninha", desc: "Você se move duas vezes mais rápido na água do que um humano comum, e não precisa testar Atletismo para nadar, exceto em tempestades ou redemoinhos. Dobre todos os A investidos em Fuga nadando." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Biguá", desc: "Tem A adicional em testes que incluem Atletismo na água ou areia fofa, e  PRESSÃO em testes que incluem Manufaturas, pois a motricidade fina dos dedos foi comprometida." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Tartaruga-aruanã", desc: "Sempre que estiver correndo ou saltando em pisos rígidos (metal, concreto, pedra),  PRESSÃO em testes que incluem Potência, devido ao formato instável das extremidades." }
         ]
       },
       {
         carta: "9 de Paus",
         nome: "Assimilação da Montanha",
         mutações: [
-          { cost: "1 singular", name: "BA — Urubu-Rei", desc: "Não sofre qualquer penalidade por altitudes elevadas ou ar rarefeito, mesmo acima de 3000m. Pode manter esforço físico moderado por mais tempo sem fadiga." },
-          { cost: "2 singulares", name: "AC — Calango-bandeira", desc: "Pode prender a respiração por até 10 minutos mesmo em movimento, mas em climas quentes e secos perde B em testes de Influência ou Expressão, devido à rouquidão." },
-          { cost: "3 singulares", name: "BC — Tucanuçu", desc: "Ao passar mais de 1 hora em ambientes abafados ou com alta umidade, tem a Sagacidade reduzida em um (mínimo 0), como se estivesse em constante mal-estar leve." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Urubu-Rei", desc: "Não sofre qualquer penalidade por altitudes elevadas ou ar rarefeito, mesmo acima de 3000m. Pode manter esforço físico moderado por mais tempo sem fadiga." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Calango-bandeira", desc: "Pode prender a respiração por até 10 minutos mesmo em movimento, mas em climas quentes e secos perde B em testes de Influência ou Expressão, devido à rouquidão." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Tucanuçu", desc: "Ao passar mais de 1 hora em ambientes abafados ou com alta umidade, tem a Sagacidade reduzida em um (mínimo 0), como se estivesse em constante mal-estar leve." }
         ]
       },
       {
         carta: "10 de Paus",
         nome: "Assimilação do Pântano",
         mutações: [
-          { cost: "1 singular", name: "BA — Guaiamu", desc: "Ignora penalidades de movimento em terrenos encharcados ou instáveis. Pode atravessar até 2 metros de profundidade de água ou lama sem necessidade de teste." },
-          { cost: "2 singulares", name: "AC — Garça-azul", desc: "Possui A adicional em testes que incluem Furtividade ao caminhar sobre lama ou folhas alagadas, pois seus passos não fazem barulho. Contudo, sofre C adicional em testes que incluam Reação em ambientes fechados, onde o alongamento das pernas prejudica o equilíbrio." },
-          { cost: "3 singulares", name: "BC — Sapo-cururu", desc: "Se for derrubado ou sofrer queda, deve fazer um teste de Potência ou irá sofrer um ponto de dano adicional de todos os ataques até o fim da cena, por instabilidade nas articulações." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Guaiamu", desc: "Ignora penalidades de movimento em terrenos encharcados ou instáveis. Pode atravessar até 2 metros de profundidade de água ou lama sem necessidade de teste." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Garça-azul", desc: "Possui A adicional em testes que incluem Furtividade ao caminhar sobre lama ou folhas alagadas, pois seus passos não fazem barulho. Contudo,  PRESSÃO adicional em testes que incluam Reação em ambientes fechados, onde o alongamento das pernas prejudica o equilíbrio." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Sapo-cururu", desc: "Se for derrubado ou sofrer queda, deve fazer um teste de Potência ou irá sofrer um ponto de dano adicional de todos os ataques até o fim da cena, por instabilidade nas articulações." }
         ]
       },
       {
         carta: "Valete de Paus",
         nome: "Assimilação da Caatinga",
         mutações: [
-          { cost: "1 singular", name: "BA — Rola-bosta", desc: "Reduz em um ponto todo dano cortante ou perfurante sofrido por fontes naturais (espinhos, facas, garras). Esse efeito não se aplica a armas de fogo ou ataques energéticos." },
-          { cost: "2 singulares", name: "AC — Asa-branca", desc: "A pele do(a) Infectado(a) o protege contra insolação e exposição solar extrema por até 2 cenas, mesmo sem abrigo ou água. Tem Influência reduzida em um (mínimo 0), devido à aparência enrijecida e aspectou vítreo." },
-          { cost: "3 singulares", name: "BC — Teiú", desc: "Em ambientes úmidos ou com pouca circulação de ar, acumula calor corporal, sofrendo uma penalidade de A em testes que incluem Reação após 2 horas." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Rola-bosta", desc: "Reduz em um ponto todo dano cortante ou perfurante sofrido por fontes naturais (espinhos, facas, garras). Esse efeito não se aplica a armas de fogo ou ataques energéticos." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Asa-branca", desc: "A pele do(a) Infectado(a) o protege contra insolação e exposição solar extrema por até 2 cenas, mesmo sem abrigo ou água. Tem Influência reduzida em um (mínimo 0), devido à aparência enrijecida e aspectou vítreo." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Teiú", desc: "Em ambientes úmidos ou com pouca circulação de ar, acumula calor corporal, sofrendo uma  SUCESSO em testes que incluem Reação após 2 horas." }
         ]
       },
       {
         carta: "Dama de Paus",
         nome: "Assimilação Subterrânea",
         mutações: [
-          { cost: "1 singular", name: "BA — Tatu-canastra", desc: "Detecta movimentos ou presenças num raio de 10 metros se estiver tocando o chão com as mãos ou pés descalços, mesmo na escuridão. Não identifica outros detalhes, somente a intensidade e a distância." },
-          { cost: "2 singulares", name: "AC — Coruja-buraqueira", desc: "Recebe A adicional em testes que incluem Percepção para identificar sons abafados ou ecos subterrâneos, mas sofre C adicional em testes que incluem Reação relacionados a ruídos altos repentinos (tiros, explosões), por conta do sistema auditivo hipersensível." },
-          { cost: "3 singulares", name: "BC — Morcego-de-cauda-livre", desc: "Ambientes com múltiplos sons sobrepostos (máquinas, motores, grandes multidões) te sobrecarregam. Tem a Sagacidade reduzida em um (mínimo 0) nesses locais até que se isole." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Tatu-canastra", desc: "Detecta movimentos ou presenças num raio de 10 metros se estiver tocando o chão com as mãos ou pés descalços, mesmo na escuridão. Não identifica outros detalhes, somente a intensidade e a distância." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Coruja-buraqueira", desc: "Recebe A adicional em testes que incluem Percepção para identificar sons abafados ou ecos subterrâneos, mas  PRESSÃO adicional em testes que incluem Reação relacionados a ruídos altos repentinos (tiros, explosões), por conta do sistema auditivo hipersensível." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Morcego-de-cauda-livre", desc: "Ambientes com múltiplos sons sobrepostos (máquinas, motores, grandes multidões) te sobrecarregam. Tem a Sagacidade reduzida em um (mínimo 0) nesses locais até que se isole." }
         ]
       },
       {
         carta: "Rei de Paus",
         nome: "Assimilação da Tundra",
         mutações: [
-          { cost: "1 singular", name: "BA — Líquen-de-mapa", desc: "Não sofre penalidades por frio intenso ou neve, mesmo abaixo de –20°C. Pode dormir ao relento sem risco de congelamento ou exaustão térmica." },
-          { cost: "2 singulares", name: "AC — Marmota-alpina", desc: "Pode entrar voluntariamente em estado de torpor por até 12 horas, reduzindo consumo de oxigênio e de estabilizando ferimentos (não morre por sangramento nesse estado). Contudo, ao sair do torpor, a Potência é reduzida em um (mínimo 0) até o próximo descanso." },
-          { cost: "3 singulares", name: "BC — Husky siberiano", desc: "Os pelos de todo o corpo crescem muito formando uma proteção contra o frio. Em ambientes quentes sofre C adicional em testes que incluam Atletismo." }
+          { cost: "1 adaptação e 1 sucesso", name: "BA — Líquen-de-mapa", desc: "Não sofre penalidades por frio intenso ou neve, mesmo abaixo de –20°C. Pode dormir ao relento sem risco de congelamento ou exaustão térmica." },
+          { cost: "1 sucesso e 1 pressão", name: "AC — Marmota-alpina", desc: "Pode entrar voluntariamente em estado de torpor por até 12 horas, reduzindo consumo de oxigênio e de estabilizando ferimentos (não morre por sangramento nesse estado). Contudo, ao sair do torpor, a Potência é reduzida em um (mínimo 0) até o próximo descanso." },
+          { cost: "1 adaptação e 1 pressão", name: "BC — Husky siberiano", desc: "Os pelos de todo o corpo crescem muito formando uma proteção contra o frio. Em ambientes quentes  PRESSÃO adicional em testes que incluam Atletismo." }
         ]
       }
     ]

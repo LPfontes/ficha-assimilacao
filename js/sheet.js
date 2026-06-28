@@ -525,7 +525,7 @@ export function renderCaboGuerraSheet() {
     el.caboRatioFill.style.height = `${100 - ratio}%`;
   }
 
-  // Renderiza a sequência de símbolos de Determinação (exatamente detNivel de símbolos)
+  // Renderiza a sequência  Ponto de Saúdeímbolos de Determinação (exatamente detNivel  Ponto de Saúdeímbolos)
   if (el.sheetDetPoints) {
     el.sheetDetPoints.innerHTML = "";
     for (let i = 1; i <= char.detNivel; i++) {
@@ -548,7 +548,7 @@ export function renderCaboGuerraSheet() {
     }
   }
 
-  // Renderiza a sequência de símbolos de Assimilação (exatamente assNivel de símbolos)
+  // Renderiza a sequência  Ponto de Saúdeímbolos de Assimilação (exatamente assNivel  Ponto de Saúdeímbolos)
   if (el.sheetAssPoints) {
     el.sheetAssPoints.innerHTML = "";
     for (let i = 1; i <= char.assNivel; i++) {
@@ -682,10 +682,10 @@ export function renderMutationsSheet() {
   container.innerHTML = "";
 
   const suitLabels = {
-    evolutivas: "Evolutiva (F)",
-    adaptativas: "Adaptativa (G)",
-    inoportunas: "Inoportuna (H)",
-    singulares: "Singular (I)"
+    evolutivas: "Evolutiva ",
+    adaptativas: "Adaptativa",
+    inoportunas: "Inoportuna",
+    singulares: "Singular"
   };
 
   if (!char.mutações || char.mutações.length === 0) {

@@ -7,7 +7,7 @@ const PERIGO_OPTS    = ["Seguro","Baixo","Moderado","Alto","Severo","Extremo","M
 const HABITACAO_OPTS = ["Inabitada","Esvaziada","Isolada","Esparsa","Dispersa","Concentrada","Inchada"];
 const RECURSOS_OPTS  = ["Sem abundância","1 recurso farto","2 recursos fartos","3 recursos fartos","4 recursos fartos","5 recursos fartos","6 recursos fartos"];
 const CONTAM_OPTS    = ["Inexistente","Introdutória","Disseminada","Propagada","Epidêmica","Pandêmica","Endêmica"];
-const DESLOC_OPTS    = ["Labiríntico (−AAA)","Traiçoeiro (−AA)","Complexo (−A)","Moderado","Descomplicado (+A)","Acessível (+AA)","Facilitado (+AAA)"];
+const DESLOC_OPTS    = ["Labiríntico ( SUCESSOS)","Traiçoeiro ( SUCESSOS)","Complexo ( SUCESSO)","Moderado","Descomplicado ( SUCESSO)","Acessível ( SUCESSOS)","Facilitado ( SUCESSOS)"];
 const TIPOS_RECURSOS = ["Água","Plantas","Animais","Madeira","Minerais","Biomassa"];
 const ABUNDANCIA_OPTS = ["Inexistente", "Escasso", "Médio", "Abundante"];
 
