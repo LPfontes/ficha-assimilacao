@@ -679,15 +679,15 @@
 }
 
 /* Cores de Naipes específicos das Mutações */
-.mutation-sheet-item.suit-evolutivas { border-left-color: #f43f5e; }
-.mutation-sheet-item.suit-adaptativas { border-left-color: #eab308; }
-.mutation-sheet-item.suit-inoportunas { border-left-color: #a855f7; }
-.mutation-sheet-item.suit-singulares { border-left-color: #10b981; }
+.mutation-sheet-item.suit-evolutivas { border-left-color: hsl(1, 61.7%, 35.9%); }
+.mutation-sheet-item.suit-adaptativas { border-left-color: hsl(1, 61.7%, 35.9%); }
+.mutation-sheet-item.suit-inoportunas { border-left-color: hsl(195, 84.6%, 43.3%); }
+.mutation-sheet-item.suit-singulares { border-left-color: hsl(297, 41.7%, 24.9%); }
 
-.suit-tag-evolutivas { background-color: rgba(244, 63, 94, 0.12); color: #f43f5e; }
-.suit-tag-adaptativas { background-color: rgba(234, 179, 8, 0.12); color: #eab308; }
-.suit-tag-inoportunas { background-color: rgba(168, 85, 247, 0.12); color: #a855f7; }
-.suit-tag-singulares { background-color: rgba(16, 185, 129, 0.12); color: #10b981; }
+.suit-tag-evolutivas { background-color: rgba(244, 63, 94, 0.12); color: hsl(1, 50%, 50%); }
+.suit-tag-adaptativas { background-color: rgba(234, 179, 8, 0.12); color: hsl(188, 92.7%, 50%); }
+.suit-tag-inoportunas { background-color: rgba(168, 85, 247, 0.12); color: hsl(195, 84.6%, 50%); }
+.suit-tag-singulares { background-color: rgba(16, 185, 129, 0.12); color: hsl(291, 50%, 50%); }
 
 /* Botões de Ajuste de Nível do Cabo de Guerra */
 .btn-cabo-adjust {
@@ -1104,3 +1104,202 @@
 }
 
 
+
+/* Inventory Item Card */
+.inventory-slot {
+  margin-bottom: 16px;
+}
+.inventory-item-card {
+  background: rgba(20, 20, 25, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inventory-item-card:focus-within {
+  border-color: rgba(0, 255, 102, 0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.1);
+}
+
+.inventory-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.inventory-item-header .slot-num {
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: 1.1rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.inventory-item-header .item-name {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  outline: none;
+  font-family: var(--font-heading);
+  transition: color 0.2s ease;
+}
+
+.inventory-item-header .item-name:focus {
+  color: var(--color-blue-glow);
+}
+
+.inventory-item-header .item-name::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.inventory-item-header .btn-delete-slot {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inventory-item-header .btn-delete-slot:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.inventory-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inventory-item-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.inv-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inv-select-group label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.inv-select-group select {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.inv-select-group select:hover,
+.inv-select-group select:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.select-qualidade { color: rgba(0, 255, 102, 0.9) !important; }
+.select-pressao { color: rgba(239, 68, 68, 0.9) !important; }
+.select-escassez { color: rgba(0, 162, 255, 0.9) !important; }
+.select-categoria { color: var(--color-gold-glow) !important; }
+
+.inv-badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.inv-category-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  color: var(--color-gold-glow);
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 5px rgba(255, 165, 0, 0.05);
+}
+
+.inv-category-badge .remove-cat-btn {
+  cursor: pointer;
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1;
+  border-radius: 50%;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.inv-category-badge .remove-cat-btn:hover {
+  transform: scale(1.2);
+  color: #fca5a5;
+}
+
+.item-effect {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.8rem !important;
+  padding: 8px !important;
+  border-radius: 4px !important;
+  outline: none !important;
+  min-height: 40px !important;
+  resize: vertical !important;
+  font-family: inherit !important;
+  transition: border-color 0.2s ease !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.item-effect:focus {
+  border-style: solid !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.inv-category-descriptions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 2px solid var(--color-gold-glow);
+}
+
+.inv-category-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+.inv-category-desc strong {
+  color: var(--color-gold-glow);
+}
