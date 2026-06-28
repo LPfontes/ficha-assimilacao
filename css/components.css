@@ -1,6 +1,7 @@
 /* Círculos / Losangos de Valor */
 .value-bubbles {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
   gap: 4px;
 }
 .desc{

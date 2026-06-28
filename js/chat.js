@@ -2,6 +2,7 @@ import { el, state, saveCurrentCharacter } from "./state.js";
 import { ICONS } from "../icons.js";
 import { logger } from "./logger.js";
 import { getCurrentHealthLevel } from "./health.js";
+import { worldState } from "./world-state.js";
 
 // ==========================================
 // CHAT E HISTÓRICO DE RESULTADOS PERSISTIDO
@@ -38,6 +39,8 @@ export function appendRollToChat(formula) {
     displayFormula = `${p.name} (${formula})`;
     // clear it
     state.activeMacroParams = null;
+  } else if (worldState.sheetMode === "conflito") {
+    maxKeep = state.activeRollResults.length;
   } else {
     if (el.modEmpenho.checked) maxKeep++;
     if (el.modOrigemOcupacao.checked) maxKeep++;
@@ -78,6 +81,7 @@ export function appendRollToChat(formula) {
     }
   }
   
+  document.dispatchEvent(new CustomEvent("roll-added", { detail: rollEntry }));
   renderChatHistory();
 }
 
@@ -435,6 +439,10 @@ export function getDieSymbolsHtml(symbols) {
 }
 
 export function toggleKeepDie(index) {
+  if (worldState.sheetMode === "conflito") {
+    logger.info(`Chat: Tentativa de alterar seleção do dado mantido ignorada (sheetMode é conflito).`);
+    return;
+  }
   logger.info(`Chat: Alterando seleção do dado mantido no painel (Índice clicado: ${index})`);
   
   const char = state.currentCharacter;

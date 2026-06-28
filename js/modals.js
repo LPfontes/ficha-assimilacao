@@ -1015,6 +1015,16 @@ export function openSettingsModal() {
         </div>
       </div>
       
+      <div class="setting-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+        <div class="setting-info" style="flex: 1; padding-right: 16px;">
+          <div class="setting-label" style="font-weight: 600; font-size: var(--font-size-md); color: var(--text-primary);">Gerenciador de Armazenamento</div>
+          <div class="setting-desc" style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: 4px;">Gerencie, delete ou exporte individualmente fichas de personagens, refúgios, regiões, conflitos, locais e pacotes de Homebrew.</div>
+        </div>
+        <div class="setting-control">
+          <button id="btn-open-storage-manager" class="btn btn-md" style="white-space: nowrap; border-color: var(--color-blue-glow); color: var(--color-blue-glow); background: rgba(0,162,255,0.05);">Gerenciar Dados</button>
+        </div>
+      </div>
+      
       <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
         <button id="btn-save-settings" class="btn btn-md">Fechar</button>
       </div>
@@ -1084,6 +1094,13 @@ export function openSettingsModal() {
         window.location.reload(true);
       });
     }
+  });
+
+  document.getElementById("btn-open-storage-manager").addEventListener("click", () => {
+    el.modalContainer.classList.add("hidden");
+    setTimeout(() => {
+      openStorageManagerModal();
+    }, 150);
   });
 
   document.getElementById("btn-save-settings").addEventListener("click", () => {
@@ -1423,7 +1440,7 @@ export function openUpgradeAptitudesModal() {
         const name = btn.dataset.name;
         const curVal = char[cat][name];
         const targetVal = curVal + 1;
-        const cost = targetVal * (cat.key === "instintos" ? 3 : 2);
+        const cost = targetVal * (cat === "instintos" ? 3 : 2);
 
         if (char.xp >= cost) {
           char[cat][name] = targetVal;
@@ -2138,14 +2155,37 @@ function saveMockCloudDB(db) {
 }
 
 export async function openCloudSyncModal() {
-  logger.info("Modal: Abrindo modal de sincronização em nuvem.");
-  el.modalContainer.classList.remove("hidden");
+  openStorageManagerModal("nuvem");
+}
 
-  // Detectar se há configurações no .env
+// Ouvinte do evento beforeunload para alertar antes de fechar a aba
+window.addEventListener("beforeunload", (e) => {
+  if (state.currentUser && state.hasUnsavedCloudChanges) {
+    e.preventDefault();
+    e.returnValue = "Você possui alterações na ficha que não foram salvas na nuvem. Sincronize antes de sair!";
+    return e.returnValue;
+  }
+});
+
+// Modal para gerenciar todo o conteúdo armazenado localmente
+export async function openStorageManagerModal(defaultTab = "fichas") {
+  logger.info("Modal: Abrindo gerenciador de armazenamento.");
+  el.modalContainer.classList.remove("hidden");
+  
+  // Importar o worldState e helpers dinamicamente
+  const { worldState, deleteRefugio, deleteRegiao, deleteConflito, deleteLocal, loadAllWorldData } = await import("./world-state.js");
+  
+  // Garantir que todos os dados do mundo estejam carregados na memória
+  loadAllWorldData();
+
+  let activeTab = defaultTab; // "fichas" | "mundo" | "homebrew" | "nuvem" | "backup"
+
+  // Detectar se há configurações no .env / config para o Firebase
   const config = await getFirebaseConfig();
   state.useRealFirebase = !!config;
 
-  if (state.useRealFirebase && state.currentUser) {
+  // Carregar cache real se logado
+  if (state.useRealFirebase && state.currentUser && cloudCharactersCache.length === 0) {
     try {
       const firebase = await initRealFirebase();
       if (firebase) {
@@ -2157,364 +2197,822 @@ export async function openCloudSyncModal() {
         cloudCharactersCache = cloudSheets;
       }
     } catch (e) {
-      console.warn("Erro ao ler dados reais do Firestore para o cache:", e);
+      console.warn("Erro ao carregar dados do Firebase no cache:", e);
     }
   }
 
-  updateCloudSyncModalUI();
-}
-
-function updateCloudSyncModalUI() {
-  if (!state.currentUser) {
-    // Tela de login
-    el.modalBody.innerHTML = `
-      <h3 class="modal-title">Sincronização em Nuvem</h3>
-      <div style="margin-top: 16px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 16px; color: var(--color-blue-glow);">☁️</div>
-        <p style="font-size: var(--font-size-md); color: var(--text-primary); margin-bottom: 8px;">Salve suas fichas na nuvem de forma segura.</p>
-        <p style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-bottom: 24px; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-          Conecte-se com sua conta Google para enviar suas fichas locais e acessá-las em qualquer outro navegador ou dispositivo móvel.
-        </p>
-        
-        <button id="btn-google-sign-in" class="btn" style="background: #fff; color: #1f1f1f; border-color: #fff; padding: 10px 20px; font-weight: bold; border-radius: 4px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-          <svg width="18" height="18" viewBox="0 0 18 18">
-            <path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.9c1.7-1.56 2.69-3.86 2.69-6.57zm-8.64 6.8c1.89 0 3.48-.63 4.64-1.7l-2.9-2.24c-.8.54-1.84.86-2.9.86-2.23 0-4.12-1.51-4.8-3.53H.07v2.32C1.23 14 5.02 16 9 16zm-4.8-7.93c-.17-.5-.26-1.03-.26-1.57s.09-1.07.26-1.57V2.63H.07C-.48 3.74-.8 4.97-.8 6.28s.32 2.54.87 3.65l3.27-2.53zm4.8-4.87c1.03 0 1.95.35 2.68 1.05l2.01-2.01C11.53.86 9.89.5 9 .5 5.02.5 1.23 2.5.07 6.28l3.27 2.53c.68-2.02 2.57-3.53 4.8-3.53z" fill="#4285F4"/>
-          </svg>
-          Entrar com o Google
-        </button>
-        
-        <div style="display: flex; justify-content: flex-end; margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px;">
-          <button id="btn-close-sync" class="btn btn-md">Fechar</button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById("btn-google-sign-in").addEventListener("click", async () => {
-      if (state.useRealFirebase) {
-        try {
-          const firebase = await initRealFirebase();
-          if (firebase) {
-            const { signInWithPopup, GoogleAuthProvider } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(firebase.auth, provider);
-
-            state.currentUser = {
-              uid: result.user.uid,
-              displayName: result.user.displayName,
-              email: result.user.email
-            };
-            localStorage.setItem("assimilação_mock_user", JSON.stringify(state.currentUser));
-            logger.info(`Autenticação: Logado via Google (Real) - ${state.currentUser.displayName}`);
-
-            // Recarregar cache
-            const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-            const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
-            const snap = await getDocs(q);
-            const cloudSheets = [];
-            snap.forEach(d => cloudSheets.push(d.data()));
-            cloudCharactersCache = cloudSheets;
-
-            updateCloudSyncModalUI();
-            updateCloudSyncBadge();
-          }
-        } catch (error) {
-          logger.error("Erro no login real do Google:", error);
-          alert("Falha no login com Google. Verifique seu arquivo .env.");
-        }
-      } else {
-        const name = prompt("Digite seu nome para simular o login do Google:", "Jogador Assimilado");
-        if (name === null) return;
-        const email = prompt("Digite seu e-mail do Google:", "jogador@gmail.com");
-        if (!email) return;
-
-        const mockUser = {
-          uid: "google_user_" + Math.random().toString(36).substr(2, 9),
-          displayName: name,
-          email: email
-        };
-
-        state.currentUser = mockUser;
-        localStorage.setItem("assimilação_mock_user", JSON.stringify(mockUser));
-        logger.info("Autenticação: Login efetuado com sucesso via conta Google (Simulado).");
-        updateCloudSyncModalUI();
-        updateCloudSyncBadge();
-      }
-    });
-
-    document.getElementById("btn-close-sync").addEventListener("click", () => {
-      el.modalContainer.classList.add("hidden");
-    });
-  } else {
-    // Usuário logado
+  // Função utilitária compartilhada para fazer o upload de qualquer ficha
+  async function pushCharacterToCloud(char) {
     const stats = getCloudStorageInfo();
-    const sizePercent = Math.min(100, (stats.sizeKB / stats.maxSizeKB) * 100);
-    const countPercent = Math.min(100, (stats.count / stats.maxCount) * 100);
+    const characterId = char.id;
 
-    el.modalBody.innerHTML = `
-      <h3 class="modal-title">Sincronização em Nuvem ${state.useRealFirebase ? "(Firebase)" : "(Simulado)"}</h3>
-      <div style="margin-top: 16px;">
-        <!-- Perfil do Usuário -->
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; background:rgba(255,255,255,0.04); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
-          <div style="width:40px; height:40px; border-radius:50%; background:var(--color-blue-glow); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:#fff;">
-            ${state.currentUser.displayName.charAt(0).toUpperCase()}
-          </div>
-          <div style="flex:1;">
-            <div style="font-weight:600; color:var(--text-primary); font-size:var(--font-size-md);">${state.currentUser.displayName}</div>
-            <div style="font-size:var(--font-size-xs); color:var(--text-secondary);">${state.currentUser.email}</div>
-          </div>
-          <button id="btn-google-sign-out" class="btn btn-sm btn-danger" style="padding: 4px 8px;">Sair</button>
-        </div>
-        
-        <!-- Status de Mudanças Locais -->
-        ${state.hasUnsavedCloudChanges ? `
-          <div style="background:rgba(255, 102, 0, 0.1); border:1px solid var(--color-orange); color:var(--color-orange); padding:10px; border-radius:6px; font-size:var(--font-size-xs); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
-            <span>⚠️</span>
-            <span>Você tem modificações locais não sincronizadas na nuvem!</span>
-          </div>
-        ` : `
-          <div style="background:rgba(0, 255, 102, 0.08); border:1px solid var(--color-praticas); color:var(--color-praticas); padding:10px; border-radius:6px; font-size:var(--font-size-xs); margin-bottom:20px; display:flex; align-items:center; gap:8px;">
-            <span>✔️</span>
-            <span>Suas fichas estão sincronizadas com a nuvem!</span>
-          </div>
-        `}
-        
-        <!-- Estatísticas de Armazenamento -->
-        <h4 style="font-size: var(--font-size-sm); margin-bottom: 12px; color: var(--text-primary); font-family:var(--font-heading);">Limites de Armazenamento</h4>
-        
-        <!-- Espaço em Disco (KB) -->
-        <div style="margin-bottom:14px;">
-          <div style="display:flex; justify-content:space-between; font-size:var(--font-size-xs); color:var(--text-secondary); margin-bottom:4px;">
-            <span>Espaço Usado:</span>
-            <strong>${stats.sizeKB.toFixed(2)} KB / ${stats.maxSizeKB} KB (${sizePercent.toFixed(1)}%)</strong>
-          </div>
-          <div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
-            <div style="width:${sizePercent}%; height:100%; background:${sizePercent > 90 ? 'var(--color-danger)' : sizePercent > 70 ? 'var(--color-orange)' : 'var(--color-blue-glow)'}; border-radius:4px; transition: width 0.3s ease;"></div>
-          </div>
-        </div>
-        
-        <!-- Limite de Quantidade de Fichas -->
-        <div style="margin-bottom:24px;">
-          <div style="display:flex; justify-content:space-between; font-size:var(--font-size-xs); color:var(--text-secondary); margin-bottom:4px;">
-            <span>Fichas na Nuvem:</span>
-            <strong>${stats.count} / ${stats.maxCount} (${countPercent.toFixed(0)}%)</strong>
-          </div>
-          <div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
-            <div style="width:${countPercent}%; height:100%; background:${countPercent > 80 ? 'var(--color-orange)' : 'var(--color-blue-glow)'}; border-radius:4px; transition: width 0.3s ease;"></div>
-          </div>
-        </div>
-        
-        <!-- Ações principais -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-          <button id="btn-cloud-push" class="btn" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-weight: bold; background: rgba(0,162,255,0.05); padding: 12px 10px; display:flex; flex-direction:column; align-items:center; gap:6px;">
-            <span style="font-size:20px;">📤</span>
-            <span>Enviar Ficha Atual</span>
-            <small style="font-size:9px; font-weight:normal; color:var(--text-muted);">Salvar esta ficha na nuvem</small>
-          </button>
-          
-          <button id="btn-cloud-pull" class="btn" style="border-color: var(--color-praticas); color: var(--color-praticas); font-weight: bold; background: rgba(0,255,102,0.05); padding: 12px 10px; display:flex; flex-direction:column; align-items:center; gap:6px;">
-            <span style="font-size:20px;">📥</span>
-            <span>Puxar da Nuvem</span>
-            <small style="font-size:9px; font-weight:normal; color:var(--text-muted);">Importar fichas da nuvem</small>
-          </button>
-        </div>
-        
-        <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px;">
-          <button id="btn-close-sync" class="btn btn-md">Fechar</button>
-        </div>
-      </div>
-    `;
+    if (state.useRealFirebase) {
+      try {
+        const firebase = await initRealFirebase();
+        if (!firebase) return;
 
-    document.getElementById("btn-google-sign-out").addEventListener("click", async () => {
-      if (confirm("Tem certeza que deseja sair de sua conta Google? Suas fichas locais permanecerão salvas no navegador.")) {
-        if (state.useRealFirebase) {
-          try {
-            const firebase = await initRealFirebase();
-            if (firebase) {
-              const { signOut } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
-              await signOut(firebase.auth);
-            }
-          } catch (e) {
-            console.error("Erro ao deslogar do Firebase:", e);
-          }
-        }
-        state.currentUser = null;
-        state.hasUnsavedCloudChanges = false;
-        cloudCharactersCache = [];
-        localStorage.removeItem("assimilação_mock_user");
-        localStorage.removeItem("assimilação_has_unsaved_changes");
-        logger.info("Autenticação: Desconexão efetuada.");
-        updateCloudSyncModalUI();
-        updateCloudSyncBadge();
-      }
-    });
+        const { doc, setDoc, getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
 
-    document.getElementById("btn-close-sync").addEventListener("click", () => {
-      el.modalContainer.classList.add("hidden");
-    });
+        // Buscar fichas atuais do Firestore para validação de limites
+        const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
+        const snap = await getDocs(q);
+        const cloudSheets = [];
+        snap.forEach(d => cloudSheets.push(d.data()));
 
-    document.getElementById("btn-cloud-push").addEventListener("click", async () => {
-      if (!state.currentCharacter) {
-        alert("Crie ou selecione um personagem primeiro!");
-        return;
-      }
+        const exists = cloudSheets.some(c => c.id === characterId);
 
-      if (state.useRealFirebase) {
-        try {
-          const firebase = await initRealFirebase();
-          if (!firebase) return;
-
-          const { doc, setDoc, getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-
-          // Buscar fichas atuais do Firestore para validação de limites
-          const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
-          const snap = await getDocs(q);
-          const cloudSheets = [];
-          snap.forEach(d => cloudSheets.push(d.data()));
-
-          const characterId = state.currentCharacter.id;
-          const exists = cloudSheets.some(c => c.id === characterId);
-
-          // Validação de limite de quantidade (máximo 5)
-          if (!exists && cloudSheets.length >= stats.maxCount) {
-            alert(`Erro de Limite: Você atingiu o limite de ${stats.maxCount} fichas salvas na nuvem. Apague uma ficha no Firestore antes de adicionar outra.`);
-            return;
-          }
-
-          // Validação de limite de espaço (máximo 100 KB)
-          const updatedSheets = [...cloudSheets.filter(c => c.id !== characterId), state.currentCharacter];
-          const newSizeBytes = new Blob([JSON.stringify(updatedSheets)]).size;
-          const newSizeKB = newSizeBytes / 1024;
-          if (newSizeKB > stats.maxSizeKB) {
-            alert(`Erro de Espaço: Limite de armazenamento de ${stats.maxSizeKB} KB excedido (tamanho necessário: ${newSizeKB.toFixed(2)} KB). Reduza o tamanho de anotações ou remova outras fichas.`);
-            return;
-          }
-
-          // Gravação no Firestore
-          const docData = {
-            ...state.currentCharacter,
-            userId: state.currentUser.uid,
-            lastUpdated: Date.now()
-          };
-          await setDoc(doc(firebase.db, "characters", characterId), docData);
-
-          // Atualiza cache e UI
-          cloudCharactersCache = updatedSheets;
-          state.hasUnsavedCloudChanges = false;
-          localStorage.setItem("assimilação_has_unsaved_changes", "false");
-          logger.info(`Sincronização Firestore: Ficha de "${state.currentCharacter.name}" salva com sucesso.`);
-
-          alert(`Ficha de "${state.currentCharacter.name}" salva no Firestore com sucesso!`);
-          updateCloudSyncModalUI();
-          updateCloudSyncBadge();
-        } catch (err) {
-          logger.error("Erro ao salvar no Firestore:", err);
-          alert("Erro ao gravar dados na nuvem real. Verifique sua conexão e regras do Firestore.");
-        }
-      } else {
-        // Modo simulado
-        const db = getMockCloudDB();
-        const uid = state.currentUser.uid;
-        const userSheets = db[uid] || [];
-
-        const characterId = state.currentCharacter.id;
-        const existsIndex = userSheets.findIndex(c => c.id === characterId);
-
-        const pendingSheets = [...userSheets];
-        if (existsIndex !== -1) {
-          pendingSheets[existsIndex] = state.currentCharacter;
-        } else {
-          pendingSheets.push(state.currentCharacter);
-        }
-
-        // Valida limite de quantidade
-        if (existsIndex === -1 && userSheets.length >= stats.maxCount) {
-          alert(`Erro de Limite: Você atingiu o limite de ${stats.maxCount} fichas salvas na nuvem. Apague uma ficha no banco antes de adicionar outra.`);
+        // Validação de limite de quantidade (máximo 5)
+        if (!exists && cloudSheets.length >= stats.maxCount) {
+          alert(`Erro de Limite: Você atingiu o limite de ${stats.maxCount} fichas salvas na nuvem. Apague uma ficha no Firestore antes de adicionar outra.`);
+          renderContent();
           return;
         }
 
-        // Valida limite de espaço (100 KB)
-        const newSizeBytes = new Blob([JSON.stringify(pendingSheets)]).size;
+        // Validação de limite de espaço (máximo 100 KB)
+        const updatedSheets = [...cloudSheets.filter(c => c.id !== characterId), char];
+        const newSizeBytes = new Blob([JSON.stringify(updatedSheets)]).size;
         const newSizeKB = newSizeBytes / 1024;
         if (newSizeKB > stats.maxSizeKB) {
           alert(`Erro de Espaço: Limite de armazenamento de ${stats.maxSizeKB} KB excedido (tamanho necessário: ${newSizeKB.toFixed(2)} KB). Reduza o tamanho de anotações ou remova outras fichas.`);
+          renderContent();
           return;
         }
 
-        // Salva
-        db[uid] = pendingSheets;
-        saveMockCloudDB(db);
+        // Gravação no Firestore
+        const docData = {
+          ...char,
+          userId: state.currentUser.uid,
+          lastUpdated: Date.now()
+        };
+        await setDoc(doc(firebase.db, "characters", characterId), docData);
 
-        state.hasUnsavedCloudChanges = false;
-        localStorage.setItem("assimilação_has_unsaved_changes", "false");
-        logger.info(`Sincronização: Ficha de "${state.currentCharacter.name}" sincronizada com a nuvem.`);
+        // Atualiza cache e UI
+        cloudCharactersCache = updatedSheets;
+        if (state.currentCharacter && state.currentCharacter.id === characterId) {
+          state.hasUnsavedCloudChanges = false;
+          localStorage.setItem("assimilação_has_unsaved_changes", "false");
+        }
+        logger.info(`Sincronização Firestore: Ficha de "${char.name}" salva com sucesso.`);
 
-        alert(`Ficha de "${state.currentCharacter.name}" enviada com sucesso!`);
-        updateCloudSyncModalUI();
+        alert(`Ficha de "${char.name}" salva no Firestore com sucesso!`);
+        renderContent();
         updateCloudSyncBadge();
+      } catch (err) {
+        logger.error("Erro ao salvar no Firestore:", err);
+        alert("Erro ao gravar dados na nuvem real. Verifique sua conexão e regras do Firestore.");
+        renderContent();
       }
-    });
+    } else {
+      // Modo simulado
+      const db = getMockCloudDB();
+      const uid = state.currentUser.uid;
+      const userSheets = db[uid] || [];
 
-    document.getElementById("btn-cloud-pull").addEventListener("click", async () => {
-      let cloudSheets = [];
+      const existsIndex = userSheets.findIndex(c => c.id === characterId);
 
-      if (state.useRealFirebase) {
-        try {
-          const firebase = await initRealFirebase();
-          if (!firebase) return;
-
-          const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
-          const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
-          const snap = await getDocs(q);
-          snap.forEach(d => cloudSheets.push(d.data()));
-          cloudCharactersCache = cloudSheets;
-        } catch (err) {
-          logger.error("Erro ao puxar dados do Firestore:", err);
-          alert("Não foi possível conectar ao Firestore. Verifique seu arquivo .env.");
-          return;
-        }
+      const pendingSheets = [...userSheets];
+      if (existsIndex !== -1) {
+        pendingSheets[existsIndex] = char;
       } else {
-        const db = getMockCloudDB();
-        const uid = state.currentUser.uid;
-        cloudSheets = db[uid] || [];
+        pendingSheets.push(char);
       }
 
-      if (cloudSheets.length === 0) {
-        alert("Nenhuma ficha encontrada na nuvem para esta conta.");
+      // Valida limite de quantidade
+      if (existsIndex === -1 && userSheets.length >= stats.maxCount) {
+        alert(`Erro de Limite: Você atingiu o limite de ${stats.maxCount} fichas salvas na nuvem. Apague uma ficha no banco antes de adicionar outra.`);
+        renderContent();
         return;
       }
 
-      if (confirm(`Encontramos ${cloudSheets.length} fichas na nuvem. Deseja importá-las? Fichas locais com o mesmo ID serão substituídas.`)) {
-        cloudSheets.forEach(cloudChar => {
-          const localIndex = state.characters.findIndex(c => c.id === cloudChar.id);
-          if (localIndex !== -1) {
-            state.characters[localIndex] = cloudChar;
-          } else {
-            state.characters.push(cloudChar);
-          }
-        });
+      // Valida limite de espaço (100 KB)
+      const newSizeBytes = new Blob([JSON.stringify(pendingSheets)]).size;
+      const newSizeKB = newSizeBytes / 1024;
+      if (newSizeKB > stats.maxSizeKB) {
+        alert(`Erro de Espaço: Limite de armazenamento de ${stats.maxSizeKB} KB excedido (tamanho necessário: ${newSizeKB.toFixed(2)} KB). Reduza o tamanho de anotações ou remova outras fichas.`);
+        renderContent();
+        return;
+      }
 
-        localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
-        updateCharSelector();
+      // Salva
+      db[uid] = pendingSheets;
+      saveMockCloudDB(db);
 
-        if (state.currentCharacter) {
-          const reloadedChar = state.characters.find(c => c.id === state.currentCharacter.id);
-          if (reloadedChar) {
-            loadCharacter(reloadedChar.id);
-          }
-        } else if (state.characters.length > 0) {
-          loadCharacter(state.characters[0].id);
-        }
-
+      if (state.currentCharacter && state.currentCharacter.id === characterId) {
         state.hasUnsavedCloudChanges = false;
         localStorage.setItem("assimilação_has_unsaved_changes", "false");
-        logger.info("Sincronização: Fichas carregadas da nuvem.");
-
-        alert("Fichas importadas da nuvem com sucesso!");
-        updateCloudSyncModalUI();
-        updateCloudSyncBadge();
       }
-    });
+      logger.info(`Sincronização: Ficha de "${char.name}" sincronizada com a nuvem.`);
+
+      alert(`Ficha de "${char.name}" enviada com sucesso!`);
+      renderContent();
+      updateCloudSyncBadge();
+    }
   }
+
+  const renderContent = () => {
+    let html = "";
+    
+    if (activeTab === "fichas") {
+      html = `
+        <h4 style="font-family:var(--font-heading); margin-bottom:12px; color:var(--text-primary);">Personagens Salvos (${state.characters.length})</h4>
+        ${state.characters.length === 0 ? `
+          <p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhum personagem salvo.</p>
+        ` : `
+          <div style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; padding-right:4px;">
+            ${state.characters.map(char => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:10px; border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                <div>
+                  <div style="font-weight:600; color:var(--text-primary); font-size:var(--font-size-sm);">${char.name}</div>
+                  <div style="font-size:var(--font-size-xs); color:var(--text-secondary);">${char.ocupacao || "Sem Ocupação"}</div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-sm btn-export-char" data-id="${char.id}" style="padding:4px 8px;">📥 Exportar</button>
+                  <button class="btn btn-sm btn-danger btn-delete-char" data-id="${char.id}" style="padding:4px 8px;">❌ Excluir</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      `;
+    } else if (activeTab === "mundo") {
+      html = `
+        <!-- Refúgios -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--color-blue-glow); font-size:var(--font-size-sm);">Refúgios (${worldState.refugios.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px; max-height:120px; overflow-y:auto; padding-right:4px;">
+          ${worldState.refugios.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhum refúgio salvo.</p>` : 
+            worldState.refugios.map(r => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${r.nome}</span>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-xs btn-export-refugio" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-refugio" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+
+        <!-- Regiões -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--color-conhecimentos); font-size:var(--font-size-sm);">Regiões (${worldState.regioes.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px; max-height:120px; overflow-y:auto; padding-right:4px;">
+          ${worldState.regioes.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhuma região salva.</p>` : 
+            worldState.regioes.map(r => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${r.nome}</span>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-xs btn-export-regiao" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-regiao" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+
+        <!-- Conflitos -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--color-danger); font-size:var(--font-size-sm);">Conflitos (${worldState.conflitos.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px; max-height:120px; overflow-y:auto; padding-right:4px;">
+          ${worldState.conflitos.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhum conflito salvo.</p>` : 
+            worldState.conflitos.map(c => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${c.nome}</span>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-xs btn-export-conflito" data-id="${c.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-conflito" data-id="${c.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+
+        <!-- Locais -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--color-praticas); font-size:var(--font-size-sm);">Locais (${worldState.locais.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; max-height:120px; overflow-y:auto; padding-right:4px;">
+          ${worldState.locais.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhum local salvo.</p>` : 
+            worldState.locais.map(l => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${l.nome}</span>
+                <div style="display:flex; gap:6px;">
+                  <button class="btn btn-xs btn-export-local" data-id="${l.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-local" data-id="${l.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+      `;
+    } else if (activeTab === "homebrew") {
+      const customTraits = getCustomTraits();
+      const customMutations = getCustomMutations();
+      
+      html = `
+        <!-- Características Homebrew -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--text-primary); font-size:var(--font-size-sm);">Características Customizadas (${customTraits.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px; max-height:150px; overflow-y:auto; padding-right:4px;">
+          ${customTraits.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhuma característica criada.</p>` : 
+            customTraits.map((t, idx) => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <div>
+                  <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${t.nome}</span>
+                  <small style="font-size:10px; color:var(--text-secondary); margin-left:6px;">(Custo: ${t.custo} XP)</small>
+                </div>
+                <button class="btn btn-xs btn-danger btn-delete-custom-trait" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+              </div>
+            `).join('')
+          }
+        </div>
+
+        <!-- Mutações Homebrew -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--text-primary); font-size:var(--font-size-sm);">Mutações Customizadas (${customMutations.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto; padding-right:4px;">
+          ${customMutations.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhuma mutação criada.</p>` : 
+            customMutations.map((m, idx) => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <div>
+                  <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${m.name}</span>
+                  <small style="font-size:10px; color:var(--text-secondary); margin-left:6px;">(${m.suit.toUpperCase()})</small>
+                </div>
+                <button class="btn btn-xs btn-danger btn-delete-custom-mutation" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+              </div>
+            `).join('')
+          }
+        </div>
+      `;
+    } else if (activeTab === "nuvem") {
+      if (!state.currentUser) {
+        html = `
+          <h4 style="font-family:var(--font-heading); margin-bottom:12px; color:var(--text-primary);">Sincronização em Nuvem</h4>
+          <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 40px; margin-bottom: 16px; color: var(--color-blue-glow);">☁️</div>
+            <p style="font-size: var(--font-size-sm); color: var(--text-primary); margin-bottom: 8px;">Salve suas fichas na nuvem de forma segura.</p>
+            <p style="font-size: var(--font-size-xs); color: var(--text-secondary); margin-bottom: 20px; max-width: 320px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+              Conecte-se com sua conta Google para enviar suas fichas locais e acessá-las em qualquer outro navegador ou dispositivo móvel.
+            </p>
+            
+            <button id="btn-google-sign-in" class="btn" style="background: #fff; color: #1f1f1f; border-color: #fff; padding: 10px 20px; font-weight: bold; border-radius: 4px; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.9c1.7-1.56 2.69-3.86 2.69-6.57zm-8.64 6.8c1.89 0 3.48-.63(4.64)-1.7l-2.9-2.24c-.8.54-1.84.86-2.9.86-2.23 0-4.12-1.51-4.8-3.53H.07v2.32C1.23 14 5.02 16 9 16zm-4.8-7.93c-.17-.5-.26-1.03-.26-1.57s.09-1.07.26-1.57V2.63H.07C-.48 3.74-.8 4.97-.8 6.28s.32 2.54.87 3.65l3.27-2.53zm4.8-4.87c1.03 0 1.95.35 2.68 1.05l2.01-2.01C11.53.86 9.89.5 9 .5 5.02.5 1.23 2.5.07 6.28l3.27 2.53c.68-2.02 2.57-3.53 4.8-3.53z" fill="#4285F4"/>
+              </svg>
+              Entrar com o Google
+            </button>
+          </div>
+        `;
+      } else {
+        const stats = getCloudStorageInfo();
+        const sizePercent = Math.min(100, (stats.sizeKB / stats.maxSizeKB) * 100);
+        const countPercent = Math.min(100, (stats.count / stats.maxCount) * 100);
+
+        // Listar outros personagens locais para enviar
+        const otherCharacters = state.characters.filter(c => !state.currentCharacter || c.id !== state.currentCharacter.id);
+        let otherCharactersHtml = "";
+        if (otherCharacters.length > 0) {
+          otherCharactersHtml = `
+            <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; text-align: left;">
+              <h5 style="font-size: 11px; margin-bottom: 8px; color: var(--text-primary); text-transform: uppercase; font-family:var(--font-heading);">Enviar Outras Fichas</h5>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                ${otherCharacters.map(char => `
+                  <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                    <span style="font-size:11px; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${char.name}</span>
+                    <button class="btn btn-xs btn-cloud-push-other" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-blue-glow); color:var(--color-blue-glow); background:rgba(0,162,255,0.04); cursor:pointer;">
+                      📤 Enviar
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+        
+        html = `
+          <!-- Perfil do Usuário -->
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; background:rgba(255,255,255,0.04); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
+            <div style="width:36px; height:36px; border-radius:50%; background:var(--color-blue-glow); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px; color:#fff;">
+              ${state.currentUser.displayName.charAt(0).toUpperCase()}
+            </div>
+            <div style="flex:1; text-align:left;">
+              <div style="font-weight:600; color:var(--text-primary); font-size:var(--font-size-sm);">${state.currentUser.displayName}</div>
+              <div style="font-size:10px; color:var(--text-secondary);">${state.currentUser.email}</div>
+            </div>
+            <button id="btn-google-sign-out" class="btn btn-xs btn-danger" style="padding: 4px 8px;">Sair</button>
+          </div>
+
+          <!-- Status de Sincronização -->
+          ${state.hasUnsavedCloudChanges ? `
+            <div style="background:rgba(255, 102, 0, 0.08); border:1px solid var(--color-orange); color:var(--color-orange); padding:8px; border-radius:4px; font-size:11px; margin-bottom:16px; display:flex; align-items:center; gap:6px;">
+              <span>⚠️</span>
+              <span>Modificações pendentes de envio!</span>
+            </div>
+          ` : `
+            <div style="background:rgba(0, 255, 102, 0.05); border:1px solid var(--color-praticas); color:var(--color-praticas); padding:8px; border-radius:4px; font-size:11px; margin-bottom:16px; display:flex; align-items:center; gap:6px;">
+              <span>✔️</span>
+              <span>Sincronizado com o Firebase</span>
+            </div>
+          `}
+
+          <!-- Limites de Armazenamento -->
+          <div style="margin-bottom:10px; text-align:left;">
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-bottom:2px;">
+              <span>Espaço:</span>
+              <strong>${stats.sizeKB.toFixed(2)} KB / ${stats.maxSizeKB} KB</strong>
+            </div>
+            <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+              <div style="width:${sizePercent}%; height:100%; background:var(--color-blue-glow);"></div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px; text-align:left;">
+            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-bottom:2px;">
+              <span>Fichas na Nuvem:</span>
+              <strong>${stats.count} / ${stats.maxCount}</strong>
+            </div>
+            <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+              <div style="width:${countPercent}%; height:100%; background:var(--color-blue-glow);"></div>
+            </div>
+          </div>
+
+          <!-- Ações principais -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+            <button id="btn-cloud-push" class="btn" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-weight: bold; background: rgba(0,162,255,0.05); padding: 8px; font-size:11px; cursor:pointer;">
+              📤 Enviar Atual
+            </button>
+            <button id="btn-cloud-pull" class="btn" style="border-color: var(--color-praticas); color: var(--color-praticas); font-weight: bold; background: rgba(0,255,102,0.05); padding: 8px; font-size:11px; cursor:pointer;">
+              📥 Puxar Nuvem
+            </button>
+          </div>
+
+          <!-- Outras Fichas -->
+          ${otherCharactersHtml}
+        `;
+      }
+    } else if (activeTab === "backup") {
+      html = `
+        <h4 style="font-family:var(--font-heading); margin-bottom:12px; color:var(--text-primary);">Backup e Importação Completa</h4>
+        <p style="font-size:var(--font-size-xs); color:var(--text-secondary); margin-bottom:20px; line-height:1.4;">
+          Exporte absolutamente tudo do seu jogo (todas as fichas de personagens, refúgios, regiões, conflitos, locais e customizações de homebrew) em um único arquivo de backup completo, ou restaure um backup existente.
+        </p>
+
+        <!-- Botões de Ação de Backup -->
+        <div style="display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:24px;">
+          <button id="btn-export-all-backup" class="btn btn-block" style="border-color:var(--color-blue-glow); color:var(--color-blue-glow); background:rgba(0,162,255,0.05); padding:10px; font-weight:bold;">
+            📤 Exportar Backup Completo (.JSON)
+          </button>
+          
+          <button id="btn-trigger-import-backup" class="btn btn-block" style="border-color:var(--color-praticas); color:var(--color-praticas); background:rgba(0,255,102,0.05); padding:10px; font-weight:bold;">
+            📥 Importar Backup Completo (.JSON)
+          </button>
+          <input type="file" id="file-import-all-backup" accept=".json" style="display:none;">
+        </div>
+
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--color-danger); font-size:var(--font-size-sm);">Zona de Risco</h4>
+        <div style="background:rgba(239,68,68,0.08); border:1px solid var(--color-danger); padding:12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="flex:1; padding-right:12px;">
+            <div style="font-size:var(--font-size-xs); font-weight:bold; color:#fff; margin-bottom:2px;">Apagar Tudo do Navegador</div>
+            <div style="font-size:10px; color:var(--text-secondary);">Isso limpará absolutamente todas as fichas locais, dados do mundo, e homebrews permanentemente.</div>
+          </div>
+          <button id="btn-wipe-everything" class="btn btn-danger btn-sm" style="white-space:nowrap;">Limpar Tudo</button>
+        </div>
+      `;
+    }
+
+    el.modalBody.innerHTML = `
+      <h3 class="modal-title">Gerenciador de Armazenamento</h3>
+      
+      <!-- Tab Bar -->
+      <div class="lib-tab-bar" style="margin-top:16px; margin-bottom:16px;">
+        <button class="lib-tab ${activeTab === 'fichas' ? 'active' : ''}" data-tab="fichas">👤 Fichas</button>
+        <button class="lib-tab ${activeTab === 'mundo' ? 'active' : ''}" data-tab="mundo">🌍 Mundo</button>
+        <button class="lib-tab ${activeTab === 'homebrew' ? 'active' : ''}" data-tab="homebrew">🧪 Custom</button>
+        <button class="lib-tab ${activeTab === 'nuvem' ? 'active' : ''}" data-tab="nuvem">☁️ Nuvem</button>
+        <button class="lib-tab ${activeTab === 'backup' ? 'active' : ''}" data-tab="backup">💾 Backup</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="storage-tab-content-container" style="min-height:280px; margin-bottom:20px;">
+        ${html}
+      </div>
+
+      <!-- Footer -->
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
+        <button id="btn-back-to-settings" class="btn btn-md btn-secondary">Voltar</button>
+        <button id="btn-close-storage-manager" class="btn btn-md">Fechar</button>
+      </div>
+    `;
+
+    // Reassociar eventos de Abas
+    el.modalBody.querySelectorAll(".lib-tab").forEach(tabBtn => {
+      tabBtn.addEventListener("click", () => {
+        activeTab = tabBtn.getAttribute("data-tab");
+        renderContent();
+      });
+    });
+
+    // Eventos do rodapé
+    document.getElementById("btn-back-to-settings").addEventListener("click", () => {
+      openSettingsModal();
+    });
+    document.getElementById("btn-close-storage-manager").addEventListener("click", () => {
+      el.modalContainer.classList.add("hidden");
+    });
+
+    // Eventos da aba Fichas
+    if (activeTab === "fichas") {
+      el.modalBody.querySelectorAll(".btn-export-char").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const char = state.characters.find(c => c.id === id);
+          if (!char) return;
+          const blob = new Blob([JSON.stringify(char, null, 2)], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `${char.name.toLowerCase().replace(/\s+/g, "_")}_ficha.json`;
+          a.click();
+        });
+      });
+
+      el.modalBody.querySelectorAll(".btn-delete-char").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const char = state.characters.find(c => c.id === id);
+          if (!char) return;
+          if (confirm(`Tem certeza de que deseja excluir a ficha de ${char.name}? Esta ação não pode ser desfeita.`)) {
+            const index = state.characters.findIndex(c => c.id === id);
+            if (index !== -1) {
+              state.characters.splice(index, 1);
+              localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
+              
+              if (state.currentCharacter && state.currentCharacter.id === id) {
+                if (state.characters.length > 0) {
+                  import("./state.js").then(({ loadCharacter }) => loadCharacter(state.characters[0].id));
+                } else {
+                  state.currentCharacter = null;
+                  window.location.reload(); // Recarrega para voltar à tela inicial limpa
+                  return;
+                }
+              }
+              import("./state.js").then(({ updateCharSelector }) => updateCharSelector());
+              renderContent();
+            }
+          }
+        });
+      });
+    }
+
+    // Eventos da aba Mundo
+    if (activeTab === "mundo") {
+      const setupWorldEvents = (selectorExport, selectorDelete, arrayProp, deleteFn, filenamePrefix) => {
+        el.modalBody.querySelectorAll(selectorExport).forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-id");
+            const item = worldState[arrayProp].find(i => i.id === id);
+            if (!item) return;
+            const blob = new Blob([JSON.stringify(item, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `${filenamePrefix}_${item.nome.toLowerCase().replace(/\s+/g, "_")}.json`;
+            a.click();
+          });
+        });
+
+        el.modalBody.querySelectorAll(selectorDelete).forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-id");
+            const item = worldState[arrayProp].find(i => i.id === id);
+            if (!item) return;
+            if (confirm(`Tem certeza de que deseja deletar "${item.nome}"? Esta ação não pode ser desfeita.`)) {
+              deleteFn(id);
+              renderContent();
+            }
+          });
+        });
+      };
+
+      setupWorldEvents(".btn-export-refugio", ".btn-delete-refugio", "refugios", deleteRefugio, "refugio");
+      setupWorldEvents(".btn-export-regiao", ".btn-delete-regiao", "regioes", deleteRegiao, "regiao");
+      setupWorldEvents(".btn-export-conflito", ".btn-delete-conflito", "conflitos", deleteConflito, "conflito");
+      setupWorldEvents(".btn-export-local", ".btn-delete-local", "locais", deleteLocal, "local");
+    }
+
+    // Eventos da aba Homebrew
+    if (activeTab === "homebrew") {
+      el.modalBody.querySelectorAll(".btn-delete-custom-trait").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          const traits = getCustomTraits();
+          const name = traits[idx]?.nome;
+          if (confirm(`Tem certeza de que deseja excluir a característica customizada "${name}"?`)) {
+            traits.splice(idx, 1);
+            localStorage.setItem("assimilação_homebrew_traits", JSON.stringify(traits));
+            import("./sheet.js").then(({ renderHomebrewSheet }) => renderHomebrewSheet());
+            renderContent();
+          }
+        });
+      });
+
+      el.modalBody.querySelectorAll(".btn-delete-custom-mutation").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          const mutations = getCustomMutations();
+          const name = mutations[idx]?.name;
+          if (confirm(`Tem certeza de que deseja excluir a mutação customizada "${name}"?`)) {
+            mutations.splice(idx, 1);
+            localStorage.setItem("assimilação_homebrew_mutations", JSON.stringify(mutations));
+            import("./sheet.js").then(({ renderHomebrewSheet }) => renderHomebrewSheet());
+            renderContent();
+          }
+        });
+      });
+    }
+
+    // Eventos da aba Nuvem
+    if (activeTab === "nuvem") {
+      const btnSignIn = document.getElementById("btn-google-sign-in");
+      if (btnSignIn) {
+        btnSignIn.addEventListener("click", async () => {
+          if (state.useRealFirebase) {
+            try {
+              const firebase = await initRealFirebase();
+              if (firebase) {
+                const { signInWithPopup, GoogleAuthProvider } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(firebase.auth, provider);
+                
+                state.currentUser = {
+                  uid: result.user.uid,
+                  displayName: result.user.displayName,
+                  email: result.user.email
+                };
+                localStorage.setItem("assimilação_mock_user", JSON.stringify(state.currentUser));
+                logger.info(`Autenticação: Logado via Google (Real) - ${state.currentUser.displayName}`);
+                
+                // Recarregar cache
+                const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+                const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
+                const snap = await getDocs(q);
+                const cloudSheets = [];
+                snap.forEach(d => cloudSheets.push(d.data()));
+                cloudCharactersCache = cloudSheets;
+                
+                renderContent();
+                updateCloudSyncBadge();
+              }
+            } catch (error) {
+              logger.error("Erro no login real do Google:", error);
+              alert("Falha no login com Google. Verifique seu arquivo .env.");
+            }
+          } else {
+            const name = prompt("Digite seu nome para simular o login do Google:", "Jogador Assimilado");
+            if (name === null) return;
+            const email = prompt("Digite seu e-mail do Google:", "jogador@gmail.com");
+            if (!email) return;
+            
+            const mockUser = {
+              uid: "google_user_" + Math.random().toString(36).substr(2, 9),
+              displayName: name,
+              email: email
+            };
+            
+            state.currentUser = mockUser;
+            localStorage.setItem("assimilação_mock_user", JSON.stringify(mockUser));
+            logger.info("Autenticação: Login efetuado com sucesso via conta Google (Simulado).");
+            renderContent();
+            updateCloudSyncBadge();
+          }
+        });
+      }
+
+      const btnSignOut = document.getElementById("btn-google-sign-out");
+      if (btnSignOut) {
+        btnSignOut.addEventListener("click", async () => {
+          if (confirm("Tem certeza que deseja sair de sua conta Google? Suas fichas locais permanecerão salvas no navegador.")) {
+            if (state.useRealFirebase) {
+              try {
+                const firebase = await initRealFirebase();
+                if (firebase) {
+                  const { signOut } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+                  await signOut(firebase.auth);
+                }
+              } catch (e) {
+                console.error("Erro ao deslogar do Firebase:", e);
+              }
+            }
+            state.currentUser = null;
+            state.hasUnsavedCloudChanges = false;
+            cloudCharactersCache = [];
+            localStorage.removeItem("assimilação_mock_user");
+            localStorage.removeItem("assimilação_has_unsaved_changes");
+            logger.info("Autenticação: Desconexão efetuada.");
+            renderContent();
+            updateCloudSyncBadge();
+          }
+        });
+      }
+
+      const btnPush = document.getElementById("btn-cloud-push");
+      if (btnPush) {
+        btnPush.addEventListener("click", async () => {
+          if (!state.currentCharacter) {
+            alert("Crie ou selecione um personagem primeiro!");
+            return;
+          }
+          btnPush.disabled = true;
+          btnPush.textContent = "⌛ Enviando...";
+          await pushCharacterToCloud(state.currentCharacter);
+        });
+      }
+
+      const btnPull = document.getElementById("btn-cloud-pull");
+      if (btnPull) {
+        btnPull.addEventListener("click", async () => {
+          let cloudSheets = [];
+          btnPull.disabled = true;
+          btnPull.textContent = "⌛ Carregando...";
+
+          if (state.useRealFirebase) {
+            try {
+              const firebase = await initRealFirebase();
+              if (!firebase) { btnPull.disabled = false; btnPull.textContent = "📥 Puxar da Nuvem"; return; }
+
+              const { getDocs, collection, query, where } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+              const q = query(collection(firebase.db, "characters"), where("userId", "==", state.currentUser.uid));
+              const snap = await getDocs(q);
+              snap.forEach(d => cloudSheets.push(d.data()));
+              cloudCharactersCache = cloudSheets;
+            } catch (err) {
+              logger.error("Erro ao puxar dados do Firestore:", err);
+              alert("Não foi possível conectar ao Firestore. Verifique seu arquivo .env.");
+              btnPull.disabled = false;
+              btnPull.textContent = "📥 Puxar da Nuvem";
+              return;
+            }
+          } else {
+            const db = getMockCloudDB();
+            const uid = state.currentUser.uid;
+            cloudSheets = db[uid] || [];
+          }
+
+          if (cloudSheets.length === 0) {
+            alert("Nenhuma ficha encontrada na nuvem para esta conta.");
+            btnPull.disabled = false;
+            btnPull.textContent = "📥 Puxar da Nuvem";
+            return;
+          }
+
+          if (confirm(`Encontramos ${cloudSheets.length} fichas na nuvem. Deseja importá-las? Fichas locais com o mesmo ID serão substituídas.`)) {
+            cloudSheets.forEach(cloudChar => {
+              const localIndex = state.characters.findIndex(c => c.id === cloudChar.id);
+              if (localIndex !== -1) {
+                state.characters[localIndex] = cloudChar;
+              } else {
+                state.characters.push(cloudChar);
+              }
+            });
+
+            localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
+            import("./state.js").then(({ updateCharSelector, loadCharacter }) => {
+              updateCharSelector();
+              if (state.currentCharacter) {
+                const reloadedChar = state.characters.find(c => c.id === state.currentCharacter.id);
+                if (reloadedChar) loadCharacter(reloadedChar.id);
+              } else if (state.characters.length > 0) {
+                loadCharacter(state.characters[0].id);
+              }
+            });
+
+            state.hasUnsavedCloudChanges = false;
+            localStorage.setItem("assimilação_has_unsaved_changes", "false");
+            logger.info("Sincronização: Fichas carregadas da nuvem.");
+            alert("Fichas importadas da nuvem com sucesso!");
+            renderContent();
+            updateCloudSyncBadge();
+          } else {
+            btnPull.disabled = false;
+            btnPull.textContent = "📥 Puxar da Nuvem";
+          }
+        });
+      }
+
+      // Eventos para botões das outras fichas locais
+      document.querySelectorAll(".btn-cloud-push-other").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const charId = btn.getAttribute("data-char-id");
+          const char = state.characters.find(c => c.id === charId);
+          if (!char) return;
+          
+          btn.disabled = true;
+          btn.textContent = "⌛ Enviando...";
+          await pushCharacterToCloud(char);
+        });
+      });
+    }
+
+    // Eventos da aba Backup
+    if (activeTab === "backup") {
+      document.getElementById("btn-export-all-backup").addEventListener("click", () => {
+        const backup = {
+          format: "assimilacao_full_backup",
+          version: 1,
+          timestamp: Date.now(),
+          characters: state.characters,
+          refugios: worldState.refugios,
+          regioes: worldState.regioes,
+          conflitos: worldState.conflitos,
+          locais: worldState.locais,
+          traits: getCustomTraits(),
+          mutations: getCustomMutations()
+        };
+
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `backup_completo_assimilacao_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+      });
+
+      const fileInput = document.getElementById("file-import-all-backup");
+      document.getElementById("btn-trigger-import-backup").addEventListener("click", () => {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          try {
+            const data = JSON.parse(evt.target.result);
+            if (data.format !== "assimilacao_full_backup") {
+              alert("Formato de arquivo inválido! Por favor, selecione um arquivo de backup do Assimilação RPG.");
+              return;
+            }
+
+            if (confirm("Esta importação irá mesclar os dados importados com os seus dados locais existentes. Deseja prosseguir?")) {
+              // Mesclar Personagens
+              if (data.characters && Array.isArray(data.characters)) {
+                data.characters.forEach(char => {
+                  const existingIdx = state.characters.findIndex(c => c.id === char.id);
+                  if (existingIdx !== -1) {
+                    state.characters[existingIdx] = char;
+                  } else {
+                    state.characters.push(char);
+                  }
+                });
+                localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
+              }
+
+              // Mesclar Mundo (Refúgios, Regiões, Conflitos, Locais)
+              const mergeWorld = (importList, localList, storageKey) => {
+                if (importList && Array.isArray(importList)) {
+                  importList.forEach(item => {
+                    const existingIdx = localList.findIndex(i => i.id === item.id);
+                    if (existingIdx !== -1) {
+                      localList[existingIdx] = item;
+                    } else {
+                      localList.push(item);
+                    }
+                  });
+                  localStorage.setItem(storageKey, JSON.stringify(localList));
+                }
+              };
+
+              mergeWorld(data.refugios, worldState.refugios, "assimilação_rpg_refugios");
+              mergeWorld(data.regioes, worldState.regioes, "assimilação_rpg_regioes");
+              mergeWorld(data.conflitos, worldState.conflitos, "assimilação_rpg_conflitos");
+              mergeWorld(data.locais, worldState.locais, "assimilação_rpg_locais");
+
+              // Mesclar Homebrew
+              if (data.traits && Array.isArray(data.traits)) {
+                const existing = getCustomTraits();
+                const merged = [...existing, ...data.traits.filter(t => !existing.some(et => et.id === t.id))];
+                localStorage.setItem("assimilação_homebrew_traits", JSON.stringify(merged));
+              }
+              if (data.mutations && Array.isArray(data.mutations)) {
+                const existing = getCustomMutations();
+                const merged = [...existing, ...data.mutations.filter(m => !existing.some(em => em.id === m.id))];
+                localStorage.setItem("assimilação_homebrew_mutations", JSON.stringify(merged));
+              }
+
+              alert("Backup importado e mesclado com sucesso! O aplicativo será recarregado.");
+              window.location.reload();
+            }
+          } catch (err) {
+            alert("Erro ao ler o arquivo de backup: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("btn-wipe-everything").addEventListener("click", () => {
+        if (confirm("⚠️ ATENÇÃO EXTREMA: Você está prestes a deletar ABSOLUTAMENTE TUDO (personagens, fichas, mundos, refúgios, homebrew). Esta ação é permanente e NÃO PODE ser desfeita. Tem certeza absoluta?")) {
+          localStorage.clear();
+          sessionStorage.clear();
+          alert("Todos os dados foram apagados com sucesso.");
+          window.location.reload();
+        }
+      });
+    }
+  };
+
+  renderContent();
 }
 
 // Ouvinte do evento beforeunload para alertar antes de fechar a aba

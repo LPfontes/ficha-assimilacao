@@ -152,32 +152,56 @@ export function renderAptitudesSheet() {
 
   // Renders de Instintos
   el.instinctsListSheet.innerHTML = "";
+  const instinctsCard = el.instinctsListSheet.closest(".aptitude-column-card");
+  const instinctsLocked = instinctsCard ? instinctsCard.classList.contains("locked") : true;
+
   Object.keys(char.instintos).forEach(name => {
     const val = char.instintos[name];
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.instinto === name) row.classList.add("selected-for-roll");
 
-    row.innerHTML = `
-      <span class="name">${name}</span>
-      <div class="value-bubbles"></div>
-    `;
+    if (!instinctsLocked) {
+      row.innerHTML = `
+        <span class="name">${name}</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
+          <div class="value-bubbles"></div>
+          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
+        </div>
+      `;
+    } else {
+      row.innerHTML = `
+        <span class="name">${name}</span>
+        <div class="value-bubbles"></div>
+      `;
+    }
 
     const bubblesContainer = row.querySelector(".value-bubbles");
     const maxBubbles = char.maxValueBubbles || 5;
-    for (let i = 1; i <= maxBubbles; i++) {
+    const numBubbles = Math.max(maxBubbles, val);
+    for (let i = 1; i <= numBubbles; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-instinct ${i <= val ? 'filled' : ''}`;
 
       bubble.addEventListener("click", (e) => {
         e.stopPropagation(); // Impede selecionar para rolagem
-        const card = e.target.closest(".aptitude-column-card");
-        if (card && card.classList.contains("locked")) return;
+        if (instinctsLocked) return;
         const newValue = val === i ? i - 1 : i;
-        // Instintos não podem ser menores que 1 no sistema básico, mas conhecimentos/práticas sim
         updateAptitudeValue("instinto", "instintos", name, Math.max(1, newValue));
       });
       bubblesContainer.appendChild(bubble);
+    }
+
+    if (!instinctsLocked) {
+      row.querySelector(".btn-bubble-dec").addEventListener("click", (e) => {
+        e.stopPropagation();
+        updateAptitudeValue("instinto", "instintos", name, Math.max(1, val - 1));
+      });
+      row.querySelector(".btn-bubble-inc").addEventListener("click", (e) => {
+        e.stopPropagation();
+        updateAptitudeValue("instinto", "instintos", name, Math.min(10, val + 1));
+      });
     }
 
     row.addEventListener("click", () => {
@@ -189,31 +213,56 @@ export function renderAptitudesSheet() {
 
   // Renders de Conhecimentos
   el.conhecimentosListSheet.innerHTML = "";
+  const conhecimentosCard = el.conhecimentosListSheet.closest(".aptitude-column-card");
+  const conhecimentosLocked = conhecimentosCard ? conhecimentosCard.classList.contains("locked") : true;
+
   Object.keys(char.conhecimentos).forEach(name => {
     const val = char.conhecimentos[name];
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
 
-    row.innerHTML = `
-      <span class="name">${name}</span>
-      <div class="value-bubbles"></div>
-    `;
+    if (!conhecimentosLocked) {
+      row.innerHTML = `
+        <span class="name">${name}</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
+          <div class="value-bubbles"></div>
+          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
+        </div>
+      `;
+    } else {
+      row.innerHTML = `
+        <span class="name">${name}</span>
+        <div class="value-bubbles"></div>
+      `;
+    }
 
     const bubblesContainer = row.querySelector(".value-bubbles");
     const maxBubbles = char.maxValueBubbles || 5;
-    for (let i = 1; i <= maxBubbles; i++) {
+    const numBubbles = Math.max(maxBubbles, val);
+    for (let i = 1; i <= numBubbles; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-conhecimento ${i <= val ? 'filled' : ''}`;
 
       bubble.addEventListener("click", (e) => {
         e.stopPropagation();
-        const card = e.target.closest(".aptitude-column-card");
-        if (card && card.classList.contains("locked")) return;
+        if (conhecimentosLocked) return;
         const newValue = val === i ? i - 1 : i;
         updateAptitudeValue("skill", "conhecimentos", name, newValue);
       });
       bubblesContainer.appendChild(bubble);
+    }
+
+    if (!conhecimentosLocked) {
+      row.querySelector(".btn-bubble-dec").addEventListener("click", (e) => {
+        e.stopPropagation();
+        updateAptitudeValue("skill", "conhecimentos", name, Math.max(0, val - 1));
+      });
+      row.querySelector(".btn-bubble-inc").addEventListener("click", (e) => {
+        e.stopPropagation();
+        updateAptitudeValue("skill", "conhecimentos", name, Math.min(10, val + 1));
+      });
     }
 
     row.addEventListener("click", () => {
@@ -225,31 +274,56 @@ export function renderAptitudesSheet() {
 
   // Renders de Práticas
   el.praticasListSheet.innerHTML = "";
+  const praticasCard = el.praticasListSheet.closest(".aptitude-column-card");
+  const praticasLocked = praticasCard ? praticasCard.classList.contains("locked") : true;
+
   Object.keys(char.praticas).forEach(name => {
     const val = char.praticas[name];
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
 
-    row.innerHTML = `
-      <span class="name">${name}</span>
-      <div class="value-bubbles"></div>
-    `;
+    if (!praticasLocked) {
+      row.innerHTML = `
+        <span class="name">${name}</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
+          <div class="value-bubbles"></div>
+          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
+        </div>
+      `;
+    } else {
+      row.innerHTML = `
+        <span class="name">${name}</span>
+        <div class="value-bubbles"></div>
+      `;
+    }
 
     const bubblesContainer = row.querySelector(".value-bubbles");
     const maxBubbles = char.maxValueBubbles || 5;
-    for (let i = 1; i <= maxBubbles; i++) {
+    const numBubbles = Math.max(maxBubbles, val);
+    for (let i = 1; i <= numBubbles; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-pratica ${i <= val ? 'filled' : ''}`;
 
       bubble.addEventListener("click", (e) => {
         e.stopPropagation();
-        const card = e.target.closest(".aptitude-column-card");
-        if (card && card.classList.contains("locked")) return;
+        if (praticasLocked) return;
         const newValue = val === i ? i - 1 : i;
         updateAptitudeValue("skill", "praticas", name, newValue);
       });
       bubblesContainer.appendChild(bubble);
+    }
+
+    if (!praticasLocked) {
+      row.querySelector(".btn-bubble-dec").addEventListener("click", (e) => {
+        e.stopPropagation();
+        updateAptitudeValue("skill", "praticas", name, Math.max(0, val - 1));
+      });
+      row.querySelector(".btn-bubble-inc").addEventListener("click", (e) => {
+        e.stopPropagation();
+        updateAptitudeValue("skill", "praticas", name, Math.min(10, val + 1));
+      });
     }
 
     row.addEventListener("click", () => {

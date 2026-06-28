@@ -605,19 +605,27 @@ export function renderRefugioSheet() {
               <div class="refugio-theme-header">Sobrevivência</div>
               <div class="refugio-resource-card res-agua">
                 <span class="refugio-resource-label">Água</span>
-                <input type="number" class="refugio-resource-input" data-res-key="agua" value="${esc(r.recursos.agua ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="agua" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="agua" value="${esc(r.recursos.agua ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="agua" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-alimento">
                 <span class="refugio-resource-label">Alimento</span>
-                <input type="number" class="refugio-resource-input" data-res-key="alimento" value="${esc(r.recursos.alimento ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="alimento" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="alimento" value="${esc(r.recursos.alimento ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="alimento" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-remedios">
                 <span class="refugio-resource-label">Remédios</span>
-                <input type="number" class="refugio-resource-input" data-res-key="remedios" value="${esc(r.recursos.remedios ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="remedios" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="remedios" value="${esc(r.recursos.remedios ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="remedios" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-vestuario">
                 <span class="refugio-resource-label">Vestuário</span>
-                <input type="number" class="refugio-resource-input" data-res-key="vestuario" value="${esc(r.recursos.vestuario ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="vestuario" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="vestuario" value="${esc(r.recursos.vestuario ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="vestuario" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
             </div>
 
@@ -626,19 +634,27 @@ export function renderRefugioSheet() {
               <div class="refugio-theme-header">Orgânicos</div>
               <div class="refugio-resource-card res-plantas">
                 <span class="refugio-resource-label">Plantas</span>
-                <input type="number" class="refugio-resource-input" data-res-key="plantas" value="${esc(r.recursos.plantas ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="plantas" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="plantas" value="${esc(r.recursos.plantas ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="plantas" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-animais">
                 <span class="refugio-resource-label">Animais</span>
-                <input type="number" class="refugio-resource-input" data-res-key="animais" value="${esc(r.recursos.animais ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="animais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="animais" value="${esc(r.recursos.animais ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="animais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-madeira">
                 <span class="refugio-resource-label">Madeira</span>
-                <input type="number" class="refugio-resource-input" data-res-key="madeira" value="${esc(r.recursos.madeira ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="madeira" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="madeira" value="${esc(r.recursos.madeira ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="madeira" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-biomassa">
                 <span class="refugio-resource-label">Biomassa</span>
-                <input type="number" class="refugio-resource-input" data-res-key="biomassa" value="${esc(r.recursos.biomassa ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="biomassa" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="biomassa" value="${esc(r.recursos.biomassa ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="biomassa" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
             </div>
 
@@ -647,19 +663,27 @@ export function renderRefugioSheet() {
               <div class="refugio-theme-header">Indústria</div>
               <div class="refugio-resource-card res-minerais">
                 <span class="refugio-resource-label">Minerais</span>
-                <input type="number" class="refugio-resource-input" data-res-key="minerais" value="${esc(r.recursos.minerais ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="minerais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="minerais" value="${esc(r.recursos.minerais ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="minerais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-combustivel">
                 <span class="refugio-resource-label">Combustível</span>
-                <input type="number" class="refugio-resource-input" data-res-key="combustivel" value="${esc(r.recursos.combustivel ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="combustivel" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="combustivel" value="${esc(r.recursos.combustivel ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="combustivel" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-municao">
                 <span class="refugio-resource-label">Munição</span>
-                <input type="number" class="refugio-resource-input" data-res-key="municao" value="${esc(r.recursos.municao ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="municao" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="municao" value="${esc(r.recursos.municao ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="municao" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
               <div class="refugio-resource-card res-mat_constr">
                 <span class="refugio-resource-label">Mat. Constr.</span>
-                <input type="number" class="refugio-resource-input" data-res-key="mat_constr" value="${esc(r.recursos.mat_constr ?? '')}">
+                <button type="button" class="btn-res-dec" data-res-key="mat_constr" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                <input type="number" class="refugio-resource-input" data-res-key="mat_constr" value="${esc(r.recursos.mat_constr ?? '')}" style="width:48px; border-left:1px solid rgba(255,255,255,0.08); background:transparent;">
+                <button type="button" class="btn-res-inc" data-res-key="mat_constr" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
               </div>
             </div>
           </div>
@@ -839,6 +863,31 @@ function _attachListeners(r) {
         resInput.value = r.reservas;
       }
       saveRefugio(r);
+    });
+  });
+
+  // Escutas dos botões + e - de recursos
+  screen.querySelectorAll(".btn-res-dec").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.resKey;
+      const input = screen.querySelector(`.refugio-resource-input[data-res-key="${key}"]`);
+      if (input) {
+        let val = parseInt(input.value) || 0;
+        input.value = Math.max(0, val - 1);
+        input.dispatchEvent(new Event("input"));
+      }
+    });
+  });
+
+  screen.querySelectorAll(".btn-res-inc").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.resKey;
+      const input = screen.querySelector(`.refugio-resource-input[data-res-key="${key}"]`);
+      if (input) {
+        let val = parseInt(input.value) || 0;
+        input.value = val + 1;
+        input.dispatchEvent(new Event("input"));
+      }
     });
   });
 

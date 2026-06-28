@@ -181,6 +181,8 @@ export function createNewConflito(name = "Novo Conflito") {
     grau: 1,
     descricao: "",
     status: "Ativo",
+    ativacoes: [],
+    rolagens: [],
     regiaoId: null,
     refugioId: null,
     localId: null,

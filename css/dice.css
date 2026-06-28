@@ -264,9 +264,11 @@ img.dice-tag:hover {
   padding: 2px;
 }
 
-.die-symbol-svg svg {
+.die-symbol-svg svg,
+.die-symbol-svg img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 .die-symbol-svg .icon-a { color: var(--color-blue-glow); }

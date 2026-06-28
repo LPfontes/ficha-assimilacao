@@ -3,20 +3,15 @@
 export const ICONS = {
   // Símbolos de Resultados dos Dados
   sucesso: `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="icon-a">
-      <path d="M12 2l2.56 5.18 5.72.83-4.14 4.04.98 5.7L12 15l-5.12 2.7.98-5.7L3.72 8.01l5.72-.83z"/>
-    </svg>
-  `, // Estrela (A)
+    <img src="assets/d6/6(D6).webp" class="icon-a" alt="S" style="width:20px; height:20px; vertical-align:middle; border-radius:3px; object-fit:contain;">
+  `, // Sucesso (S)
   adaptacao: `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-b">
-      <path d="M12 22V10M12 10l-4-4M12 14l5-5M12 10l4-4M8 6h8M6 12h12M12 14l-5-5"/>
-    </svg>
-  `, // Galhos/Chifres (B)
+    <img src="assets/d6/ad.webp" class="icon-b" alt="A" style="width:20px; height:20px; vertical-align:middle; border-radius:3px; object-fit:contain;">
+  `, // Adaptação (A)
   pressao: `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-c">
-      <path d="M12 2L9 7h6zM6 9l3 5-5-2zM18 9l2 3-5-2zM4 14l5 3-2 5zM20 14l-3 3 2 5zM12 22l-3-5h6z"/>
-    </svg>
-  `, // Besta de Espinhos (C)
+    <img src="assets/d6/3-4(D6).webp" class="icon-c" alt="P" style="width:20px; height:20px; vertical-align:middle; border-radius:3px; object-fit:contain;">
+  `, // Pressão (P)
+
 
   // Naipes para Assimilações
   copas: `

@@ -2,6 +2,7 @@ import { el, state, saveCurrentCharacter } from "./state.js";
 import { getCurrentHealthLevel } from "./health.js";
 import { appendRollToChat, renderResultsPanel, updateResultsSummary, getDieSymbolsHtml, getDieFaceImgSrc } from "./chat.js";
 import { logger } from "./logger.js";
+import { worldState } from "./world-state.js";
 
 // ==========================================
 // MAPEAMENTO DE DADOS (PÁG 43)
@@ -186,6 +187,8 @@ function initKeptDiceIndexes() {
   let targetKeep = 1;
   if (state.activeMacroParams) {
     targetKeep = state.activeMacroParams.maxKeep || 1;
+  } else if (worldState.sheetMode === "conflito") {
+    targetKeep = state.activeRollResults.length;
   } else {
     if (el.modEmpenho.checked) targetKeep++;
     if (el.modOrigemOcupacao.checked) targetKeep++;

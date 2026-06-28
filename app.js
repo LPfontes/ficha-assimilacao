@@ -143,6 +143,7 @@ function setupEventListeners() {
             iconSpan.innerHTML = ICONS[iconName];
           }
         }
+        renderAptitudesSheet();
       }
     });
   });
