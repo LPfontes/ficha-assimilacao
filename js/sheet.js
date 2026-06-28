@@ -794,102 +794,118 @@ export function renderInventorySheet() {
       slot.categorias = slotCats;
     }
 
-    row.innerHTML = \`
-      <div class="inventory-item-card">
-        <div class="inventory-item-header">
-          <span class="slot-num" title="\${isBody ? 'Espaço no Corpo' : 'Espaço na Mochila'}" style="color: \${isBody ? 'var(--color-blue-glow)' : 'var(--text-muted)'};">\${slotDisplayNum}</span>
-          <input type="text" class="item-name" value="\${slot.name || ''}" placeholder="Nome do Equipamento">
-          <button class="btn-delete-slot" title="Remover item deste espaço" type="button">
-            \${ICONS.trash}
-          </button>
-        </div>
-
-        <div class="inventory-item-body">
-          <div class="inventory-item-controls">
-            <div class="inv-select-group">
-              <label>Qualidade</label>
-              <select class="select-qualidade">
-                <option value="0" \${qual === 0 ? 'selected' : ''}>Q0: Quebrado</option>
-                <option value="1" \${qual === 1 ? 'selected' : ''}>Q1: Defeituoso</option>
-                <option value="2" \${qual === 2 ? 'selected' : ''}>Q2: Comprometido</option>
-                <option value="3" \${qual === 3 ? 'selected' : ''}>Q3: Padrão</option>
-                <option value="4" \${qual === 4 ? 'selected' : ''}>Q4: Reforçado</option>
-                <option value="5" \${qual === 5 ? 'selected' : ''}>Q5: Superior</option>
-                <option value="6" \${qual === 6 ? 'selected' : ''}>Q6: Obra-Prima</option>
-              </select>
-            </div>
-
-            <div class="inv-select-group">
-              <label>Desgaste</label>
-              <select class="select-pressao">
-                <option value="0" \${pressao === 0 ? 'selected' : ''}>0</option>
-                <option value="1" \${pressao === 1 ? 'selected' : ''}>1</option>
-                <option value="2" \${pressao === 2 ? 'selected' : ''}>2</option>
-                <option value="3" \${pressao === 3 ? 'selected' : ''}>3</option>
-                <option value="4" \${pressao === 4 ? 'selected' : ''}>4</option>
-                <option value="5" \${pressao === 5 ? 'selected' : ''}>5</option>
-                <option value="6" \${pressao === 6 ? 'selected' : ''}>6</option>
-              </select>
-            </div>
-
-            <div class="inv-select-group">
-              <label>Escassez</label>
-              <select class="select-escassez">
-                <option value="0" \${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
-                <option value="1" \${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
-                <option value="2" \${esc === 2 ? 'selected' : ''}>E2: Comum</option>
-                <option value="3" \${esc === 3 ? 'selected' : ''}>E3: Incomum</option>
-                <option value="4" \${esc === 4 ? 'selected' : ''}>E4: Atípico</option>
-                <option value="5" \${esc === 5 ? 'selected' : ''}>E5: Raro</option>
-                <option value="6" \${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
-              </select>
-            </div>
-
-            <div class="inv-select-group">
-              <label>Categoria</label>
-              <select class="select-categoria">
-                <option value="nenhuma">+ Categoria</option>
-                \${Object.entries(ITEM_CATEGORIAS).filter(([key]) => key !== 'nenhuma' && !slotCats.includes(key)).map(([key, cat]) => \`
-                  <option value="\${key}">
-                    \${cat.nome} \${cat.cat !== 0 && cat.cat !== "Especial" ? \`(Cat: \${cat.cat})\` : ''}
-                  </option>
-                \`).join("")}
-              </select>
-            </div>
-          </div>
-
-          \${slotCats.length > 0 ? \`
-          <div class="inv-badges-container">
-            \${slotCats.map(catKey => {
-              const cat = ITEM_CATEGORIAS[catKey];
-              if (!cat) return '';
-              return \`
-                <span class="inv-category-badge category-badge-item" data-cat-key="\${catKey}" title="\${cat.desc}">
-                  \${cat.nome} <span class="remove-cat-btn" style="padding-left:4px;">&times;</span>
-                </span>
-              \`;
-            }).join('')}
-          </div>
-          \` : ''}
-
-          <textarea class="item-effect" placeholder="Efeito / Descrição do item...">\${slot.efeito || ''}</textarea>
-
-          \${slotCats.length > 0 ? \`
-          <div class="inv-category-descriptions">
-            \${slotCats.map(catKey => {
-              const cat = ITEM_CATEGORIAS[catKey];
-              if (!cat) return '';
-              return \`
-                <div class="inv-category-desc">
-                  <strong>\${cat.nome}:</strong> \${cat.desc}
-                </div>
-              \`;
-            }).join('')}
-          </div>
-          \` : ''}
+    row.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
+        <span class="slot-num" title="${isBody ? 'Espaço no Corpo' : 'Espaço na Mochila'}" style="color: ${isBody ? 'var(--color-blue-glow)' : 'var(--text-muted)'}; font-weight: bold; font-family: var(--font-heading);">${slotDisplayNum}</span>
+        <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio" style="width: 100%;">
+        <div class="item-category-badges-container" style="display: flex; gap: 4px; flex-wrap: wrap; margin-left: 6px;">
+          ${slotCats.map(catKey => {
+            const cat = ITEM_CATEGORIAS[catKey];
+            if (!cat) return '';
+            return `
+              <span class="item-category-badge" style="font-size: 8px; padding: 2px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); white-space: nowrap;">
+                ${cat.nome}
+              </span>
+            `;
+          }).join('')}
         </div>
       </div>
-    \`;
+      
+      <div class="item-props-redesign" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        
+        <div class="row" style="display: flex; flex-direction: row; gap: 4px;">  
+          <!-- Qualidade -->
+            <div class="prop-select-wrapper" title="Qualidade do Equipamento">
+              <select class="select-qualidade" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,102,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+                <option value="0" ${qual === 0 ? 'selected' : ''}>Q0: Quebrado</option>
+                <option value="1" ${qual === 1 ? 'selected' : ''}>Q1: Defeituoso</option>
+                <option value="2" ${qual === 2 ? 'selected' : ''}>Q2: Comprometido</option>
+                <option value="3" ${qual === 3 ? 'selected' : ''}>Q3: Padrão</option>
+                <option value="4" ${qual === 4 ? 'selected' : ''}>Q4: Reforçado</option>
+                <option value="5" ${qual === 5 ? 'selected' : ''}>Q5: Superior</option>
+                <option value="6" ${qual === 6 ? 'selected' : ''}>Q6: Obra-Prima</option>
+              </select>
+            </div>
+ 
+            <!-- C Investidas -->
+            <div class="prop-c-wrapper" title="Pressões" style="display: flex; align-items: center; gap: 4px;">
+              <span style="color: var(--color-rust-glow); font-size: 11px; font-weight: bold;">Desgate:</span>
+              <select class="select-pressao" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(141,36,40,0.3); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; width: 40px; cursor: pointer;">
+                <option value="0" ${pressao === 0 ? 'selected' : ''}>0</option>
+                <option value="1" ${pressao === 1 ? 'selected' : ''}>1</option>
+                <option value="2" ${pressao === 2 ? 'selected' : ''}>2</option>
+                <option value="3" ${pressao === 3 ? 'selected' : ''}>3</option>
+                <option value="4" ${pressao === 4 ? 'selected' : ''}>4</option>
+                <option value="5" ${pressao === 5 ? 'selected' : ''}>5</option>
+                <option value="6" ${pressao === 6 ? 'selected' : ''}>6</option>
+              </select>
+            </div>
+          </div>
+ 
+          <div class="colum" style="display: flex; flex-direction: column; gap: 4px;">
+            <div class="row" style="display: flex; flex-direction: row; gap: 6px; align-items: center;">
+              <!-- Escassez -->
+              <div class="prop-select-wrapper" title="Nível de Escassez">
+                <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+                  <option value="0" ${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
+                  <option value="1" ${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
+                  <option value="2" ${esc === 2 ? 'selected' : ''}>E2: Comum</option>
+                  <option value="3" ${esc === 3 ? 'selected' : ''}>E3: Incomum</option>
+                  <option value="4" ${esc === 4 ? 'selected' : ''}>E4: Atípico</option>
+                  <option value="5" ${esc === 5 ? 'selected' : ''}>E5: Raro</option>
+                  <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
+                </select>
+              </div>
+ 
+              <!-- Categoria/Característica -->
+              <div class="prop-categoria-container" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                <div class="selected-categorias-badges" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  ${slotCats.map(catKey => {
+                    const cat = ITEM_CATEGORIAS[catKey];
+                    if (!cat) return '';
+                    return `
+                      <span class="category-badge-item" data-cat-key="${catKey}" title="${cat.desc}" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255, 165, 0, 0.15); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); font-weight: bold; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                        ${cat.nome}
+                        <span class="remove-cat-btn" style="cursor: pointer; color: #ef4444; font-weight: bold; margin-left: 2px;">&times;</span>
+                      </span>
+                    `;
+                  }).join('')}
+                </div>
+                <div class="prop-select-wrapper prop-categoria-wrapper">
+                  <select class="select-categoria" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer; max-width: 140px;">
+                    <option value="nenhuma">+ Categoria</option>
+                    ${Object.entries(ITEM_CATEGORIAS).filter(([key]) => key !== 'nenhuma' && !slotCats.includes(key)).map(([key, cat]) => `
+                      <option value="${key}">
+                        ${cat.nome} ${cat.cat !== 0 && cat.cat !== "Especial" ? `(Cat: ${cat.cat})` : ''}
+                      </option>
+                    `).join("")}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <!-- Efeito -->
+            <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
+              <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
+            </div>
+            <!-- Texto das Categorias -->
+            <div class="category-descs-container" style="display: flex; flex-direction: column; gap: 4px; max-width: 300px; margin-top: 4px;">
+              ${slotCats.map(catKey => {
+                const cat = ITEM_CATEGORIAS[catKey];
+                if (!cat) return '';
+                return `
+                  <span class="category-desc-text" data-cat-key="${catKey}" style="font-size: 10px; color: var(--color-gold-glow); opacity: 0.85; font-style: italic;">
+                    <strong>${cat.nome}</strong>: ${cat.desc}
+                  </span>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-delete-slot" title="Remover item deste espaço" type="button">
+        ${ICONS.trash}
+      </button>
+    `;
  
     const inputName = row.querySelector(".item-name");
     const selQ = row.querySelector(".select-qualidade");
