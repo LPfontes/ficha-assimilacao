@@ -28,7 +28,7 @@ const DICE = (function() {
 
     var vars = { //todo: make these configurable on init
         frame_rate: 1 / 30,
-        scale: 0.7, //dice size
+        scale: 0.6, //dice size
         
         material_options: {
             specular: 0x172022,
@@ -51,8 +51,8 @@ const DICE = (function() {
         known_types: ['d4', 'd6', 'd8', 'd9', 'd10', 'd12', 'd20', 'd100'],
         dice_face_range: { 'd4': [1, 4], 'd6': [1, 6], 'd8': [1, 8], 'd9': [0, 9], 'd10': [0, 9], 
             'd12': [1, 12], 'd20': [1, 20], 'd100': [0, 9] },
-        dice_mass: { 'd4': 900, 'd6': 900, 'd8': 1020, 'd9': 1050, 'd10': 1050, 'd12': 1050, 'd20': 1200, 'd100': 1050 },
-        dice_inertia: { 'd4': 5, 'd6': 13, 'd8': 10, 'd9': 9, 'd10': 9, 'd12': 8, 'd20': 6, 'd100': 9 },
+        dice_mass: { 'd4': 900, 'd6': 600, 'd8': 1020, 'd9': 1050, 'd10': 1050, 'd12': 750, 'd20': 1200, 'd100': 1050 },
+        dice_inertia: { 'd4': 5, 'd6': 10, 'd8': 10, 'd9': 9, 'd10': 9, 'd12': 8, 'd20': 6, 'd100': 9 },
         
         standart_d20_dice_face_labels: [' ', '0', '1', '2', '3', '4', '5', '6', '7', '8',
                 '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20'],
@@ -92,7 +92,7 @@ const DICE = (function() {
             this.reinit(elem.canvas);
         });
 
-        this.world.gravity.set(0, 0, -9.8 * 800);
+        this.world.gravity.set(0, 0, -9.8 * 600);
         this.world.broadphase = new CANNON.NaiveBroadphase();
         this.world.solver.iterations = 16;
 

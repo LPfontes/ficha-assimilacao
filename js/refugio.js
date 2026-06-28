@@ -1,17 +1,44 @@
 import { worldState, saveRefugio, deleteRefugio, createNewRefugio } from "./world-state.js";
 import { hideAllScreens, goToLanding, esc, setupImageUpload } from "./screen-utils.js";
-import { renderHeader, renderImageFrame, renderAttrDots, renderCrudListEmpty } from "./screen-components.js";
-
-const REFUGIO_ATTRS = [
-  { key: "populacao",    label: "População",    desc: "~10 hab/ponto" },
-  { key: "reservas",     label: "Reservas",     desc: "Recursos estocados" },
-  { key: "mobilidade",   label: "Mobilidade",   desc: "Transporte/montarias" },
-  { key: "defesa",       label: "Defesa",       desc: "Fortificações" },
-  { key: "moral",        label: "Moral",        desc: "Resistência a crises" },
-  { key: "beligerancia", label: "Beligerância", desc: "Poder armado" },
-];
+import { renderImageFrame, renderCrudListEmpty } from "./screen-components.js";
+import { el } from "./state.js";
+import { getDieFaceImgSrc } from "./chat.js";
 
 const CRISE_STATUS = ["Ativo", "Contido", "Resolvido"];
+
+const DEFESA_LABELS = [
+  "Nenhuma",
+  "Linhas e sinos",
+  "Cerca de arame farpado",
+  "Muro de madeira",
+  "Muro de pedra ou tijolo",
+  "Complexo prisional",
+  "Base militar"
+];
+
+const MORAL_LABELS = [
+  "Amotinada",
+  "Desiludida",
+  "Hesitante",
+  "Resoluta",
+  "Animada",
+  "Empenhada",
+  "Exaltada"
+];
+
+const BELIGERANCIA_LABELS = [
+  "Pacifista",
+  "Mínima",
+  "Razoável",
+  "Eficiente",
+  "Ameaçadora",
+  "Terrível",
+  "Arrasadora"
+];
+
+function getLevelLabel(val, arr) {
+  return arr[Math.max(0, Math.min(val, arr.length - 1))] || "";
+}
 
 function getScreen() { return document.getElementById("refugio-screen"); }
 
@@ -23,38 +50,638 @@ export function loadRefugioSheet(refugio) {
   renderRefugioSheet();
 }
 
+const CONSTRUCOES_MODELO = [
+  {
+    nome: "Boticário",
+    nivel: 10,
+    consumo: "Plantas 1",
+    producao: "Medicamentos 1",
+    descricao: "Cada População 1 em uma semana converte Plantas 1 em Medicamentos 1. Requerido para criar Medicamentos."
+  },
+  {
+    nome: "Casa de Costura",
+    nivel: 10,
+    consumo: "Nenhum",
+    producao: "Vestuário +1",
+    descricao: "Todo Vestuário produzido ali gera um Vestuário adicional."
+  },
+  {
+    nome: "Centro Comunitário",
+    nivel: 10,
+    consumo: "Nenhum",
+    producao: "Moral +1",
+    descricao: "Aumenta em um nível a Moral. Custo = 10 * novo nível de Moral. Tipos: Alambique, Igreja, Museu, Teatro, etc."
+  },
+  {
+    nome: "Coleta de Biomassa",
+    nivel: 20,
+    consumo: "Trabalho 1",
+    producao: "Biomassa 1",
+    descricao: "Cada População 1 coleta Biomassa 1 por nível de Recursos Naturais da região (máx 5x). Sonda, Mina, etc."
+  },
+  {
+    nome: "Dormitório",
+    nivel: 20,
+    consumo: "Nenhum",
+    producao: "Teto População",
+    descricao: "Aumenta o teto máximo de População em nível igual aos pontos de obra estabelecidos."
+  },
+  {
+    nome: "Fábrica de Munição",
+    nivel: 20,
+    consumo: "Minerais 1",
+    producao: "Munição 1",
+    descricao: "Cada População 1 em uma semana converte Minerais 1 em Munição 1."
+  },
+  {
+    nome: "Fábrica para Obras",
+    nivel: 20,
+    consumo: "Minerais 1",
+    producao: "Mat. Constr. 1",
+    descricao: "Cada População 1 em uma semana converte Minerais 1 em Materiais de Construção 1."
+  },
+  {
+    nome: "Fonte de Água",
+    nivel: 10,
+    consumo: "Nenhum",
+    producao: "Água constante",
+    descricao: "Se houver fartura de Água na região, cria fonte constante que dispensa estocagem de Água."
+  },
+  {
+    nome: "Fortificação",
+    nivel: 10,
+    consumo: "Trabalho 1 (Guarda)",
+    producao: "Defesa +1",
+    descricao: "Aumenta em um nível a Defesa, contanto que População 1 fique de guarda. Custo = 10 * novo nível de Defesa."
+  },
+  {
+    nome: "Moinho",
+    nivel: 10,
+    consumo: "Plantas 1",
+    producao: "Alimento (Teto)",
+    descricao: "Aumenta o teto de produção de Alimento com Plantas por nível de População igual ao nível do moinho."
+  },
+  {
+    nome: "Oficina de Equipamentos",
+    nivel: 10,
+    consumo: "Materiais",
+    producao: "Itens (Escassez)",
+    descricao: "Permite criar itens de nível de Escassez até o nível dessa oficina."
+  },
+  {
+    nome: "Oficina Mecânica",
+    nivel: 10,
+    consumo: "Peças de veículos",
+    producao: "Veículos restaurados",
+    descricao: "Permite restaurar veículos usando peças de reposição."
+  },
+  {
+    nome: "Pedreira",
+    nivel: 20,
+    consumo: "Trabalho 1",
+    producao: "Minerais (Região)",
+    descricao: "Cada População 1 em uma semana coleta Minerais igual ao nível de Recursos Naturais de minerais."
+  },
+  {
+    nome: "Porto",
+    nivel: 20,
+    consumo: "População 1 (manut.)",
+    producao: "Barcos (Mobilidade)",
+    descricao: "Permite embarcações. Requer manutenção semestral de População 1 por nível de Mobilidade."
+  },
+  {
+    nome: "Refeitório",
+    nivel: 10,
+    consumo: "Plantas / Animais",
+    producao: "Alimento (Dobrado)",
+    descricao: "Todo Alimento convertido a partir de uma fonte de Plantas ou Animais é dobrado."
+  },
+  {
+    nome: "Refinaria Animal",
+    nivel: 10,
+    consumo: "Esterco Animal 1",
+    producao: "Combustível 1",
+    descricao: "Cada População 1 em uma semana usa esterco para produzir Combustível 1 (máx nível de animais, até 10/sem)."
+  },
+  {
+    nome: "Refinaria de Biomassa",
+    nivel: 10,
+    consumo: "Biomassa 1",
+    producao: "Combustível 1",
+    descricao: "Cada População 1 em uma semana converte Biomassa 1 em Combustível 1 (máx 10/sem)."
+  },
+  {
+    nome: "Refinaria Vegetal",
+    nivel: 10,
+    consumo: "Plantas 1",
+    producao: "Combustível 1",
+    descricao: "Cada População 1 em uma semana converte certas Plantas 1 em Biomassa 1 e depois em Combustível 1 (máx 10/sem)."
+  },
+  {
+    nome: "Reservas Expandidas",
+    nivel: 10,
+    consumo: "Nenhum",
+    producao: "Teto Reserva +10",
+    descricao: "Aumenta o teto de Reservas do tipo escolhido (Ex: Armazém, Paiol, Caixa D'Água) em nível igual a pontos de obra."
+  },
+  {
+    nome: "Serraria",
+    nivel: 10,
+    consumo: "Madeira 1",
+    producao: "Mat. Constr. 1",
+    descricao: "Cada População 1 em uma semana converte Madeira 1 em Materiais de Construção 1 (máx 10/sem)."
+  }
+];
+
+function openCreateBuildingModal(r) {
+  el.modalContainer.classList.remove("hidden");
+  el.modalBody.innerHTML = `
+    <h3 class="modal-title" style="margin-bottom: 16px;">Nova Construção</h3>
+    
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Modelo de Construção</label>
+      <select id="modal-building-preset" class="ws-select" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px; border-radius: 4px;">
+        <option value="custom">[Personalizada...]</option>
+        ` + CONSTRUCOES_MODELO.map((c, i) => `<option value="${i}">${c.nome} (Custo: ${c.nivel} Obra)</option>`).join("") + `
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Nome da Construção</label>
+      <input type="text" id="modal-building-name" class="ws-input" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px; border-radius: 4px;" placeholder="Ex: Refeitório Comunitário">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 12px; display: flex; gap: 10px;">
+      <div style="flex:1;">
+        <label class="ws-label" style="display:block; margin-bottom: 4px;">Consome</label>
+        <input type="text" id="modal-building-consumo" class="ws-input" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px; border-radius: 4px;" placeholder="Ex: Plantas 1">
+      </div>
+      <div style="flex:1;">
+        <label class="ws-label" style="display:block; margin-bottom: 4px;">Produz</label>
+        <input type="text" id="modal-building-producao" class="ws-input" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px; border-radius: 4px;" placeholder="Ex: Medicamentos 1">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Pontos de Obra (Nível/Custo)</label>
+      <input type="number" id="modal-building-level" class="ws-input" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px; border-radius: 4px;" value="10" min="1">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 16px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Descrição / Efeitos</label>
+      <textarea id="modal-building-desc" class="ws-textarea" style="width: 100%; height: 80px; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px; border-radius: 4px; resize: vertical;" placeholder="Descrição dos benefícios e requisitos da obra..."></textarea>
+    </div>
+
+    <div class="modal-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button id="btn-modal-building-cancel" class="btn btn-sm btn-secondary" style="padding: 6px 12px;">Cancelar</button>
+      <button id="btn-modal-building-save" class="btn btn-sm btn-success" style="padding: 6px 12px;">Adicionar</button>
+    </div>
+  `;
+
+  const presetSel = document.getElementById("modal-building-preset");
+  const nameInput = document.getElementById("modal-building-name");
+  const levelInput = document.getElementById("modal-building-level");
+  const consumoInput = document.getElementById("modal-building-consumo");
+  const producaoInput = document.getElementById("modal-building-producao");
+  const descText = document.getElementById("modal-building-desc");
+
+  presetSel.addEventListener("change", e => {
+    const val = e.target.value;
+    if (val === "custom") {
+      nameInput.value = "";
+      levelInput.value = 10;
+      consumoInput.value = "";
+      producaoInput.value = "";
+      descText.value = "";
+    } else {
+      const idx = parseInt(val);
+      const model = CONSTRUCOES_MODELO[idx];
+      nameInput.value = model.nome;
+      levelInput.value = model.nivel;
+      consumoInput.value = model.consumo || "";
+      producaoInput.value = model.producao || "";
+      descText.value = model.descricao;
+    }
+  });
+
+  const closeModal = () => {
+    el.modalContainer.classList.add("hidden");
+  };
+
+  document.getElementById("btn-modal-building-cancel").addEventListener("click", closeModal);
+
+  document.getElementById("btn-modal-building-save").addEventListener("click", () => {
+    const name = nameInput.value.trim();
+    if (!name) {
+      alert("Por favor, insira o nome da construção!");
+      return;
+    }
+    const level = parseInt(levelInput.value) || 10;
+    const consumo = consumoInput.value.trim();
+    const producao = producaoInput.value.trim();
+    const desc = descText.value.trim();
+
+    r.construcoes.push({ nome: name, nivel: level, consumo: consumo, producao: producao, descricao: desc });
+    saveRefugio(r);
+    
+    closeModal();
+    _renderBuildings(getScreen(), r);
+  });
+}
+
+const CRISE_GATILHOS = {
+  populacao: {
+    nome: "Crise de População",
+    desc: "A População ultrapassou o limite do seu teto."
+  },
+  defesa: {
+    nome: "Crise de Defesa",
+    desc: "A Defesa ficou menor que o Perigo da região ou da Beligerância de um refúgio invasor."
+  },
+  recurso: {
+    nome: "Crise de Recursos",
+    desc: "Falta um Recurso no seu respectivo consumo. Cada semana consome Água 1, Alimento 1 e Madeira 1 vezes a População; a cada ano consome Medicamentos 1 vezes a População e a cada dois anos consome Vestuário 1 vezes a População."
+  },
+  custom: {
+    nome: "Crise Geral",
+    desc: "Gatilho personalizado."
+  }
+};
+
+const CRISE_GRAVIDADES = {
+  1: {
+    grau: 1,
+    texto: "Por sorte, os habitantes sobrevivem à Crise sem maiores percalços (0-1 Símbolos)."
+  },
+  2: {
+    grau: 2,
+    texto: "Briga interna que cria uma migração de aproximadamente metade da População atual do Refúgio para outro lugar, levando consigo metade dos recursos estocados (2 Símbolos)."
+  },
+  3: {
+    grau: 3,
+    texto: "Enfermidade que nenhum remédio do Refúgio consegue tratar, o que tira 1d de todos os testes dos personagens dali até que uma cura seja encontrada. Para remover os destroços por completo será preciso investir População 1 por semana para cada ponto de obra que a construção levou para ser construída (3 Símbolos)."
+  },
+  4: {
+    grau: 4,
+    texto: "Criatura assimilada de grande tamanho surge no Refúgio colocando em risco Reservas e Construções a critério do(a) Assimilador(a). Alguém precisa lidar com essa ameaça para não haver também uma perda significativa de População (4 Símbolos)."
+  },
+  5: {
+    grau: 5,
+    texto: "Rebelião que divide a População atual do Refúgio em duas facções antagônicas e inconciliáveis que disputam pelo controle do Refúgio (5 Símbolos)."
+  },
+  6: {
+    grau: 6,
+    texto: "O Refúgio é atacado por invasores que precisam ser neutralizados para não haver uma perda significativa de População a critério do(a) Assimilador(a). Se os invasores vencerem, caso não queiram ocupar o lugar, eles podem destruir o Refúgio e levar os seus Recursos consigo (6+ Símbolos)."
+  }
+};
+
+function openCreateCriseModal(r) {
+  el.modalContainer.classList.remove("hidden");
+  el.modalBody.innerHTML = `
+    <h3 class="modal-title" style="margin-bottom: 16px;">Registrar Nova Crise</h3>
+    
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Gatilho da Crise</label>
+      <select id="modal-crise-gatilho" class="ws-select" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px; border-radius: 4px;">
+        <option value="populacao">População excedeu o teto máximo</option>
+        <option value="defesa">Defesa menor que o Perigo/Beligerância invasora</option>
+        <option value="recurso">Falta de Recurso (Consumo semanal/anual/bienal)</option>
+        <option value="custom" selected>[Outro gatilho / Personalizado...]</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Nome da Crise</label>
+      <input type="text" id="modal-crise-name" class="ws-input" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px; border-radius: 4px;" placeholder="Ex: Crise de Fome">
+    </div>
+
+    <!-- Simulador de Dados -->
+    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+        <span class="ws-label" style="font-size: 11px;">Rolar Gravidade (4 dados - elimina 1)</span>
+        <button id="btn-modal-crise-roll" class="btn btn-sm btn-secondary" style="padding: 2px 8px; font-size: 10px;">Rolar 4d6</button>
+      </div>
+      <div id="modal-crise-dice-container" style="display:flex; gap:8px; justify-content:center; min-height: 40px; align-items:center;">
+        <span style="font-size:10px; color:var(--text-muted); font-style:italic;">Clique em "Rolar 4d6" para sortear.</span>
+      </div>
+      <div id="modal-crise-dice-instruction" style="font-size: 10px; color:#56ffff; text-align:center; margin-top: 4px; display:none; user-select:none;">
+        Escolha 1 dado para eliminar clicando sobre ele
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Gravidade da Crise (Símbolos Rolados)</label>
+      <select id="modal-crise-grau" class="ws-select" style="width: 100%; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px; border-radius: 4px;">
+        <option value="1">0-1 Símbolos: Sobrevivência</option>
+        <option value="2">2 Símbolos: Briga Interna (Migração 50%)</option>
+        <option value="3">3 Símbolos: Enfermidade (-1d em testes)</option>
+        <option value="4">4 Símbolos: Criatura Assimilada</option>
+        <option value="5">5 Símbolos: Rebelião (Facções)</option>
+        <option value="6">6+ Símbolos: Ataque Invasor</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 12px;">
+      <label class="ws-label" style="display:block; margin-bottom: 4px;">Efeitos / Descrição da Crise</label>
+      <textarea id="modal-crise-desc" class="ws-textarea" style="width: 100%; height: 80px; background: #222; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px; border-radius: 4px; resize: vertical;" placeholder="Efeitos específicos da crise..."></textarea>
+    </div>
+
+    <div style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="modal-crise-reduce-moral" checked style="width:16px; height:16px; accent-color:#ef4444; cursor:pointer;">
+      <label for="modal-crise-reduce-moral" class="ws-label" style="cursor:pointer; font-size:11px; user-select:none; color:#ffb0b0;">
+        Reduzir 1 de Moral do Refúgio (de ${r.moral || 0} para ${Math.max(0, (r.moral || 0) - 1)})
+      </label>
+    </div>
+
+    <div class="modal-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button id="btn-modal-crise-cancel" class="btn btn-sm btn-secondary" style="padding: 6px 12px;">Cancelar</button>
+      <button id="btn-modal-crise-save" class="btn btn-sm btn-danger" style="padding: 6px 12px;">Ativar Crise</button>
+    </div>
+  `;
+
+  const gatilhoSel = document.getElementById("modal-crise-gatilho");
+  const nameInput = document.getElementById("modal-crise-name");
+  const grauSel = document.getElementById("modal-crise-grau");
+  const descText = document.getElementById("modal-crise-desc");
+  const moralCheck = document.getElementById("modal-crise-reduce-moral");
+  const rollBtn = document.getElementById("btn-modal-crise-roll");
+  const diceContainer = document.getElementById("modal-crise-dice-container");
+  const diceInstruction = document.getElementById("modal-crise-dice-instruction");
+
+  gatilhoSel.addEventListener("change", e => {
+    const val = e.target.value;
+    const trigger = CRISE_GATILHOS[val];
+    if (trigger) {
+      nameInput.value = trigger.nome;
+      if (val !== "custom") {
+        descText.value = `Gatilho: ${trigger.desc}\n\nConsequências:\n` + descText.value.replace(/^Gatilho: .*\n\nConsequências:\n/g, "");
+      }
+    }
+  });
+
+  const updateDescFromGrau = () => {
+    const grau = parseInt(grauSel.value);
+    const textData = CRISE_GRAVIDADES[grau];
+    if (textData) {
+      const baseDesc = descText.value;
+      const gatilhoHeaderMatch = baseDesc.match(/^Gatilho: .*\n\n/);
+      const gatilhoHeader = gatilhoHeaderMatch ? gatilhoHeaderMatch[0] : "";
+      descText.value = `${gatilhoHeader}Efeito (${grau} Símbolos): ${textData.texto}`;
+    }
+  };
+  grauSel.addEventListener("change", updateDescFromGrau);
+
+  updateDescFromGrau();
+
+  let rolledDice = [];
+  rollBtn.addEventListener("click", () => {
+    rolledDice = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1);
+    
+    diceContainer.innerHTML = rolledDice.map((d, i) => `
+      <div class="modal-die-face" data-idx="${i}" style="width:40px; height:40px; background:#1a1a1a; border:2px solid rgba(255,255,255,0.2); display:flex; justify-content:center; align-items:center; border-radius:6px; cursor:pointer; user-select:none; transition:all 0.2s; overflow:hidden;">
+        <img src="${getDieFaceImgSrc(6, d)}" style="width:100%; height:100%; object-fit:cover;" alt="d6 face ${d}">
+      </div>
+    `).join("");
+    
+    diceInstruction.style.display = "block";
+    
+    diceContainer.querySelectorAll(".modal-die-face").forEach(dieEl => {
+      dieEl.addEventListener("click", e => {
+        const idxToEliminate = parseInt(e.currentTarget.dataset.idx);
+        
+        diceContainer.querySelectorAll(".modal-die-face").forEach((el, i) => {
+          if (i === idxToEliminate) {
+            el.style.opacity = "0.2";
+            el.style.textDecoration = "line-through";
+            el.style.borderColor = "rgba(255,0,0,0.4)";
+          }
+          el.style.pointerEvents = "none";
+        });
+        
+        diceInstruction.style.display = "none";
+        
+        const remainingDice = rolledDice.filter((_, i) => i !== idxToEliminate);
+        const successes = remainingDice.filter(v => v >= 5).length;
+        
+        let targetGrau = 1; // 0-1 símbolos
+        if (successes === 2) targetGrau = 2;
+        if (successes === 3) targetGrau = 3;
+        
+        grauSel.value = targetGrau;
+        updateDescFromGrau();
+      });
+    });
+  });
+
+  const closeModal = () => {
+    el.modalContainer.classList.add("hidden");
+  };
+
+  document.getElementById("btn-modal-crise-cancel").addEventListener("click", closeModal);
+
+  document.getElementById("btn-modal-crise-save").addEventListener("click", () => {
+    const name = nameInput.value.trim() || "Crise Ativa";
+    const grau = parseInt(grauSel.value) || 1;
+    const desc = descText.value.trim();
+
+    if (!r.crises) r.crises = [];
+    r.crises.push({ nome: name, grau: grau, status: "Ativo", descricao: desc });
+
+    if (moralCheck.checked) {
+      r.moral = Math.max(0, (r.moral || 0) - 1);
+    }
+
+    saveRefugio(r);
+    closeModal();
+    renderRefugioSheet();
+  });
+}
+
+function calculateCurrentReserves(r) {
+  let total = 0;
+  if (r.recursos) {
+    Object.values(r.recursos).forEach(val => {
+      const str = String(val || "");
+      const matches = str.match(/\d+/g);
+      if (matches) {
+        matches.forEach(numStr => {
+          total += parseInt(numStr) || 0;
+        });
+      } else {
+        const parsed = parseInt(str);
+        if (!isNaN(parsed)) {
+          total += parsed;
+        }
+      }
+    });
+  }
+  return total;
+}
+
 export function renderRefugioSheet() {
   const r = worldState.currentRefugio;
   if (!r) return;
   const screen = getScreen();
 
+  // Garante a presença dos campos novos no objeto para retrocompatibilidade
+  if (!r.recursos) {
+    r.recursos = {
+      agua: 0, plantas: 0, animais: 0, madeira: 0, minerais: 0, biomassa: 0,
+      alimento: 0, vestuario: 0, municao: 0, combustivel: 0, remedios: 0, mat_constr: 0
+    };
+  }
+  if (!r.construcoes) {
+    r.construcoes = [];
+  }
+  if (r.populacaoMax === undefined) r.populacaoMax = 10;
+  if (r.reservasMax === undefined) r.reservasMax = 10;
+  r.reservas = calculateCurrentReserves(r);
+
   screen.innerHTML = `
     <div class="world-sheet-screen">
-      ${renderHeader("btn-refugio-back", "refugio-nome", r.nome, "Nome do Refúgio", "btn-refugio-delete")}
-      ${renderImageFrame(r, "refugio")}
-      <div class="world-sheet-body">
-        <div class="card-glass" style="padding:16px;">
-          <h3 class="ws-section-title">Atributos</h3>
-          <div class="attr-danger-alert" id="refugio-danger-alert">
-            ⚠️ <strong>Alerta:</strong> O Perigo da região excede a Defesa deste Refúgio — Crises podem ser ativadas!
+      <div class="world-sheet-header" style="justify-content: space-between; border-bottom: none; padding-bottom: 0; margin-bottom: 12px;">
+        <button id="btn-refugio-back" class="sheet-back-btn">
+          Voltar
+        </button>
+        <button id="btn-refugio-delete" class="btn btn-sm btn-danger" style="padding:6px 12px;">Excluir Refúgio</button>
+      </div>
+
+      <div class="refugio-screen-grid">
+        <!-- Coluna da Esquerda (Foto & Identificação) -->
+        <div class="ref-area-left">
+        <!-- Título/Nome -->
+          <div class="refugio-title-input-card">
+            <input type="text" id="refugio-nome" value="${esc(r.nome)}" placeholder="Título do Refúgio">
           </div>
-          <div class="attr-slider-group" id="refugio-attrs">
-            ${REFUGIO_ATTRS.map(a => renderAttrDots(a.key, a.label, r[a.key] || 0, 10)).join("")}
+          <div class="refugio-tag-card">REFÚGIO</div>
+          ${renderImageFrame(r, "refugio")}
+        </div>
+
+        <!-- Coluna do Meio (Título, Atributos, Recursos) -->
+        <div class="ref-area-middle">
+          <!-- Atributos -->
+          <div class="refugio-attrs-grid">
+            <div class="refugio-attr-card" title="Cada nível de População representa aproximadamente 10 habitantes. A cada seis níveis de População, um é composto por pessoas que não podem trabalhar (não-trabalhadores).">
+              <span class="refugio-attr-label">População</span>
+              <div class="refugio-attr-split-container">
+                <input type="number" id="refugio-populacao" class="refugio-attr-split-input left" value="${r.populacao || 0}" min="0" title="População Atual">
+                <span class="refugio-attr-split-divider">/</span>
+                <input type="number" id="refugio-populacao-max" class="refugio-attr-split-input right" value="${r.populacaoMax || 10}" min="0" title="População Máxima antes de Crise">
+              </div>
+            </div>
+            <div class="refugio-attr-card" title="Primeiro valor é o número total atual de recursos estocados (soma dos recursos abaixo) e o segundo é o máximo que o refúgio comporta. Todo excedente se perde.">
+              <span class="refugio-attr-label">Reservas</span>
+              <div class="refugio-attr-split-container">
+                <input type="number" id="refugio-reservas" class="refugio-attr-split-input left" value="${r.reservas || 0}" min="0" title="Reservas Atuais (Soma dos Recursos)" readonly style="cursor: not-allowed; opacity: 0.85;">
+                <span class="refugio-attr-split-divider">/</span>
+                <input type="number" id="refugio-reservas-max" class="refugio-attr-split-input right" value="${r.reservasMax || 10}" min="0" title="Capacidade Máxima de Reservas">
+              </div>
+            </div>
+            <div class="refugio-attr-card" title="Cada nível representa aproximadamente 10 indivíduos que podem ser transportados (pode carregar 1 nível de População).">
+              <span class="refugio-attr-label">Mobilidade</span>
+              <input type="number" id="refugio-mobilidade" class="refugio-attr-input" value="${r.mobilidade || 0}" min="0">
+            </div>
+            <div class="refugio-attr-card" title="Nível 0: Nenhuma&#10;Nível 1: Linhas e sinos&#10;Nível 2: Cerca de arame farpado&#10;Nível 3: Muro de madeira&#10;Nível 4: Muro de pedra ou tijolo&#10;Nível 5: Complexo prisional&#10;Nível 6: Base militar">
+              <span class="refugio-attr-label">Defesa</span>
+              <input type="number" id="refugio-defesa" class="refugio-attr-input" value="${r.defesa || 0}" min="0" max="6" style="padding-bottom: 2px;">
+              <span class="refugio-attr-level-desc" id="desc-refugio-defesa" style="display:block; text-align:center; font-size:var(--font-size-md); color:rgba(255,255,255,0.5); font-family:var(--font-heading); text-transform:uppercase; font-weight:600; letter-spacing:0.3px;">${getLevelLabel(r.defesa || 0, DEFESA_LABELS)}</span>
+            </div>
+            <div class="refugio-attr-card" title="Nível 0: Amotinada&#10;Nível 1: Desiludida&#10;Nível 2: Hesitante&#10;Nível 3: Resoluta&#10;Nível 4: Animada&#10;Nível 5: Empenhada&#10;Nível 6: Exaltada">
+              <span class="refugio-attr-label">Moral</span>
+              <input type="number" id="refugio-moral" class="refugio-attr-input" value="${r.moral || 0}" min="0" max="6" style="padding-bottom: 2px;">
+              <span class="refugio-attr-level-desc" id="desc-refugio-moral" style="display:block; text-align:center; font-size:var(--font-size-md); color:rgba(255,255,255,0.5); font-family:var(--font-heading); text-transform:uppercase; font-weight:600; letter-spacing:0.3px;">${getLevelLabel(r.moral || 0, MORAL_LABELS)}</span>
+            </div>
+            <div class="refugio-attr-card" title="Nível 0: Pacifista&#10;Nível 1: Mínima&#10;Nível 2: Razoável&#10;Nível 3: Eficiente&#10;Nível 4: Ameaçadora&#10;Nível 5: Terrível&#10;Nível 6: Arrasadora">
+              <span class="refugio-attr-label">Beligerância</span>
+              <input type="number" id="refugio-beligerancia" class="refugio-attr-input" value="${r.beligerancia || 0}" min="0" max="6" style="padding-bottom: 2px;">
+              <span class="refugio-attr-level-desc" id="desc-refugio-beligerancia" style="display:block; text-align:center; font-size:var(--font-size-md); color:rgba(255,255,255,0.5); font-family:var(--font-heading); text-transform:uppercase; font-weight:600; letter-spacing:0.3px;">${getLevelLabel(r.beligerancia || 0, BELIGERANCIA_LABELS)}</span>
+            </div>
+          </div>
+
+          <!-- Grade de Recursos por Temas -->
+          <div class="refugio-resources-themed">
+            <!-- Coluna 1: Sobrevivência -->
+            <div class="refugio-resource-theme-col">
+              <div class="refugio-theme-header">Sobrevivência</div>
+              <div class="refugio-resource-card res-agua">
+                <span class="refugio-resource-label">Água</span>
+                <input type="number" class="refugio-resource-input" data-res-key="agua" value="${esc(r.recursos.agua ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-alimento">
+                <span class="refugio-resource-label">Alimento</span>
+                <input type="number" class="refugio-resource-input" data-res-key="alimento" value="${esc(r.recursos.alimento ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-remedios">
+                <span class="refugio-resource-label">Remédios</span>
+                <input type="number" class="refugio-resource-input" data-res-key="remedios" value="${esc(r.recursos.remedios ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-vestuario">
+                <span class="refugio-resource-label">Vestuário</span>
+                <input type="number" class="refugio-resource-input" data-res-key="vestuario" value="${esc(r.recursos.vestuario ?? '')}">
+              </div>
+            </div>
+
+            <!-- Coluna 2: Orgânicos -->
+            <div class="refugio-resource-theme-col">
+              <div class="refugio-theme-header">Orgânicos</div>
+              <div class="refugio-resource-card res-plantas">
+                <span class="refugio-resource-label">Plantas</span>
+                <input type="number" class="refugio-resource-input" data-res-key="plantas" value="${esc(r.recursos.plantas ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-animais">
+                <span class="refugio-resource-label">Animais</span>
+                <input type="number" class="refugio-resource-input" data-res-key="animais" value="${esc(r.recursos.animais ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-madeira">
+                <span class="refugio-resource-label">Madeira</span>
+                <input type="number" class="refugio-resource-input" data-res-key="madeira" value="${esc(r.recursos.madeira ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-biomassa">
+                <span class="refugio-resource-label">Biomassa</span>
+                <input type="number" class="refugio-resource-input" data-res-key="biomassa" value="${esc(r.recursos.biomassa ?? '')}">
+              </div>
+            </div>
+
+            <!-- Coluna 3: Indústria -->
+            <div class="refugio-resource-theme-col">
+              <div class="refugio-theme-header">Indústria</div>
+              <div class="refugio-resource-card res-minerais">
+                <span class="refugio-resource-label">Minerais</span>
+                <input type="number" class="refugio-resource-input" data-res-key="minerais" value="${esc(r.recursos.minerais ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-combustivel">
+                <span class="refugio-resource-label">Combustível</span>
+                <input type="number" class="refugio-resource-input" data-res-key="combustivel" value="${esc(r.recursos.combustivel ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-municao">
+                <span class="refugio-resource-label">Munição</span>
+                <input type="number" class="refugio-resource-input" data-res-key="municao" value="${esc(r.recursos.municao ?? '')}">
+              </div>
+              <div class="refugio-resource-card res-mat_constr">
+                <span class="refugio-resource-label">Mat. Constr.</span>
+                <input type="number" class="refugio-resource-input" data-res-key="mat_constr" value="${esc(r.recursos.mat_constr ?? '')}">
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-glass" style="padding:16px;display:flex;flex-direction:column;gap:12px;">
-          <div>
-            <label class="ws-label" style="display:block;margin-bottom:4px;">Descrição</label>
-            <textarea id="refugio-descricao" class="ws-textarea" style="min-height:80px;" placeholder="Descreva o refúgio...">${esc(r.descricao)}</textarea>
+
+        <!-- Coluna da Direita (Descrição, Anotações, Crises) -->
+        <div class="ref-area-right">
+          <!-- Descrição -->
+          <div class="refugio-textarea-card">
+            <label>Descrição</label>
+            <textarea id="refugio-descricao" placeholder="Descreva o refúgio...">${esc(r.descricao)}</textarea>
           </div>
-          <div>
-            <label class="ws-label" style="display:block;margin-bottom:4px;">Anotações</label>
-            <textarea id="refugio-notas" class="ws-textarea" style="min-height:80px;" placeholder="Notas da sessão...">${esc(r.notas)}</textarea>
+
+          <!-- Anotações -->
+          <div class="refugio-textarea-card">
+            <label>Anotações</label>
+            <textarea id="refugio-notas" placeholder="Notas da sessão...">${esc(r.notas)}</textarea>
           </div>
-        </div>
-        <div class="card-glass world-sheet-full-col" style="padding:16px;">
-          <div class="world-list-section">
-            <div class="world-list-header">
+
+          <!-- Crises -->
+          <div class="refugio-crises-card">
+            <div class="refugio-crises-header">
               <h4>Crises Ativas</h4>
               <button class="btn btn-sm" id="btn-add-crise">+ Crise</button>
             </div>
@@ -63,11 +690,75 @@ export function renderRefugioSheet() {
             </div>
           </div>
         </div>
+
+        <!-- Parte Inferior (Construções - Ocupa Coluna 1 & 2 no Desktop) -->
+        <div class="ref-area-bottom">
+          <div class="refugio-buildings-card">
+            <div class="refugio-buildings-header">
+              <h4>Construções</h4>
+              <button id="btn-add-construcao">+</button>
+            </div>
+            <div class="refugio-buildings-list" id="refugio-buildings-list">
+              <!-- Inserido dinamicamente -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `;
 
   _attachListeners(r);
+  _renderBuildings(screen, r);
+}
+
+function _renderBuildings(screen, r) {
+  const list = screen.querySelector("#refugio-buildings-list");
+  if (!list) return;
+  if (!r.construcoes || r.construcoes.length === 0) {
+    list.innerHTML = `<div style="font-size:var(--font-size-xs); color:var(--text-muted); text-align:center; padding:16px; font-style:italic;">Nenhuma construção registrada. Clique no "+" acima para adicionar.</div>`;
+    return;
+  }
+  list.innerHTML = r.construcoes.map((c, i) => `
+    <div class="refugio-building-item" data-building-idx="${i}">
+      <div class="refugio-building-top-row">
+        <input type="text" class="refugio-building-name-input building-nome" value="${esc(c.nome)}" placeholder="Nome da Construção">
+        <div class="refugio-building-level-wrapper">
+          <span class="refugio-building-level-label">Obra</span>
+          <input type="number" class="refugio-building-level-input building-nivel" value="${c.nivel || 10}" min="1" max="999">
+        </div>
+      </div>
+      
+      <!-- Linha de Fluxo de Recursos (Consome / Produz) -->
+      <div style="display:flex; gap:10px; margin: 4px 0 6px 0;">
+        <div style="flex:1; display:flex; align-items:center; gap:6px; background:rgba(239,68,68,0.04); border:1px solid rgba(239,68,68,0.15); padding:3px 8px; border-radius:4px;">
+          <span style="font-size:9px; color:#ef4444; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px; user-select:none;">Consome</span>
+          <input type="text" class="building-consumo" value="${esc(c.consumo || '')}" placeholder="Ex: Plantas 1" style="background:transparent; border:none; color:#ffb0b0; font-size:11px; width:100%; outline:none;">
+        </div>
+        <div style="flex:1; display:flex; align-items:center; gap:6px; background:rgba(0,255,102,0.04); border:1px solid rgba(0,255,102,0.15); padding:3px 8px; border-radius:4px;">
+          <span style="font-size:9px; color:#00ff66; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px; user-select:none;">Produz</span>
+          <input type="text" class="building-producao" value="${esc(c.producao || '')}" placeholder="Ex: Medicamentos 1" style="background:transparent; border:none; color:#a0ffa0; font-size:11px; width:100%; outline:none;">
+        </div>
+        <button class="refugio-building-remove-btn btn-remove-building" title="Remover">&times;</button>
+      </div>
+
+      <textarea class="refugio-building-desc-textarea building-desc" placeholder="Efeito / Requisitos da obra..." rows="2">${esc(c.descricao || "")}</textarea>
+    </div>
+  `).join("");
+
+  list.querySelectorAll(".refugio-building-item").forEach((item, i) => {
+    item.querySelector(".building-nome")?.addEventListener("input", e => { r.construcoes[i].nome = e.target.value; saveRefugio(r); });
+    item.querySelector(".building-nivel")?.addEventListener("input", e => { r.construcoes[i].nivel = parseInt(e.target.value) || 0; saveRefugio(r); });
+    item.querySelector(".building-consumo")?.addEventListener("input", e => { r.construcoes[i].consumo = e.target.value; saveRefugio(r); });
+    item.querySelector(".building-producao")?.addEventListener("input", e => { r.construcoes[i].producao = e.target.value; saveRefugio(r); });
+    item.querySelector(".building-desc")?.addEventListener("input", e => { r.construcoes[i].descricao = e.target.value; saveRefugio(r); });
+    item.querySelector(".btn-remove-building")?.addEventListener("click", () => {
+      if (confirm(`Remover a construção "${r.construcoes[i].nome || 'Sem nome'}"?`)) {
+        r.construcoes.splice(i, 1);
+        saveRefugio(r);
+        _renderBuildings(screen, r);
+      }
+    });
+  });
 }
 
 function _renderCrises(crises) {
@@ -104,25 +795,60 @@ function _attachListeners(r) {
   screen.querySelector("#refugio-descricao")?.addEventListener("input", e => { r.descricao = e.target.value; saveRefugio(r); });
   screen.querySelector("#refugio-notas")?.addEventListener("input", e => { r.notas = e.target.value; saveRefugio(r); });
 
-  screen.querySelectorAll(".attr-dot").forEach(dot => {
-    dot.addEventListener("click", () => {
-      const key = dot.dataset.key;
-      const idx = parseInt(dot.dataset.idx);
-      const current = r[key] || 0;
-      r[key] = current === idx + 1 ? idx : idx + 1;
+  // Escutas dos 6 atributos principais
+  screen.querySelector("#refugio-populacao")?.addEventListener("input", e => {
+    r.populacao = parseInt(e.target.value) || 0;
+    saveRefugio(r);
+  });
+  screen.querySelector("#refugio-populacao-max")?.addEventListener("input", e => {
+    r.populacaoMax = parseInt(e.target.value) || 0;
+    saveRefugio(r);
+  });
+  screen.querySelector("#refugio-reservas-max")?.addEventListener("input", e => {
+    r.reservasMax = parseInt(e.target.value) || 0;
+    saveRefugio(r);
+  });
+
+  const updateAttr = (id, key, labelArr, descId) => {
+    screen.querySelector(id)?.addEventListener("input", e => {
+      const val = parseInt(e.target.value) || 0;
+      r[key] = val;
       saveRefugio(r);
-      const row = dot.closest(".attr-row");
-      row.querySelectorAll(".attr-dot").forEach((d, i) => d.classList.toggle("filled", i < r[key]));
-      row.querySelector(`#attr-val-${key}`).textContent = r[key];
+      if (descId && labelArr) {
+        const descEl = screen.querySelector(descId);
+        if (descEl) descEl.textContent = getLevelLabel(val, labelArr);
+      }
+    });
+  };
+  updateAttr("#refugio-mobilidade", "mobilidade");
+  updateAttr("#refugio-defesa", "defesa", DEFESA_LABELS, "#desc-refugio-defesa");
+  updateAttr("#refugio-moral", "moral", MORAL_LABELS, "#desc-refugio-moral");
+  updateAttr("#refugio-beligerancia", "beligerancia", BELIGERANCIA_LABELS, "#desc-refugio-beligerancia");
+
+  // Escutas dos Recursos
+  screen.querySelectorAll(".refugio-resource-input").forEach(input => {
+    input.addEventListener("input", e => {
+      const key = e.target.dataset.resKey;
+      r.recursos[key] = e.target.value;
+      saveRefugio(r);
+
+      // Recalcular Reservas Atuais e atualizar input no DOM
+      r.reservas = calculateCurrentReserves(r);
+      const resInput = screen.querySelector("#refugio-reservas");
+      if (resInput) {
+        resInput.value = r.reservas;
+      }
+      saveRefugio(r);
     });
   });
 
+  // Escuta do botão de adicionar Construção
+  screen.querySelector("#btn-add-construcao")?.addEventListener("click", () => {
+    openCreateBuildingModal(r);
+  });
+
   screen.querySelector("#btn-add-crise")?.addEventListener("click", () => {
-    if (!r.crises) r.crises = [];
-    r.crises.push({ nome: "", grau: 1, status: "Ativo", descricao: "" });
-    saveRefugio(r);
-    screen.querySelector("#refugio-crises-list").innerHTML = _renderCrises(r.crises);
-    _attachCriseListeners(r);
+    openCreateCriseModal(r);
   });
   _attachCriseListeners(r);
 

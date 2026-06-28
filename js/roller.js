@@ -88,7 +88,11 @@ export function updateDiceDrawerUI() {
   if (el.rollSelectInstinto) el.rollSelectInstinto.value = state.selectedRoll.instinto;
   if (el.rollSelectSkill) el.rollSelectSkill.value = state.selectedRoll.skill;
   
-  if (state.selectedRoll.instinto || state.selectedRoll.skill) {
+  if (state.selectedRoll.instinto2) {
+    const instText = `${state.selectedRoll.instinto} (${state.currentCharacter.instintos[state.selectedRoll.instinto] || 0})`;
+    const inst2Text = `${state.selectedRoll.instinto2} (${state.currentCharacter.instintos[state.selectedRoll.instinto2] || 0})`;
+    el.currentRollLabel.textContent = `Rolagem Assimilada: ${instText} + ${inst2Text}`;
+  } else if (state.selectedRoll.instinto || state.selectedRoll.skill) {
     const instText = state.selectedRoll.instinto ? `${state.selectedRoll.instinto} (${state.currentCharacter.instintos[state.selectedRoll.instinto]})` : "Nenhum Instinto";
     const skillText = state.selectedRoll.skill ? `${state.selectedRoll.skill} (${state.currentCharacter.conhecimentos[state.selectedRoll.skill] || state.currentCharacter.praticas[state.selectedRoll.skill] || 0})` : "Nenhuma Aptidão";
     el.currentRollLabel.textContent = `Teste: ${instText} + ${skillText}`;
@@ -135,7 +139,8 @@ export function updateDiceDrawerUI() {
 }
 
 export function resetDiceDrawerSelections() {
-  state.selectedRoll = { instinto: "", skill: "", d6: 0, d10: 0, d12: 0 };
+  state.selectedRoll = { instinto: "", instinto2: "", skill: "", d6: 0, d10: 0, d12: 0 };
+  state.activeMacroParams = null;
   el.diceQtyD6.textContent = 0;
   el.diceQtyD10.textContent = 0;
   el.diceQtyD12.textContent = 0;
@@ -176,10 +181,30 @@ export function updateKeepCountDisplay() {
 }
 
 
+function initKeptDiceIndexes() {
+  state.keptDiceIndexes = [];
+  let targetKeep = 1;
+  if (state.activeMacroParams) {
+    targetKeep = state.activeMacroParams.maxKeep || 1;
+  } else {
+    if (el.modEmpenho.checked) targetKeep++;
+    if (el.modOrigemOcupacao.checked) targetKeep++;
+    if (el.modOrigemEvento.checked) targetKeep++;
+    if (state.selectedRoll.agirPorInstinto) targetKeep++;
+    const bonusKeep = parseInt(el.modBonusKeep?.value) || 0;
+    targetKeep += Math.max(0, bonusKeep);
+  }
+  const autoKeepCount = Math.min(state.activeRollResults.length, targetKeep);
+  for (let i = 0; i < autoKeepCount; i++) {
+    state.keptDiceIndexes.push(i);
+  }
+}
+
 // ==========================================
 // ROLAGEM DE DADOS
 // ==========================================
 export function execute3DPhysicsRoll() {
+  const isMacro = !!state.activeMacroParams;
   const box = state.diceBox || window.diceBox;
   if (!box) {
     alert("O motor 3D ainda está carregando...");
@@ -236,16 +261,13 @@ export function execute3DPhysicsRoll() {
     }
     
     state.activeRollResults = results;
-    state.keptDiceIndexes = [];
-    if (state.activeRollResults.length > 0) {
-      state.keptDiceIndexes.push(0);
-    }
+    initKeptDiceIndexes();
     
     appendRollToChat(notationString);
     renderResultsPanel();
     updateResultsSummary();
     
-    if (el.diceDrawer && el.diceDrawer.classList.contains("hidden")) {
+    if (!isMacro && el.diceDrawer && el.diceDrawer.classList.contains("hidden")) {
       el.diceDrawer.classList.remove("hidden");
     }
     return;
@@ -286,13 +308,7 @@ export function execute3DPhysicsRoll() {
         };
       });
       
-      // Reseta dados mantidos
-      state.keptDiceIndexes = [];
-      
-      // Se for rolagem básica, mantemos o primeiro automaticamente
-      if (state.activeRollResults.length > 0) {
-        state.keptDiceIndexes.push(0);
-      }
+      initKeptDiceIndexes();
       
       // Adiciona mensagem ao chat
       appendRollToChat(notationString);
@@ -305,7 +321,7 @@ export function execute3DPhysicsRoll() {
       }, 2500);
 
       // Abre o modal do painel caso ele esteja fechado para ver o chat do resultado
-      if (el.diceDrawer && el.diceDrawer.classList.contains("hidden")) {
+      if (!isMacro && el.diceDrawer && el.diceDrawer.classList.contains("hidden")) {
         el.diceDrawer.classList.remove("hidden");
       }
     }
@@ -347,10 +363,7 @@ export function executeCustomRoll() {
     });
     
     state.activeRollResults = results;
-    state.keptDiceIndexes = [];
-    if (state.activeRollResults.length > 0) {
-      state.keptDiceIndexes.push(0);
-    }
+    initKeptDiceIndexes();
     
     appendRollToChat(formula);
     renderResultsPanel();
@@ -397,13 +410,7 @@ export function executeCustomRoll() {
         };
       });
       
-      // Reseta dados mantidos
-      state.keptDiceIndexes = [];
-      
-      // Se for rolagem básica, mantemos o primeiro automaticamente
-      if (state.activeRollResults.length > 0) {
-        state.keptDiceIndexes.push(0);
-      }
+      initKeptDiceIndexes();
       
       // Adiciona mensagem ao chat
       appendRollToChat(formula);
@@ -799,4 +806,112 @@ export function initRolagemAssimiladaPanel() {
     btnPanelAgir._onClick = runRoll;
     btnPanelAgir.addEventListener("click", runRoll);
   }
+}
+
+export function executeMacroRoll(macro) {
+  const char = state.currentCharacter;
+  if (!char) {
+    alert("Nenhum personagem selecionado!");
+    return;
+  }
+  
+  if (macro.assimilada) {
+    // Custo: 1 Ponto de Assimilação ou 2 Pontos de Determinação
+    const podeAssimilacao = char.assPoints >= 1;
+    const podeDeterminacao = char.detPoints >= 2;
+    
+    if (!podeAssimilacao && !podeDeterminacao) {
+      alert("Recursos insuficientes! É necessário ter pelo menos 1 Ponto de Assimilação ou 2 Pontos de Determinação.");
+      return;
+    }
+    
+    let totalDetCost = 0;
+    let totalAssCost = 0;
+    if (podeAssimilacao) {
+      totalAssCost = 1;
+    } else {
+      totalDetCost = 2;
+    }
+    
+    // Deduz custos
+    char.assPoints -= totalAssCost;
+    char.detPoints -= totalDetCost;
+    saveCurrentCharacter();
+    document.dispatchEvent(new CustomEvent('cabo-guerra-refresh'));
+    
+    // Calcula pool d12
+    const val1 = char.instintos[macro.instinto] || 0;
+    const val2 = char.instintos[macro.instinto2] || 0;
+    const totalD12 = val1 + val2 + (macro.d12Bonus || 0);
+    
+    if (totalD12 === 0) {
+      alert("Sua pilha de dados para esta rolagem assimilada é 0! Selecione instintos válidos.");
+      return;
+    }
+    
+    // Set selected roll parameters (for drawer UI)
+    state.selectedRoll = {
+      instinto: macro.instinto || "",
+      instinto2: macro.instinto2 || "",
+      skill: "",
+      d6: 0,
+      d10: 0,
+      d12: totalD12
+    };
+    
+    // Set macro modifiers on state
+    state.activeMacroParams = {
+      name: macro.name,
+      bonusSuccesses: macro.bonusSuccesses || 0,
+      bonusPressures: macro.bonusPressures || 0,
+      bonusAdaptations: macro.bonusAdaptations || 0,
+      maxKeep: macro.maxKeep || 2
+    };
+    
+    // Sync to drawer inputs
+    updateDiceDrawerUI();
+    
+    // Execute roll using existing logic
+    execute3DPhysicsRoll();
+    return;
+  }
+
+  // Calculate pools
+  let instintoVal = 0;
+  if (macro.instinto) {
+    instintoVal = char.instintos[macro.instinto] || 0;
+  }
+  const d6Count = instintoVal + (macro.instintoBonus || 0);
+  
+  let skillVal = 0;
+  if (macro.skill) {
+    skillVal = char.conhecimentos[macro.skill] || char.praticas[macro.skill] || 0;
+  }
+  const d10Count = skillVal + (macro.skillBonus || 0);
+  
+  const d12Count = macro.d12Bonus || 0;
+  
+  // Set selected roll parameters (for drawer UI)
+  state.selectedRoll = {
+    instinto: macro.instinto || "",
+    skill: macro.skill || "",
+    d6: d6Count,
+    d10: d10Count,
+    d12: d12Count
+  };
+  
+  // Set macro modifiers on state
+  state.activeMacroParams = {
+    name: macro.name,
+    bonusSuccesses: macro.bonusSuccesses || 0,
+    bonusPressures: macro.bonusPressures || 0,
+    bonusAdaptations: macro.bonusAdaptations || 0,
+    maxKeep: macro.maxKeep || 1
+  };
+  
+  // Sync to drawer inputs
+  updateDiceDrawerUI();
+  
+  // Execute roll using existing logic
+  execute3DPhysicsRoll();
 }

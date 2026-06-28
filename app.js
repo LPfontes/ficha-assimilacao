@@ -776,6 +776,15 @@ function setupEventListeners() {
   document.addEventListener("render-chat-history", () => {
     import("./js/chat.js").then(({ renderChatHistory }) => renderChatHistory());
   });
+
+  // Ouvintes para gerenciamento de rolagens personalizadas (macros)
+  if (el.btnAddCustomRoll) {
+    el.btnAddCustomRoll.addEventListener("click", () => {
+      import("./js/modals.js").then(({ openCustomRollModal }) => openCustomRollModal());
+    });
+  }
+
+
 }
 
 function goToLanding() {

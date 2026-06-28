@@ -42,7 +42,7 @@ function parseCost(costStr) {
 }
 
 import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations } from "./state.js";
-import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet } from "./sheet.js";
+import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet, renderSavedMacrosSheet } from "./sheet.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
 import { ICONS } from "../icons.js";
@@ -798,7 +798,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       </div>
       <div class="mutation-buy-list">
         ${cardData.mutações.map((mut, mIdx) => {
-          const isOwned = char.mutações.some(m => m.name === mut.name);
+          const isOwned = char.mutações.some(m => m.id && mut.id ? m.id === mut.id : m.name === mut.name);
           const reqs = parseCost(mut.cost);
 
           // Verifica se cumpre o requisito de Nível de Assimilação
@@ -905,6 +905,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
 
         // Adiciona mutação
         char.mutações.push({
+          id: mut.id || "",
           suit: type,
           name: mut.name,
           cost: mut.cost,
@@ -1057,6 +1058,112 @@ export function openSettingsModal() {
 // ==========================================
 // MODAL: ADICIONAR ITEM NO INVENTÁRIO
 // ==========================================
+const ITEM_CATEGORIAS = {
+  nenhuma: {
+    nome: "Nenhuma (Comum)",
+    cat: 0,
+    desc: "Equipamento comum sem características especiais."
+  },
+  artefato: {
+    nome: "Artefato",
+    cat: "Especial",
+    desc: "Equipamentos especiais que possuem propriedades únicas e oferecem características ou vantagens além do comum, ajudando os Infectados em sua jornada e tornando suas ações mais eficazes ou estratégicas."
+  },
+  fragil: {
+    nome: "Frágil",
+    cat: -1,
+    desc: "Característica de Categoria -1. Cai de nível de Qualidade com 1 C a menos; nível 1 se torna Quebrado no próximo uso."
+  },
+  improvisado: {
+    nome: "Improvisado",
+    cat: -1,
+    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 A, que pode ser cancelado investindo uma B."
+  },
+  pesado: {
+    nome: "Pesado",
+    cat: -1,
+    desc: "Característica de Categoria -1. Reduz a mobilidade, cancelando 1 A em testes de movimento ou furtividade; ocupa 2 espaços de inventário."
+  },
+  uso_unico: {
+    nome: "Uso Único",
+    cat: -1,
+    desc: "Característica de Categoria -1. Funciona apenas uma vez; após o uso, o item quebra ou se esgota completamente."
+  },
+  agil: {
+    nome: "Ágil",
+    cat: 1,
+    desc: "Característica de Categoria 1. Arma branca balanceada; em ataques substitui Potência por Reação."
+  },
+  discreto: {
+    nome: "Discreto",
+    cat: 1,
+    desc: "Característica de Categoria 1. Item pequeno ou retrátil, fácil de esconder; não ocupa espaço de inventário e passa despercebido enquanto guardado."
+  },
+  espacoso: {
+    nome: "Espaçoso",
+    cat: 1,
+    desc: "Característica de Categoria 1. Aumenta em +2 os espaços de Inventário; efeitos podem ser acumulados ao comprar a característica mais de uma vez."
+  },
+  iluminador: {
+    nome: "Iluminador",
+    cat: 1,
+    desc: "Característica de Categoria 1. Projeta luz proporcional ao nível de qualidade (6 m por nível). Pode perder um nível de qualidade com uso prolongado, com aviso do(a) Assimilador(a); tocha simples ilumina 6 m."
+  },
+  letal: {
+    nome: "Letal",
+    cat: 1,
+    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar uma B por um A; uso extra concede +1 A, mas reduz 1 nível de Qualidade."
+  },
+  protetivo: {
+    nome: "Protetivo",
+    cat: 1,
+    desc: "Característica de Categoria 1. Permite evitar a perda de 1 Ponto de Saúde uma vez por cena; uso extra é possível sacrificando 1 nível de Qualidade."
+  },
+  restaurador: {
+    nome: "Restaurador",
+    cat: 1,
+    desc: "Característica de Categoria 1. Alimentos, bebidas ou remédios com 6 usos; cada uso alimenta um personagem por um dia e concede 1 Ponto de Saúde na próxima Recuperação, sem acumular efeitos no mesmo repouso."
+  },
+  eficiente: {
+    nome: "Eficiente",
+    cat: 2,
+    desc: "Característica de Categoria 2. Item prático e ergonômico; uma vez por dia, permite trocar 16 por 11 em um teste. Uso extra no mesmo dia reduz 1 nível de Qualidade."
+  },
+  duravel: {
+    nome: "Durável",
+    cat: 2,
+    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer uma C adicional para reduzir 1 nível de Qualidade."
+  },
+  adrenalina: {
+    nome: "Adrenalina",
+    cat: 3,
+    desc: "Característica de Categoria 3. Canetas ou injeções que aumentam temporariamente a resistência à dor e cansaço. Cada uso concede 6 Pontos de Saúde até o próximo repouso. Usos adicionais exigem teste de Resolução + Atletismo: sucesso mantém os 6 pontos, falha causa perda de 8 pontos. Após o repouso, cada uso reduz 1 ponto de Determinação."
+  },
+  armadura: {
+    nome: "Armadura",
+    cat: 3,
+    desc: "Característica de Categoria 3. Veste de proteção que absorve ferimentos. Permite até 3 usos por cena para evitar a perda de 1 Ponto de Saúde por uso. Quando os 3 usos são consumidos na mesma cena, a armadura perde 1 nível de Qualidade."
+  },
+  explosivo: {
+    nome: "Explosivo",
+    cat: 4,
+    desc: "Característica de Categoria 4. Item projetado para detonação. Ao ser usado, pode ser destruído para causar 4d6 de dano em uma área, atingindo criaturas e estruturas. Sempre possui Uso Único e não acumula pontos de Categoria."
+  },
+  inflamavel: {
+    nome: "Inflamável",
+    cat: 4,
+    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem investir A e B ou recebem 2d6 adicionais no final do turno."
+  },
+  medicinal: {
+    nome: "Medicinal",
+    cat: 4,
+    desc: "Característica de Categoria 4. Itens médicos ou medicamentosos com 6 usos; cada uso cancela 1C em testes de Tratamento Médico, limitado à graduação em Medicina. Itens de Uso Único podem cancelar até 2C em um teste."
+  }
+};
+
+// ==========================================
+// MODAL: ADICIONAR ITEM NO INVENTÁRIO
+// ==========================================
 export function openAddItemModal() {
   const char = state.currentCharacter;
   if (!char) return;
@@ -1114,6 +1221,16 @@ export function openAddItemModal() {
           </select>
         </div>
       </div>
+      <div class="form-group">
+        <label for="add-item-categoria" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Característica / Categoria</label>
+        <select id="add-item-categoria" style="width:100%; padding:6px 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; font-size:12px; outline:none; cursor:pointer;">
+          ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => `
+            <option value="${key}">
+              ${cat.nome} ${cat.cat !== 0 && cat.cat !== "Especial" ? `(Cat: ${cat.cat})` : ''} - ${cat.desc.substring(0, 55)}...
+            </option>
+          `).join("")}
+        </select>
+      </div>
       <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
         <button id="btn-cancel-add-item" class="btn" style="padding:10px 20px;">Cancelar</button>
         <button id="btn-confirm-add-item" class="btn btn-success" style="padding:10px 20px;">
@@ -1128,6 +1245,7 @@ export function openAddItemModal() {
   const qualSelect = document.getElementById("add-item-qualidade");
   const pressaoSelect = document.getElementById("add-item-pressao");
   const escSelect = document.getElementById("add-item-escassez");
+  const catSelect = document.getElementById("add-item-categoria");
 
   const closeModal = () => el.modalContainer.classList.add("hidden");
 
@@ -1153,6 +1271,7 @@ export function openAddItemModal() {
       qualidade: parseInt(qualSelect.value),
       pressao: parseInt(pressaoSelect.value),
       escassez: parseInt(escSelect.value),
+      categoria: catSelect.value,
       efeito: efeitoInput.value.trim()
     };
 
@@ -1459,6 +1578,32 @@ export function openAssimilationLibraryModal() {
   ];
 
   let activeTab = 0;
+  let activeSubTab = "Todas";
+
+  const renderSubTabsHtml = (catIndex) => {
+    const cat = categories[catIndex];
+    const assimData = ASSIMILACOES[cat.key];
+    const catCustomMuts = getCustomMutations().filter(m => m.suit === cat.key);
+    if ((!assimData || !assimData.cartas || assimData.cartas.length === 0) && catCustomMuts.length === 0) return "";
+    
+    let html = `
+      <div class="lib-sub-tab-bar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; padding:6px; background:rgba(0,0,0,0.25); border-radius:4px; border:1px solid rgba(255,255,255,0.05); overflow-x:auto;">
+        <button class="lib-sub-tab" data-sub-tab="Todas" style="padding:4px 8px; font-size:11px; font-family:var(--font-heading); border-radius:3px; background:${activeSubTab === 'Todas' ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${activeSubTab === 'Todas' ? 'var(--border-color)' : 'transparent'}; color:${activeSubTab === 'Todas' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">Todas</button>
+    `;
+    if (assimData && assimData.cartas) {
+      html += assimData.cartas.map(card => {
+        const shortName = card.carta.split(" ")[0];
+        const isActive = activeSubTab === card.carta;
+        return `<button class="lib-sub-tab" data-sub-tab="${card.carta}" style="padding:4px 8px; font-size:11px; font-family:var(--font-heading); border-radius:3px; background:${isActive ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'}; color:${isActive ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">${shortName}</button>`;
+      }).join('');
+    }
+    if (catCustomMuts.length > 0) {
+      const isActive = activeSubTab === "Personalizadas";
+      html += `<button class="lib-sub-tab" data-sub-tab="Personalizadas" style="padding:4px 8px; font-size:11px; font-family:var(--font-heading); border-radius:3px; background:${isActive ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'}; color:${isActive ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">⚙️ Criadas</button>`;
+    }
+    html += `</div>`;
+    return html;
+  };
 
   const renderCategoryContent = (catIndex) => {
     const cat = categories[catIndex];
@@ -1469,8 +1614,12 @@ export function openAssimilationLibraryModal() {
     let html = `<div class="library-modal-list">`;
 
     const assimData = ASSIMILACOES[cat.key];
-    if (assimData && assimData.cartas) {
-      assimData.cartas.forEach(card => {
+    if (assimData && assimData.cartas && activeSubTab !== "Personalizadas") {
+      const cardsToRender = activeSubTab === "Todas"
+        ? assimData.cartas
+        : assimData.cartas.filter(c => c.carta === activeSubTab);
+
+      cardsToRender.forEach(card => {
         html += `
           <div class="lib-card">
             <div class="lib-card-title">${card.carta} — ${card.nome}</div>
@@ -1478,7 +1627,7 @@ export function openAssimilationLibraryModal() {
         `;
 
         card.mutações.forEach(mut => {
-          const isOwned = char.mutações.some(m => m.name === mut.name);
+          const isOwned = char.mutações.some(m => m.id && mut.id ? m.id === mut.id : m.name === mut.name);
           const reqs = parseCost(mut.cost);
           const meetsLevelReq = !mut.req || char.assNivel >= mut.req;
 
@@ -1508,7 +1657,7 @@ export function openAssimilationLibraryModal() {
                 ${reqLabel}
               </div>
               <div class="lib-mut-action">
-                ${isOwned ? '' : `<button class="btn btn-sm lib-buy-btn" data-cat="${cat.key}" data-card="${card.carta}" data-mut-name="${mut.name}" data-mut-cost="${mut.cost}" data-mut-desc="${mut.desc}" ${canBuy ? '' : 'disabled'}>Adquirir</button>`}
+                ${isOwned ? '' : `<button class="btn btn-sm lib-buy-btn" data-cat="${cat.key}" data-card="${card.carta}" data-mut-id="${mut.id || ''}" data-mut-name="${mut.name}" data-mut-cost="${mut.cost}" data-mut-desc="${mut.desc}" ${canBuy ? '' : 'disabled'}>Adquirir</button>`}
               </div>
             </div>
           `;
@@ -1520,14 +1669,14 @@ export function openAssimilationLibraryModal() {
 
     // Custom mutations for this category
     const catCustomMuts = getCustomMutations().filter(m => m.suit === cat.key);
-    if (catCustomMuts.length > 0) {
+    if (catCustomMuts.length > 0 && (activeSubTab === "Todas" || activeSubTab === "Personalizadas")) {
       html += `
         <div class="lib-card">
           <div class="lib-card-title" style="color:${cat.color};">⚙️ Personalizadas</div>
           <div class="lib-mutations">
       `;
       catCustomMuts.forEach(mut => {
-        const isOwned = char.mutações.some(m => m.name === mut.name);
+        const isOwned = char.mutações.some(m => m.id && mut.id ? m.id === mut.id : m.name === mut.name);
         const reqs = parseCost(mut.cost);
         const meetsLevelReq = !mut.req || char.assNivel >= mut.req;
 
@@ -1589,6 +1738,7 @@ export function openAssimilationLibraryModal() {
           `<button class="lib-tab ${i === activeTab ? 'active' : ''}" data-tab-index="${i}" style="${i === activeTab ? `border-color:${cat.color}; color:${cat.color};` : ''}">${cat.suitSymbol} ${cat.label}</button>`
         ).join('')}
       </div>
+      ${renderSubTabsHtml(activeTab)}
       <div id="lib-tab-content">
         ${renderCategoryContent(activeTab)}
       </div>
@@ -1605,6 +1755,15 @@ export function openAssimilationLibraryModal() {
     el.modalBody.querySelectorAll(".lib-tab").forEach(tabBtn => {
       tabBtn.addEventListener("click", () => {
         activeTab = parseInt(tabBtn.dataset.tabIndex, 10);
+        activeSubTab = "Todas";
+        renderLibrary();
+      });
+    });
+
+    // Sub-tab switching
+    el.modalBody.querySelectorAll(".lib-sub-tab").forEach(subTabBtn => {
+      subTabBtn.addEventListener("click", () => {
+        activeSubTab = subTabBtn.dataset.subTab;
         renderLibrary();
       });
     });
@@ -1612,6 +1771,7 @@ export function openAssimilationLibraryModal() {
     el.modalBody.querySelectorAll(".lib-buy-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const cat = btn.dataset.cat;
+        const mutId = btn.dataset.mutId || "";
         const name = btn.dataset.mutName;
         const costStr = btn.dataset.mutCost;
         const desc = btn.dataset.mutDesc;
@@ -1637,6 +1797,7 @@ export function openAssimilationLibraryModal() {
         char.ptsC = ptsC;
 
         char.mutações.push({
+          id: mutId,
           suit: cat,
           name: name,
           cost: costStr,
@@ -1664,4 +1825,222 @@ export function openAssimilationLibraryModal() {
   };
 
   renderLibrary();
+}
+
+export function openCustomRollModal(macroToEdit = null) {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  logger.info(`Modal: Abrindo modal de rolagem personalizada (${macroToEdit ? 'Editar' : 'Criar'}).`);
+
+  const defaultMacro = {
+    name: "",
+    assimilada: false,
+    instinto: "",
+    instinto2: "",
+    instintoBonus: 0,
+    skill: "",
+    skillBonus: 0,
+    bonusSuccesses: 0,
+    bonusPressures: 0,
+    bonusAdaptations: 0,
+    maxKeep: 1,
+    d12Bonus: 0
+  };
+
+  const macro = macroToEdit ? { ...defaultMacro, ...macroToEdit } : { ...defaultMacro };
+
+  el.modalContainer.classList.remove("hidden");
+  el.modalBody.innerHTML = `
+    <h3 class="modal-title">${macroToEdit ? "Editar Rolagem" : "Nova Rolagem Personalizada"}</h3>
+    <form id="form-custom-roll" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+      <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+        <label for="macro-name" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Nome da Rolagem:</label>
+        <input type="text" id="macro-name" value="${esc(macro.name)}" placeholder="Ex: Ataque Rápido, Furtividade Sutil" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" required />
+      </div>
+
+      <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background: rgba(0, 162, 255, 0.08); border: 1px dashed rgba(0, 162, 255, 0.3); padding: 8px; border-radius: 4px;">
+        <span style="font-weight:bold; font-size:12px; color:var(--text-secondary); user-select:none;">Rolagem Assimilada (Consome 1 Assimilação / 2 Determinação e rola d12)</span>
+        <label class="theme-switch">
+          <input type="checkbox" id="macro-assimilada" ${macro.assimilada ? "checked" : ""}>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label id="label-instinto-1" for="macro-instinto" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Instinto (d6):</label>
+          <select id="macro-instinto" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
+            <option value="">-- Nenhum --</option>
+            <option value="Influência" ${macro.instinto === "Influência" ? "selected" : ""}>Influência</option>
+            <option value="Percepção" ${macro.instinto === "Percepção" ? "selected" : ""}>Percepção</option>
+            <option value="Potência" ${macro.instinto === "Potência" ? "selected" : ""}>Potência</option>
+            <option value="Reação" ${macro.instinto === "Reação" ? "selected" : ""}>Reação</option>
+            <option value="Resolução" ${macro.instinto === "Resolução" ? "selected" : ""}>Resolução</option>
+            <option value="Sagacidade" ${macro.instinto === "Sagacidade" ? "selected" : ""}>Sagacidade</option>
+          </select>
+        </div>
+        <div class="form-group" id="group-instinto-bonus" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-instinto-bonus" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Bônus Dados Instinto (d6):</label>
+          <input type="number" id="macro-instinto-bonus" value="${macro.instintoBonus}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+        </div>
+        <div class="form-group" id="group-instinto-2" style="display:none; flex-direction:column; gap:4px;">
+          <label for="macro-instinto-2" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Instinto 2 (d12):</label>
+          <select id="macro-instinto-2" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
+            <option value="">-- Nenhum --</option>
+            <option value="Influência" ${macro.instinto2 === "Influência" ? "selected" : ""}>Influência</option>
+            <option value="Percepção" ${macro.instinto2 === "Percepção" ? "selected" : ""}>Percepção</option>
+            <option value="Potência" ${macro.instinto2 === "Potência" ? "selected" : ""}>Potência</option>
+            <option value="Reação" ${macro.instinto2 === "Reação" ? "selected" : ""}>Reação</option>
+            <option value="Resolução" ${macro.instinto2 === "Resolução" ? "selected" : ""}>Resolução</option>
+            <option value="Sagacidade" ${macro.instinto2 === "Sagacidade" ? "selected" : ""}>Sagacidade</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="group-skill-container" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-skill" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Conhecimento / Prática (d10):</label>
+          <select id="macro-skill" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
+            <option value="">-- Nenhum --</option>
+            <optgroup label="Conhecimentos">
+              <option value="Biologia" ${macro.skill === "Biologia" ? "selected" : ""}>Biologia</option>
+              <option value="Erudição" ${macro.skill === "Erudição" ? "selected" : ""}>Erudição</option>
+              <option value="Engenharia" ${macro.skill === "Engenharia" ? "selected" : ""}>Engenharia</option>
+              <option value="Geografia" ${macro.skill === "Geografia" ? "selected" : ""}>Geografia</option>
+              <option value="Medicina" ${macro.skill === "Medicina" ? "selected" : ""}>Medicina</option>
+              <option value="Segurança" ${macro.skill === "Segurança" ? "selected" : ""}>Segurança</option>
+            </optgroup>
+            <optgroup label="Práticas">
+              <option value="Armas" ${macro.skill === "Armas" ? "selected" : ""}>Armas</option>
+              <option value="Atletismo" ${macro.skill === "Atletismo" ? "selected" : ""}>Atletismo</option>
+              <option value="Expressão" ${macro.skill === "Expressão" ? "selected" : ""}>Expressão</option>
+              <option value="Furtividade" ${macro.skill === "Furtividade" ? "selected" : ""}>Furtividade</option>
+              <option value="Manufaturas" ${macro.skill === "Manufaturas" ? "selected" : ""}>Manufaturas</option>
+              <option value="Sobrevivência" ${macro.skill === "Sobrevivência" ? "selected" : ""}>Sobrevivência</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-skill-bonus" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Bônus Dados Skill (d10):</label>
+          <input type="number" id="macro-skill-bonus" value="${macro.skillBonus}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-bonus-successes" style="font-weight:bold; font-size:11px; color:var(--text-secondary);">Sucessos Extras:</label>
+          <input type="number" id="macro-bonus-successes" value="${macro.bonusSuccesses}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+        </div>
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-bonus-pressures" style="font-weight:bold; font-size:11px; color:var(--text-secondary);">Pressões Extras:</label>
+          <input type="number" id="macro-bonus-pressures" value="${macro.bonusPressures}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+        </div>
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-bonus-adaptations" style="font-weight:bold; font-size:11px; color:var(--text-secondary);">Adaptações Extras:</label>
+          <input type="number" id="macro-bonus-adaptations" value="${macro.bonusAdaptations}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-max-keep" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Dados a Manter:</label>
+          <input type="number" id="macro-max-keep" value="${macro.maxKeep}" min="1" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" required />
+        </div>
+        <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
+          <label for="macro-d12-bonus" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Bônus Dados d12:</label>
+          <input type="number" id="macro-d12-bonus" value="${macro.d12Bonus || 0}" min="0" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+        <button type="button" class="btn btn-close-macro" style="border-color:var(--text-muted); color:var(--text-muted);">Cancelar</button>
+        <button type="submit" class="btn btn-success">Salvar Rolagem</button>
+      </div>
+    </form>
+  `;
+
+  const closeForm = () => {
+    el.modalContainer.classList.add("hidden");
+  };
+
+  el.modalBody.querySelector(".btn-close-macro").addEventListener("click", closeForm);
+
+  const checkboxAss = el.modalBody.querySelector("#macro-assimilada");
+  const labelInst1 = el.modalBody.querySelector("#label-instinto-1");
+  const groupInstBonus = el.modalBody.querySelector("#group-instinto-bonus");
+  const groupInst2 = el.modalBody.querySelector("#group-instinto-2");
+  const groupSkill = el.modalBody.querySelector("#group-skill-container");
+  const inputMaxKeep = el.modalBody.querySelector("#macro-max-keep");
+
+  const updateFormFields = () => {
+    const isAss = checkboxAss.checked;
+    if (isAss) {
+      labelInst1.textContent = "Instinto 1 (d12):";
+      groupInstBonus.style.display = "none";
+      groupInst2.style.display = "flex";
+      groupSkill.style.display = "none";
+      if (parseInt(inputMaxKeep.value) === 1 && !macroToEdit) {
+        inputMaxKeep.value = 2;
+      }
+    } else {
+      labelInst1.textContent = "Instinto (d6):";
+      groupInstBonus.style.display = "flex";
+      groupInst2.style.display = "none";
+      groupSkill.style.display = "grid";
+      if (parseInt(inputMaxKeep.value) === 2 && !macroToEdit) {
+        inputMaxKeep.value = 1;
+      }
+    }
+  };
+
+  checkboxAss.addEventListener("change", updateFormFields);
+  updateFormFields();
+
+  const form = el.modalBody.querySelector("#form-custom-roll");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("macro-name").value.trim();
+    const assimilada = checkboxAss.checked;
+    const instinto = document.getElementById("macro-instinto").value;
+    const instinto2 = assimilada ? document.getElementById("macro-instinto-2").value : "";
+    const instintoBonus = assimilada ? 0 : (parseInt(document.getElementById("macro-instinto-bonus").value) || 0);
+    const skill = assimilada ? "" : document.getElementById("macro-skill").value;
+    const skillBonus = assimilada ? 0 : (parseInt(document.getElementById("macro-skill-bonus").value) || 0);
+    const bonusSuccesses = parseInt(document.getElementById("macro-bonus-successes").value) || 0;
+    const bonusPressures = parseInt(document.getElementById("macro-bonus-pressures").value) || 0;
+    const bonusAdaptations = parseInt(document.getElementById("macro-bonus-adaptations").value) || 0;
+    const maxKeep = parseInt(document.getElementById("macro-max-keep").value) || 1;
+    const d12Bonus = parseInt(document.getElementById("macro-d12-bonus").value) || 0;
+
+    if (!char.savedRolls) char.savedRolls = [];
+
+    const savedMacro = {
+      id: macro.id || "macro_" + Date.now(),
+      name,
+      assimilada,
+      instinto,
+      instinto2,
+      instintoBonus,
+      skill,
+      skillBonus,
+      bonusSuccesses,
+      bonusPressures,
+      bonusAdaptations,
+      maxKeep,
+      d12Bonus
+    };
+
+    if (macro.id) {
+      const idx = char.savedRolls.findIndex(m => m.id === macro.id);
+      if (idx !== -1) char.savedRolls[idx] = savedMacro;
+    } else {
+      char.savedRolls.push(savedMacro);
+    }
+
+    saveCurrentCharacter();
+    renderSavedMacrosSheet();
+    closeForm();
+  });
 }

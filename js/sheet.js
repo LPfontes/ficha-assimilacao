@@ -9,6 +9,109 @@ import { updateResultsSummary } from "./chat.js";
 import { getCurrentHealthLevel } from "./health.js";
 export { getCurrentHealthLevel } from "./health.js";
 
+export const ITEM_CATEGORIAS = {
+  nenhuma: {
+    nome: "Nenhuma (Comum)",
+    cat: 0,
+    desc: "Equipamento comum sem características especiais."
+  },
+  artefato: {
+    nome: "Artefato",
+    cat: "Especial",
+    desc: "Equipamentos especiais que possuem propriedades únicas e oferecem características ou vantagens além do comum, ajudando os Infectados em sua jornada e tornando suas ações mais eficazes ou estratégicas."
+  },
+  fragil: {
+    nome: "Frágil",
+    cat: -1,
+    desc: "Característica de Categoria -1. Cai de nível de Qualidade com 1 C a menos; nível 1 se torna Quebrado no próximo uso."
+  },
+  improvisado: {
+    nome: "Improvisado",
+    cat: -1,
+    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 A, que pode ser cancelado investindo uma B."
+  },
+  pesado: {
+    nome: "Pesado",
+    cat: -1,
+    desc: "Característica de Categoria -1. Reduz a mobilidade, cancelando 1 A em testes de movimento ou furtividade; ocupa 2 espaços de inventário."
+  },
+  uso_unico: {
+    nome: "Uso Único",
+    cat: -1,
+    desc: "Característica de Categoria -1. Funciona apenas uma vez; após o uso, o item quebra ou se esgota completamente."
+  },
+  agil: {
+    nome: "Ágil",
+    cat: 1,
+    desc: "Característica de Categoria 1. Arma branca balanceada; em ataques substitui Potência por Reação."
+  },
+  discreto: {
+    nome: "Discreto",
+    cat: 1,
+    desc: "Característica de Categoria 1. Item pequeno ou retrátil, fácil de esconder; não ocupa espaço de inventário e passa despercebido enquanto guardado."
+  },
+  espacoso: {
+    nome: "Espaçoso",
+    cat: 1,
+    desc: "Característica de Categoria 1. Aumenta em +2 os espaços de Inventário; efeitos podem ser acumulados ao comprar a característica mais de uma vez."
+  },
+  iluminador: {
+    nome: "Iluminador",
+    cat: 1,
+    desc: "Característica de Categoria 1. Projeta luz proporcional ao nível de qualidade (6 m por nível). Pode perder um nível de qualidade com uso prolongado, com aviso do(a) Assimilador(a); tocha simples ilumina 6 m."
+  },
+  letal: {
+    nome: "Letal",
+    cat: 1,
+    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar uma B por um A; uso extra concede +1 A, mas reduz 1 nível de Qualidade."
+  },
+  protetivo: {
+    nome: "Protetivo",
+    cat: 1,
+    desc: "Característica de Categoria 1. Permite evitar a perda de 1 Ponto de Saúde uma vez por cena; uso extra é possível sacrificando 1 nível de Qualidade."
+  },
+  restaurador: {
+    nome: "Restaurador",
+    cat: 1,
+    desc: "Característica de Categoria 1. Alimentos, bebidas ou remédios com 6 usos; cada uso alimenta um personagem por um dia e concede 1 Ponto de Saúde na próxima Recuperação, sem acumular efeitos no mesmo repouso."
+  },
+  eficiente: {
+    nome: "Eficiente",
+    cat: 2,
+    desc: "Característica de Categoria 2. Item prático e ergonômico; uma vez por dia, permite trocar 16 por 11 em um teste. Uso extra no mesmo dia reduz 1 nível de Qualidade."
+  },
+  duravel: {
+    nome: "Durável",
+    cat: 2,
+    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer uma C adicional para reduzir 1 nível de Qualidade."
+  },
+  adrenalina: {
+    nome: "Adrenalina",
+    cat: 3,
+    desc: "Característica de Categoria 3. Canetas ou injeções que aumentam temporariamente a resistência à dor e cansaço. Cada uso concede 6 Pontos de Saúde até o próximo repouso. Usos adicionais exigem teste de Resolução + Atletismo: sucesso mantém os 6 pontos, falha causa perda de 8 pontos. Após o repouso, cada uso reduz 1 ponto de Determinação."
+  },
+  armadura: {
+    nome: "Armadura",
+    cat: 3,
+    desc: "Característica de Categoria 3. Veste de proteção que absorve ferimentos. Permite até 3 usos por cena para evitar a perda de 1 Ponto de Saúde por uso. Quando os 3 usos são consumidos na mesma cena, a armadura perde 1 nível de Qualidade."
+  },
+  explosivo: {
+    nome: "Explosivo",
+    cat: 4,
+    desc: "Característica de Categoria 4. Item projetado para detonação. Ao ser usado, pode ser destruído para causar 4d6 de dano em uma área, atingindo criaturas e estruturas. Sempre possui Uso Único e não acumula pontos de Categoria."
+  },
+  inflamavel: {
+    nome: "Inflamável",
+    cat: 4,
+    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem investir A e B ou recebem 2d6 adicionais no final do turno."
+  },
+  medicinal: {
+    nome: "Medicinal",
+    cat: 4,
+    desc: "Característica de Categoria 4. Itens médicos ou medicamentosos com 6 usos; cada uso cancela 1C em testes de Tratamento Médico, limitado à graduação em Medicina. Itens de Uso Único podem cancelar até 2C em um teste."
+  }
+};
+
 // ==========================================
 // RENDERS DA FICHA INTERATIVA
 // ==========================================
@@ -18,13 +121,13 @@ let dragSourceIndex = -1;
 export function renderAptitudesSheet() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   logger.debug("Renderizando aptidões na ficha...");
-  
+
   // Helper para atualizar valores das aptidões quando clica na bolha
   const updateAptitudeValue = (type, categoryKey, name, newValue) => {
     char[categoryKey][name] = newValue;
-    
+
     // Sincroniza com a seleção de rolagens ativa
     if (type === "instinto" && state.selectedRoll.instinto === name) {
       if (state.selectedRoll.agirPorInstinto) {
@@ -35,15 +138,15 @@ export function renderAptitudesSheet() {
     } else if (type === "skill" && state.selectedRoll.skill === name) {
       state.selectedRoll.d10 = newValue;
     }
-    
+
     saveCurrentCharacter();
     renderAptitudesSheet();
-    
+
     // Se mudou Potência ou Resolução, recalcula Saúde
     if (name === "Potência" || name === "Resolução") {
       renderHealthSheet();
     }
-    
+
     import("./roller.js").then(({ updateDiceDrawerUI }) => updateDiceDrawerUI());
   };
 
@@ -54,17 +157,17 @@ export function renderAptitudesSheet() {
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.instinto === name) row.classList.add("selected-for-roll");
-    
+
     row.innerHTML = `
       <span class="name">${name}</span>
       <div class="value-bubbles"></div>
     `;
-    
+
     const bubblesContainer = row.querySelector(".value-bubbles");
     for (let i = 1; i <= 5; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-instinct ${i <= val ? 'filled' : ''}`;
-      
+
       bubble.addEventListener("click", (e) => {
         e.stopPropagation(); // Impede selecionar para rolagem
         const card = e.target.closest(".aptitude-column-card");
@@ -75,11 +178,11 @@ export function renderAptitudesSheet() {
       });
       bubblesContainer.appendChild(bubble);
     }
-    
+
     row.addEventListener("click", () => {
       selectRollAptitude("instinto", name, char.instintos[name]);
     });
-    
+
     el.instinctsListSheet.appendChild(row);
   });
 
@@ -90,17 +193,17 @@ export function renderAptitudesSheet() {
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
-    
+
     row.innerHTML = `
       <span class="name">${name}</span>
       <div class="value-bubbles"></div>
     `;
-    
+
     const bubblesContainer = row.querySelector(".value-bubbles");
     for (let i = 1; i <= 5; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-conhecimento ${i <= val ? 'filled' : ''}`;
-      
+
       bubble.addEventListener("click", (e) => {
         e.stopPropagation();
         const card = e.target.closest(".aptitude-column-card");
@@ -110,11 +213,11 @@ export function renderAptitudesSheet() {
       });
       bubblesContainer.appendChild(bubble);
     }
-    
+
     row.addEventListener("click", () => {
       selectRollAptitude("skill", name, char.conhecimentos[name]);
     });
-    
+
     el.conhecimentosListSheet.appendChild(row);
   });
 
@@ -125,17 +228,17 @@ export function renderAptitudesSheet() {
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
-    
+
     row.innerHTML = `
       <span class="name">${name}</span>
       <div class="value-bubbles"></div>
     `;
-    
+
     const bubblesContainer = row.querySelector(".value-bubbles");
     for (let i = 1; i <= 5; i++) {
       const bubble = document.createElement("span");
       bubble.className = `bubble bubble-pratica ${i <= val ? 'filled' : ''}`;
-      
+
       bubble.addEventListener("click", (e) => {
         e.stopPropagation();
         const card = e.target.closest(".aptitude-column-card");
@@ -145,11 +248,11 @@ export function renderAptitudesSheet() {
       });
       bubblesContainer.appendChild(bubble);
     }
-    
+
     row.addEventListener("click", () => {
       selectRollAptitude("skill", name, char.praticas[name]);
     });
-    
+
     el.praticasListSheet.appendChild(row);
   });
 }
@@ -158,23 +261,23 @@ export function renderAptitudesSheet() {
 export function renderHealthSheet() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   if (char.saudeMod === undefined) char.saudeMod = 0;
-  
+
   const basePts = 1 + char.instintos.Potência + char.instintos.Resolução;
   const maxPts = Math.max(1, basePts + char.saudeMod);
-  
+
   if (el.valSaudeMod) el.valSaudeMod.textContent = char.saudeMod;
-  
+
   // Hide health formula or update it dynamically
   const formulaInfo = document.querySelector(".health-formula-info");
   if (formulaInfo) {
     let saudeModText = char.saudeMod !== 0 ? ` ${char.saudeMod >= 0 ? '+' : ''}${char.saudeMod}` : "";
     formulaInfo.textContent = `(${basePts}${saudeModText} Caixas por Nível)`;
   }
-  
+
   el.healthLevelsSheet.innerHTML = "";
-  
+
   const levels = [
     { key: "6", name: "6. Saudável", desc: "Plenamente funcional." },
     { key: "5", name: "5. Escoriação", desc: "Apenas arranhões ou cortes leves." },
@@ -183,21 +286,21 @@ export function renderHealthSheet() {
     { key: "2", name: "2. Debilitação", desc: "Custa 1 Determinação para agir (mantém penalidade de -2 Sucessos).<br>Ignore a penalidade de Sucessos gastando 1 Adaptação na rolagem. Requer tratamento." },
     { key: "1", name: "1. Incapacitação", desc: "Crítico. Gaste 1 Determinação/rodada para falar/manter consciência (sem Ação).<br>Para agir: +1 Determinação e exige 2 Adaptações na rolagem para ter sucesso. Requer tratamento." }
   ];
-  
+
   if (!char.dano) {
     char.dano = { 6: 0, 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   }
-  
+
   const activeLvl = getCurrentHealthLevel(char);
   const lvlInfo = levels.find(l => parseInt(l.key) === activeLvl);
-  
+
   const row = document.createElement("div");
   row.className = "health-level-row active";
   row.setAttribute("data-level", lvlInfo.key);
-  
+
   let dropsHtml = "";
   const activeDano = char.dano[lvlInfo.key] || 0;
-  
+
   for (let i = 1; i <= maxPts; i++) {
     const isFilled = i <= (maxPts - activeDano);
     dropsHtml += `
@@ -206,7 +309,7 @@ export function renderHealthSheet() {
       </span>
     `;
   }
-  
+
   const totalMax = 6 * maxPts;
   let totalCurrent = 0;
   for (let lvl = 1; lvl <= 6; lvl++) {
@@ -234,7 +337,7 @@ export function renderHealthSheet() {
     </div>
     <span class="desc">${lvlInfo.desc}</span>
   `;
-  
+
   const inputAdjust = row.querySelector("#input-health-adjust");
   if (inputAdjust) {
     inputAdjust.addEventListener("keypress", (e) => {
@@ -245,7 +348,7 @@ export function renderHealthSheet() {
         if (!isNaN(value) && value !== 0) {
           const totalHealth = activeLvl * maxPts - activeDano;
           const newTotalHealth = Math.max(0, Math.min(6 * maxPts, totalHealth + value));
-          
+
           if (newTotalHealth === 0) {
             for (let lvl = 1; lvl <= 6; lvl++) {
               char.dano[lvl] = maxPts;
@@ -262,10 +365,10 @@ export function renderHealthSheet() {
               }
             }
           }
-          
+
           saveCurrentCharacter();
           renderHealthSheet();
-          
+
           try {
             updateDiceDrawerUI();
           } catch (err) {
@@ -277,31 +380,31 @@ export function renderHealthSheet() {
       }
     });
   }
-  
+
   row.querySelectorAll(".health-drop").forEach(drop => {
     drop.addEventListener("click", () => {
       const index = parseInt(drop.getAttribute("data-index"));
       const currentDano = char.dano[lvlInfo.key] || 0;
       const currentHealth = maxPts - currentDano;
-      
+
       let newHealth;
       if (currentHealth === index) {
         newHealth = index - 1;
       } else {
         newHealth = index;
       }
-      
+
       const newDano = maxPts - newHealth;
       char.dano[lvlInfo.key] = newDano;
-      
+
       // If we completely filled this level with damage (0 health remaining), we transition to the next level down (if any)
       if (newDano === maxPts && activeLvl > 1) {
         char.dano[activeLvl - 1] = 0;
       }
-      
+
       saveCurrentCharacter();
       renderHealthSheet();
-      
+
       try {
         updateDiceDrawerUI();
       } catch (e) {
@@ -309,10 +412,10 @@ export function renderHealthSheet() {
       }
     });
   });
-  
+
   const btnPrev = row.querySelector("#btn-health-lvl-prev");
   const btnNext = row.querySelector("#btn-health-lvl-next");
-  
+
   btnPrev.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -321,7 +424,7 @@ export function renderHealthSheet() {
       char.dano[activeLvl + 1] = maxPts - 1;
       saveCurrentCharacter();
       renderHealthSheet();
-      
+
       try {
         updateDiceDrawerUI();
       } catch (err) {
@@ -329,7 +432,7 @@ export function renderHealthSheet() {
       }
     }
   });
-  
+
   btnNext.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -339,7 +442,7 @@ export function renderHealthSheet() {
     }
     saveCurrentCharacter();
     renderHealthSheet();
-    
+
     try {
       updateDiceDrawerUI();
     } catch (err) {
@@ -358,15 +461,15 @@ export function renderHealthSheet() {
       if (currentDano < maxPts) {
         const newDano = currentDano + 1;
         char.dano[lvlInfo.key] = newDano;
-        
+
         // If we completely filled this level with damage, transition to the level below
         if (newDano === maxPts && activeLvl > 1) {
           char.dano[activeLvl - 1] = 0;
         }
-        
+
         saveCurrentCharacter();
         renderHealthSheet();
-        
+
         try {
           updateDiceDrawerUI();
         } catch (err) {
@@ -385,7 +488,7 @@ export function renderHealthSheet() {
         char.dano[lvlInfo.key] = currentDano - 1;
         saveCurrentCharacter();
         renderHealthSheet();
-        
+
         try {
           updateDiceDrawerUI();
         } catch (err) {
@@ -397,7 +500,7 @@ export function renderHealthSheet() {
         char.dano[activeLvl + 1] = maxPts - 1;
         saveCurrentCharacter();
         renderHealthSheet();
-        
+
         try {
           updateDiceDrawerUI();
         } catch (err) {
@@ -406,32 +509,32 @@ export function renderHealthSheet() {
       }
     });
   }
-  
+
   el.healthLevelsSheet.appendChild(row);
 }
 
 export function renderCaboGuerraSheet() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   if (el.sheetDetLevel) el.sheetDetLevel.textContent = char.detNivel;
   if (el.sheetAssLevel) el.sheetAssLevel.textContent = char.assNivel;
-  
+
   const ratio = (char.detNivel / 10) * 100;
   if (el.caboRatioFill) {
     el.caboRatioFill.style.height = `${100 - ratio}%`;
   }
-  
+
   // Renderiza a sequência de símbolos de Determinação (exatamente detNivel de símbolos)
   if (el.sheetDetPoints) {
     el.sheetDetPoints.innerHTML = "";
     for (let i = 1; i <= char.detNivel; i++) {
       const isFilled = i <= char.detPoints;
-      
+
       const point = document.createElement("span");
       point.className = `cabo-point ${isFilled ? 'filled' : ''}`;
       point.innerHTML = ICONS.determinacao;
-      
+
       point.addEventListener("click", () => {
         if (isFilled && char.detPoints === i) {
           char.detPoints = i - 1;
@@ -450,11 +553,11 @@ export function renderCaboGuerraSheet() {
     el.sheetAssPoints.innerHTML = "";
     for (let i = 1; i <= char.assNivel; i++) {
       const isFilled = i <= char.assPoints;
-      
+
       const point = document.createElement("span");
       point.className = `cabo-point ${isFilled ? 'filled' : ''}`;
       point.innerHTML = ICONS.determinacao;
-      
+
       point.addEventListener("click", () => {
         if (isFilled && char.assPoints === i) {
           char.assPoints = i - 1;
@@ -467,7 +570,7 @@ export function renderCaboGuerraSheet() {
       el.sheetAssPoints.appendChild(point);
     }
   }
-  
+
   if (char.detNivel === 0) {
     if (el.suscetivelAlert) el.suscetivelAlert.classList.add("hidden");
     if (el.assimilacaoTotalAlert) el.assimilacaoTotalAlert.classList.remove("hidden");
@@ -483,19 +586,19 @@ export function renderCaboGuerraSheet() {
 export function renderCharacteristicsSheet() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   el.traitsListSheet.innerHTML = "";
   if (char.caracteristicas.length === 0) {
     el.traitsListSheet.innerHTML = `<div style="color:var(--text-muted); font-size:13px; grid-column:1/-1;">Nenhuma característica adquirida com Experiência.</div>`;
     return;
   }
-  
+
   const customTraits = getCustomTraits();
 
   char.caracteristicas.forEach(traitId => {
     const trait = CARACTERISTICAS.find(c => c.id === traitId) || customTraits.find(c => c.id === traitId);
     if (!trait) return;
-    
+
     const card = document.createElement("div");
     card.className = "trait-sheet-card";
     card.innerHTML = `
@@ -507,7 +610,7 @@ export function renderCharacteristicsSheet() {
         ${ICONS.trash}
       </button>
     `;
-    
+
     card.querySelector(".btn-delete-trait").addEventListener("click", () => {
       if (confirm(`Remover característica ${trait.nome}? Você recuperará os ${trait.custo} XP correspondentes.`)) {
         char.caracteristicas = char.caracteristicas.filter(id => id !== traitId);
@@ -516,7 +619,7 @@ export function renderCharacteristicsSheet() {
         loadCharacter(char.id);
       }
     });
-    
+
     el.traitsListSheet.appendChild(card);
   });
 }
@@ -524,14 +627,14 @@ export function renderCharacteristicsSheet() {
 export function renderMutationsSheet() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   // Renderizar pontos de assimilação (Sucesso, Adaptação, Pressão)
   const pointsContainer = document.getElementById("sheet-assimilation-points");
   if (pointsContainer) {
     if (char.ptsA === undefined) char.ptsA = 1;
     if (char.ptsB === undefined) char.ptsB = 0;
     if (char.ptsC === undefined) char.ptsC = 2;
-    
+
     pointsContainer.innerHTML = `
       <div class="ass-point-badge success-badge">
         <span class="badge-label">Sucesso [S]:</span>
@@ -552,7 +655,7 @@ export function renderMutationsSheet() {
         <button class="btn-point-adjust inc-c">+</button>
       </div>
     `;
-    
+
     // Listeners
     pointsContainer.querySelector(".dec-a").addEventListener("click", () => {
       if (char.ptsA > 0) { char.ptsA--; saveCurrentCharacter(); renderMutationsSheet(); }
@@ -573,23 +676,23 @@ export function renderMutationsSheet() {
       char.ptsC++; saveCurrentCharacter(); renderMutationsSheet();
     });
   }
-  
+
   const container = document.getElementById("mutations-list-sheet");
   if (!container) return;
   container.innerHTML = "";
-  
+
   const suitLabels = {
     evolutivas: "Evolutiva (F)",
     adaptativas: "Adaptativa (G)",
     inoportunas: "Inoportuna (H)",
     singulares: "Singular (I)"
   };
-  
+
   if (!char.mutações || char.mutações.length === 0) {
     container.innerHTML = `<div style="color:var(--text-muted); font-size:13px; padding:8px;">Nenhuma mutação adquirida.</div>`;
     return;
   }
-  
+
   char.mutações.forEach(mut => {
     const row = document.createElement("div");
     row.className = `mutation-sheet-item suit-${mut.suit}`;
@@ -606,15 +709,20 @@ export function renderMutationsSheet() {
         &times;
       </button>
     `;
-    
+
     row.querySelector(".btn-remove-mutation").addEventListener("click", () => {
       if (confirm(`Remover mutação ${mut.name}?`)) {
-        char.mutações = char.mutações.filter(m => !(m.suit === mut.suit && m.name === mut.name));
+        char.mutações = char.mutações.filter(m => {
+          if (m.id && mut.id) {
+            return m.id !== mut.id;
+          }
+          return !(m.suit === mut.suit && m.name === mut.name);
+        });
         saveCurrentCharacter();
         renderMutationsSheet();
       }
     });
-    
+
     container.appendChild(row);
   });
 }
@@ -622,14 +730,14 @@ export function renderMutationsSheet() {
 export function renderInventorySheet() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   if (el.inventoryBodyList) el.inventoryBodyList.innerHTML = "";
   if (el.inventoryBackpackList) el.inventoryBackpackList.innerHTML = "";
-  
+
   if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
   if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
   const expectedLength = char.bodySlotsCount + char.backpackSlotsCount;
-  
+
   if (!char.inventario || char.inventario.length !== expectedLength) {
     const oldInv = char.inventario || [];
     char.inventario = Array(expectedLength).fill(null).map((_, idx) => {
@@ -640,7 +748,7 @@ export function renderInventorySheet() {
       } else if (typeof oldItem.qualidade === 'number') {
         qual = oldItem.qualidade;
       }
-      
+
       let esc = 2; // Comum
       if (typeof oldItem.escassez === 'boolean') {
         esc = oldItem.escassez ? 3 : 2;
@@ -653,12 +761,13 @@ export function renderInventorySheet() {
         qualidade: qual,
         pressao: oldItem.pressao || 0,
         escassez: esc,
+        categoria: oldItem.categoria || "nenhuma",
         efeito: oldItem.efeito || ""
       };
     });
     saveCurrentCharacter();
   }
-  
+
   const labelBody = document.getElementById("label-body-slots");
   const labelBackpack = document.getElementById("label-backpack-slots");
   if (labelBody) {
@@ -667,24 +776,28 @@ export function renderInventorySheet() {
   if (labelBackpack) {
     labelBackpack.textContent = `Na Mochila`;
   }
-  
+
   char.inventario.forEach((slot, i) => {
     const row = document.createElement("div");
     row.className = "inventory-slot";
     row.draggable = true;
     row.dataset.index = i;
-    
+
     const isBody = i < char.bodySlotsCount;
     const slotDisplayNum = isBody ? i + 1 : i - char.bodySlotsCount + 1;
-    
+
     let qual = typeof slot.qualidade === 'number' ? slot.qualidade : (slot.qualidade ? 4 : 3);
     let pressao = typeof slot.pressao === 'number' ? slot.pressao : 0;
     let esc = typeof slot.escassez === 'number' ? slot.escassez : (slot.escassez ? 3 : 2);
-    
+    let categoria = slot.categoria || 'nenhuma';
+
     row.innerHTML = `
       <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
         <span class="slot-num" title="${isBody ? 'Espaço no Corpo' : 'Espaço na Mochila'}" style="color: ${isBody ? 'var(--color-blue-glow)' : 'var(--text-muted)'}; font-weight: bold; font-family: var(--font-heading);">${slotDisplayNum}</span>
         <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio" style="width: 100%;">
+        <span class="item-category-badge" style="font-size: 8px; padding: 2px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); display: ${categoria === 'nenhuma' ? 'none' : 'inline-block'}; white-space: nowrap;">
+          ${ITEM_CATEGORIAS[categoria]?.nome || ''}
+        </span>
       </div>
       
       <div class="item-props-redesign" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -719,22 +832,39 @@ export function renderInventorySheet() {
           </div>
 
           <div class="colum" style="display: flex; flex-direction: column; gap: 4px;">
-            <!-- Escassez -->
-            <div class="prop-select-wrapper" title="Nível de Escassez">
-              <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
-                <option value="0" ${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
-                <option value="1" ${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
-                <option value="2" ${esc === 2 ? 'selected' : ''}>E2: Comum</option>
-                <option value="3" ${esc === 3 ? 'selected' : ''}>E3: Incomum</option>
-                <option value="4" ${esc === 4 ? 'selected' : ''}>E4: Atípico</option>
-                <option value="5" ${esc === 5 ? 'selected' : ''}>E5: Raro</option>
-                <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
-              </select>
+            <div class="row" style="display: flex; flex-direction: row; gap: 6px; align-items: center;">
+              <!-- Escassez -->
+              <div class="prop-select-wrapper" title="Nível de Escassez">
+                <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+                  <option value="0" ${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
+                  <option value="1" ${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
+                  <option value="2" ${esc === 2 ? 'selected' : ''}>E2: Comum</option>
+                  <option value="3" ${esc === 3 ? 'selected' : ''}>E3: Incomum</option>
+                  <option value="4" ${esc === 4 ? 'selected' : ''}>E4: Atípico</option>
+                  <option value="5" ${esc === 5 ? 'selected' : ''}>E5: Raro</option>
+                  <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
+                </select>
+              </div>
+
+              <!-- Categoria/Característica -->
+              <div class="prop-select-wrapper prop-categoria-wrapper" title="${ITEM_CATEGORIAS[categoria]?.desc || ''}">
+                <select class="select-categoria" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer; max-width: 140px;">
+                  ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => `
+                    <option value="${key}" ${categoria === key ? 'selected' : ''}>
+                      ${cat.nome} ${cat.cat !== 0 && cat.cat !== "Especial" ? `(Cat: ${cat.cat})` : ''}
+                    </option>
+                  `).join("")}
+                </select>
+              </div>
             </div>
             <!-- Efeito -->
             <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
               <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
             </div>
+            <!-- Texto da Categoria -->
+            <span class="category-desc-text" style="font-size: 10px; color: var(--color-gold-glow); opacity: 0.85; max-width: 300px; display: ${categoria === 'nenhuma' ? 'none' : 'block'}; font-style: italic;">
+              ${ITEM_CATEGORIAS[categoria]?.desc || ''}
+            </span>
           </div>
         </div>
       </div>
@@ -742,30 +872,60 @@ export function renderInventorySheet() {
         ${ICONS.trash}
       </button>
     `;
-    
+
     const inputName = row.querySelector(".item-name");
     const selQ = row.querySelector(".select-qualidade");
     const selP = row.querySelector(".select-pressao");
     const selE = row.querySelector(".select-escassez");
+    const selCat = row.querySelector(".select-categoria");
     const inputEffect = row.querySelector(".item-effect");
-    
     const saveSlot = () => {
       char.inventario[i] = {
         name: inputName.value,
         qualidade: parseInt(selQ.value),
         pressao: parseInt(selP.value),
         escassez: parseInt(selE.value),
+        categoria: selCat.value,
         efeito: inputEffect.value
       };
       saveCurrentCharacter();
     };
-    
+
     inputName.addEventListener("input", saveSlot);
     selQ.addEventListener("change", saveSlot);
     selP.addEventListener("change", saveSlot);
     selE.addEventListener("change", saveSlot);
+    selCat.addEventListener("change", e => {
+      const selectedKey = e.target.value;
+      const catWrapper = row.querySelector(".prop-categoria-wrapper");
+      if (catWrapper) {
+        catWrapper.title = ITEM_CATEGORIAS[selectedKey].desc;
+      }
+      
+      const badge = row.querySelector(".item-category-badge");
+      if (badge) {
+        if (selectedKey !== "nenhuma") {
+          badge.textContent = ITEM_CATEGORIAS[selectedKey].nome;
+          badge.style.display = "inline-block";
+        } else {
+          badge.style.display = "none";
+        }
+      }
+
+      const descText = row.querySelector(".category-desc-text");
+      if (descText) {
+        if (selectedKey !== "nenhuma") {
+          descText.textContent = ITEM_CATEGORIAS[selectedKey].desc;
+          descText.style.display = "block";
+        } else {
+          descText.style.display = "none";
+        }
+      }
+      
+      saveSlot();
+    });
     inputEffect.addEventListener("input", saveSlot);
-    
+
     // Delete slot button
     const btnDelete = row.querySelector(".btn-delete-slot");
     btnDelete.addEventListener("click", (e) => {
@@ -780,7 +940,7 @@ export function renderInventorySheet() {
       saveCurrentCharacter();
       renderInventorySheet();
     });
-    
+
     // Drag & Drop handlers
     row.addEventListener("dragstart", (e) => {
       dragSourceIndex = i;
@@ -788,7 +948,7 @@ export function renderInventorySheet() {
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", String(i));
     });
-    
+
     row.addEventListener("dragend", () => {
       dragSourceIndex = -1;
       row.classList.remove("dragging");
@@ -796,38 +956,38 @@ export function renderInventorySheet() {
         s.classList.remove("drag-over", "drag-over-target");
       });
     });
-    
+
     row.addEventListener("dragover", (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
     });
-    
+
     row.addEventListener("dragenter", (e) => {
       e.preventDefault();
       if (dragSourceIndex === i || dragSourceIndex === -1 || row.classList.contains("dragging")) return;
       row.classList.add("drag-over");
     });
-    
+
     row.addEventListener("dragleave", () => {
       row.classList.remove("drag-over");
     });
-    
+
     row.addEventListener("drop", (e) => {
       e.preventDefault();
       row.classList.remove("drag-over");
-      
+
       const fromIdx = dragSourceIndex;
       if (fromIdx === -1 || fromIdx === i) return;
-      
+
       // Swap items
       const temp = char.inventario[fromIdx];
       char.inventario[fromIdx] = char.inventario[i];
       char.inventario[i] = temp;
-      
+
       saveCurrentCharacter();
       renderInventorySheet();
     });
-    
+
     if (isBody) {
       if (el.inventoryBodyList) el.inventoryBodyList.appendChild(row);
     } else {
@@ -839,16 +999,16 @@ export function renderInventorySheet() {
 export function adjustCaboGuerraLevels(changeDet) {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   const newDet = char.detNivel + changeDet;
   if (newDet >= 0 && newDet <= 10) {
     char.detNivel = newDet;
     char.assNivel = 10 - newDet;
-    
+
     // Ajusta os pontos se necessário
     if (char.detPoints > char.detNivel) char.detPoints = char.detNivel;
     if (char.assPoints > char.assNivel) char.assPoints = char.assNivel;
-    
+
     saveCurrentCharacter();
     renderCaboGuerraSheet();
   }
@@ -857,13 +1017,13 @@ export function adjustCaboGuerraLevels(changeDet) {
 export function executeAssimilacaoAvanco() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   if (char.detPoints === 0) {
     if (char.detNivel > 0) {
       char.detNivel -= 1;
       char.assNivel += 1;
       char.detPoints = char.detNivel; // Restabelece Determinação ao novo máximo
-      
+
       saveCurrentCharacter();
       renderCaboGuerraSheet();
       alert(`A infecção avançou! Determinação Máxima agora é Nível ${char.detNivel} e Assimilação Máxima é Nível ${char.assNivel}. Seus pontos de Determinação foram restaurados.`);
@@ -884,16 +1044,16 @@ export function restoreDeterminacao() {
 export function addBodySlot() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
   if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
-  
+
   const newItem = { name: "", qualidade: 3, pressao: 0, escassez: 2, efeito: "" };
-  
+
   // Insert at index bodySlotsCount (after current body slots, before backpack slots)
   char.inventario.splice(char.bodySlotsCount, 0, newItem);
   char.bodySlotsCount++;
-  
+
   saveCurrentCharacter();
   renderInventorySheet();
 }
@@ -901,16 +1061,16 @@ export function addBodySlot() {
 export function addBackpackSlot() {
   const char = state.currentCharacter;
   if (!char) return;
-  
+
   if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
   if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
-  
+
   const newItem = { name: "", qualidade: 3, pressao: 0, escassez: 2, efeito: "" };
-  
+
   // Add at the end of backpack slots (end of inventario array)
   char.inventario.push(newItem);
   char.backpackSlotsCount++;
-  
+
   saveCurrentCharacter();
   renderInventorySheet();
 }
@@ -985,6 +1145,115 @@ export function renderHomebrewSheet() {
         }
       });
       mutationList.appendChild(item);
+    });
+  }
+}
+
+export function renderSavedMacrosSheet() {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  const listContainer = el.customRollsListSheet;
+  if (!listContainer) return;
+
+  listContainer.innerHTML = "";
+  const savedRolls = char.savedRolls || [];
+
+  if (savedRolls.length === 0) {
+    listContainer.innerHTML = `<div style="font-size: var(--font-size-xs); color: var(--text-muted); text-align: center; padding: 12px; border: 1px dashed rgba(255,255,255,0.05); border-radius: var(--radius-md);">Nenhuma rolagem personalizada criada. Clique no botão "+" para começar.</div>`;
+  } else {
+    savedRolls.forEach(m => {
+      const item = document.createElement("div");
+      item.className = "custom-roll-item";
+
+      // Build formula preview string
+      let formulaParts = [];
+      if (m.assimilada) {
+        const val1 = char.instintos[m.instinto] || 0;
+        const val2 = char.instintos[m.instinto2] || 0;
+        formulaParts.push(`Assimilação [${m.instinto} (${val1}) + ${m.instinto2 || 'Nenhum'} (${val2})]`);
+        if (m.d12Bonus > 0) {
+          formulaParts.push(`+${m.d12Bonus}d12`);
+        }
+      } else {
+        if (m.instinto) {
+          const val = char.instintos[m.instinto] || 0;
+          const bonusStr = m.instintoBonus >= 0 ? `+${m.instintoBonus}` : `${m.instintoBonus}`;
+          formulaParts.push(`${m.instinto} (${val}${m.instintoBonus !== 0 ? bonusStr : ""})`);
+        }
+        if (m.skill) {
+          const val = char.conhecimentos[m.skill] || char.praticas[m.skill] || 0;
+          const bonusStr = m.skillBonus >= 0 ? `+${m.skillBonus}` : `${m.skillBonus}`;
+          formulaParts.push(`${m.skill} (${val}${m.skillBonus !== 0 ? bonusStr : ""})`);
+        }
+        if (m.d12Bonus > 0) {
+          formulaParts.push(`+${m.d12Bonus}d12`);
+        }
+      }
+      if (m.bonusSuccesses !== 0) {
+        const sign = m.bonusSuccesses > 0 ? "+" : "";
+        formulaParts.push(`${sign}${m.bonusSuccesses} Sucesso(s)`);
+      }
+      if (m.bonusPressures !== 0) {
+        const sign = m.bonusPressures > 0 ? "+" : "";
+        formulaParts.push(`${sign}${m.bonusPressures} Pressão(ões)`);
+      }
+      if (m.bonusAdaptations !== 0) {
+        const sign = m.bonusAdaptations > 0 ? "+" : "";
+        formulaParts.push(`${sign}${m.bonusAdaptations} Adaptação(ões)`);
+      }
+      formulaParts.push(`mantém ${m.maxKeep}`);
+
+      const formulaString = formulaParts.join(" + ").replace(" + mantém", " mantém").replace(" + -", " - ");
+      const nameBadge = m.assimilada ? `<span class="mutation-badge suit-tag-singulares" style="font-size: 9px; padding: 1px 4px; margin-left: 6px; background: #00a2ff; color: #fff; border-radius: 4px; font-weight: bold; text-transform: uppercase;">Assimilada</span>` : "";
+
+      item.innerHTML = `
+        <div class="custom-roll-info" title="Clique para rolar">
+          <div class="custom-roll-name-row">
+            <span class="custom-roll-name">${esc(m.name)}${nameBadge}</span>
+          </div>
+          <span class="custom-roll-formula-preview">${esc(formulaString)}</span>
+        </div>
+        <div class="custom-roll-actions">
+          <button class="btn btn-sm btn-edit-macro" title="Editar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle;">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path>
+            </svg>
+          </button>
+          <button class="btn btn-sm btn-danger btn-delete-macro" title="Excluir">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle;">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
+      `;
+
+      // Roll action click on info row
+      item.querySelector(".custom-roll-info").addEventListener("click", () => {
+        import("./roller.js").then(({ executeMacroRoll }) => executeMacroRoll(m));
+      });
+
+      // Edit macro click
+      item.querySelector(".btn-edit-macro").addEventListener("click", (e) => {
+        e.stopPropagation();
+        import("./modals.js").then(({ openCustomRollModal }) => openCustomRollModal(m));
+      });
+
+      // Delete macro click
+      item.querySelector(".btn-delete-macro").addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (confirm(`Tem certeza de que deseja excluir a rolagem "${m.name}"?`)) {
+          char.savedRolls = char.savedRolls.filter(x => x.id !== m.id);
+          saveCurrentCharacter();
+          renderSavedMacrosSheet();
+        }
+      });
+
+      listContainer.appendChild(item);
     });
   }
 }

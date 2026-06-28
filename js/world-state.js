@@ -86,12 +86,28 @@ export function createNewRefugio(name = "Novo Refúgio") {
     imagem: "",
     descricao: "",
     populacao: 0,
-    populacao: 0,
+    populacaoMax: 10,
     reservas: 0,
+    reservasMax: 10,
     mobilidade: 0,
     defesa: 0,
     moral: 0,
     beligerancia: 0,
+    recursos: {
+      agua: 0,
+      plantas: 0,
+      animais: 0,
+      madeira: 0,
+      minerais: 0,
+      biomassa: 0,
+      alimento: 0,
+      vestuario: 0,
+      municao: 0,
+      combustivel: 0,
+      remedios: 0,
+      mat_constr: 0
+    },
+    construcoes: [], // [{nome, nivel, descricao}]
     crises: [],     // [{nome, grau, status, descricao}]
     notas: "",
   };

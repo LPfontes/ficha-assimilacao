@@ -1,4 +1,4 @@
-import { renderAptitudesSheet, renderHealthSheet, renderCaboGuerraSheet, renderCharacteristicsSheet, renderMutationsSheet, renderInventorySheet, renderHomebrewSheet } from "./sheet.js";
+import { renderAptitudesSheet, renderHealthSheet, renderCaboGuerraSheet, renderCharacteristicsSheet, renderMutationsSheet, renderInventorySheet, renderHomebrewSheet, renderSavedMacrosSheet } from "./sheet.js";
 import { resetDiceDrawerSelections } from "./roller.js";
 import { logger } from "./logger.js";
 
@@ -106,7 +106,9 @@ export const el = {
   rollSelectInstinto: document.getElementById("roll-select-instinto"),
   rollSelectSkill: document.getElementById("roll-select-skill"),
   diceOverlay: document.getElementById("dice-overlay"),
-  rollChatMessages: document.getElementById("roll-chat-messages")
+  rollChatMessages: document.getElementById("roll-chat-messages"),
+  customRollsListSheet: document.getElementById("custom-rolls-list-sheet"),
+  btnAddCustomRoll: document.getElementById("btn-add-custom-roll")
 };
 
 // ==========================================
@@ -321,6 +323,7 @@ export function loadCharacter(charId) {
   renderMutationsSheet();
   renderInventorySheet();
   renderHomebrewSheet();
+  renderSavedMacrosSheet();
   
   // Reseta seleção de rolagem
   resetDiceDrawerSelections();

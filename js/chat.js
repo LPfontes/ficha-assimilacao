@@ -24,17 +24,36 @@ export function appendRollToChat(formula) {
   logger.info(`Chat: Adicionando mensagem de rolagem da fórmula: "${formula}"`);
   
   let maxKeep = 1;
-  if (el.modEmpenho.checked) maxKeep++;
-  if (el.modOrigemOcupacao.checked) maxKeep++;
-  if (el.modOrigemEvento.checked) maxKeep++;
-  if (state.selectedRoll.agirPorInstinto) maxKeep++;
-  const bonusKeep = parseInt(el.modBonusKeep?.value) || 0;
-  maxKeep += Math.max(0, bonusKeep);
+  let bonusSuccesses = 0;
+  let bonusPressures = 0;
+  let bonusAdaptations = 0;
+  let displayFormula = formula;
+  
+  if (state.activeMacroParams) {
+    const p = state.activeMacroParams;
+    maxKeep = p.maxKeep || 1;
+    bonusSuccesses = p.bonusSuccesses || 0;
+    bonusPressures = p.bonusPressures || 0;
+    bonusAdaptations = p.bonusAdaptations || 0;
+    displayFormula = `${p.name} (${formula})`;
+    // clear it
+    state.activeMacroParams = null;
+  } else {
+    if (el.modEmpenho.checked) maxKeep++;
+    if (el.modOrigemOcupacao.checked) maxKeep++;
+    if (el.modOrigemEvento.checked) maxKeep++;
+    if (state.selectedRoll.agirPorInstinto) maxKeep++;
+    const bonusKeep = parseInt(el.modBonusKeep?.value) || 0;
+    maxKeep += Math.max(0, bonusKeep);
+  }
   
   const rollEntry = {
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    formula: formula,
+    formula: displayFormula,
     maxKeep: maxKeep,
+    bonusSuccesses: bonusSuccesses,
+    bonusPressures: bonusPressures,
+    bonusAdaptations: bonusAdaptations,
     results: JSON.parse(JSON.stringify(state.activeRollResults)),
     keptDiceIndexes: JSON.parse(JSON.stringify(state.keptDiceIndexes)),
     healthLvl: state.currentCharacter ? getCurrentHealthLevel(state.currentCharacter) : 6
@@ -108,9 +127,9 @@ export function renderChatHistory() {
     });
     
     // Calculate final counts for this roll
-    let sucessos = 0;
-    let adaptacoes = 0;
-    let pressoes = 0;
+    let sucessos = roll.bonusSuccesses || 0;
+    let adaptacoes = roll.bonusAdaptations || 0;
+    let pressoes = roll.bonusPressures || 0;
     
     roll.keptDiceIndexes.forEach(index => {
       const die = roll.results[index];
@@ -163,8 +182,10 @@ export function renderChatHistory() {
       narrativeText += `Obteve <strong>${finalAdaptacoes} Adaptação</strong>. `;
     }
     
-    if (pressoes > 0) {
-      narrativeText += `Sofreu <strong>${pressoes} Pressão</strong>. `;
+    const finalPressoes = Math.max(0, pressoes);
+    
+    if (finalPressoes > 0) {
+      narrativeText += `Sofreu <strong>${finalPressoes} Pressão</strong>. `;
     }
     
     if (healthLvl === 4 || healthLvl === 3) {
@@ -188,7 +209,7 @@ export function renderChatHistory() {
         <div class="roll-summary-inline">
           <span>Sucesso: <strong class="sum-sucessos">${sucessosHtml}</strong></span>
           <span>Adaptação: <strong class="sum-adaptacoes">${adaptacoesHtml}</strong></span>
-          <span>Pressão: <strong class="sum-pressoes">${pressoes}</strong></span>
+          <span>Pressão: <strong class="sum-pressoes">${finalPressoes}</strong></span>
         </div>
         <div class="roll-narrative">${narrativeText}</div>
       </div>
@@ -256,9 +277,9 @@ export function renderChatHistory() {
         }
         
         // Calculate counts for summary
-        let sucessos = 0;
-        let adaptacoes = 0;
-        let pressoes = 0;
+        let sucessos = lastRoll.bonusSuccesses || 0;
+        let adaptacoes = lastRoll.bonusAdaptations || 0;
+        let pressoes = lastRoll.bonusPressures || 0;
         lastRoll.keptDiceIndexes.forEach(index => {
           const die = lastRoll.results[index];
           if (die) {
@@ -270,11 +291,13 @@ export function renderChatHistory() {
           }
         });
         
+        const finalPressoes = Math.max(0, pressoes);
+        
         if (instintoSummary) {
           instintoSummary.innerHTML = `
             <span>Sucesso: <strong class="sum-sucessos">${sucessos}</strong></span>
             <span>Adaptação: <strong class="sum-adaptacoes">${adaptacoes}</strong></span>
-            <span>Pressão: <strong class="sum-pressoes">${pressoes}</strong></span>
+            <span>Pressão: <strong class="sum-pressoes">${finalPressoes}</strong></span>
           `;
         }
       }
@@ -316,9 +339,9 @@ export function renderChatHistory() {
         }
         
         // Calculate counts for summary
-        let sucessos = 0;
-        let adaptacoes = 0;
-        let pressoes = 0;
+        let sucessos = lastRoll.bonusSuccesses || 0;
+        let adaptacoes = lastRoll.bonusAdaptations || 0;
+        let pressoes = lastRoll.bonusPressures || 0;
         lastRoll.keptDiceIndexes.forEach(index => {
           const die = lastRoll.results[index];
           if (die) {
@@ -347,6 +370,7 @@ export function renderChatHistory() {
         
         const finalSucessos = Math.max(0, sucessos - penalidadeA);
         const finalAdaptacoes = Math.max(0, adaptacoes - penalidadeB);
+        const finalPressoes = Math.max(0, pressoes);
         
         let sucessosHtml = finalSucessos;
         if (penalidadeA > 0) {
@@ -361,7 +385,7 @@ export function renderChatHistory() {
           normalSummary.innerHTML = `
             <span>Sucesso: <strong class="sum-sucessos">${sucessosHtml}</strong></span>
             <span>Adaptação: <strong class="sum-adaptacoes">${adaptacoesHtml}</strong></span>
-            <span>Pressão: <strong class="sum-pressoes">${pressoes}</strong></span>
+            <span>Pressão: <strong class="sum-pressoes">${finalPressoes}</strong></span>
           `;
         }
         
@@ -375,8 +399,8 @@ export function renderChatHistory() {
           if (finalAdaptacoes > 0) {
             narrativeText += `Obteve <strong>${finalAdaptacoes} Adaptação</strong>. `;
           }
-          if (pressoes > 0) {
-            narrativeText += `Sofreu <strong>${pressoes} Pressão</strong>. `;
+          if (finalPressoes > 0) {
+            narrativeText += `Sofreu <strong>${finalPressoes} Pressão</strong>. `;
           }
           normalNarrative.innerHTML = narrativeText;
         }

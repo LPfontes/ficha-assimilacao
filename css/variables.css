@@ -162,10 +162,9 @@ body::before {
 }
 
 select, input[type="text"], input[type="number"], textarea {
-  background-color: var(--bg-input);
+  background: rgba(0, 0, 0, 0);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
-  padding: 8px 12px;
   border-radius: var(--radius-sm);
   font-family: var(--font-body);
   outline: none;
