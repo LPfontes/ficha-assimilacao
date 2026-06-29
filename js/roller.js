@@ -437,35 +437,49 @@ export function executeCustomRoll() {
 // Configura botões mais/menos nos seletores numéricos
 export function setupNumberInputControls() {
   document.querySelectorAll(".number-input").forEach(container => {
-    const input = container.querySelector("input");
+    const target = container.querySelector("input, .dice-qty-span");
     const minus = container.querySelector(".num-minus");
     const plus = container.querySelector(".num-plus");
     
     // Evita duplicar escutas se o container for do wizard
     if (container.closest("#wizard-screen")) return;
 
-    if (minus && plus && input) {
+    if (minus && plus && target) {
+      const isInput = target.tagName === "INPUT";
+      
+      const getValue = () => parseInt(isInput ? target.value : target.textContent) || 0;
+      const setValue = (val) => {
+        if (isInput) {
+          target.value = val;
+          target.dispatchEvent(new Event("change"));
+        } else {
+          target.textContent = val;
+        }
+      };
+
       minus.addEventListener("click", () => {
-        let val = parseInt(input.value) || 0;
-        if (val > parseInt(input.min || 0)) {
-          input.value = val - 1;
-          input.dispatchEvent(new Event("change"));
+        let val = getValue();
+        let minVal = isInput ? parseInt(target.min || 0) : 0;
+        if (val > minVal) {
+          setValue(val - 1);
           triggerSelectedRollUpdate();
         }
       });
       
       plus.addEventListener("click", () => {
-        let val = parseInt(input.value) || 0;
-        if (val < parseInt(input.max || 10)) {
-          input.value = val + 1;
-          input.dispatchEvent(new Event("change"));
+        let val = getValue();
+        let maxVal = isInput ? parseInt(target.max || 10) : 20;
+        if (val < maxVal) {
+          setValue(val + 1);
           triggerSelectedRollUpdate();
         }
       });
 
-      input.addEventListener("change", () => {
-        triggerSelectedRollUpdate();
-      });
+      if (isInput) {
+        target.addEventListener("change", () => {
+          triggerSelectedRollUpdate();
+        });
+      }
     }
   });
 

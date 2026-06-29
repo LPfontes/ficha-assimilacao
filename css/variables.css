@@ -176,6 +176,11 @@ select:focus, input:focus, textarea:focus {
   box-shadow: var(--glow-shadow);
 }
 
+option, optgroup {
+  background-color: #1a1a1a;
+  color: var(--text-primary);
+}
+
 /* Botões (Estilo Carimbo/Tecla de Máquina) */
 .btn {
   font-family: var(--font-heading);

@@ -949,14 +949,9 @@ export function renderInventorySheet() {
                   }).join('')}
                 </div>
                 <div class="prop-select-wrapper prop-categoria-wrapper">
-                  <select class="select-categoria" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer; max-width: 140px;">
-                    <option value="nenhuma">+ Categoria</option>
-                    ${Object.entries(ITEM_CATEGORIAS).filter(([key]) => key !== 'nenhuma' && !slotCats.includes(key)).map(([key, cat]) => `
-                      <option value="${key}">
-                        ${cat.nome} ${cat.cat !== 0 && cat.cat !== "Especial" ? `(Cat: ${cat.cat})` : ''}
-                      </option>
-                    `).join("")}
-                  </select>
+                  <button type="button" class="btn btn-sm btn-gerenciar-cat" data-slot="${i}" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                    ➕ Gerenciar Categorias
+                  </button>
                 </div>
               </div>
             </div>
@@ -988,8 +983,8 @@ export function renderInventorySheet() {
     const selQ = row.querySelector(".select-qualidade");
     const selP = row.querySelector(".select-pressao");
     const selE = row.querySelector(".select-escassez");
-    const selCat = row.querySelector(".select-categoria");
     const inputEffect = row.querySelector(".item-effect");
+
     const saveSlot = () => {
       char.inventario[i] = {
         name: inputName.value,
@@ -1007,20 +1002,14 @@ export function renderInventorySheet() {
     selQ.addEventListener("change", saveSlot);
     selP.addEventListener("change", saveSlot);
     selE.addEventListener("change", saveSlot);
-    
-    selCat.addEventListener("change", e => {
-      const selectedKey = e.target.value;
-      if (selectedKey !== "nenhuma") {
-        const slotCats = slot.categorias || (slot.categoria && slot.categoria !== 'nenhuma' ? [slot.categoria] : []);
-        if (!slotCats.includes(selectedKey)) {
-          slotCats.push(selectedKey);
-        }
-        slot.categorias = slotCats;
-        slot.categoria = selectedKey;
-        saveSlot();
-        renderInventorySheet();
-      }
-    });
+    inputEffect.addEventListener("input", saveSlot);
+
+    const btnGerenciarCat = row.querySelector(".btn-gerenciar-cat");
+    if (btnGerenciarCat) {
+      btnGerenciarCat.addEventListener("click", () => {
+        openItemCategoriesModal(i);
+      });
+    }
 
     row.querySelectorAll(".remove-cat-btn").forEach(btn => {
       btn.addEventListener("click", e => {
@@ -1034,8 +1023,6 @@ export function renderInventorySheet() {
       });
     });
  
-    inputEffect.addEventListener("input", saveSlot);
-
     // Delete slot button
     const btnDelete = row.querySelector(".btn-delete-slot");
     btnDelete.addEventListener("click", (e) => {
