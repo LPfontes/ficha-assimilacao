@@ -1,0 +1,630 @@
+
+/* Layout da Ficha de Refúgio Atualizada */
+.refugio-screen-grid {
+  display: grid;
+  grid-template-columns: 280px 1.3fr 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "left middle right"
+    "bottom bottom right";
+  gap: 10px;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .refugio-screen-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "left"
+      "middle"
+      "bottom"
+      "right";
+  }
+}
+
+.ref-area-left {
+  grid-area: left;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+#refugio-image-frame,
+#conflito-image-frame {
+  background: #f7f5ee !important; /* Papel polaroid retrô */
+  padding: 12px 12px 36px 12px !important;
+  border-radius: 2px !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35), inset 0 0 10px rgba(0,0,0,0.03) !important;
+  height: 230px !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  transform: rotate(-1.5deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  box-sizing: border-box;
+}
+
+#refugio-image-frame:hover,
+#conflito-image-frame:hover {
+  transform: rotate(0.5deg) scale(1.03);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.45) !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+#refugio-image-frame img,
+#conflito-image-frame img {
+  width: 100% !important;
+  height: 180px !important;
+  object-fit: cover !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 0 !important;
+}
+
+#refugio-image-frame .local-image-placeholder,
+#conflito-image-frame .local-image-placeholder {
+  height: 180px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px dashed rgba(0, 0, 0, 0.15) !important;
+  color: #666 !important;
+  margin: 0 !important;
+}
+
+#refugio-image-frame .local-image-placeholder svg,
+#conflito-image-frame .local-image-placeholder svg {
+  color: #777 !important;
+}
+
+#refugio-image-frame .local-image-overlay,
+#conflito-image-frame .local-image-overlay {
+  inset: 12px 12px 36px 12px !important;
+  border-radius: 0 !important;
+}
+
+.ref-area-middle {
+  grid-area: middle;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ref-area-right {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ref-area-bottom {
+  grid-area: bottom;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tag REFÚGIO */
+.refugio-tag-card {
+  background: rgba(0, 0, 0, 0.45);
+  border: 2px solid #8d2428;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  font-weight: 800;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Moldura da Imagem (Polaroid) em tamanho total e quadrada */
+#refugio-screen .polaroid-frame {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#refugio-screen .polaroid-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Título Input Card */
+.refugio-title-input-card {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.refugio-title-input-card input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--text-primary);
+  text-align: center;
+  outline: none;
+}
+
+/* Grade de Atributos */
+.refugio-attrs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.refugio-attr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.45);
+  text-align: center;
+  padding: 8px;
+  min-height: 90px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.refugio-attr-card:hover {
+  border-color: rgba(0, 162, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 162, 255, 0.15);
+}
+
+.refugio-attr-label {
+  background: rgba(255, 255, 255, 0.02);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  text-align: center;
+  padding: 4px;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.refugio-attr-input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+  text-align: center;
+  width: 60px;
+  outline: none;
+}
+
+/* Grade de Recursos por Temas (3 colunas de temas) */
+.refugio-resources-themed {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .refugio-resources-themed {
+    grid-template-columns: 1fr;
+  }
+
+  .refugio-attrs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .refugio-attr-card {
+    min-height: 80px;
+    padding: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .refugio-attrs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.refugio-resource-theme-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.refugio-theme-header {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.refugio-resource-card {
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.refugio-resource-label {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.refugio-resource-input {
+  width: 80px;
+  background: rgba(0, 0, 0, 0.45);
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  text-align: center;
+  outline: none;
+}
+
+/* Cores das fontes de recursos */
+.res-agua .refugio-resource-label {
+  color: #5678a0;
+}
+
+.res-plantas .refugio-resource-label {
+  color: #568c5a;
+}
+
+.res-animais .refugio-resource-label {
+  color: #8c64a0;
+}
+
+.res-madeira .refugio-resource-label {
+  color: #a08250;
+}
+
+.res-minerais .refugio-resource-label {
+  color: #788ca0;
+}
+
+.res-biomassa .refugio-resource-label {
+  color: #50a050;
+}
+
+.res-alimento .refugio-resource-label {
+  color: #a05050;
+}
+
+.res-vestuario .refugio-resource-label {
+  color: #5064a0;
+}
+
+.res-municao .refugio-resource-label {
+  color: #a03c64;
+}
+
+.res-combustivel .refugio-resource-label {
+  color: #a08232;
+}
+
+.res-remedios .refugio-resource-label {
+  color: #78468c;
+}
+
+.res-mat_constr .refugio-resource-label {
+  color: #8c8c8c;
+}
+
+/* Text Cards (Descrição / Anotações) */
+.refugio-textarea-card {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.refugio-textarea-card label {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.refugio-textarea-card textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  resize: vertical;
+  color: var(--text-primary);
+  outline: none;
+  font-size: var(--font-size-sm);
+  min-height: 70px;
+}
+
+/* Crises Card */
+.refugio-crises-card {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.refugio-crises-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding-bottom: 8px;
+}
+
+.refugio-crises-header h4 {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.8px;
+}
+
+/* Construções Card */
+.refugio-buildings-card {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.refugio-buildings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding-bottom: 8px;
+}
+
+.refugio-buildings-header h4 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.refugio-buildings-header button {
+  background: rgba(56, 140, 140, 0.2);
+  border: 1px solid rgba(56, 140, 140, 0.6);
+  color: #56ffff;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.refugio-buildings-header button:hover {
+  background: rgba(56, 140, 140, 0.4);
+  box-shadow: 0 0 8px rgba(56, 255, 255, 0.2);
+}
+
+.refugio-buildings-list {
+  padding: 8px 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+
+
+@media (max-width: 768px) {
+  .refugio-buildings-list {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+}
+
+
+
+/* Atributos com Valores Divididos (Atual/Máximo) */
+.refugio-attr-split-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.refugio-attr-split-input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+  padding: 8px 2px;
+  width: 42%;
+  outline: none;
+}
+
+.refugio-attr-split-input.left {
+  text-align: right;
+}
+
+.refugio-attr-split-input.right {
+  text-align: left;
+  color: var(--text-muted);
+  font-size: var(--font-size-md);
+}
+
+.refugio-attr-split-divider {
+  color: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  font-size: 16px;
+  user-select: none;
+  margin: 0 4px;
+}
+
+/* Painel de Construções Formatado como Cards Elegantes */
+.refugio-building-item {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  /* Indicador ciano combinando com o botão '+' */
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 10px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.refugio-building-item:hover {
+  border-color: rgba(56, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.refugio-building-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.refugio-building-name-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: var(--font-size-md);
+  padding: 2px 0;
+  flex: 1;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.refugio-building-name-input:focus {
+  border-bottom-color: rgba(56, 255, 255, 0.4);
+}
+
+.refugio-building-level-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.refugio-building-level-label {
+  font-size: var(--font-size-md);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+}
+
+.refugio-building-level-input {
+  background: transparent;
+  border: none;
+  color: #56ffff;
+  font-family: var(--font-heading);
+  font-weight: bold;
+  font-size: var(--font-size-sm);
+  width: 60px;
+  text-align: center;
+  outline: none;
+}
+
+.refugio-building-level-input::-webkit-outer-spin-button,
+.refugio-building-level-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.refugio-building-desc-textarea {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: var(--font-size-md);
+  line-height: 1.45;
+  resize: vertical;
+  width: 100%;
+  min-height: 34px;
+  outline: none;
+  padding: 2px 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.refugio-building-desc-textarea:focus {
+  border-bottom-color: rgba(56, 255, 255, 0.4);
+  color: #fff;
+}
+
+.refugio-building-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+
+.refugio-building-remove-btn:hover {
+  color: #ef4444;
+}
+

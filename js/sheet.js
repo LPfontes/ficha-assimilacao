@@ -1,4 +1,5 @@
 import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, getCustomMutations, saveCustomTraits, saveCustomMutations } from "./state.js";
+import { worldState, saveItemToDb } from "./world-state.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
 import { ICONS } from "../icons.js";
@@ -869,6 +870,15 @@ export function renderInventorySheet() {
   if (el.inventoryBodyList) el.inventoryBodyList.innerHTML = "";
   if (el.inventoryBackpackList) el.inventoryBackpackList.innerHTML = "";
 
+  // Create or update shared items datalist
+  let datalist = document.getElementById("itens-db-list");
+  if (!datalist) {
+    datalist = document.createElement("datalist");
+    datalist.id = "itens-db-list";
+    document.body.appendChild(datalist);
+  }
+  datalist.innerHTML = (worldState.itensDb || []).map(it => `<option value="${esc(it.name)}">`).join("");
+
   if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
   if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
   const expectedLength = char.bodySlotsCount + char.backpackSlotsCount;
@@ -932,7 +942,7 @@ export function renderInventorySheet() {
     row.innerHTML = `
       <div class="inventory-item-header">
         <span class="slot-num" title="${isBody ? 'Espaço no Corpo' : 'Espaço na Mochila'}" style="color: ${isBody ? 'var(--color-blue-glow)' : 'var(--text-muted)'}; font-weight: bold; font-family: var(--font-heading);">${slotDisplayNum}</span>
-        <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio" style="width: 100%;">
+        <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio" style="width: 100%;" list="itens-db-list">
         <div class="item-category-badges-container" style="display: flex; gap: 4px; flex-wrap: wrap; margin-left: 6px;">
           ${slotCats.map(catKey => {
             const cat = ITEM_CATEGORIAS[catKey];
@@ -1037,9 +1047,26 @@ export function renderInventorySheet() {
         efeito: inputEffect.value
       };
       saveCurrentCharacter();
+      if (inputName.value.trim() !== "") {
+        saveItemToDb(char.inventario[i]);
+      }
     };
  
     inputName.addEventListener("input", saveSlot);
+    inputName.addEventListener("change", () => {
+      const typed = inputName.value.trim().toLowerCase();
+      const dbItem = (worldState.itensDb || []).find(it => it.name.toLowerCase() === typed);
+      if (dbItem) {
+        selE.value = dbItem.escassez;
+        inputEffect.value = dbItem.efeito;
+        slot.categorias = dbItem.categorias || [];
+        slot.categoria = dbItem.categoria || (dbItem.categorias && dbItem.categorias.length > 0 ? dbItem.categorias[dbItem.categorias.length - 1] : 'nenhuma');
+        saveSlot();
+        renderInventorySheet();
+      } else {
+        saveSlot();
+      }
+    });
     selQ.addEventListener("change", saveSlot);
     selP.addEventListener("change", saveSlot);
     selE.addEventListener("change", saveSlot);

@@ -511,6 +511,11 @@
     flex: 0 0 120px !important;
     scroll-snap-align: center !important;
   }
+  .refugio-resources-row{
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
 }
 
 /* CELULARES PORTRAIT (Largura até 480px) */
@@ -540,15 +545,14 @@
     transform: scale(1.02) !important;
   }
 
-  .sheet-redesign-tabs-nav {
-    flex-wrap: wrap !important;
-    padding: 6px 6px 0 6px !important;
+  .sheet-redesign-tabs-nav::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari, Opera */
   }
 
   .sheet-tab-btn {
-    padding: 6px 10px !important;
-    font-size: 9px !important;
-    flex: 1 1 auto !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    flex: 0 0 auto !important;
     justify-content: center !important;
   }
 

@@ -588,6 +588,17 @@
 
                   <!-- Aba 2: Assimilações -->
                   <div class="sheet-tab-panel" id="tab-assimilacoes">
+                    <div class="assimilation-buttons-container" style="display: flex; gap: 8px;">
+                          <button id="btn-assimilation-test-sheet" class="btn btn-sm" title="Realizar Teste de Assimilação">
+                            <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text" style="font-size: 11px;">Teste de Assimilação</span>
+                          </button>
+                          <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
+                            <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text" style="font-size: 11px;">Leitura de Tarot</span>
+                          </button>
+                          <button id="btn-open-assimilation-library" class="btn btn-sm" title="Biblioteca de Assimilações">
+                            <span class="btn-text" style="font-size: 11px;">📖 Biblioteca</span>
+                          </button>
+                        </div>
                     <!-- Seção de Assimilações -->
                     <div class="sheet-section section-assimilations">
                       <div class="sheet-section-header" style="flex-wrap: wrap; justify-content: space-between;">
@@ -601,17 +612,6 @@
                         <!-- Mutações inseridas pelo JS em uma única coluna -->
                       </div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                          <button id="btn-assimilation-test-sheet" class="btn btn-sm" title="Realizar Teste de Assimilação">
-                            <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text" style="font-size: 11px;">Teste de Assimilação</span>
-                          </button>
-                          <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
-                            <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text" style="font-size: 11px;">Leitura de Tarot</span>
-                          </button>
-                          <button id="btn-open-assimilation-library" class="btn btn-sm" title="Biblioteca de Assimilações">
-                            <span class="btn-text" style="font-size: 11px;">📖 Biblioteca</span>
-                          </button>
-                        </div>
                   </div>
                   
                   <!-- Aba 3: Inventário -->
@@ -637,7 +637,7 @@
                             </button>
                           </div>
                         </div>
-                        <div id="inventory-body-list" class="inventory-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <div id="inventory-body-list" class="inventory-grid" >
                           <!-- JS renderizará 3 slots -->
                         </div>
                       </div>
@@ -652,7 +652,7 @@
                             + Slot
                           </button>
                         </div>
-                        <div id="inventory-backpack-list" class="inventory-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <div id="inventory-backpack-list" class="inventory-grid">
                           <!-- JS renderizará 6 slots -->
                         </div>
                       </div>

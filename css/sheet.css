@@ -307,7 +307,6 @@
 /* Responsive: stack on mobile */
 @media (max-width: 640px) {
   .portrait-wrapper {
-    flex-direction: column !important;
     align-items: center;
   }
   .polaroid-frame {
@@ -463,7 +462,29 @@
   z-index: 5;
   background: rgba(22, 28, 35, 0.4);
 }
-
+@media (max-width: 640px) {
+  .sheet-redesign-tabs-nav {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    padding: 6px 8px 0 8px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important; /* Firefox */
+  }
+  
+  .inventory-body-list, .inventory-backpack-list{
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }}
+@media (max-width: 640px) {
+  .inventory-body-list, .inventory-backpack-list{
+    display: grid !important;
+    grid-template-columns: repeat(1, 1fr) !important;
+    gap: 8px !important;
+  }
+}
 .sheet-tab-btn {
   background: none;
   border: 1px solid transparent;

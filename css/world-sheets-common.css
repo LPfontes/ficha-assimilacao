@@ -1,0 +1,829 @@
+/* ==========================================================
+   WORLD-SHEETS.CSS — Fichas do Mundo (Refúgio, Região, Conflito, Local)
+   Assimilação RPG
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   CORES POR TIPO DE FICHA
+   ---------------------------------------------------------- */
+:root {
+  --color-infectado: hsl(145, 60%, 30%);
+  /* verde musgo */
+  --color-refugio: hsl(28, 70%, 38%);
+  /* laranja queimado */
+  --color-regiao: hsl(205, 55%, 32%);
+  /* azul profundo */
+  --color-conflito: hsl(0, 60%, 35%);
+  /* vermelho escuro */
+  --color-local: hsl(270, 45%, 38%);
+  /* roxo */
+
+  --color-infectado-border: hsl(145, 60%, 22%);
+  --color-refugio-border: hsl(28, 70%, 26%);
+  --color-regiao-border: hsl(205, 55%, 22%);
+  --color-conflito-border: hsl(0, 60%, 24%);
+  --color-local-border: hsl(270, 45%, 26%);
+}
+
+/* ----------------------------------------------------------
+   MODAL DE SELEÇÃO DE TIPO DE FICHA
+   ---------------------------------------------------------- */
+.sheet-type-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+  padding: 8px 0 16px;
+}
+
+.sheet-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  text-align: center;
+  user-select: none;
+}
+
+.sheet-type-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.sheet-type-card .type-emoji {
+  font-size: 2rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.sheet-type-card .type-label {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sheet-type-card .type-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Cores por tipo no modal */
+.sheet-type-card[data-type="infectado"] {
+  border-color: var(--color-infectado-border);
+}
+
+.sheet-type-card[data-type="infectado"]:hover {
+  background: rgba(56, 100, 56, 0.25);
+  border-color: var(--color-infectado);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px rgba(56, 140, 56, 0.2);
+}
+
+.sheet-type-card[data-type="refugio"] {
+  border-color: var(--color-refugio-border);
+}
+
+.sheet-type-card[data-type="refugio"]:hover {
+  background: rgba(120, 70, 20, 0.25);
+  border-color: var(--color-refugio);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px rgba(180, 90, 20, 0.2);
+}
+
+.sheet-type-card[data-type="regiao"] {
+  border-color: var(--color-regiao-border);
+}
+
+.sheet-type-card[data-type="regiao"]:hover {
+  background: rgba(20, 60, 100, 0.25);
+  border-color: var(--color-regiao);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px rgba(20, 80, 140, 0.2);
+}
+
+.sheet-type-card[data-type="conflito"] {
+  border-color: var(--color-conflito-border);
+}
+
+.sheet-type-card[data-type="conflito"]:hover {
+  background: rgba(100, 20, 20, 0.25);
+  border-color: var(--color-conflito);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px rgba(160, 30, 30, 0.2);
+}
+
+.sheet-type-card[data-type="local"] {
+  border-color: var(--color-local-border);
+}
+
+.sheet-type-card[data-type="local"]:hover {
+  background: rgba(70, 20, 100, 0.25);
+  border-color: var(--color-local);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px rgba(100, 30, 160, 0.2);
+}
+
+/* ----------------------------------------------------------
+   BADGES DE TIPO NOS CARDS DA LANDING
+   ---------------------------------------------------------- */
+.sheet-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-md);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Cards with sub-info push badge above the sub-info text */
+.character-card .char-card-sub-info~.sheet-type-badge {
+  bottom: 22px;
+}
+
+.badge-infectado {
+  background: var(--color-infectado);
+  color: #fff;
+}
+
+.badge-refugio {
+  background: var(--color-refugio);
+  color: #fff;
+}
+
+.badge-regiao {
+  background: var(--color-regiao);
+  color: #fff;
+}
+
+.badge-conflito {
+  background: var(--color-conflito);
+  color: #fff;
+}
+
+.badge-local {
+  background: var(--color-local);
+  color: #fff;
+}
+
+/* Borda colorida dos cards por tipo */
+.character-card[data-sheet-type="infectado"] {
+  border-color: var(--color-infectado-border);
+}
+
+.character-card[data-sheet-type="refugio"] {
+  border-color: var(--color-refugio-border);
+}
+
+.character-card[data-sheet-type="regiao"] {
+  border-color: var(--color-regiao-border);
+}
+
+.character-card[data-sheet-type="conflito"] {
+  border-color: var(--color-conflito-border);
+}
+
+.character-card[data-sheet-type="local"] {
+  border-color: var(--color-local-border);
+}
+
+/* ----------------------------------------------------------
+   LAYOUT GENÉRICO DAS NOVAS FICHAS
+   ---------------------------------------------------------- */
+.world-sheet-screen {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.world-sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.world-sheet-header .sheet-back-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-heading);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.world-sheet-header .sheet-back-btn:hover {
+  border-color: var(--color-blue-glow);
+  color: var(--text-primary);
+}
+
+.world-sheet-title-group {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.world-sheet-title-group input.world-name-input {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  padding: 2px 0;
+  outline: none;
+  flex: 1;
+  min-width: 180px;
+}
+
+.world-sheet-title-group input.world-name-input:focus {
+  border-bottom-color: var(--color-blue-glow);
+}
+
+.world-sheet-body {
+  display: grid;
+  grid-template-columns: 0.6fr 1fr 0.8fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .world-sheet-body {
+    grid-template-columns: 1fr;
+  }
+
+  .world-sheet-screen {
+    padding: 12px;
+  }
+}
+
+.world-sheet-full-col {
+  grid-column: 1 / -1;
+}
+
+/* ----------------------------------------------------------
+   SLIDERS DE ATRIBUTO (0-10) — Estilo Cabo de Guerra
+   ---------------------------------------------------------- */
+.attr-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.attr-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.attr-row .attr-label {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attr-dots {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+}
+
+.attr-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.attr-dot:hover {
+  transform: scale(1.2);
+}
+
+.attr-dot.filled {
+  background: var(--color-refugio);
+  border-color: var(--color-refugio-border);
+}
+
+.attr-dot.filled.attr-dot-regiao {
+  background: var(--color-regiao);
+  border-color: var(--color-regiao-border);
+}
+
+.attr-dot.filled.attr-dot-danger {
+  background: var(--color-conflito);
+  border-color: var(--color-conflito-border);
+}
+
+.attr-value-badge {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Alerta Perigo > Defesa */
+.attr-danger-alert {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(141, 36, 40, 0.25);
+  border: 1px solid var(--color-rust);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-rust-glow);
+  animation: pulse-alert 2s infinite;
+}
+
+.attr-danger-alert.visible {
+  display: flex;
+}
+
+@keyframes pulse-alert {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(190, 49, 53, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(190, 49, 53, 0);
+  }
+}
+
+/* ----------------------------------------------------------
+   SELECT COM RÓTULO (atributos de Região 0-6)
+   ---------------------------------------------------------- */
+.select-attr-row {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.select-attr-row label {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.select-attr-row select {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  padding: 4px 8px;
+}
+
+/* Recursos naturais — cada tipo com seu select */
+
+/* ----------------------------------------------------------
+   LISTAS CRUD GENÉRICAS (Crises, Marcos, Conflitos ref., Itens)
+   ---------------------------------------------------------- */
+.world-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.world-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.world-list-header h4 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.world-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 200px;
+}
+
+.world-list-empty {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  padding: 8px 0;
+  font-style: italic;
+}
+
+/* Item genérico */
+.world-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  transition: border-color 0.15s;
+}
+
+.world-list-item:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.world-list-item .item-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+}
+
+.world-list-item input[type="text"],
+.world-list-item textarea,
+.world-list-item select {
+  font-size: var(--font-size-md);
+  padding: 3px 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  width: 100%;
+}
+
+.world-list-item textarea {
+  resize: vertical;
+  height: 100%;
+}
+
+.world-list-item .item-inline-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.world-list-item .item-inline-row select,
+.world-list-item .item-inline-row input {
+  flex: 1;
+}
+
+.btn-remove-world-item {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  font-size: 16px;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.btn-remove-world-item:hover {
+  color: var(--color-rust-glow);
+}
+
+/* ----------------------------------------------------------
+   CLASSES AUXILIARES PARA FICHAS (substituem estilos inline)
+   ---------------------------------------------------------- */
+.ws-section-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+.ws-label {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ws-label-inline {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ws-textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+/* Badges de status de Crise/Conflito */
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: var(--font-size-md);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-ativo {
+  background: rgba(141, 36, 40, 0.6);
+  color: #ffa0a0;
+}
+
+.status-contido {
+  background: rgba(120, 80, 0, 0.6);
+  color: #ffd090;
+}
+
+.status-resolvido {
+  background: rgba(40, 90, 40, 0.6);
+  color: #90ffa0;
+}
+
+/* Grau (0-10) compacto inline */
+.grau-input {
+  width: 50px !important;
+  text-align: center;
+}
+
+/* ----------------------------------------------------------
+   PAINEL DE REFERÊNCIAS (Vinculação de IDs)
+   ---------------------------------------------------------- */
+.ref-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ref-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ref-panel-row label {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-heading);
+  color: var(--text-muted);
+  min-width: 80px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ref-panel-row select {
+  flex: 1;
+  font-size: var(--font-size-xs);
+  padding: 3px 6px;
+}
+
+.ref-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.ref-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: var(--font-size-md);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  background: rgba(20, 60, 100, 0.4);
+  border: 1px solid rgba(20, 60, 100, 0.7);
+  color: var(--text-secondary);
+}
+
+.ref-chip .btn-remove-ref {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  line-height: 1;
+  padding: 0;
+  transition: color 0.12s;
+}
+
+.ref-chip .btn-remove-ref:hover {
+  color: var(--color-rust-glow);
+}
+
+/* ----------------------------------------------------------
+   FICHA DE LOCAL — Imagem de destaque
+   ---------------------------------------------------------- */
+.local-image-frame {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px dashed rgba(100, 30, 160, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.18s;
+}
+
+.local-image-frame:hover {
+  border-color: var(--color-local);
+}
+
+.local-image-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.local-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+}
+
+.local-image-placeholder svg {
+  width: 40px;
+  height: 40px;
+  opacity: 0.4;
+}
+
+.local-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.18s, background 0.18s;
+}
+
+.local-image-frame:hover .local-image-overlay {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.local-image-overlay span {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* --- Polaroid Frame por Tipo de Entidade --- */
+#regiao-screen .polaroid-frame {
+  width: 250px !important;
+  height: 250px !important;
+  border-color: var(--color-regiao-border);
+}
+
+#regiao-screen .polaroid-frame:hover {
+  border-color: var(--color-regiao);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8), 0 0 20px rgba(20, 80, 140, 0.25);
+}
+
+#refugio-screen .polaroid-frame {
+  width: 250px !important;
+  height: 250px !important;
+  border-color: var(--color-refugio-border);
+}
+
+#refugio-screen .polaroid-frame:hover {
+  border-color: var(--color-refugio);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8), 0 0 20px rgba(180, 90, 20, 0.25);
+}
+
+#conflito-screen .polaroid-frame {
+  border-color: var(--color-conflito-border);
+}
+
+#conflito-screen .polaroid-frame:hover {
+  border-color: var(--color-conflito);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8), 0 0 20px rgba(160, 30, 30, 0.25);
+}
+
+#local-screen .polaroid-frame {
+  width: 250px !important;
+  height: 250px !important;
+  border-color: var(--color-local-border);
+}
+
+#local-screen .polaroid-frame:hover {
+  border-color: var(--color-local);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8), 0 0 20px rgba(100, 30, 160, 0.25);
+}
+
+/* --- Select / Option por Tipo de Entidade --- */
+#regiao-screen .profile-attr-row select:focus,
+#regiao-screen .select-attr-row select:focus {
+  border-color: var(--color-regiao);
+}
+
+#regiao-screen .profile-attr-row select option,
+#regiao-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #b0c4de;
+}
+
+#refugio-screen .profile-attr-row select:focus,
+#refugio-screen .select-attr-row select:focus {
+  border-color: var(--color-refugio);
+}
+
+#refugio-screen .profile-attr-row select option,
+#refugio-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #deb887;
+}
+
+#conflito-screen .profile-attr-row select:focus,
+#conflito-screen .select-attr-row select:focus {
+  border-color: var(--color-conflito);
+}
+
+#conflito-screen .profile-attr-row select option,
+#conflito-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #d4a0a0;
+}
+
+#local-screen .profile-attr-row select:focus,
+#local-screen .select-attr-row select:focus {
+  border-color: var(--color-local);
+}
+
+#local-screen .profile-attr-row select option,
+#local-screen .select-attr-row select option {
+  background: #1a1a2e;
+  color: #c8a0d4;
+}
+
+/* Itens do Local */
+.local-item-escassez {
+  width: 90px !important;
+}
+
+/* ----------------------------------------------------------
+   CARD DE WORLD SHEET NA LANDING — variante com sub-info
+   ---------------------------------------------------------- */
+.char-card-sub-info {
+  font-size: var(--font-size-md);
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0 4px;
+  line-height: 1.3;
+}

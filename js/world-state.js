@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   regioes:   "assimilação_rpg_regioes",
   conflitos: "assimilação_rpg_conflitos",
   locais:    "assimilação_rpg_locais",
+  itensDb:   "assimilação_rpg_itens_db",
 };
 
 // ---- Estado compartilhado (exportado) ----
@@ -18,6 +19,7 @@ export const worldState = {
   regioes:   [],
   conflitos: [],
   locais:    [],
+  itensDb:   [],
   currentRefugio:  null,
   currentRegiao:   null,
   currentConflito: null,
@@ -110,6 +112,8 @@ export function createNewRefugio(name = "Novo Refúgio") {
     construcoes: [], // [{nome, nivel, descricao}]
     crises: [],     // [{nome, grau, status, descricao}]
     notas: "",
+    regiaoId: null,
+    localId: null,
   };
 }
 
@@ -187,6 +191,11 @@ export function createNewConflito(name = "Novo Conflito") {
     refugioId: null,
     localId: null,
     notas: "",
+    objetivoPrincipal: "",
+    objetivoSecundario: "",
+    objPrincipalVal: 0,
+    objSecundarioVal: 0,
+    condicionantes: [],
   };
 }
 
@@ -221,6 +230,7 @@ export function createNewLocal(name = "Novo Local") {
     conflitosAssociados: [],   // IDs de Conflitos
     regiaoId: null,
     notas: "",
+    pontosInteresse: [], // [{nome, descricao}]
   };
 }
 
@@ -241,6 +251,97 @@ export function getLocalById(id) {
 }
 
 // =====================================================
+// BANCO DE ITENS COMPARTILHADO
+// =====================================================
+export function loadItensDb() {
+  try {
+    const raw = localStorage.getItem("assimilação_rpg_itens_db");
+    if (raw) {
+      worldState.itensDb = JSON.parse(raw);
+    } else {
+      worldState.itensDb = [];
+    }
+  } catch (e) {
+    logger.error("[WorldState] Erro ao carregar banco de itens:", e);
+    worldState.itensDb = [];
+  }
+}
+
+export function saveItemToDb(item) {
+  if (!item || !item.name || item.name.trim() === "") return;
+  const nameClean = item.name.trim();
+  
+  if (!worldState.itensDb) worldState.itensDb = [];
+  
+  // Encontra item por nome (case insensitive)
+  const idx = worldState.itensDb.findIndex(i => i.name.toLowerCase() === nameClean.toLowerCase());
+  
+  const itemToSave = {
+    name: nameClean,
+    efeito: item.efeito || "",
+    escassez: item.escassez !== undefined ? item.escassez : 2,
+    peso: item.peso !== undefined ? item.peso : 1,
+    categorias: item.categorias || (item.categoria && item.categoria !== 'nenhuma' ? [item.categoria] : []),
+  };
+
+  if (idx !== -1) {
+    worldState.itensDb[idx] = itemToSave;
+  } else {
+    worldState.itensDb.push(itemToSave);
+  }
+  
+  try {
+    localStorage.setItem("assimilação_rpg_itens_db", JSON.stringify(worldState.itensDb));
+  } catch (e) {
+    logger.error("[WorldState] Erro ao salvar banco de itens:", e);
+  }
+}
+
+export function loadAmeacasFromDb() {
+  try {
+    const raw = localStorage.getItem("assimilação_rpg_ameacas_db");
+    if (raw) {
+      worldState.ameacasDb = JSON.parse(raw);
+    } else {
+      worldState.ameacasDb = [];
+    }
+  } catch (e) {
+    logger.error("[WorldState] Erro ao carregar banco de ameaças:", e);
+    worldState.ameacasDb = [];
+  }
+}
+
+export function saveAmeacaToDb(ameaca) {
+  if (!ameaca || !ameaca.nome || ameaca.nome.trim() === "") return;
+  const nameClean = ameaca.nome.trim();
+
+  if (!worldState.ameacasDb) worldState.ameacasDb = [];
+
+  const idx = worldState.ameacasDb.findIndex(a => a.nome.toLowerCase() === nameClean.toLowerCase());
+
+  const ameacaToSave = {
+    nome: nameClean,
+    descricao: ameaca.descricao || "",
+    d6: ameaca.d6 !== undefined ? ameaca.d6 : 1,
+    d10: ameaca.d10 !== undefined ? ameaca.d10 : 0,
+    d12: ameaca.d12 !== undefined ? ameaca.d12 : 0,
+    objetivoTipo: ameaca.objetivoTipo || "Principal"
+  };
+
+  if (idx !== -1) {
+    worldState.ameacasDb[idx] = ameacaToSave;
+  } else {
+    worldState.ameacasDb.push(ameacaToSave);
+  }
+
+  try {
+    localStorage.setItem("assimilação_rpg_ameacas_db", JSON.stringify(worldState.ameacasDb));
+  } catch (e) {
+    logger.error("[WorldState] Erro ao salvar banco de ameaças:", e);
+  }
+}
+
+// =====================================================
 // LOAD ALL — Chamar na inicialização
 // =====================================================
 export function loadAllWorldData() {
@@ -248,4 +349,6 @@ export function loadAllWorldData() {
   loadRegioesFromStorage();
   loadConflitosFromStorage();
   loadLocaisFromStorage();
+  loadItensDb();
+  loadAmeacasFromDb();
 }

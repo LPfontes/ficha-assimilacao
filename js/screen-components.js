@@ -209,20 +209,32 @@ export function renderProfileCard(entity, prefix, config) {
     return html;
   }
 
-  const sideFieldsHtml = renderFields(sideFields);
+  const nonGroupSideFields = sideFields.filter(f => !f.group);
+  const groupSideFields = sideFields.filter(f => f.group);
+
+  const sideFieldsHtml = renderFields(nonGroupSideFields);
+  const groupFieldsHtml = renderFields(groupSideFields);
   const gridFieldsHtml = renderFields(gridFields);
+
+  const hasThreeColsClass = groupFieldsHtml ? ' has-three-cols' : '';
 
   return `
     <div class="profile-card card-glass" style="display:flex; flex-direction:column; gap:20px; align-items:stretch; width:100%;">
-      <div class="portrait-centered-wrapper" style="display:flex; justify-content:center; padding:10px 0; width:100%;">
-        <div class="polaroid-frame" id="${prefix}-image-frame" title="Clique para alterar a imagem" style="margin: 0 auto; flex-shrink:0;">
-          ${imgContent}
-          <div class="portrait-overlay"><span>Alterar Foto</span></div>
+      <div class="profile-card-top-row${hasThreeColsClass}">
+        <div class="portrait-centered-wrapper" style="display:flex; justify-content:center; padding:10px 0; width:100%;">
+          <div class="polaroid-frame" id="${prefix}-image-frame" title="Clique para alterar a imagem" style="margin: 0 auto; flex-shrink:0;">
+            ${imgContent}
+            <div class="portrait-overlay"><span>Alterar Foto</span></div>
+          </div>
+          <input type="file" id="${prefix}-image-input" accept="image/*" style="display:none;">
         </div>
-        <input type="file" id="${prefix}-image-input" accept="image/*" style="display:none;">
-      </div>
-      <div class="portrait-side-fields" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
-        ${sideFieldsHtml}
+        <div class="portrait-side-fields" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+          ${sideFieldsHtml}
+        </div>
+        ${groupFieldsHtml ? `
+        <div class="portrait-group-fields" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+          ${groupFieldsHtml}
+        </div>` : ''}
       </div>
       <div class="profile-fields-grid" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
         ${gridFieldsHtml}
