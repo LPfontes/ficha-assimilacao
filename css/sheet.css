@@ -1129,9 +1129,9 @@
 .inventory-item-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 8px;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
 }
 
 .inventory-item-header .slot-num {

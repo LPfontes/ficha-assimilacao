@@ -804,6 +804,64 @@ export function renderMutationsSheet() {
   });
 }
 
+function openItemCategoriesModal(slotIndex) {
+  const char = state.currentCharacter;
+  if (!char) return;
+
+  const slot = char.inventario[slotIndex];
+  if (!slot) return;
+
+  const currentCats = slot.categorias || (slot.categoria && slot.categoria !== 'nenhuma' ? [slot.categoria] : []);
+
+  el.modalContainer.classList.remove("hidden");
+  el.modalBody.innerHTML = `
+    <h3 class="modal-title" style="margin-bottom:8px;">Gerenciar Categorias do Item</h3>
+    <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+      <strong>${esc(slot.name)}</strong>
+    </p>
+    <div style="display:flex; flex-direction:column; gap:6px; max-height:400px; overflow-y:auto;">
+      ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => {
+        const checked = currentCats.includes(key) ? 'checked' : '';
+        return `
+          <label style="display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:4px; background:rgba(255,255,255,0.03); cursor:pointer; transition:background 0.2s;">
+            <input type="checkbox" class="cat-checkbox" value="${key}" ${checked} style="accent-color:var(--color-gold-glow);">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <span style="font-size:12px; font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
+              <span style="font-size:10px; color:var(--text-secondary);">${cat.desc}</span>
+            </div>
+          </label>
+        `;
+      }).join("")}
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
+      <button id="btn-cancel-cat-modal" class="btn" style="padding:8px 16px;">Cancelar</button>
+      <button id="btn-confirm-cat-modal" class="btn btn-success" style="padding:8px 16px;">Salvar</button>
+    </div>
+  `;
+
+  const closeModal = () => el.modalContainer.classList.add("hidden");
+
+  document.getElementById("btn-cancel-cat-modal").addEventListener("click", closeModal, { once: true });
+  document.getElementById("btn-confirm-cat-modal").addEventListener("click", () => {
+    const checkedBoxes = el.modalBody.querySelectorAll(".cat-checkbox:checked");
+    const selected = Array.from(checkedBoxes).map(cb => cb.value);
+    slot.categorias = selected;
+    slot.categoria = selected.length > 0 ? selected[selected.length - 1] : 'nenhuma';
+    saveCurrentCharacter();
+    renderInventorySheet();
+    closeModal();
+  }, { once: true });
+
+  const closeBtn = el.modalContainer.querySelector(".modal-close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeModal, { once: true });
+  }
+
+  el.modalContainer.addEventListener("click", (e) => {
+    if (e.target === el.modalContainer) closeModal();
+  }, { once: true });
+}
+
 export function renderInventorySheet() {
   const char = state.currentCharacter;
   if (!char) return;
@@ -872,7 +930,7 @@ export function renderInventorySheet() {
     }
 
     row.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
+      <div class="inventory-item-header">
         <span class="slot-num" title="${isBody ? 'Espaço no Corpo' : 'Espaço na Mochila'}" style="color: ${isBody ? 'var(--color-blue-glow)' : 'var(--text-muted)'}; font-weight: bold; font-family: var(--font-heading);">${slotDisplayNum}</span>
         <input type="text" class="item-name" value="${slot.name || ''}" placeholder="Vazio" style="width: 100%;">
         <div class="item-category-badges-container" style="display: flex; gap: 4px; flex-wrap: wrap; margin-left: 6px;">
@@ -918,8 +976,6 @@ export function renderInventorySheet() {
               </select>
             </div>
           </div>
- 
-          <div class="colum" style="display: flex; flex-direction: column; gap: 4px;">
             <div class="row" style="display: flex; flex-direction: row; gap: 6px; align-items: center;">
               <!-- Escassez -->
               <div class="prop-select-wrapper" title="Nível de Escassez">
@@ -932,30 +988,16 @@ export function renderInventorySheet() {
                   <option value="5" ${esc === 5 ? 'selected' : ''}>E5: Raro</option>
                   <option value="6" ${esc === 6 ? 'selected' : ''}>E6: Quase Extinto</option>
                 </select>
-              </div>
- 
-              <!-- Categoria/Característica -->
-              <div class="prop-categoria-container" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-                <div class="selected-categorias-badges" style="display: flex; gap: 4px; flex-wrap: wrap;">
-                  ${slotCats.map(catKey => {
-                    const cat = ITEM_CATEGORIAS[catKey];
-                    if (!cat) return '';
-                    return `
-                      <span class="category-badge-item" data-cat-key="${catKey}" title="${cat.desc}" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255, 165, 0, 0.15); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); font-weight: bold; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                        ${cat.nome}
-                        <span class="remove-cat-btn" style="cursor: pointer; color: #ef4444; font-weight: bold; margin-left: 2px;">&times;</span>
-                      </span>
-                    `;
-                  }).join('')}
-                </div>
-                <div class="prop-select-wrapper prop-categoria-wrapper">
-                  <button type="button" class="btn btn-sm btn-gerenciar-cat" data-slot="${i}" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
-                    ➕ Gerenciar Categorias
-                  </button>
-                </div>
-              </div>
             </div>
-            <!-- Efeito -->
+            <div class="prop-select-wrapper prop-categoria-wrapper">
+              <button type="button" class="btn btn-sm btn-gerenciar-cat" data-slot="${i}" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                ➕ Gerenciar Categorias
+              </button>
+            </div>
+          
+        </div>
+        <div class="column" style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
+        <!-- Efeito -->
             <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
               <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
             </div>
@@ -971,7 +1013,6 @@ export function renderInventorySheet() {
                 `;
               }).join('')}
             </div>
-          </div>
         </div>
       </div>
       <button class="btn-delete-slot" title="Remover item deste espaço" type="button">
@@ -1011,18 +1052,6 @@ export function renderInventorySheet() {
       });
     }
 
-    row.querySelectorAll(".remove-cat-btn").forEach(btn => {
-      btn.addEventListener("click", e => {
-        e.stopPropagation();
-        const catKey = btn.closest(".category-badge-item").dataset.catKey;
-        const slotCats = slot.categorias || (slot.categoria && slot.categoria !== 'nenhuma' ? [slot.categoria] : []);
-        slot.categorias = slotCats.filter(k => k !== catKey);
-        slot.categoria = slot.categorias.length > 0 ? slot.categorias[slot.categorias.length - 1] : 'nenhuma';
-        saveSlot();
-        renderInventorySheet();
-      });
-    });
- 
     // Delete slot button
     const btnDelete = row.querySelector(".btn-delete-slot");
     btnDelete.addEventListener("click", (e) => {
