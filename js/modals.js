@@ -2119,9 +2119,9 @@ export function getCloudStorageInfo() {
 
   return {
     count,
-    maxCount: 5,
+    maxCount: 10,
     sizeKB: sizeKB,
-    maxSizeKB: 100
+    maxSizeKB: 10240
   };
 }
 
