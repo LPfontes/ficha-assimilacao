@@ -685,6 +685,14 @@
   background: rgba(239, 68, 68, 0.08);
 }
 
+.investimento-control-group img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
 .invest-label-symbol {
   color: var(--text-secondary);
 }

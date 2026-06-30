@@ -14,6 +14,7 @@ const STATUS_CLASS_MAP = {
 };
 
 let activeThreatIdxForModal = null;
+let editingActivationState = null; // { idx, ameacaIdx (or null), isAmeaca }
 
 function _renderTriggerBadges(gatilho) {
   const chars = gatilho.toUpperCase().replace(/\s+/g, "").split("");
@@ -110,7 +111,10 @@ function _renderAmeacaActivations(a, ameacaIdx) {
           </div>
         </div>
 
-        <button class="btn-delete-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Excluir Ativação da Ameaça">&times;</button>
+        <div style="display:flex; gap:4px; margin-top:4px;">
+          <button class="btn-edit-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Editar Ativação da Ameaça" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;">Editar</button>
+          <button class="btn-delete-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Excluir Ativação da Ameaça">&times;</button>
+        </div>
       </div>
     `;
   }).join("");
@@ -426,21 +430,21 @@ export function renderConflitoSheet() {
                     <div class="investimento-controls">
                       ${requiredS > 0 ? `
                       <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
-                        <img src="assets/d6/6(D6).webp" alt="S" title="Sucesso"">
+                        <img src="assets/d6/6(D6).webp" alt="S" title="Sucesso">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
                         <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
                       </div>` : ""}
                       ${requiredA > 0 ? `
                       <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
-                        <img src="assets/d6/ad.webp" alt="A" title="Adaptação"">
+                        <img src="assets/d6/ad.webp" alt="A" title="Adaptação">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
                         <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
                       </div>` : ""}
                       ${requiredP > 0 ? `
                       <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
-                        <img src="assets/d6/3-4(D6).webp" alt="P" title="Pressão"">
+                        <img src="assets/d6/3-4(D6).webp" alt="P" title="Pressão">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
                         <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
@@ -458,7 +462,10 @@ export function renderConflitoSheet() {
                   </div>
                   <div class="conflito-ativacao-efeito">${act.efeito}</div>
 
-                  <button class="btn-delete-ativacao" data-idx="${idx}" title="Excluir Ativação">&times;</button>
+                  <div style="display:flex; gap:4px; margin-top:4px;">
+                    <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;">Editar</button>
+                    <button class="btn-delete-ativacao" data-idx="${idx}" title="Excluir Ativação">&times;</button>
+                  </div>
                 </div>
               `;
   }).join("")}
@@ -708,9 +715,14 @@ function _attachListeners(c) {
   const modal = screen.querySelector("#conflito-modal-nova-ativacao");
 
   // Abrir o modal
+  const modalTitle = screen.querySelector("#conflito-modal-nova-ativacao .conflito-modal-title");
+  const confirmBtn = screen.querySelector("#btn-confirm-add-ativacao");
   screen.querySelector("#btn-open-nova-ativacao-modal")?.addEventListener("click", () => {
     activeThreatIdxForModal = null;
+    editingActivationState = null;
     if (modal) {
+      modalTitle.textContent = "Nova Ativação";
+      confirmBtn.textContent = "Adicionar";
       screen.querySelector("#modal-ativacao-gatilho").value = "";
       screen.querySelector("#modal-ativacao-titulo").value = "";
       screen.querySelector("#modal-ativacao-efeito").value = "";
@@ -729,7 +741,7 @@ function _attachListeners(c) {
     }
   });
 
-  // Adicionar Ativação a partir do modal
+  // Adicionar/Editar Ativação a partir do modal
   screen.querySelector("#btn-confirm-add-ativacao")?.addEventListener("click", () => {
     const gatilhoInput = screen.querySelector("#modal-ativacao-gatilho");
     const tituloInput = screen.querySelector("#modal-ativacao-titulo");
@@ -744,7 +756,25 @@ function _attachListeners(c) {
       return;
     }
 
-    if (activeThreatIdxForModal !== null) {
+    if (editingActivationState) {
+      if (editingActivationState.isAmeaca) {
+        const a = c.ameacas[editingActivationState.ameacaIdx];
+        if (a && a.ativacoes[editingActivationState.idx]) {
+          const act = a.ativacoes[editingActivationState.idx];
+          act.gatilho = gatilho;
+          act.titulo = titulo;
+          act.efeito = efeito;
+        }
+      } else {
+        const act = c.ativacoes[editingActivationState.idx];
+        if (act) {
+          act.gatilho = gatilho;
+          act.titulo = titulo;
+          act.efeito = efeito;
+        }
+      }
+      editingActivationState = null;
+    } else if (activeThreatIdxForModal !== null) {
       const a = c.ameacas[activeThreatIdxForModal];
       if (a) {
         if (!a.ativacoes) a.ativacoes = [];
@@ -770,6 +800,24 @@ function _attachListeners(c) {
     saveConflito(c);
     hideModal();
     renderConflitoSheet();
+  });
+
+  // Listener para editar ativacao do conflito
+  screen.querySelectorAll(".btn-edit-ativacao").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.idx);
+      const act = c.ativacoes[idx];
+      if (!act) return;
+      editingActivationState = { idx, ameacaIdx: null, isAmeaca: false };
+      activeThreatIdxForModal = null;
+      modalTitle.textContent = "Editar Ativação";
+      confirmBtn.textContent = "Salvar";
+      screen.querySelector("#modal-ativacao-gatilho").value = act.gatilho;
+      screen.querySelector("#modal-ativacao-titulo").value = act.titulo;
+      screen.querySelector("#modal-ativacao-efeito").value = act.efeito;
+      modal.classList.remove("hidden");
+      screen.querySelector("#modal-ativacao-gatilho").focus();
+    });
   });
 
   // Listener para excluir ativacao
@@ -1046,13 +1094,37 @@ function _attachListeners(c) {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       activeThreatIdxForModal = parseInt(btn.dataset.ameacaIdx);
+      editingActivationState = null;
       if (modal) {
+        modalTitle.textContent = "Nova Ativação";
+        confirmBtn.textContent = "Adicionar";
         screen.querySelector("#modal-ativacao-gatilho").value = "";
         screen.querySelector("#modal-ativacao-titulo").value = "";
         screen.querySelector("#modal-ativacao-efeito").value = "";
         modal.classList.remove("hidden");
         screen.querySelector("#modal-ativacao-gatilho").focus();
       }
+    });
+  });
+
+  // Editar ativação da ameaça
+  screen.querySelectorAll(".btn-edit-ativacao-ameaca").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const ameacaIdx = parseInt(btn.dataset.ameacaIdx);
+      const actIdx = parseInt(btn.dataset.actIdx);
+      const a = c.ameacas[ameacaIdx];
+      if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
+      const act = a.ativacoes[actIdx];
+      editingActivationState = { idx: actIdx, ameacaIdx, isAmeaca: true };
+      activeThreatIdxForModal = null;
+      modalTitle.textContent = "Editar Ativação da Ameaça";
+      confirmBtn.textContent = "Salvar";
+      screen.querySelector("#modal-ativacao-gatilho").value = act.gatilho;
+      screen.querySelector("#modal-ativacao-titulo").value = act.titulo;
+      screen.querySelector("#modal-ativacao-efeito").value = act.efeito;
+      modal.classList.remove("hidden");
+      screen.querySelector("#modal-ativacao-gatilho").focus();
     });
   });
 
