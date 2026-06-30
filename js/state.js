@@ -21,11 +21,13 @@ export const el = {
   btnDeleteChar: document.getElementById("btn-delete-char"),
   btnOpenRoller: document.getElementById("btn-open-roller"),
   btnSettings: document.getElementById("btn-settings"),
+  btnManageItems: document.getElementById("btn-manage-items"),
   btnCloudSync: document.getElementById("btn-cloud-sync"),
   btnMobileMenu: document.getElementById("btn-mobile-menu"),
   headerControls: document.querySelector(".header-controls"),
   
   // Wizard Navigation
+  btnWizCancel: document.getElementById("btn-wiz-cancel"),
   btnWizPrev: document.getElementById("btn-wiz-prev"),
   btnWizNext: document.getElementById("btn-wiz-next"),
   btnWizFinish: document.getElementById("btn-wiz-finish"),

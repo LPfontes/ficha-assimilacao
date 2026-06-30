@@ -253,6 +253,9 @@ export function getLocalById(id) {
 // =====================================================
 // BANCO DE ITENS COMPARTILHADO
 // =====================================================
+
+import { DEFAULT_ITENS_DB } from "./dados.js";
+
 export function loadItensDb() {
   try {
     const raw = localStorage.getItem("assimilação_rpg_itens_db");
@@ -264,6 +267,25 @@ export function loadItensDb() {
   } catch (e) {
     logger.error("[WorldState] Erro ao carregar banco de itens:", e);
     worldState.itensDb = [];
+  }
+
+  // Popula itens default que não estejam no DB, e atualiza propriedades ausentes
+  let dbChanged = false;
+  for (const defaultItem of DEFAULT_ITENS_DB) {
+    const existing = worldState.itensDb.find(i => i.name.toLowerCase() === defaultItem.name.toLowerCase());
+    if (!existing) {
+      worldState.itensDb.push(defaultItem);
+      dbChanged = true;
+    } else {
+      if (!existing.categorias && defaultItem.categorias) {
+        existing.categorias = defaultItem.categorias;
+        dbChanged = true;
+      }
+    }
+  }
+
+  if (dbChanged) {
+    localStorage.setItem("assimilação_rpg_itens_db", JSON.stringify(worldState.itensDb));
   }
 }
 

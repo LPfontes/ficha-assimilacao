@@ -139,7 +139,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
   letter-spacing: 0.5px;
 }
 

@@ -1,6 +1,7 @@
 import { worldState, saveRegiao, deleteRegiao, createNewRegiao } from "./world-state.js";
 import { hideAllScreens, goToLanding, esc, setupImageUpload } from "./screen-utils.js";
 import { renderHeader, renderProfileCard, renderRefPanelMulti } from "./screen-components.js";
+import { openSelectReferencesModal } from "./modals.js";
 
 const TAMANHO_OPTS   = ["Quarteirão","Largo","Bairro","Cidade Pequena","Zona Urbana","Cidade Média","Cidade Grande"];
 const PERIGO_OPTS    = ["Seguro","Baixo","Moderado","Alto","Severo","Extremo","Mortal"];
@@ -80,17 +81,30 @@ export function renderRegiaoSheet() {
             </div>
           </div>
         </div>
-        <div class="card-glass" style="padding:16px;">
-          <h3 class="ws-section-title">Referências</h3>
-          <div class="ref-panel">
-            ${renderRefPanelMulti("Refúgios", "regiao-ref-refugios",  r.refugiosAssociados, "refugios")}
-            ${renderRefPanelMulti("Conflitos","regiao-ref-conflitos", r.conflitosAssociados,"conflitos")}
-            ${renderRefPanelMulti("Locais",   "regiao-ref-locais",    r.locaisAssociados,   "locais")}
-          </div>
-        </div>
       </div>
     </div>
   `;
+
+  const portraitWrapper = screen.querySelector('.portrait-centered-wrapper');
+  if (portraitWrapper) {
+    portraitWrapper.insertAdjacentHTML('beforeend', `
+      <div class="card-glass" style=" background:transparent; padding:16px; margin-top:10px; width:100%; box-sizing:border-box;">
+        <h3 class="ws-section-title">Referências</h3>
+        <div class="ref-panel">
+          ${renderRefPanelMulti("Refúgios", "regiao-ref-refugios",  r.refugiosAssociados, "refugios")}
+          ${renderRefPanelMulti("Conflitos","regiao-ref-conflitos", r.conflitosAssociados,"conflitos")}
+          ${renderRefPanelMulti("Locais",   "regiao-ref-locais",    r.locaisAssociados,   "locais")}
+        </div>
+      </div>
+    `);
+  }
+
+  const profileFieldsGrid = screen.querySelector('.profile-fields-grid');
+  const worldSheetBody = screen.querySelector('.world-sheet-body');
+  if (profileFieldsGrid && worldSheetBody) {
+    worldSheetBody.appendChild(profileFieldsGrid);
+  }
+
   _attachListeners(r);
 }
 
@@ -170,13 +184,16 @@ function _attachMarcosListeners(r) {
 
 function _attachRefListeners(r, containerId, fieldKey, stateKey) {
   const screen = getScreen();
-  const addSel = screen.querySelector(`#${containerId}-add`);
-  if (addSel) {
-    addSel.addEventListener("change", e => {
-      const id = e.target.value;
-      if (!id) return;
-      if (!r[fieldKey]) r[fieldKey] = [];
-      if (!r[fieldKey].includes(id)) { r[fieldKey].push(id); saveRegiao(r); renderRegiaoSheet(); }
+  const openBtn = screen.querySelector(`#${containerId}-chips`).parentNode.querySelector(".btn-open-ref-modal");
+  if (openBtn) {
+    openBtn.addEventListener("click", e => {
+      const label = e.target.dataset.reflabel;
+      const currentIds = r[fieldKey] || [];
+      openSelectReferencesModal("Vincular " + label, stateKey, currentIds, (selectedIds) => {
+        r[fieldKey] = selectedIds;
+        saveRegiao(r);
+        renderRegiaoSheet();
+      });
     });
   }
   screen.querySelectorAll(`#${containerId}-chips .btn-remove-ref`).forEach(btn => {

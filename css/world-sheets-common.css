@@ -267,8 +267,8 @@
 
 .world-sheet-body {
   display: grid;
-  grid-template-columns: 0.6fr 1fr 0.8fr;
-  gap: 20px;
+  grid-template-columns: 1fr 0.7fr;
+  gap: 10px;
 }
 
 @media (max-width: 768px) {
@@ -826,4 +826,4 @@
   text-align: center;
   padding: 0 4px;
   line-height: 1.3;
-}
+}

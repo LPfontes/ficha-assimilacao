@@ -1,40 +1,14 @@
 import { worldState, saveRefugio, deleteRefugio, createNewRefugio } from "./world-state.js";
 import { hideAllScreens, goToLanding, esc, setupImageUpload } from "./screen-utils.js";
 import { renderImageFrame, renderCrudListEmpty, renderRefPanelSingle } from "./screen-components.js";
+import { openSelectReferencesModal } from "./modals.js";
 import { el } from "./state.js";
 import { getDieFaceImgSrc } from "./chat.js";
+import { DEFESA_LABELS, MORAL_LABELS, BELIGERANCIA_LABELS, CONSTRUCOES_MODELO, CRISE_GATILHOS, CRISE_GRAVIDADES } from "./dados.js";
 
 const CRISE_STATUS = ["Ativo", "Contido", "Resolvido"];
 
-const DEFESA_LABELS = [
-  "Nenhuma",
-  "Linhas e sinos",
-  "Cerca de arame farpado",
-  "Muro de madeira",
-  "Muro de pedra ou tijolo",
-  "Complexo prisional",
-  "Base militar"
-];
 
-const MORAL_LABELS = [
-  "Amotinada",
-  "Desiludida",
-  "Hesitante",
-  "Resoluta",
-  "Animada",
-  "Empenhada",
-  "Exaltada"
-];
-
-const BELIGERANCIA_LABELS = [
-  "Pacifista",
-  "Mínima",
-  "Razoável",
-  "Eficiente",
-  "Ameaçadora",
-  "Terrível",
-  "Arrasadora"
-];
 
 function getLevelLabel(val, arr) {
   return arr[Math.max(0, Math.min(val, arr.length - 1))] || "";
@@ -50,148 +24,7 @@ export function loadRefugioSheet(refugio) {
   renderRefugioSheet();
 }
 
-const CONSTRUCOES_MODELO = [
-  {
-    nome: "Boticário",
-    nivel: 10,
-    consumo: "Plantas 1",
-    producao: "Medicamentos 1",
-    descricao: "Cada População 1 em uma semana converte Plantas 1 em Medicamentos 1. Requerido para criar Medicamentos."
-  },
-  {
-    nome: "Casa de Costura",
-    nivel: 10,
-    consumo: "Nenhum",
-    producao: "Vestuário +1",
-    descricao: "Todo Vestuário produzido ali gera um Vestuário adicional."
-  },
-  {
-    nome: "Centro Comunitário",
-    nivel: 10,
-    consumo: "Nenhum",
-    producao: "Moral +1",
-    descricao: "Aumenta em um nível a Moral. Custo = 10 * novo nível de Moral. Tipos: Alambique, Igreja, Museu, Teatro, etc."
-  },
-  {
-    nome: "Coleta de Biomassa",
-    nivel: 20,
-    consumo: "Trabalho 1",
-    producao: "Biomassa 1",
-    descricao: "Cada População 1 coleta Biomassa 1 por nível de Recursos Naturais da região (máx 5x). Sonda, Mina, etc."
-  },
-  {
-    nome: "Dormitório",
-    nivel: 20,
-    consumo: "Nenhum",
-    producao: "Teto População",
-    descricao: "Aumenta o teto máximo de População em nível igual aos pontos de obra estabelecidos."
-  },
-  {
-    nome: "Fábrica de Munição",
-    nivel: 20,
-    consumo: "Minerais 1",
-    producao: "Munição 1",
-    descricao: "Cada População 1 em uma semana converte Minerais 1 em Munição 1."
-  },
-  {
-    nome: "Fábrica para Obras",
-    nivel: 20,
-    consumo: "Minerais 1",
-    producao: "Mat. Constr. 1",
-    descricao: "Cada População 1 em uma semana converte Minerais 1 em Materiais de Construção 1."
-  },
-  {
-    nome: "Fonte de Água",
-    nivel: 10,
-    consumo: "Nenhum",
-    producao: "Água constante",
-    descricao: "Se houver fartura de Água na região, cria fonte constante que dispensa estocagem de Água."
-  },
-  {
-    nome: "Fortificação",
-    nivel: 10,
-    consumo: "Trabalho 1 (Guarda)",
-    producao: "Defesa +1",
-    descricao: "Aumenta em um nível a Defesa, contanto que População 1 fique de guarda. Custo = 10 * novo nível de Defesa."
-  },
-  {
-    nome: "Moinho",
-    nivel: 10,
-    consumo: "Plantas 1",
-    producao: "Alimento (Teto)",
-    descricao: "Aumenta o teto de produção de Alimento com Plantas por nível de População igual ao nível do moinho."
-  },
-  {
-    nome: "Oficina de Equipamentos",
-    nivel: 10,
-    consumo: "Materiais",
-    producao: "Itens (Escassez)",
-    descricao: "Permite criar itens de nível de Escassez até o nível dessa oficina."
-  },
-  {
-    nome: "Oficina Mecânica",
-    nivel: 10,
-    consumo: "Peças de veículos",
-    producao: "Veículos restaurados",
-    descricao: "Permite restaurar veículos usando peças de reposição."
-  },
-  {
-    nome: "Pedreira",
-    nivel: 20,
-    consumo: "Trabalho 1",
-    producao: "Minerais (Região)",
-    descricao: "Cada População 1 em uma semana coleta Minerais igual ao nível de Recursos Naturais de minerais."
-  },
-  {
-    nome: "Porto",
-    nivel: 20,
-    consumo: "População 1 (manut.)",
-    producao: "Barcos (Mobilidade)",
-    descricao: "Permite embarcações. Requer manutenção semestral de População 1 por nível de Mobilidade."
-  },
-  {
-    nome: "Refeitório",
-    nivel: 10,
-    consumo: "Plantas / Animais",
-    producao: "Alimento (Dobrado)",
-    descricao: "Todo Alimento convertido a partir de uma fonte de Plantas ou Animais é dobrado."
-  },
-  {
-    nome: "Refinaria Animal",
-    nivel: 10,
-    consumo: "Esterco Animal 1",
-    producao: "Combustível 1",
-    descricao: "Cada População 1 em uma semana usa esterco para produzir Combustível 1 (máx nível de animais, até 10/sem)."
-  },
-  {
-    nome: "Refinaria de Biomassa",
-    nivel: 10,
-    consumo: "Biomassa 1",
-    producao: "Combustível 1",
-    descricao: "Cada População 1 em uma semana converte Biomassa 1 em Combustível 1 (máx 10/sem)."
-  },
-  {
-    nome: "Refinaria Vegetal",
-    nivel: 10,
-    consumo: "Plantas 1",
-    producao: "Combustível 1",
-    descricao: "Cada População 1 em uma semana converte certas Plantas 1 em Biomassa 1 e depois em Combustível 1 (máx 10/sem)."
-  },
-  {
-    nome: "Reservas Expandidas",
-    nivel: 10,
-    consumo: "Nenhum",
-    producao: "Teto Reserva +10",
-    descricao: "Aumenta o teto de Reservas do tipo escolhido (Ex: Armazém, Paiol, Caixa D'Água) em nível igual a pontos de obra."
-  },
-  {
-    nome: "Serraria",
-    nivel: 10,
-    consumo: "Madeira 1",
-    producao: "Mat. Constr. 1",
-    descricao: "Cada População 1 em uma semana converte Madeira 1 em Materiais de Construção 1 (máx 10/sem)."
-  }
-];
+
 
 function openCreateBuildingModal(r) {
   el.modalContainer.classList.remove("hidden");
@@ -289,51 +122,7 @@ function openCreateBuildingModal(r) {
   });
 }
 
-const CRISE_GATILHOS = {
-  populacao: {
-    nome: "Crise de População",
-    desc: "A População ultrapassou o limite do seu teto."
-  },
-  defesa: {
-    nome: "Crise de Defesa",
-    desc: "A Defesa ficou menor que o Perigo da região ou da Beligerância de um refúgio invasor."
-  },
-  recurso: {
-    nome: "Crise de Recursos",
-    desc: "Falta um Recurso no seu respectivo consumo. Cada semana consome Água 1, Alimento 1 e Madeira 1 vezes a População; a cada ano consome Medicamentos 1 vezes a População e a cada dois anos consome Vestuário 1 vezes a População."
-  },
-  custom: {
-    nome: "Crise Geral",
-    desc: "Gatilho personalizado."
-  }
-};
 
-const CRISE_GRAVIDADES = {
-  1: {
-    grau: 1,
-    texto: "Por sorte, os habitantes sobrevivem à Crise sem maiores percalços (0-1 Símbolos)."
-  },
-  2: {
-    grau: 2,
-    texto: "Briga interna que cria uma migração de aproximadamente metade da População atual do Refúgio para outro lugar, levando consigo metade dos recursos estocados (2 Símbolos)."
-  },
-  3: {
-    grau: 3,
-    texto: "Enfermidade que nenhum remédio do Refúgio consegue tratar, o que tira 1d de todos os testes dos personagens dali até que uma cura seja encontrada. Para remover os destroços por completo será preciso investir População 1 por semana para cada ponto de obra que a construção levou para ser construída (3 Símbolos)."
-  },
-  4: {
-    grau: 4,
-    texto: "Criatura assimilada de grande tamanho surge no Refúgio colocando em risco Reservas e Construções a critério do(a) Assimilador(a). Alguém precisa lidar com essa ameaça para não haver também uma perda significativa de População (4 Símbolos)."
-  },
-  5: {
-    grau: 5,
-    texto: "Rebelião que divide a População atual do Refúgio em duas facções antagônicas e inconciliáveis que disputam pelo controle do Refúgio (5 Símbolos)."
-  },
-  6: {
-    grau: 6,
-    texto: "O Refúgio é atacado por invasores que precisam ser neutralizados para não haver uma perda significativa de População a critério do(a) Assimilador(a). Se os invasores vencerem, caso não queiram ocupar o lugar, eles podem destruir o Refúgio e levar os seus Recursos consigo (6+ Símbolos)."
-  }
-};
 
 function openCreateCriseModal(r) {
   el.modalContainer.classList.remove("hidden");
@@ -959,12 +748,29 @@ function _attachListeners(r) {
   });
   _attachCriseListeners(r);
 
-  [["refugio-ref-regiao", "regiaoId"], ["refugio-ref-local", "localId"]].forEach(([id, key]) => {
-    screen.querySelector(`#${id}`)?.addEventListener("change", e => {
-      r[key] = e.target.value || null;
-      saveRefugio(r);
+  const _attachSingleRefListener = (containerId, fieldKey, stateKey) => {
+    const openBtn = screen.querySelector(`#${containerId}-chips`)?.parentNode.querySelector(".btn-open-ref-modal-single");
+    if (openBtn) {
+      openBtn.addEventListener("click", e => {
+        const label = e.target.dataset.reflabel;
+        const currentIds = r[fieldKey] ? [r[fieldKey]] : [];
+        openSelectReferencesModal("Vincular " + label, stateKey, currentIds, (selectedIds) => {
+          r[fieldKey] = selectedIds.length > 0 ? selectedIds[0] : null;
+          saveRefugio(r);
+          renderRefugioSheet();
+        }, true);
+      });
+    }
+    screen.querySelectorAll(`#${containerId}-chips .btn-remove-ref`).forEach(btn => {
+      btn.addEventListener("click", () => {
+        r[fieldKey] = null;
+        saveRefugio(r); renderRefugioSheet();
+      });
     });
-  });
+  };
+
+  _attachSingleRefListener("refugio-ref-regiao", "regiaoId", "regioes");
+  _attachSingleRefListener("refugio-ref-local", "localId", "locais");
 
   setupImageUpload("refugio-image-frame", "refugio-image-input", r, saveRefugio);
 }

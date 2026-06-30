@@ -10,108 +10,8 @@ import { updateResultsSummary } from "./chat.js";
 import { getCurrentHealthLevel } from "./health.js";
 export { getCurrentHealthLevel } from "./health.js";
 
-export const ITEM_CATEGORIAS = {
-  nenhuma: {
-    nome: "Nenhuma (Comum)",
-    cat: 0,
-    desc: "Equipamento comum sem características especiais."
-  },
-  artefato: {
-    nome: "Artefato",
-    cat: "Especial",
-    desc: "Equipamentos especiais que possuem propriedades únicas e oferecem características ou vantagens além do comum, ajudando os Infectados em sua jornada e tornando suas ações mais eficazes ou estratégicas."
-  },
-  fragil: {
-    nome: "Frágil",
-    cat: -1,
-    desc: "Característica de Categoria -1. Cai de nível de Qualidade com 1 Pressão a menos; nível 1 se torna Quebrado no próximo uso."
-  },
-  improvisado: {
-    nome: "Improvisado",
-    cat: -1,
-    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 Sucesso, que pode ser cancelado investindo uma Adaptação."
-  },
-  pesado: {
-    nome: "Pesado",
-    cat: -1,
-    desc: "Característica de Categoria -1. Reduz a mobilidade, cancelando 1 Sucesso em testes de movimento ou furtividade; ocupa 2 espaços de inventário."
-  },
-  uso_unico: {
-    nome: "Uso Único",
-    cat: -1,
-    desc: "Característica de Categoria -1. Funciona apenas uma vez; após o uso, o item quebra ou se esgota completamente."
-  },
-  agil: {
-    nome: "Ágil",
-    cat: 1,
-    desc: "Característica de Categoria 1. Arma branca balanceada; em ataques substitui Potência por Reação."
-  },
-  discreto: {
-    nome: "Discreto",
-    cat: 1,
-    desc: "Característica de Categoria 1. Item pequeno ou retrátil, fácil de esconder; não ocupa espaço de inventário e passa despercebido enquanto guardado."
-  },
-  espacoso: {
-    nome: "Espaçoso",
-    cat: 1,
-    desc: "Característica de Categoria 1. Aumenta em +2 os espaços de Inventário; efeitos podem ser acumulados ao comprar a característica mais de uma vez."
-  },
-  iluminador: {
-    nome: "Iluminador",
-    cat: 1,
-    desc: "Característica de Categoria 1. Projeta luz proporcional ao nível de qualidade (6 m por nível). Pode perder um nível de qualidade com uso prolongado, com aviso do(a) Assimilador(a); tocha simples ilumina 6 m."
-  },
-  letal: {
-    nome: "Letal",
-    cat: 1,
-    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar uma Adaptação por um Sucesso; uso extra concede +1 Sucesso, mas reduz 1 nível de Qualidade."
-  },
-  protetivo: {
-    nome: "Protetivo",
-    cat: 1,
-    desc: "Característica de Categoria 1. Permite evitar a perda de 1 Ponto de Saúde uma vez por cena; uso extra é possível sacrificando 1 nível de Qualidade."
-  },
-  restaurador: {
-    nome: "Restaurador",
-    cat: 1,
-    desc: "Característica de Categoria 1. Alimentos, bebidas ou remédios com 6 usos; cada uso alimenta um personagem por um dia e concede 1 Ponto de Saúde na próxima Recuperação, sem acumular efeitos no mesmo repouso."
-  },
-  eficiente: {
-    nome: "Eficiente",
-    cat: 2,
-    desc: "Característica de Categoria 2. Item prático e ergonômico; uma vez por dia, permite trocar 1d6 por 1d10 em um teste. Uso extra no mesmo dia reduz 1 nível de Qualidade."
-  },
-  duravel: {
-    nome: "Durável",
-    cat: 2,
-    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer uma Pressão adicional para reduzir 1 nível de Qualidade."
-  },
-  adrenalina: {
-    nome: "Adrenalina",
-    cat: 3,
-    desc: "Característica de Categoria 3. Canetas ou injeções que aumentam temporariamente a resistência à dor e cansaço. Cada uso concede 6 Pontos de Saúde até o próximo repouso. Usos adicionais exigem teste de Resolução + Atletismo: sucesso mantém os 6 pontos, falha causa perda de 8 pontos. Após o repouso, cada uso reduz 1 ponto de Determinação."
-  },
-  armadura: {
-    nome: "Armadura",
-    cat: 3,
-    desc: "Característica de Categoria 3. Veste de proteção que absorve ferimentos. Permite até 3 usos por cena para evitar a perda de 1 Ponto de Saúde por uso. Quando os 3 usos são consumidos na mesma cena, a armadura perde 1 nível de Qualidade."
-  },
-  explosivo: {
-    nome: "Explosivo",
-    cat: 4,
-    desc: "Característica de Categoria 4. Item projetado para detonação. Ao ser usado, pode ser destruído para causar 4d6 de dano em uma área, atingindo criaturas e estruturas. Sempre possui Uso Único e não acumula pontos de Categoria."
-  },
-  inflamavel: {
-    nome: "Inflamável",
-    cat: 4,
-    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem investir um Sucesso e uma Adaptação ou recebem 2d6 adicionais no final do turno."
-  },
-  medicinal: {
-    nome: "Medicinal",
-    cat: 4,
-    desc: "Característica de Categoria 4. Itens médicos ou medicamentosos com 6 usos; cada uso cancela 1 Pressão em testes de Tratamento Médico, limitado à graduação em Medicina. Itens de Uso Único podem cancelar até 2 Pressões em um teste."
-  }
-};
+import { ITEM_CATEGORIAS } from "./dados.js";
+export { ITEM_CATEGORIAS };
 
 // ==========================================
 // RENDERS DA FICHA INTERATIVA
@@ -816,27 +716,29 @@ function openItemCategoriesModal(slotIndex) {
 
   el.modalContainer.classList.remove("hidden");
   el.modalBody.innerHTML = `
-    <h3 class="modal-title" style="margin-bottom:8px;">Gerenciar Categorias do Item</h3>
-    <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
-      <strong>${esc(slot.name)}</strong>
-    </p>
-    <div style="display:flex; flex-direction:column; gap:6px; max-height:400px; overflow-y:auto;">
-      ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => {
-        const checked = currentCats.includes(key) ? 'checked' : '';
-        return `
-          <label style="display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:4px; background:rgba(255,255,255,0.03); cursor:pointer; transition:background 0.2s;">
-            <input type="checkbox" class="cat-checkbox" value="${key}" ${checked} style="accent-color:var(--color-gold-glow);">
-            <div style="display:flex; flex-direction:column; gap:2px;">
-              <span style="font-size:12px; font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
-              <span style="font-size:10px; color:var(--text-secondary);">${cat.desc}</span>
-            </div>
-          </label>
-        `;
-      }).join("")}
-    </div>
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
-      <button id="btn-cancel-cat-modal" class="btn" style="padding:8px 16px;">Cancelar</button>
-      <button id="btn-confirm-cat-modal" class="btn btn-success" style="padding:8px 16px;">Salvar</button>
+    <div class="modal-content-manage-categories card-glass">
+      <h3 class="modal-title" style="margin-bottom:8px;">Gerenciar Categorias do Item</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+        <strong>${esc(slot.name)}</strong>
+      </p>
+      <div style="display:flex; flex-direction:column; gap:6px; max-height:400px; overflow-y:auto;">
+        ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => {
+          const checked = currentCats.includes(key) ? 'checked' : '';
+          return `
+            <label style="display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:4px; background:rgba(255,255,255,0.03); cursor:pointer; transition:background 0.2s;">
+              <input type="checkbox" class="cat-checkbox" value="${key}" ${checked} style="accent-color:var(--color-gold-glow);">
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <span style="font-size:12px; font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
+                <span style="font-size:10px; color:var(--text-secondary);">${cat.desc}</span>
+              </div>
+            </label>
+          `;
+        }).join("")}
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
+        <button id="btn-cancel-cat-modal" class="btn" style="padding:8px 16px;">Cancelar</button>
+        <button id="btn-confirm-cat-modal" class="btn btn-success" style="padding:8px 16px;">Salvar</button>
+      </div>
     </div>
   `;
 
@@ -881,11 +783,37 @@ export function renderInventorySheet() {
 
   if (char.bodySlotsCount === undefined) char.bodySlotsCount = 3;
   if (char.backpackSlotsCount === undefined) char.backpackSlotsCount = 6;
-  const expectedLength = char.bodySlotsCount + char.backpackSlotsCount;
 
-  if (!char.inventario || char.inventario.length !== expectedLength) {
+  let espacosoCount = 0;
+  let pesadoCount = 0;
+  if (char.inventario) {
+    char.inventario.forEach(item => {
+      if (item && item.name && item.name.trim() !== "") {
+        const cats = item.categorias || (item.categoria && item.categoria !== 'nenhuma' ? [item.categoria] : []);
+        cats.forEach(c => {
+          if (c === "espacoso") espacosoCount++;
+          if (c === "pesado") pesadoCount++;
+        });
+      }
+    });
+  }
+
+  const dynamicBackpackSlotsCount = Math.max(0, char.backpackSlotsCount + (espacosoCount * 2) - pesadoCount);
+  const expectedLength = char.bodySlotsCount + dynamicBackpackSlotsCount;
+
+  let safeLength = expectedLength;
+  if (char.inventario && char.inventario.length > expectedLength) {
+    // Evitar deletar itens que estão nos slots extras que seriam cortados
+    for (let j = expectedLength; j < char.inventario.length; j++) {
+      if (char.inventario[j] && char.inventario[j].name && char.inventario[j].name.trim() !== "") {
+        safeLength = j + 1;
+      }
+    }
+  }
+
+  if (!char.inventario || char.inventario.length !== safeLength) {
     const oldInv = char.inventario || [];
-    char.inventario = Array(expectedLength).fill(null).map((_, idx) => {
+    char.inventario = Array(safeLength).fill(null).map((_, idx) => {
       const oldItem = oldInv[idx] || {};
       let qual = 3; // Padrão
       if (typeof oldItem.qualidade === 'boolean') {
@@ -907,6 +835,7 @@ export function renderInventorySheet() {
         pressao: oldItem.pressao || 0,
         escassez: esc,
         categoria: oldItem.categoria || "nenhuma",
+        categorias: oldItem.categorias || (oldItem.categoria && oldItem.categoria !== 'nenhuma' ? [oldItem.categoria] : []),
         efeito: oldItem.efeito || ""
       };
     });
@@ -919,7 +848,11 @@ export function renderInventorySheet() {
     labelBody.textContent = `No Corpo`;
   }
   if (labelBackpack) {
-    labelBackpack.textContent = `Na Mochila`;
+    if (safeLength > expectedLength) {
+      labelBackpack.innerHTML = `Na Mochila <span style="color:var(--color-rust); font-size:10px; margin-left:8px;">(SOBRECARGA)</span>`;
+    } else {
+      labelBackpack.textContent = `Na Mochila`;
+    }
   }
 
   char.inventario.forEach((slot, i) => {
@@ -1012,12 +945,12 @@ export function renderInventorySheet() {
               <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
             </div>
             <!-- Texto das Categorias -->
-            <div class="category-descs-container" style="display: flex; flex-direction: column; gap: 4px; max-width: 300px; margin-top: 4px;">
+            <div class="category-descs-container" style="display: flex; flex-direction: column; gap: 4px;">
               ${slotCats.map(catKey => {
                 const cat = ITEM_CATEGORIAS[catKey];
                 if (!cat) return '';
                 return `
-                  <span class="category-desc-text" data-cat-key="${catKey}" style="font-size: 10px; color: var(--color-gold-glow); opacity: 0.85; font-style: italic;">
+                  <span class="category-desc-text" data-cat-key="${catKey}" style="font-size: var(--font-size-sm); color: var(--color-gold-glow); opacity: 0.85; font-style: italic;">
                     <strong>${cat.nome}</strong>: ${cat.desc}
                   </span>
                 `;
@@ -1117,7 +1050,8 @@ export function renderInventorySheet() {
 
     row.addEventListener("dragenter", (e) => {
       e.preventDefault();
-      if (dragSourceIndex === i || dragSourceIndex === -1 || row.classList.contains("dragging")) return;
+      const isLibraryDrag = e.dataTransfer.types.includes("application/json");
+      if (!isLibraryDrag && (dragSourceIndex === i || dragSourceIndex === -1 || row.classList.contains("dragging"))) return;
       row.classList.add("drag-over");
     });
 
@@ -1128,6 +1062,30 @@ export function renderInventorySheet() {
     row.addEventListener("drop", (e) => {
       e.preventDefault();
       row.classList.remove("drag-over");
+
+      if (e.dataTransfer.types.includes("application/json")) {
+        try {
+          const data = JSON.parse(e.dataTransfer.getData("application/json"));
+          if (data.source === "library" && data.itemIdx !== undefined) {
+             const item = worldState.itensDb[data.itemIdx];
+             if (item) {
+                char.inventario[i] = {
+                  name: item.name,
+                  qualidade: 3,
+                  pressao: 0,
+                  escassez: item.escassez,
+                  categoria: (item.categorias && item.categorias.length > 0) ? item.categorias[0] : (item.categoria || 'nenhuma'),
+                  categorias: item.categorias || [],
+                  efeito: item.efeito
+                };
+                saveCurrentCharacter();
+                renderInventorySheet();
+                el.modalContainer.classList.add("hidden");
+             }
+          }
+        } catch (err) { console.error(err); }
+        return;
+      }
 
       const fromIdx = dragSourceIndex;
       if (fromIdx === -1 || fromIdx === i) return;

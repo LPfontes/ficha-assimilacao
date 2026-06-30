@@ -42,6 +42,7 @@ function parseCost(costStr) {
 }
 
 import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations, updateCloudSyncBadge, updateCharSelector } from "./state.js";
+import { worldState, saveItemToDb } from "./world-state.js";
 import { getFirebaseConfig } from "./config.js";
 import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet, renderSavedMacrosSheet } from "./sheet.js";
 import { CARACTERISTICAS } from "./characteristics.js";
@@ -698,9 +699,9 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         <h3>🔮 Selecionar Mutações Sorteadas</h3>
         <p style="font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0;">Toque em cada carta para revelar e ver as opções de mutação.</p>
         <div class="points-bar">
-          <span style="color:#00ff66;">[Níveis de Saúde] Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
-          <span style="color:#eab308;">[SUCESSO] Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
-          <span style="color:#ef4444;">[P] Pressões: <strong id="val-pts-c">${ptsC}</strong></span>
+          <span style="color:#00ff66;">Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
+          <span style="color:#eab308;">Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
+          <span style="color:#ef4444;">Pressões: <strong id="val-pts-c">${ptsC}</strong></span>
         </div>
       </div>
 
@@ -968,8 +969,9 @@ export function openSettingsModal() {
   const currentMaxBubbles = (char && char.maxValueBubbles) || parseInt(localStorage.getItem("assimilação_max_value_bubbles")) || 5;
 
   el.modalBody.innerHTML = `
+    <div class="settings-modal-content card-glass">
     <h3 class="modal-title">Configurações</h3>
-    <div class="settings-modal-content" style="margin-top: 16px;">
+    <div class="settings-modal-content card-glass" style="margin-top: 16px;">
       <div class="setting-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
         <div class="setting-info" style="flex: 1; padding-right: 16px;">
           <div class="setting-label" style="font-weight: 600; font-size: var(--font-size-md); color: var(--text-primary);">Desativar Dados 3D</div>
@@ -1029,6 +1031,7 @@ export function openSettingsModal() {
         <button id="btn-save-settings" class="btn btn-md">Fechar</button>
       </div>
     </div>
+  </div>
   `;
 
   const checkbox = document.getElementById("settings-disable-3d");
@@ -1111,108 +1114,7 @@ export function openSettingsModal() {
 // ==========================================
 // MODAL: ADICIONAR ITEM NO INVENTÁRIO
 // ==========================================
-const ITEM_CATEGORIAS = {
-  nenhuma: {
-    nome: "Nenhuma (Comum)",
-    cat: 0,
-    desc: "Equipamento comum sem características especiais."
-  },
-  artefato: {
-    nome: "Artefato",
-    cat: "Especial",
-    desc: "Equipamentos especiais que possuem propriedades únicas e oferecem características ou vantagens além do comum, ajudando os Infectados em sua jornada e tornando suas ações mais eficazes ou estratégicas."
-  },
-  fragil: {
-    nome: "Frágil",
-    cat: -1,
-    desc: "Característica de Categoria -1. Cai de nível de Qualidade com 1 C a menos; nível 1 se torna Quebrado no próximo uso."
-  },
-  improvisado: {
-    nome: "Improvisado",
-    cat: -1,
-    desc: "Característica de Categoria -1. Feito com materiais reaproveitados; testes têm –1 A, que pode ser cancelado investindo  ADAPTAÇÃO."
-  },
-  pesado: {
-    nome: "Pesado",
-    cat: -1,
-    desc: "Característica de Categoria -1. Reduz a mobilidade, cancelando 1 A em testes de movimento ou furtividade; ocupa 2 espaços de inventário."
-  },
-  uso_unico: {
-    nome: "Uso Único",
-    cat: -1,
-    desc: "Característica de Categoria -1. Funciona apenas uma vez; após o uso, o item quebra ou se esgota completamente."
-  },
-  agil: {
-    nome: "Ágil",
-    cat: 1,
-    desc: "Característica de Categoria 1. Arma branca balanceada; em ataques substitui Potência por Reação."
-  },
-  discreto: {
-    nome: "Discreto",
-    cat: 1,
-    desc: "Característica de Categoria 1. Item pequeno ou retrátil, fácil de esconder; não ocupa espaço de inventário e passa despercebido enquanto guardado."
-  },
-  espacoso: {
-    nome: "Espaçoso",
-    cat: 1,
-    desc: "Característica de Categoria 1. Aumenta em +2 os espaços de Inventário; efeitos podem ser acumulados ao comprar a característica mais de uma vez."
-  },
-  iluminador: {
-    nome: "Iluminador",
-    cat: 1,
-    desc: "Característica de Categoria 1. Projeta luz proporcional ao nível de qualidade (6 m por nível). Pode perder um nível de qualidade com uso prolongado, com aviso do(a) Assimilador(a); tocha simples ilumina 6 m."
-  },
-  letal: {
-    nome: "Letal",
-    cat: 1,
-    desc: "Característica de Categoria 1. Arma capaz de causar ferimentos graves. Uma vez por dia, permite trocar  ADAPTAÇÃO por  SUCESSO; uso extra concede +1 A, mas reduz 1 nível de Qualidade."
-  },
-  protetivo: {
-    nome: "Protetivo",
-    cat: 1,
-    desc: "Característica de Categoria 1. Permite evitar a perda de 1 Ponto de Saúde uma vez por cena; uso extra é possível sacrificando 1 nível de Qualidade."
-  },
-  restaurador: {
-    nome: "Restaurador",
-    cat: 1,
-    desc: "Característica de Categoria 1. Alimentos, bebidas ou remédios com 6 usos; cada uso alimenta um personagem por um dia e concede 1 Ponto de Saúde na próxima Recuperação, sem acumular efeitos no mesmo repouso."
-  },
-  eficiente: {
-    nome: "Eficiente",
-    cat: 2,
-    desc: "Característica de Categoria 2. Item prático e ergonômico; uma vez por dia, permite trocar 16 por 11 em um teste. Uso extra no mesmo dia reduz 1 nível de Qualidade."
-  },
-  duravel: {
-    nome: "Durável",
-    cat: 2,
-    desc: "Característica de Categoria 2. Itens reforçados para resistir ao desgaste; requer  PRESSÃO adicional para reduzir 1 nível de Qualidade."
-  },
-  adrenalina: {
-    nome: "Adrenalina",
-    cat: 3,
-    desc: "Característica de Categoria 3. Canetas ou injeções que aumentam temporariamente a resistência à dor e cansaço. Cada uso concede 6 Pontos de Saúde até o próximo repouso. Usos adicionais exigem teste de Resolução + Atletismo: sucesso mantém os 6 pontos, falha causa perda de 8 pontos. Após o repouso, cada uso reduz 1 ponto de Determinação."
-  },
-  armadura: {
-    nome: "Armadura",
-    cat: 3,
-    desc: "Característica de Categoria 3. Veste de proteção que absorve ferimentos. Permite até 3 usos por cena para evitar a perda de 1 Ponto de Saúde por uso. Quando os 3 usos são consumidos na mesma cena, a armadura perde 1 nível de Qualidade."
-  },
-  explosivo: {
-    nome: "Explosivo",
-    cat: 4,
-    desc: "Característica de Categoria 4. Item projetado para detonação. Ao ser usado, pode ser destruído para causar 4d6 de dano em uma área, atingindo criaturas e estruturas. Sempre possui Uso Único e não acumula pontos de Categoria."
-  },
-  inflamavel: {
-    nome: "Inflamável",
-    cat: 4,
-    desc: "Característica de Categoria 4. Item capaz de gerar fogo. Pode reduzir 1 nível de Qualidade para incendiar uma área, causando 3d6 de dano de queimadura. Alvos devem  SUCESSO e B ou recebem 2d6 adicionais no final do turno."
-  },
-  medicinal: {
-    nome: "Medicinal",
-    cat: 4,
-    desc: "Característica de Categoria 4. Itens médicos ou medicamentosos com 6 usos; cada uso cancela 1C em testes de Tratamento Médico, limitado à graduação em Medicina. Itens de Uso Único podem cancelar até 2C em um teste."
-  }
-};
+import { ITEM_CATEGORIAS } from "./dados.js";
 
 // ==========================================
 // MODAL: ADICIONAR ITEM NO INVENTÁRIO
@@ -1222,131 +1124,206 @@ export function openAddItemModal() {
   if (!char) return;
 
   el.modalContainer.classList.remove("hidden");
-  el.modalBody.innerHTML = `
-    <h3 class="modal-title" style="margin-bottom:8px;">Adicionar Item ao Inventário</h3>
-    <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
-      Preencha os dados do novo item. Ele será colocado no primeiro espaço vazio.
-    </p>
-    <div class="add-item-form" style="display:flex; flex-direction:column; gap:14px;">
-      <div class="form-group">
-        <label for="add-item-name" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Nome do Item</label>
-        <input type="text" id="add-item-name" placeholder="Ex: Faca, Corda, Kit de primeiros socorros..." style="width:100%; padding:8px 12px;">
+  el.modalContainer.style.opacity = "1";
+  el.modalContainer.style.pointerEvents = "auto";
+
+
+  const renderLibrary = () => {
+    el.modalBody.innerHTML = `
+    <div class="inventory-add-library-container">
+      <h3 class="modal-title" style="margin-bottom:8px;">Biblioteca de Itens</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:8px;">
+        <p style="font-size:13px; color:var(--text-secondary); margin:0;">
+          Arraste um item para a ficha ou clique para equipar no primeiro espaço vazio.
+        </p>
+        <button id="btn-add-item-manual" class="btn btn-sm" style="flex-shrink:0;">Criar Manualmente</button>
       </div>
-      <div class="form-group">
-        <label for="add-item-efeito" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Efeito / Descrição</label>
-        <input type="text" id="add-item-efeito" placeholder="Ex: +1 dado em Furtividade, Arma leve, Silenciosa..." style="width:100%; padding:8px 12px;">
-      </div>
-      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px;">
-        <div class="form-group">
-          <label for="add-item-qualidade" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Qualidade</label>
-          <select id="add-item-qualidade" style="width:100%; padding:6px 8px;">
-            <option value="0">Q0: Quebrado</option>
-            <option value="1">Q1: Defeituoso</option>
-            <option value="2">Q2: Comprometido</option>
-            <option value="3" selected>Q3: Padrão</option>
-            <option value="4">Q4: Reforçado</option>
-            <option value="5">Q5: Superior</option>
-            <option value="6">Q6: Obra-Prima</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="add-item-pressao" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Desgaste</label>
-          <select id="add-item-pressao" style="width:100%; padding:6px 8px;">
-            <option value="0" selected>0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="add-item-escassez" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Escassez</label>
-          <select id="add-item-escassez" style="width:100%; padding:6px 8px;">
-            <option value="0">E0: Abundante</option>
-            <option value="1">E1: Corriqueiro</option>
-            <option value="2" selected>E2: Comum</option>
-            <option value="3">E3: Incomum</option>
-            <option value="4">E4: Atípico</option>
-            <option value="5">E5: Raro</option>
-            <option value="6">E6: Quase Extinto</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="add-item-categoria" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Característica / Categoria</label>
-        <select id="add-item-categoria" style="width:100%; padding:6px 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; font-size:12px; outline:none; cursor:pointer;">
-          ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => `
-            <option value="${key}">
-              ${cat.nome} ${cat.cat !== 0 && cat.cat !== "Especial" ? `(Cat: ${cat.cat})` : ''} - ${cat.desc.substring(0, 55)}...
-            </option>
-          `).join("")}
-        </select>
-      </div>
-      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
-        <button id="btn-cancel-add-item" class="btn" style="padding:10px 20px;">Cancelar</button>
-        <button id="btn-confirm-add-item" class="btn btn-success" style="padding:10px 20px;">
-          ${ICONS.plus} Adicionar
-        </button>
+      <div class="library-items-grid" style="display:grid; grid-template-columns:1fr; gap:8px; max-height:60vh; overflow-y:auto; padding-right:4px;">
+        ${(worldState.itensDb || []).map((it, idx) => `
+          <div class="library-item-card" draggable="true" data-item-idx="${idx}" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:4px; cursor:grab; user-select:none;">
+            <div style="font-weight:bold; font-size:13px; color:#fff;">${esc(it.name)}</div>
+            <div style="font-size:11px; color:#aaa; margin-top:4px;">${esc(it.efeito || '')}</div>
+            <div style="font-size:10px; color:#888; margin-top:4px;">Escassez: E${it.escassez} | Categoria: ${it.categorias ? it.categorias.join(", ") : (it.categoria || 'Nenhuma')}</div>
+          </div>
+        `).join("")}
       </div>
     </div>
-  `;
+    `;
 
-  const nameInput = document.getElementById("add-item-name");
-  const efeitoInput = document.getElementById("add-item-efeito");
-  const qualSelect = document.getElementById("add-item-qualidade");
-  const pressaoSelect = document.getElementById("add-item-pressao");
-  const escSelect = document.getElementById("add-item-escassez");
-  const catSelect = document.getElementById("add-item-categoria");
+    document.getElementById("btn-add-item-manual").addEventListener("click", renderManualForm, { once: true });
 
-  const closeModal = () => el.modalContainer.classList.add("hidden");
+    el.modalBody.querySelectorAll(".library-item-card").forEach(card => {
+      const idx = card.dataset.itemIdx;
+      
+      card.addEventListener("dragstart", (e) => {
+        e.dataTransfer.effectAllowed = "copy";
+        e.dataTransfer.setData("application/json", JSON.stringify({ source: "library", itemIdx: parseInt(idx) }));
+        setTimeout(() => {
+          el.modalContainer.style.opacity = "0.2";
+          el.modalContainer.style.pointerEvents = "none";
+        }, 0);
+      });
 
-  document.getElementById("btn-cancel-add-item").addEventListener("click", closeModal, { once: true });
+      card.addEventListener("dragend", () => {
+        el.modalContainer.style.opacity = "1";
+        el.modalContainer.style.pointerEvents = "auto";
+        el.modalContainer.classList.add("hidden"); // close after dragging
+      });
 
-  document.getElementById("btn-confirm-add-item").addEventListener("click", () => {
-    const name = nameInput.value.trim();
-    if (!name) {
-      nameInput.focus();
-      nameInput.style.borderColor = "var(--color-rust)";
-      return;
-    }
+      card.addEventListener("click", () => {
+        const item = worldState.itensDb[idx];
+        const inv = char.inventario;
+        const emptyIndex = inv.findIndex(s => !s.name || s.name.trim() === "");
+        if (emptyIndex === -1) {
+          alert("Inventário cheio! Remova ou troque itens antes de adicionar novos.");
+          return;
+        }
+        inv[emptyIndex] = {
+          name: item.name,
+          qualidade: 3,
+          pressao: 0,
+          escassez: item.escassez,
+          categoria: (item.categorias && item.categorias.length > 0) ? item.categorias[0] : (item.categoria || 'nenhuma'),
+          categorias: item.categorias || [],
+          efeito: item.efeito
+        };
+        saveCurrentCharacter();
+        renderInventorySheet();
+        el.modalContainer.classList.add("hidden");
+      });
+    });
+  };
 
-    const inv = char.inventario;
-    const emptyIndex = inv.findIndex(s => !s.name || s.name.trim() === "");
-    if (emptyIndex === -1) {
-      alert("Inventário cheio! Remova ou troque itens antes de adicionar novos.");
-      return;
-    }
+  const renderManualForm = () => {
+    el.modalBody.innerHTML = `
+    <div class="inventory-add-manual-container">
+      <h3 class="modal-title" style="margin-bottom:8px;">Adicionar Item Manual</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+        Preencha os dados do novo item. Ele será colocado no primeiro espaço vazio.
+      </p>
+      <div class="add-item-form" style="display:flex; flex-direction:column; gap:14px;">
+        <div class="form-group">
+          <label for="add-item-name" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Nome do Item</label>
+          <input type="text" id="add-item-name" placeholder="Ex: Faca, Corda..." style="width:100%; padding:8px 12px;">
+        </div>
+        <div class="form-group">
+          <label for="add-item-efeito" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Efeito / Descrição</label>
+          <input type="text" id="add-item-efeito" placeholder="Ex: Arma leve..." style="width:100%; padding:8px 12px;">
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px;">
+          <div class="form-group">
+            <label for="add-item-qualidade" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Qualidade</label>
+            <select id="add-item-qualidade" style="width:100%; padding:6px 8px;">
+              <option value="0">Q0: Quebrado</option>
+              <option value="1">Q1: Defeituoso</option>
+              <option value="2">Q2: Comprometido</option>
+              <option value="3" selected>Q3: Padrão</option>
+              <option value="4">Q4: Reforçado</option>
+              <option value="5">Q5: Superior</option>
+              <option value="6">Q6: Obra-Prima</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add-item-pressao" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Desgaste</label>
+            <select id="add-item-pressao" style="width:100%; padding:6px 8px;">
+              <option value="0" selected>0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="add-item-escassez" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Escassez</label>
+            <select id="add-item-escassez" style="width:100%; padding:6px 8px;">
+              <option value="0">E0: Abundante</option>
+              <option value="1">E1: Corriqueiro</option>
+              <option value="2" selected>E2: Comum</option>
+              <option value="3">E3: Incomum</option>
+              <option value="4">E4: Atípico</option>
+              <option value="5">E5: Raro</option>
+              <option value="6">E6: Quase Extinto</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Características / Categorias</label>
+          <button type="button" id="btn-toggle-cat-list" class="btn btn-sm btn-gerenciar-cat" style="width:100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+            ➕ Gerenciar Categorias
+          </button>
+          <div id="add-item-cat-list" style="display:none; flex-direction:column; gap:4px; margin-top:8px; max-height:200px; overflow-y:auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 4px;">
+            ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => `
+              <label style="display:flex; align-items:center; gap:8px; padding:4px; border-radius:4px; background:rgba(255,255,255,0.03); cursor:pointer;">
+                <input type="checkbox" class="add-item-cat-checkbox" value="${key}" style="accent-color:var(--color-gold-glow);">
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                  <span style="font-size:11px; font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
+                  <span style="font-size:9px; color:var(--text-secondary);">${cat.desc}</span>
+                </div>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+          <button id="btn-cancel-add-item" class="btn" style="padding:10px 20px;">Voltar</button>
+          <button id="btn-confirm-add-item" class="btn btn-success" style="padding:10px 20px;">Adicionar</button>
+        </div>
+      </div>
+    </div>
+    `;
 
-    inv[emptyIndex] = {
-      name: name,
-      qualidade: parseInt(qualSelect.value),
-      pressao: parseInt(pressaoSelect.value),
-      escassez: parseInt(escSelect.value),
-      categoria: catSelect.value,
-      efeito: efeitoInput.value.trim()
-    };
+    document.getElementById("btn-toggle-cat-list").addEventListener("click", () => {
+      const list = document.getElementById("add-item-cat-list");
+      list.style.display = list.style.display === "none" ? "flex" : "none";
+    });
 
-    saveCurrentCharacter();
-    renderInventorySheet();
-    closeModal();
-  }, { once: true });
+    document.getElementById("btn-cancel-add-item").addEventListener("click", renderLibrary, { once: true });
+
+    document.getElementById("btn-confirm-add-item").addEventListener("click", () => {
+      const nameInput = document.getElementById("add-item-name");
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.focus();
+        nameInput.style.borderColor = "var(--color-rust)";
+        return;
+      }
+
+      const inv = char.inventario;
+      const emptyIndex = inv.findIndex(s => !s.name || s.name.trim() === "");
+      if (emptyIndex === -1) {
+        alert("Inventário cheio! Remova ou troque itens antes de adicionar novos.");
+        return;
+      }
+
+      const checkedBoxes = el.modalBody.querySelectorAll(".add-item-cat-checkbox:checked");
+      const selectedCats = Array.from(checkedBoxes).map(cb => cb.value);
+
+      inv[emptyIndex] = {
+        name: name,
+        qualidade: parseInt(document.getElementById("add-item-qualidade").value),
+        pressao: parseInt(document.getElementById("add-item-pressao").value),
+        escassez: parseInt(document.getElementById("add-item-escassez").value),
+        categoria: selectedCats.length > 0 ? selectedCats[selectedCats.length - 1] : 'nenhuma',
+        categorias: selectedCats,
+        efeito: document.getElementById("add-item-efeito").value.trim()
+      };
+
+      saveCurrentCharacter();
+      renderInventorySheet();
+      el.modalContainer.classList.add("hidden");
+    }, { once: true });
+  };
+
+  renderLibrary();
 
   const closeBtn = el.modalContainer.querySelector(".modal-close");
   if (closeBtn) {
-    closeBtn.addEventListener("click", closeModal, { once: true });
+    // We don't want to use once:true because they might open and close it multiple times.
+    // However, closeBtn is an existing DOM element, attaching another listener without removing might leak.
+    // Let's do it inline:
+    closeBtn.onclick = () => { el.modalContainer.classList.add("hidden"); };
   }
-
-  const handleOverlay = (e) => {
-    if (e.target === el.modalContainer) {
-      closeModal();
-      el.modalContainer.removeEventListener("click", handleOverlay);
-    }
-  };
-  el.modalContainer.addEventListener("click", handleOverlay, { once: true });
-
-  nameInput.focus();
 }
 
 // ==========================================
@@ -1480,6 +1457,7 @@ export function openCreateTraitModal() {
 
   el.modalContainer.classList.remove("hidden");
   el.modalBody.innerHTML = `
+  <div class="settings-modal-content card-glass">
     <h3 class="modal-title">Criar Característica Personalizada</h3>
     <div class="homebrew-form">
       <div class="form-group">
@@ -1503,6 +1481,7 @@ export function openCreateTraitModal() {
         <button class="btn btn-success" id="btn-confirm-create-trait">Criar Característica</button>
       </div>
     </div>
+  </div>
   `;
 
   document.getElementById("btn-cancel-create-trait").addEventListener("click", () => {
@@ -2482,7 +2461,26 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
           `;
         }
         
-        html = `
+          let cloudCharactersHtml = "";
+          if (cloudCharactersCache && cloudCharactersCache.length > 0) {
+            cloudCharactersHtml = `
+              <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; text-align: left;">
+                <h5 style="font-size: 11px; margin-bottom: 8px; color: var(--text-primary); text-transform: uppercase; font-family:var(--font-heading);">Fichas na Nuvem</h5>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  ${cloudCharactersCache.map(char => `
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                      <span style="font-size:11px; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${char.name}</span>
+                      <button class="btn btn-xs btn-cloud-delete-char" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-danger); color:var(--color-danger); background:rgba(239,68,68,0.04); cursor:pointer;">
+                        🗑️ Apagar
+                      </button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }
+
+          html = `
           <!-- Perfil do Usuário -->
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; background:rgba(255,255,255,0.04); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
             <div style="width:36px; height:36px; border-radius:50%; background:var(--color-blue-glow); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px; color:#fff;">
@@ -2538,6 +2536,9 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               📥 Puxar Nuvem
             </button>
           </div>
+
+          <!-- Listagem da Nuvem -->
+          ${cloudCharactersHtml}
 
           <!-- Outras Fichas -->
           ${otherCharactersHtml}
@@ -2778,6 +2779,48 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
           }
         });
       }
+
+      el.modalBody.querySelectorAll(".btn-cloud-delete-char").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const charId = btn.getAttribute("data-char-id");
+          const char = cloudCharactersCache.find(c => c.id === charId);
+          if (!char) return;
+
+          if (!confirm(`Tem certeza que deseja apagar a ficha de "${char.name}" da NUVEM? Esta ação é irreversível e NÃO afetará a sua ficha local.`)) {
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = "Apagando...";
+
+          try {
+            if (state.useRealFirebase) {
+              const firebase = await initRealFirebase();
+              if (firebase) {
+                const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+                await deleteDoc(doc(firebase.db, "characters", charId));
+              }
+            } else {
+              const db = getMockCloudDB();
+              const uid = state.currentUser.uid;
+              if (db[uid]) {
+                db[uid] = db[uid].filter(c => c.id !== charId);
+                saveMockCloudDB(db);
+              }
+            }
+
+            // Atualiza o cache local
+            cloudCharactersCache = cloudCharactersCache.filter(c => c.id !== charId);
+            renderContent();
+            updateCloudSyncBadge();
+          } catch (e) {
+            logger.error("Erro ao apagar ficha da nuvem", e);
+            alert("Erro ao apagar a ficha. Tente novamente.");
+            btn.disabled = false;
+            btn.textContent = "🗑️ Apagar";
+          }
+        });
+      });
 
       const btnSignOut = document.getElementById("btn-google-sign-out");
       if (btnSignOut) {
@@ -3023,3 +3066,89 @@ window.addEventListener("beforeunload", (e) => {
     return e.returnValue;
   }
 });
+
+// ==========================================
+// MODAL: GERENCIAR BANCO DE ITENS
+// ==========================================
+export function openManageItemsModal() {
+  if (!el.modalContainer || !el.modalBody) return;
+  el.modalContainer.classList.remove("hidden");
+  
+  function renderList() {
+    const items = worldState.itensDb || [];
+    el.modalBody.innerHTML = `
+      <h3 class="modal-title" style="margin-bottom: 16px;">Gerenciar Banco de Itens</h3>
+      <div class="manage-items-form" style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1);">
+        <input type="text" id="manage-item-name" class="ws-input" placeholder="Nome do Item" style="width:100%; background:#222; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:8px; border-radius:4px;">
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="manage-item-escassez" class="ws-input" placeholder="Escassez (ex: 2)" style="flex:1; background:#222; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:8px; border-radius:4px;">
+          <input type="number" id="manage-item-peso" class="ws-input" placeholder="Peso (ex: 1)" style="flex:1; background:#222; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:8px; border-radius:4px;">
+        </div>
+        <input type="text" id="manage-item-categoria" class="ws-input" placeholder="Categoria (opcional, separadas por vírgula)" style="width:100%; background:#222; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:8px; border-radius:4px;">
+        <textarea id="manage-item-efeito" class="ws-textarea" placeholder="Efeito / Descrição" style="width:100%; height:60px; background:#222; border:1px solid rgba(255,255,255,0.1); color:#fff; padding:8px; border-radius:4px;"></textarea>
+        <button id="btn-save-manage-item" class="btn btn-success" style="padding:10px;">Salvar Item</button>
+      </div>
+      <div class="manage-items-list" style="max-height: 40vh; overflow-y: auto;">
+        ${items.map((it, idx) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:rgba(0,0,0,0.3); margin-bottom:4px; border-radius:4px;">
+            <div>
+              <div style="font-weight:bold; font-size:14px; color:#fff;">${esc(it.name)}</div>
+              <div style="font-size:11px; color:#aaa;">Escassez: ${it.escassez} | Categorias: ${it.categorias ? it.categorias.join(", ") : ''}</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-sm btn-edit-item" data-idx="${idx}">Editar</button>
+              <button class="btn btn-sm btn-danger btn-delete-item" data-idx="${idx}">Excluir</button>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    document.getElementById("btn-save-manage-item").addEventListener("click", () => {
+      const name = document.getElementById("manage-item-name").value.trim();
+      if (!name) return;
+      const itemToSave = {
+        name: name,
+        escassez: parseInt(document.getElementById("manage-item-escassez").value) || 0,
+        peso: parseInt(document.getElementById("manage-item-peso").value) || 1,
+        categorias: document.getElementById("manage-item-categoria").value.split(",").map(c => c.trim()).filter(c => c),
+        efeito: document.getElementById("manage-item-efeito").value.trim()
+      };
+      
+      saveItemToDb(itemToSave);
+      renderList();
+    });
+
+    el.modalBody.querySelectorAll(".btn-edit-item").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = e.target.getAttribute("data-idx");
+        const it = worldState.itensDb[idx];
+        if (it) {
+          document.getElementById("manage-item-name").value = it.name;
+          document.getElementById("manage-item-escassez").value = it.escassez !== undefined ? it.escassez : "";
+          document.getElementById("manage-item-peso").value = it.peso !== undefined ? it.peso : "";
+          document.getElementById("manage-item-categoria").value = it.categorias ? it.categorias.join(", ") : (it.categoria || "");
+          document.getElementById("manage-item-efeito").value = it.efeito || "";
+        }
+      });
+    });
+
+    el.modalBody.querySelectorAll(".btn-delete-item").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = e.target.getAttribute("data-idx");
+        if (confirm("Tem certeza que deseja excluir este item permanentemente do banco de dados?")) {
+          worldState.itensDb.splice(idx, 1);
+          localStorage.setItem("assimilação_rpg_itens_db", JSON.stringify(worldState.itensDb));
+          renderList();
+        }
+      });
+    });
+  }
+
+  renderList();
+  
+  const closeBtn = el.modalContainer.querySelector(".modal-close");
+  if (closeBtn) {
+    closeBtn.onclick = () => el.modalContainer.classList.add("hidden");
+  }
+}

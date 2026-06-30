@@ -88,17 +88,19 @@ export function renderRefPanelMulti(label, containerId, ids, stateKey) {
       <button class="btn-remove-ref" data-refid="${s.id}" data-refcontainer="${containerId}" title="Remover vínculo">&times;</button>
     </span>
   `).join("") || `<span style="font-size:10px;color:var(--text-muted);">Nenhum vinculado</span>`;
-  const selectOpts = available.map(a => `<option value="${a.id}">${esc(a.name || a.nome)}</option>`).join("");
-  const selectHtml = available.length > 0
-    ? `<select id="${containerId}-add" style="font-size:11px;padding:3px 6px;max-width:160px;">
-         <option value="">— Vincular —</option>${selectOpts}
-       </select>`
+  
+  const addHtml = (available.length > 0 || items.length > 0)
+    ? `<div style="margin-top:8px;">
+         <button class="btn btn-sm btn-secondary btn-open-ref-modal" data-refcontainer="${containerId}" data-reflabel="${esc(label)}" data-statekey="${stateKey}" data-currentids="${(ids||[]).join(',')}">
+           + Adicionar
+         </button>
+       </div>`
     : "";
   return `
     <div style="margin-bottom:10px;">
       <p style="font-family:var(--font-heading);font-size:var(--font-size-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">${esc(label)}</p>
       <div class="ref-chips-container" id="${containerId}-chips">${chips}</div>
-      <div style="margin-top:5px;">${selectHtml}</div>
+      ${addHtml}
     </div>
   `;
 }
@@ -107,13 +109,29 @@ export function renderRefPanelSingle(label, id, currentId, stateKey) {
   const items = stateKey === "characters"
     ? (window._worldStateCharacters || [])
     : (worldState[stateKey] || []);
-  const opts = items.map(i => `<option value="${i.id}" ${i.id === currentId ? "selected" : ""}>${esc(i.name || i.nome)}</option>`).join("");
+    
+  const currentItem = items.find(i => i.id === currentId);
+  
+  const chipHtml = currentItem 
+    ? `<span class="ref-chip">
+         <span>${esc(currentItem.name || currentItem.nome)}</span>
+         <button class="btn-remove-ref" data-refid="${currentItem.id}" data-refcontainer="${id}" title="Remover vínculo">&times;</button>
+       </span>`
+    : `<span style="font-size:10px;color:var(--text-muted);">Nenhum vinculado</span>`;
+    
+  const addHtml = items.length > 0
+    ? `<div style="margin-top:8px;">
+         <button class="btn btn-sm btn-secondary btn-open-ref-modal-single btn-blue" data-refcontainer="${id}" data-reflabel="${esc(label)}" data-statekey="${stateKey}" data-currentids="${currentId || ''}">
+           + ${currentItem ? 'Alterar' : 'Vincular'}
+         </button>
+       </div>`
+    : "";
+
   return `
     <div style="margin-bottom:8px;">
       <label style="font-family:var(--font-heading);font-size:var(--font-size-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">${esc(label)}</label>
-      <select id="${id}" style="width:100%;font-size:var(--font-size-xs);padding:4px 8px;">
-        <option value="">— Nenhum —</option>${opts}
-      </select>
+      <div class="ref-chips-container" id="${id}-chips">${chipHtml}</div>
+      ${addHtml}
     </div>
   `;
 }
@@ -221,7 +239,7 @@ export function renderProfileCard(entity, prefix, config) {
   return `
     <div class="profile-card card-glass" style="display:flex; flex-direction:column; gap:20px; align-items:stretch; width:100%;">
       <div class="profile-card-top-row${hasThreeColsClass}">
-        <div class="portrait-centered-wrapper" style="display:flex; justify-content:center; padding:10px 0; width:100%;">
+        <div class="portrait-centered-wrapper" style="display:flex; flex-direction:column; align-items:center; padding:10px 0; width:100%;">
           <div class="polaroid-frame" id="${prefix}-image-frame" title="Clique para alterar a imagem" style="margin: 0 auto; flex-shrink:0;">
             ${imgContent}
             <div class="portrait-overlay"><span>Alterar Foto</span></div>

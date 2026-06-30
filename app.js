@@ -1,7 +1,7 @@
 import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations, updateCloudSyncBadge } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal, openCloudSyncModal } from "./js/modals.js";
+import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openManageItemsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal, openCloudSyncModal } from "./js/modals.js";
 import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
@@ -71,6 +71,9 @@ function setupEventListeners() {
   el.btnDeleteChar.addEventListener("click", deleteActiveCharacter);
   if (el.btnSettings) {
     el.btnSettings.addEventListener("click", openSettingsModal);
+  }
+  if (el.btnManageItems) {
+    el.btnManageItems.addEventListener("click", openManageItemsModal);
   }
   if (el.btnCloudSync) {
     el.btnCloudSync.addEventListener("click", openCloudSyncModal);
@@ -194,6 +197,13 @@ function setupEventListeners() {
   }
 
   // Wizard Navigation
+  if (el.btnWizCancel) {
+    el.btnWizCancel.addEventListener("click", () => {
+      if (confirm("Deseja cancelar a criação do personagem? Todo o progresso será perdido.")) {
+        goToLanding();
+      }
+    });
+  }
   el.btnWizPrev.addEventListener("click", wizardPrevStep);
   el.btnWizNext.addEventListener("click", wizardNextStep);
   el.btnWizFinish.addEventListener("click", wizardFinish);
@@ -227,84 +237,99 @@ function setupEventListeners() {
     }
   });
 
-  // Torna o modal arrastável e redefine a posição ao abrir
-  const modalContent = document.querySelector(".modal-content");
-  if (modalContent) {
-    let isDragging = false;
-    let startX, startY, initialLeft, initialTop;
+  // Torna os modais arrastáveis
+  let isDragging = false;
+  let startX, startY, initialLeft, initialTop;
+  let currentDragTarget = null;
 
-    modalContent.addEventListener("mousedown", (e) => {
-      // Não arrasta se clicar em botões, campos de entrada, selects, links ou no botão de fechar
-      const tag = e.target.tagName.toLowerCase();
-      if (
-        tag === "input" || 
-        tag === "button" || 
-        tag === "select" || 
-        tag === "textarea" || 
-        tag === "a" || 
-        e.target.closest(".btn") || 
-        e.target.classList.contains("modal-close")
-      ) {
-        return;
-      }
-      
-      isDragging = true;
-      modalContent.style.cursor = "grabbing";
-      
-      const rect = modalContent.getBoundingClientRect();
-      initialLeft = rect.left;
-      initialTop = rect.top;
-      
-      startX = e.clientX;
-      startY = e.clientY;
-      
-      modalContent.style.position = "absolute";
-      modalContent.style.margin = "0";
-      modalContent.style.left = `${initialLeft}px`;
-      modalContent.style.top = `${initialTop}px`;
-      modalContent.style.transform = "none";
-      modalContent.style.animation = "none";
-      
-      e.preventDefault();
-    });
+  document.addEventListener("mousedown", (e) => {
+    const modalContent = e.target.closest(".modal-content, .conflito-modal-content");
+    if (!modalContent) return;
 
-    document.addEventListener("mousemove", (e) => {
-      if (!isDragging) return;
-      
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      
-      modalContent.style.left = `${initialLeft + dx}px`;
-      modalContent.style.top = `${initialTop + dy}px`;
-    });
-
-    document.addEventListener("mouseup", () => {
-      if (isDragging) {
-        isDragging = false;
-        modalContent.style.cursor = "grab";
-      }
-    });
+    // Não arrasta se clicar em botões, campos de entrada, selects, links ou no botão de fechar
+    const tag = e.target.tagName.toLowerCase();
+    if (
+      tag === "input" || 
+      tag === "button" || 
+      tag === "select" || 
+      tag === "textarea" || 
+      tag === "a" || 
+      e.target.closest(".btn") || 
+      e.target.classList.contains("modal-close") ||
+      e.target.closest(".dice-skills-selection") || 
+      e.target.closest(".results-dice-grid") ||
+      e.target.closest(".library-items-grid")
+    ) {
+      return;
+    }
     
-    modalContent.style.cursor = "grab";
+    isDragging = true;
+    currentDragTarget = modalContent;
+    currentDragTarget.style.cursor = "grabbing";
+    
+    const rect = currentDragTarget.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+    
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    currentDragTarget.style.position = "absolute";
+    currentDragTarget.style.margin = "0";
+    currentDragTarget.style.left = `${initialLeft}px`;
+    currentDragTarget.style.top = `${initialTop}px`;
+    currentDragTarget.style.transform = "none";
+    currentDragTarget.style.animation = "none";
+    
+    e.preventDefault();
+  });
 
-    // Observer para recentralizar o modal sempre que for reaberto
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class") {
-          const isHidden = el.modalContainer.classList.contains("hidden");
-          if (!isHidden) {
-            modalContent.style.position = "";
-            modalContent.style.left = "";
-            modalContent.style.top = "";
-            modalContent.style.transform = "";
-            modalContent.style.margin = "";
-            modalContent.style.animation = "";
-          }
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging || !currentDragTarget) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    currentDragTarget.style.left = `${initialLeft + dx}px`;
+    currentDragTarget.style.top = `${initialTop + dy}px`;
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (isDragging && currentDragTarget) {
+      isDragging = false;
+      currentDragTarget.style.cursor = "grab";
+      currentDragTarget = null;
+    }
+  });
+
+  // Aplica o cursor grab inicial
+  document.querySelectorAll(".modal-content, .conflito-modal-content").forEach(m => m.style.cursor = "grab");
+
+  // Observer para recentralizar os modais quando os containers forem escondidos
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === "class") {
+        const targetContainer = mutation.target;
+        if (targetContainer.classList.contains("hidden")) {
+          // Reseta todos os modais dentro deste container
+          const modalsInside = targetContainer.querySelectorAll(".modal-content, .conflito-modal-content");
+          modalsInside.forEach(m => {
+            m.style.position = "";
+            m.style.left = "";
+            m.style.top = "";
+            m.style.transform = "";
+            m.style.margin = "";
+            m.style.animation = "";
+            m.style.cursor = "grab";
+          });
         }
-      });
+      }
     });
-    observer.observe(el.modalContainer, { attributes: true });
-  }
+  });
+  
+  if (el.modalContainer) observer.observe(el.modalContainer, { attributes: true, attributeFilter: ["class"] });
+  const diceDrawer = document.getElementById("dice-drawer");
+  if (diceDrawer) observer.observe(diceDrawer, { attributes: true, attributeFilter: ["class"] });
 
   // Add Trait from Sheet
   el.btnAddTraitSheet.addEventListener("click", openTraitsModal);

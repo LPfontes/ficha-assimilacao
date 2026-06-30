@@ -802,7 +802,7 @@
 /* Otimização do Inventário na Aba */
 #tab-inventario .inventory-grid {
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 8px;
   max-height: none;
   overflow-y: visible;
 }
@@ -898,7 +898,7 @@
 
 .character-card.square-card {
   width: 220px;
-  height: 220px;
+  height: 240px;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -908,8 +908,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
   position: relative;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -925,8 +924,8 @@
 }
 
 .character-card.square-card .char-card-avatar {
-  width: 76px;
-  height: 76px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -969,7 +968,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  padding: 0 4px;
 }
 
 .character-card.square-card .char-actions {
@@ -980,6 +978,19 @@
   pointer-events: none;
   transition: opacity 0.2s ease;
   z-index: 10;
+}
+
+.modal-content-manage-categories {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-modal-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
 }
 
 .character-card.square-card:hover .char-actions {

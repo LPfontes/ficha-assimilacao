@@ -69,6 +69,9 @@
         <span class="btn-icon" data-icon="cloud"></span>
         <span id="cloud-sync-badge" style="display:none; position:absolute; top:-2px; right:-2px; width:8px; height:8px; background-color:var(--color-orange); border-radius:50%;"></span>
       </button>
+      <button id="btn-manage-items" class="btn" title="Gerenciar Itens">
+        <span class="btn-icon" data-icon="backpack"></span>
+      </button>
       <button id="btn-settings" class="btn" title="Configurações">
         <span class="btn-icon" data-icon="settings"></span>
       </button>
@@ -141,7 +144,7 @@
           <p class="step-help">Dê um nome à sua personagem e escolha a idade dela com base no Colapso.</p>
           <div class="form-group">
             <label for="wiz-name">Nome do(a) Infectado(a):</label>
-            <input type="text" id="wiz-name" placeholder="Ex: Lucas Torres, Maya..." required>
+            <input type="text" id="wiz-name" placeholder="Ex: Lucas Torres, Maya...">
           </div>
           <div class="form-group">
             <label for="wiz-generation">Geração:</label>
@@ -159,11 +162,11 @@
           <p class="step-help">Defina as experiências que moldaram a visão de mundo da personagem.</p>
           <div class="form-group">
             <label for="wiz-ocupacao">Ocupação (Duas palavras: Identidade + Especificidade):</label>
-            <input type="text" id="wiz-ocupacao" placeholder="Ex: Agroecologista Tecnofóbico, Mercador Honrado..." required>
+            <input type="text" id="wiz-ocupacao" placeholder="Ex: Agroecologista Tecnofóbico, Mercador Honrado...">
           </div>
           <div class="form-group">
             <label for="wiz-evento">Evento Marcante (Frase de referência do passado):</label>
-            <input type="text" id="wiz-evento" placeholder="Ex: Sobrevivente da queda  Nível de Saúdeão Leopoldo, Abandonado pelos familiares..." required>
+            <input type="text" id="wiz-evento" placeholder="Ex: Sobrevivente da queda  Nível de Saúdeão Leopoldo, Abandonado pelos familiares...">
           </div>
         </div>
 
@@ -173,19 +176,19 @@
           <p class="step-help">Os motores emocionais da personagem. Defina dois anseios pessoais e dois coletivos.</p>
           <div class="form-group">
             <label for="wiz-prop-p1">Propósito Pessoal 1 (Anseio íntimo do Ego):</label>
-            <input type="text" id="wiz-prop-p1" placeholder="Ex: Conseguir um veículo para explorar..." required>
+            <input type="text" id="wiz-prop-p1" placeholder="Ex: Conseguir um veículo para explorar...">
           </div>
           <div class="form-group">
             <label for="wiz-prop-p2">Propósito Pessoal 2 (Outra motivação secreta):</label>
-            <input type="text" id="wiz-prop-p2" placeholder="Ex: Encontrar pistas sobre minha irmã desaparecida..." required>
+            <input type="text" id="wiz-prop-p2" placeholder="Ex: Encontrar pistas sobre minha irmã desaparecida...">
           </div>
           <div class="form-group">
             <label for="wiz-prop-col">Propósito Coletivo 1 (Impacto no grupo - necessita adesão):</label>
-            <input type="text" id="wiz-prop-col" placeholder="Ex: Manter as cercas do Refúgio seguras..." required>
+            <input type="text" id="wiz-prop-col" placeholder="Ex: Manter as cercas do Refúgio seguras...">
           </div>
           <div class="form-group">
             <label for="wiz-prop-col2">Propósito Coletivo 2 (Outro impacto/objetivo do grupo):</label>
-            <input type="text" id="wiz-prop-col2" placeholder="Ex: Descobrir uma cura para a infecção..." required>
+            <input type="text" id="wiz-prop-col2" placeholder="Ex: Descobrir uma cura para a infecção...">
           </div>
         </div>
 
@@ -306,10 +309,13 @@
       </div>
 
       <!-- Navegação do Wizard -->
-      <div class="wizard-footer">
-        <button id="btn-wiz-prev" class="btn" disabled>Anterior</button>
-        <button id="btn-wiz-next" class="btn">Próximo</button>
-        <button id="btn-wiz-finish" class="btn btn-success hidden">Finalizar & Salvar</button>
+      <div class="wizard-footer" style="display: flex; justify-content: space-between;">
+        <button id="btn-wiz-cancel" class="btn" style="background: var(--bg-card); border-color: var(--color-rust); color: var(--color-rust-glow);">Cancelar</button>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-wiz-prev" class="btn" disabled>Anterior</button>
+          <button id="btn-wiz-next" class="btn">Próximo</button>
+          <button id="btn-wiz-finish" class="btn btn-success hidden">Finalizar & Salvar</button>
+        </div>
       </div>
     </section>
 

@@ -581,13 +581,7 @@
   font-size: var(--font-size-xs);
   padding: 2px;
 }
-/* Inventário Customizado */
-#tab-inventario .inventory-grid {
-  grid-template-columns: 1fr;
-  gap: 10px;
-  max-height: none;
-  overflow-y: visible;
-}
+
 
 #tab-inventario .inventory-slot {
   background-color: rgba(0, 0, 0, 0.2);
@@ -1026,13 +1020,11 @@
 /* Grid de Recursos Naturais */
 .profile-field-group[data-group="recursos"] {
   display: grid !important;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px 16px;
-  padding: 14px;
-  background: rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 165, 0, 0.12) !important;
   border-radius: var(--radius-md) !important;
-  margin-top: 16px;
+  background: transparent;
 }
 
 .profile-field-group[data-group="recursos"] .ws-label {
@@ -1043,8 +1035,6 @@
   letter-spacing: 0.75px;
   color: var(--color-gold-glow);
   font-weight: bold;
-  border-bottom: 1px solid rgba(255, 165, 0, 0.2);
-  padding-bottom: 6px;
   margin: 0 0 8px 0 !important;
 }
 

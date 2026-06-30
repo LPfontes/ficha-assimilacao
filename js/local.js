@@ -1,9 +1,11 @@
 import { worldState, saveLocal, deleteLocal, createNewLocal, saveItemToDb } from "./world-state.js";
 import { hideAllScreens, goToLanding, esc, setupImageUpload } from "./screen-utils.js";
 import { renderHeader, renderProfileCard, renderRefPanelSingle, renderRefPanelMulti, renderCrudListEmpty } from "./screen-components.js";
+import { openSelectReferencesModal } from "./modals.js";
 
 const TIPO_LOCAL = ["Cidade","Floresta","Ponte","Ruína","Edifício","Estrada","Caverna","Acampamento","Costa","Outro"];
 const ESCASSEZ_OPTS = ["E0: Abundante","E1: Corriqueiro","E2: Comum","E3: Incomum","E4: Atípico","E5: Raro","E6: Quase Extinto"];
+const PERIGO_OPTS = ["Seguro","Baixo","Moderado","Alto","Severo","Extremo","Mortal"];
 
 const LOCAL_SHEET_CONFIG = {
   imageKey: 'imagem',
@@ -14,6 +16,13 @@ const LOCAL_SHEET_CONFIG = {
       type: 'select',
       options: TIPO_LOCAL.map(t => ({ value: t, label: t })),
       valueKey: 'tipoLocal'
+    },
+    {
+      id: 'local-perigo',
+      label: 'Perigo',
+      type: 'select',
+      options: PERIGO_OPTS.map((o, i) => ({ value: i, label: `${i} – ${o}` })),
+      valueKey: 'perigo'
     }
   ],
   gridFields: []
@@ -148,6 +157,7 @@ function _attachListeners(l) {
 
   screen.querySelector("#local-nome")?.addEventListener("input", e => { l.nome = e.target.value; saveLocal(l); });
   screen.querySelector("#local-tipo")?.addEventListener("change", e => { l.tipoLocal = e.target.value; saveLocal(l); });
+  screen.querySelector("#local-perigo")?.addEventListener("change", e => { l.perigo = parseInt(e.target.value); saveLocal(l); });
   screen.querySelector("#local-descricao")?.addEventListener("input", e => { l.descricao = e.target.value; saveLocal(l); });
   screen.querySelector("#local-notas")?.addEventListener("input", e => { l.notas = e.target.value; saveLocal(l); });
 
@@ -171,9 +181,28 @@ function _attachListeners(l) {
   });
   _attachPoiListeners(l);
 
-  screen.querySelector("#local-ref-regiao")?.addEventListener("change", e => {
-    l.regiaoId = e.target.value || null; saveLocal(l);
-  });
+  const _attachSingleRefListener = (containerId, fieldKey, stateKey) => {
+    const openBtn = screen.querySelector(`#${containerId}-chips`)?.parentNode.querySelector(".btn-open-ref-modal-single");
+    if (openBtn) {
+      openBtn.addEventListener("click", e => {
+        const label = e.target.dataset.reflabel;
+        const currentIds = l[fieldKey] ? [l[fieldKey]] : [];
+        openSelectReferencesModal("Vincular " + label, stateKey, currentIds, (selectedIds) => {
+          l[fieldKey] = selectedIds.length > 0 ? selectedIds[0] : null;
+          saveLocal(l);
+          renderLocalSheet();
+        }, true);
+      });
+    }
+    screen.querySelectorAll(`#${containerId}-chips .btn-remove-ref`).forEach(btn => {
+      btn.addEventListener("click", () => {
+        l[fieldKey] = null;
+        saveLocal(l); renderLocalSheet();
+      });
+    });
+  };
+
+  _attachSingleRefListener("local-ref-regiao", "regiaoId", "regioes");
 
   _attachMultiRefListeners(l, "local-ref-infectados", "infectadosAssociados", "characters");
   _attachMultiRefListeners(l, "local-ref-conflitos",  "conflitosAssociados",  "conflitos");
@@ -244,13 +273,16 @@ function _attachPoiListeners(l) {
 
 function _attachMultiRefListeners(l, containerId, fieldKey, stateKey) {
   const screen = getScreen();
-  const addSel = screen.querySelector(`#${containerId}-add`);
-  if (addSel) {
-    addSel.addEventListener("change", e => {
-      const id = e.target.value;
-      if (!id) return;
-      if (!l[fieldKey]) l[fieldKey] = [];
-      if (!l[fieldKey].includes(id)) { l[fieldKey].push(id); saveLocal(l); renderLocalSheet(); }
+  const openBtn = screen.querySelector(`#${containerId}-chips`).parentNode.querySelector(".btn-open-ref-modal");
+  if (openBtn) {
+    openBtn.addEventListener("click", e => {
+      const label = e.target.dataset.reflabel;
+      const currentIds = l[fieldKey] || [];
+      openSelectReferencesModal("Vincular " + label, stateKey, currentIds, (selectedIds) => {
+        l[fieldKey] = selectedIds;
+        saveLocal(l);
+        renderLocalSheet();
+      });
     });
   }
   screen.querySelectorAll(`#${containerId}-chips .btn-remove-ref`).forEach(btn => {

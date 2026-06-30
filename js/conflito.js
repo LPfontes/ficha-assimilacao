@@ -1,6 +1,7 @@
 import { worldState, saveConflito, deleteConflito, createNewConflito, saveAmeacaToDb } from "./world-state.js";
 import { hideAllScreens, goToLanding, esc, setupImageUpload } from "./screen-utils.js";
 import { renderImageFrame, renderAttrDots, renderStatusBadge, renderRefPanelSingle } from "./screen-components.js";
+import { openSelectReferencesModal } from "./modals.js";
 import { executeCustomRoll } from "./roller.js";
 import { getDieFaceImgSrc } from "./chat.js";
 
@@ -73,29 +74,29 @@ function _renderAmeacaActivations(a, ameacaIdx) {
         <div class="investimento-label-row">
           <span class="investimento-label">Partitura:</span>
           <div class="investimento-controls">
+            ${requiredS > 0 ? `
             <div class="investimento-control-group group-s">
               <img src="assets/d6/6(D6).webp" alt="S" title="Sucesso" class="conflito-trigger-badge-img badge-img-s">
               <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">-</button>
-              <span>${investedS}</span>
+              <span>${investedS}/${requiredS}</span>
               <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">+</button>
-            </div>
+            </div>` : ""}
+            ${requiredA > 0 ? `
             <div class="investimento-control-group group-a">
               <img src="assets/d6/ad.webp" alt="A" title="Adaptação" class="conflito-trigger-badge-img badge-img-a">
               <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">-</button>
-              <span>${investedA}</span>
+              <span>${investedA}/${requiredA}</span>
               <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">+</button>
-            </div>
+            </div>` : ""}
+            ${requiredP > 0 ? `
             <div class="investimento-control-group group-p">
               <img src="assets/d6/3-4(D6).webp" alt="P" title="Pressão" class="conflito-trigger-badge-img badge-img-p">
               <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">-</button>
-              <span>${investedP}</span>
+              <span>${investedP}/${requiredP}</span>
               <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">+</button>
-            </div>
+            </div>` : ""}
             <div class="conflito-ativacao-title-row-left">
               <span class="conflito-ativacao-titulo ameaca-ativacao-titulo">Ativação</span>
-              <div class="conflito-ativacao-title-row-left-left">
-                ${_renderTriggerBadges(act.gatilho)}
-              </div>
             </div>
             <div class="conflito-ativacao-title-row ameaca-ativacao-title-row">
               ${statusBadgeHtml}
@@ -129,6 +130,26 @@ function _renderCondicionantes(condicionantes) {
   `).join("");
 }
 
+function _renderObjetivosSecundarios(objetivosSecundarios) {
+  if (!objetivosSecundarios || objetivosSecundarios.length === 0) {
+    return `<div class="world-list-empty" style="font-size: 11px; padding: 12px; color: var(--text-muted);">Nenhum objetivo secundário definido.</div>`;
+  }
+  return objetivosSecundarios.map((obj, idx) => `
+    <div class="objetivo-secundario-item" data-obj-idx="${idx}" style="margin-bottom: 12px; padding: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); border-radius: 4px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <label class="ws-label" style="margin-bottom: 0;">Objetivo Secundário ${idx + 1}</label>
+        <div class="conflito-qty-controls" style="display:flex; align-items:center; gap:4px;">
+          <button type="button" class="btn-obj-sec-dec btn-conf-qty-dec" data-idx="${idx}">-</button>
+          <input type="number" value="${obj.valor || 0}" min="0" max="99" class="conflito-dado-input obj-sec-val" readonly style="width: 32px; text-align: center;">
+          <button type="button" class="btn-obj-sec-inc btn-conf-qty-inc" data-idx="${idx}">+</button>
+          <button type="button" class="btn btn-sm btn-danger btn-remove-obj-sec" data-idx="${idx}" style="margin-left:8px; font-size:12px; padding:2px 6px;">&times;</button>
+        </div>
+      </div>
+      <textarea class="ws-textarea obj-sec-desc" placeholder="Descreva o objetivo secundário..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(obj.descricao || '')}</textarea>
+    </div>
+  `).join("");
+}
+
 function _renderAmeacas(c) {
   if (!c.ameacas) c.ameacas = [];
   if (c.ameacas.length === 0) {
@@ -157,12 +178,12 @@ function _renderAmeacas(c) {
         
         <!-- Lista de Ativações da Ameaça -->
         <div class="ameaca-ativacoes-container">
-        <button type="button" class="btn btn-sm btn-add-ativacao-ameaca" data-ameaca-idx="${idx}">+ Ativação</button>
+        <button type="button" class="btn btn-sm btn-add-ativacao-ameaca btn-blue" data-ameaca-idx="${idx}">+ Ativação</button>
           <div class="ameaca-ativacoes-header">
             <span>Ativações da Ameaça</span>
             <div class="conflito-ativacao-header-row">
               <div class="conflito-ameaca-actions">
-                <button class="btn btn-sm btn-roll-ameaca" data-idx="${idx}">🎲 Rolar</button>
+                <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}">🎲 Rolar</button>
                 <button class="btn btn-sm btn-danger btn-remove-ameaca" data-idx="${idx}">&times;</button>
               </div>
               <span>Dados: ${diceDesc}</span>
@@ -178,6 +199,15 @@ function _renderAmeacas(c) {
 }
 
 export function loadConflitoSheet(conflito) {
+  if (!conflito.objetivosSecundarios) {
+    conflito.objetivosSecundarios = [];
+    if (conflito.objetivoSecundario) {
+      conflito.objetivosSecundarios.push({
+        descricao: conflito.objetivoSecundario,
+        valor: conflito.objSecundarioVal || 0
+      });
+    }
+  }
   worldState.currentConflito = conflito;
   worldState.sheetMode = "conflito";
   hideAllScreens();
@@ -253,16 +283,6 @@ export function renderConflitoSheet() {
             <textarea id="conflito-notas" class="ws-textarea conflito-notas-textarea" placeholder="Notas da sessão...">${esc(c.notas)}</textarea>
           </div>
 
-          <!-- Condicionantes -->
-          <div class="conflito-condicionantes-section" style="margin-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h4 class="ws-label" style="margin: 0; font-size: var(--font-size-md);">Condicionantes da Cena</h4>
-              <button type="button" class="btn btn-sm" id="btn-conflito-add-cond" style="font-size: 10px; padding: 2px 8px; line-height: 1.2;">+ Condicionante</button>
-            </div>
-            <div id="conflito-condicionantes-list" class="conflito-condicionantes-list">
-              ${_renderCondicionantes(c.condicionantes)}
-            </div>
-          </div>
         </div>
 
         <!-- Coluna 2: Dados -->
@@ -306,28 +326,37 @@ export function renderConflitoSheet() {
                 </button>
               </div>
 
-              <div class="conflito-objetivos-panel">
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <label class="ws-label" style="margin-bottom: 0;">Objetivo Principal</label>
-                    <div class="conflito-qty-controls">
-                      <button type="button" class="btn-obj-dec btn-conf-qty-dec" data-target="principal">-</button>
-                      <input type="number" id="conflito-obj-principal-val" value="${c.objPrincipalVal || 0}" min="0" max="99" class="conflito-dado-input" readonly style="width: 32px; text-align: center;">
-                      <button type="button" class="btn-obj-inc btn-conf-qty-inc" data-target="principal">+</button>
-                    </div>
-                  </div>
-                  <textarea id="conflito-obj-principal" class="ws-textarea" placeholder="Descreva o objetivo principal..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(c.objetivoPrincipal || '')}</textarea>
+              <!-- Condicionantes -->
+              <div class="conflito-condicionantes-section" style="background:transparent;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <h4 class="ws-label" style="margin: 0; font-size: var(--font-size-md);">Condicionantes da Cena</h4>
+                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-cond" style="font-size: 10px; padding: 2px 8px; line-height: 1.2;">+ Condicionante</button>
                 </div>
-                <div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <label class="ws-label" style="margin-bottom: 0;">Objetivos Secundários</label>
-                    <div class="conflito-qty-controls">
-                      <button type="button" class="btn-obj-dec btn-conf-qty-dec" data-target="secundario">-</button>
-                      <input type="number" id="conflito-obj-secundario-val" value="${c.objSecundarioVal || 0}" min="0" max="99" class="conflito-dado-input" readonly style="width: 32px; text-align: center;">
-                      <button type="button" class="btn-obj-inc btn-conf-qty-inc" data-target="secundario">+</button>
-                    </div>
+                <div id="conflito-condicionantes-list" class="conflito-condicionantes-list">
+                  ${_renderCondicionantes(c.condicionantes)}
+                </div>
+              </div>
+            </div>
+            
+            <div class="conflito-objetivos-panel">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label class="ws-label" style="margin-bottom: 0;">Objetivo Principal</label>
+                  <div class="conflito-qty-controls">
+                    <button type="button" class="btn-obj-dec btn-conf-qty-dec" data-target="principal">-</button>
+                    <input type="number" id="conflito-obj-principal-val" value="${c.objPrincipalVal || 0}" min="0" max="99" class="conflito-dado-input" readonly style="width: 32px; text-align: center;">
+                    <button type="button" class="btn-obj-inc btn-conf-qty-inc" data-target="principal">+</button>
                   </div>
-                  <textarea id="conflito-obj-secundario" class="ws-textarea" placeholder="Descreva os objetivos secundários..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(c.objetivoSecundario || '')}</textarea>
+                </div>
+                <textarea id="conflito-obj-principal" class="ws-textarea" placeholder="Descreva o objetivo principal..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(c.objetivoPrincipal || '')}</textarea>
+              </div>
+              <div id="conflito-objetivos-secundarios-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label class="ws-label" style="margin-bottom: 0;">Objetivos Secundários</label>
+                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-obj-sec" style="font-size: 10px; padding: 2px 8px; line-height: 1.2;">+ Objetivo</button>
+                </div>
+                <div id="conflito-objetivos-sec-list" class="conflito-objetivos-sec-list">
+                  ${_renderObjetivosSecundarios(c.objetivosSecundarios)}
                 </div>
               </div>
             </div>
@@ -395,31 +424,34 @@ export function renderConflitoSheet() {
                   <div class="investimento-label-row">
                     <span class="investimento-label">Partitura:</span>
                     <div class="investimento-controls">
+                      ${requiredS > 0 ? `
                       <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
                         <img src="assets/d6/6(D6).webp" alt="S" title="Sucesso"">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
-                        <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}</span>
+                        <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
-                      </div>
+                      </div>` : ""}
+                      ${requiredA > 0 ? `
                       <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
                         <img src="assets/d6/ad.webp" alt="A" title="Adaptação"">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
-                        <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}</span>
+                        <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
-                      </div>
+                      </div>` : ""}
+                      ${requiredP > 0 ? `
                       <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
                         <img src="assets/d6/3-4(D6).webp" alt="P" title="Pressão"">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
-                        <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}</span>
+                        <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
-                      </div>
+                      </div>` : ""}
                     </div>
                     </div>
                   </div>
                   <div class="conflito-ativacao-title-row">
                   <span title="Ativação">
                   
-                    ${_renderTriggerBadges(act.gatilho)}
+
                     <span class="conflito-ativacao-titulo">${act.titulo}</span>
                     ${statusBadgeHtml}
                   </span>
@@ -454,7 +486,7 @@ export function renderConflitoSheet() {
           <div class="conflito-ameacas-section">
             <div class="conflito-ameacas-header">
               <h4>Ameaças Ativas</h4>
-              <button type="button" class="btn btn-sm" id="btn-conflito-add-ameaca">+ Ameaça</button>
+              <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-ameaca">+ Ameaça</button>
             </div>
             <div id="conflito-ameacas-list" class="conflito-ameacas-list">
               ${_renderAmeacas(c)}
@@ -569,7 +601,7 @@ function _attachListeners(c) {
   screen.querySelector("#conflito-descricao")?.addEventListener("input", e => { c.descricao = e.target.value; saveConflito(c); });
   screen.querySelector("#conflito-notas")?.addEventListener("input", e => { c.notas = e.target.value; saveConflito(c); });
   screen.querySelector("#conflito-obj-principal")?.addEventListener("input", e => { c.objetivoPrincipal = e.target.value; saveConflito(c); });
-  screen.querySelector("#conflito-obj-secundario")?.addEventListener("input", e => { c.objetivoSecundario = e.target.value; saveConflito(c); });
+
 
   screen.querySelectorAll(".btn-obj-dec").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -577,11 +609,8 @@ function _attachListeners(c) {
       if (target === "principal") {
         c.objPrincipalVal = Math.max(0, (c.objPrincipalVal || 0) - 1);
         screen.querySelector("#conflito-obj-principal-val").value = c.objPrincipalVal;
-      } else {
-        c.objSecundarioVal = Math.max(0, (c.objSecundarioVal || 0) - 1);
-        screen.querySelector("#conflito-obj-secundario-val").value = c.objSecundarioVal;
+        saveConflito(c);
       }
-      saveConflito(c);
     });
   });
 
@@ -591,13 +620,12 @@ function _attachListeners(c) {
       if (target === "principal") {
         c.objPrincipalVal = (c.objPrincipalVal || 0) + 1;
         screen.querySelector("#conflito-obj-principal-val").value = c.objPrincipalVal;
-      } else {
-        c.objSecundarioVal = (c.objSecundarioVal || 0) + 1;
-        screen.querySelector("#conflito-obj-secundario-val").value = c.objSecundarioVal;
+        saveConflito(c);
       }
-      saveConflito(c);
     });
   });
+
+  _attachObjetivosSecundariosListeners(c);
 
   screen.querySelector("#conflito-status")?.addEventListener("change", e => {
     c.status = e.target.value;
@@ -823,12 +851,30 @@ function _attachListeners(c) {
     }
   });
 
-  [["conflito-ref-regiao", "regiaoId"], ["conflito-ref-refugio", "refugioId"], ["conflito-ref-local", "localId"]].forEach(([id, key]) => {
-    screen.querySelector(`#${id}`)?.addEventListener("change", e => {
-      c[key] = e.target.value || null;
-      saveConflito(c);
+  const _attachSingleRefListener = (containerId, fieldKey, stateKey) => {
+    const openBtn = screen.querySelector(`#${containerId}-chips`)?.parentNode.querySelector(".btn-open-ref-modal-single");
+    if (openBtn) {
+      openBtn.addEventListener("click", e => {
+        const label = e.target.dataset.reflabel;
+        const currentIds = c[fieldKey] ? [c[fieldKey]] : [];
+        openSelectReferencesModal("Vincular " + label, stateKey, currentIds, (selectedIds) => {
+          c[fieldKey] = selectedIds.length > 0 ? selectedIds[0] : null;
+          saveConflito(c);
+          renderConflitoSheet();
+        }, true);
+      });
+    }
+    screen.querySelectorAll(`#${containerId}-chips .btn-remove-ref`).forEach(btn => {
+      btn.addEventListener("click", () => {
+        c[fieldKey] = null;
+        saveConflito(c); renderConflitoSheet();
+      });
     });
-  });
+  };
+
+  _attachSingleRefListener("conflito-ref-regiao", "regiaoId", "regioes");
+  _attachSingleRefListener("conflito-ref-refugio", "refugioId", "refugios");
+  _attachSingleRefListener("conflito-ref-local", "localId", "locais");
 
   screen.querySelector("#btn-conflito-clear-log")?.addEventListener("click", () => {
     if (confirm("Limpar o histórico de rolagens deste conflito?")) {
@@ -1063,6 +1109,72 @@ function _attachListeners(c) {
       saveConflito(c);
       renderConflitoSheet();
     });
+  });
+}
+
+function _attachObjetivosSecundariosListeners(c) {
+  const container = getScreen().querySelector("#conflito-objetivos-secundarios-container");
+  if (!container) return;
+
+  // Use event delegation on the container
+  // Clone the container to remove any previously attached listeners (just in case)
+  const newContainer = container.cloneNode(true);
+  container.parentNode.replaceChild(newContainer, container);
+
+  newContainer.addEventListener("click", (e) => {
+    // Adicionar Objetivo
+    if (e.target.closest("#btn-conflito-add-obj-sec")) {
+      if (!c.objetivosSecundarios) c.objetivosSecundarios = [];
+      c.objetivosSecundarios.push({ descricao: "", valor: 0 });
+      saveConflito(c);
+      renderConflitoSheet();
+      return;
+    }
+
+    // Decrementar
+    const btnDec = e.target.closest(".btn-obj-sec-dec");
+    if (btnDec) {
+      const idx = parseInt(btnDec.dataset.idx);
+      c.objetivosSecundarios[idx].valor = Math.max(0, (c.objetivosSecundarios[idx].valor || 0) - 1);
+      saveConflito(c);
+      const valInput = btnDec.parentElement.querySelector(".obj-sec-val");
+      if (valInput) valInput.value = c.objetivosSecundarios[idx].valor;
+      return;
+    }
+
+    // Incrementar
+    const btnInc = e.target.closest(".btn-obj-sec-inc");
+    if (btnInc) {
+      const idx = parseInt(btnInc.dataset.idx);
+      c.objetivosSecundarios[idx].valor = (c.objetivosSecundarios[idx].valor || 0) + 1;
+      saveConflito(c);
+      const valInput = btnInc.parentElement.querySelector(".obj-sec-val");
+      if (valInput) valInput.value = c.objetivosSecundarios[idx].valor;
+      return;
+    }
+
+    // Remover
+    const btnRemove = e.target.closest(".btn-remove-obj-sec");
+    if (btnRemove) {
+      const idx = parseInt(btnRemove.dataset.idx);
+      if (confirm("Remover este objetivo secundário?")) {
+        c.objetivosSecundarios.splice(idx, 1);
+        saveConflito(c);
+        renderConflitoSheet();
+      }
+      return;
+    }
+  });
+
+  newContainer.addEventListener("input", (e) => {
+    if (e.target.classList.contains("obj-sec-desc")) {
+      const itemEl = e.target.closest(".objetivo-secundario-item");
+      if (itemEl) {
+        const idx = parseInt(itemEl.dataset.objIdx);
+        c.objetivosSecundarios[idx].descricao = e.target.value;
+        saveConflito(c);
+      }
+    }
   });
 }
 

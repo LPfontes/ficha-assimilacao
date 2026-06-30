@@ -77,7 +77,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.2);
   padding: 10px;
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.04);
@@ -138,6 +137,26 @@
   outline: none;
 }
 
+#local-screen .world-sheet-body {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+#regiao-screen .world-sheet-body {
+  grid-template-columns: 1.5fr 0.6fr 0.6fr;
+  gap: 10px;
+}
+
+#conflito-screen .world-sheet-body {
+  grid-template-columns: 0.6fr 1fr 0.8fr;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  #conflito-screen .world-sheet-body {
+    grid-template-columns: 1fr;
+  }
+}
+
 .conflito-roll-btn {
   border-color: rgba(239, 68, 68, 0.4);
   color: #fff;
@@ -153,6 +172,7 @@
   border-radius: 4px;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
   margin-top: 4px;
+  box-shadow: none;
 }
 
 .conflito-roll-btn:hover {
@@ -499,7 +519,7 @@
 .conflito-col-dados {
   display: flex;
 
-  gap: 16px;
+  gap: 10px;
 }
 
 .grid-3-col-d {
@@ -808,10 +828,9 @@
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 20px;
   cursor: pointer;
   line-height: 1;
-  padding: 0;
+  padding: 6px;
   transition: color 0.15s;
 }
 
@@ -858,9 +877,8 @@
 .conflito-dados-mid-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 10px;
   width: 100%;
-  margin-bottom: 12px;
   align-items: start;
 }
 
@@ -875,7 +893,11 @@
   flex-direction: column;
   gap: 8px;
 }
-
+.conflito-objetivos-sec-list{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
 .conflito-narrativa-wrapper {
   margin-top: 12px;
 }
@@ -1175,4 +1197,89 @@
 
 .conflito-ativacoes-header h3 {
   margin-bottom: 0;
+}
+
+/* Responsividade Mobile */
+@media (max-width: 768px) {
+  .conflito-sheet-body {
+    grid-template-columns: 1fr !important;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .conflito-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .conflito-title-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .conflito-header-controls {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .conflito-status-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .conflito-col-esquerda, .conflito-col-direita, .conflito-col-ativacoes {
+    width: 100%;
+  }
+
+  .investimento-label-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .investimento-controls {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .investimento-control-group {
+    padding: 4px 8px;
+  }
+
+  .conflito-ativacao-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .conflito-modal-content {
+    width: 95%;
+    max-width: 100%;
+    padding: 15px;
+    margin: 10px;
+  }
+
+  .conflito-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .ameaca-card, .ameaca-ativacao-card {
+    padding: 10px;
+  }
+
+  .conflito-trigger-badge-img {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .btn-invest-mini {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
 }

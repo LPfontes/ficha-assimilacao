@@ -91,10 +91,9 @@ export function wizardPrevStep() {
 
 export function validateWizardStep(step) {
   if (step === 1) {
-    const name = document.getElementById("wiz-name").value.trim();
+    let name = document.getElementById("wiz-name").value.trim();
     if (!name) {
-      alert("Por favor, digite o nome do(a) Infectado(a).");
-      return false;
+      name = "Sem Nome";
     }
     state.wizardData.name = name;
     state.wizardData.generation = document.getElementById("wiz-generation").value;
@@ -103,10 +102,6 @@ export function validateWizardStep(step) {
   if (step === 2) {
     const ocupacao = document.getElementById("wiz-ocupacao").value.trim();
     const evento = document.getElementById("wiz-evento").value.trim();
-    if (!ocupacao || !evento) {
-      alert("Defina a Ocupação e o Evento Marcante da personagem.");
-      return false;
-    }
     state.wizardData.ocupacao = ocupacao;
     state.wizardData.evento = evento;
   }
@@ -116,10 +111,6 @@ export function validateWizardStep(step) {
     const p2 = document.getElementById("wiz-prop-p2").value.trim();
     const col = document.getElementById("wiz-prop-col").value.trim();
     const col2 = document.getElementById("wiz-prop-col2").value.trim();
-    if (!p1 || !p2 || !col || !col2) {
-      alert("Preencha todos os quatro propósitos (2 Pessoais e 2 Coletivos).");
-      return false;
-    }
     state.wizardData.propP1 = p1;
     state.wizardData.propP2 = p2;
     state.wizardData.propCol = col;

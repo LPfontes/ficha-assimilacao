@@ -14,7 +14,7 @@ export const CARACTERISTICAS = [
     custo: 1,
     requisitoText: "Nenhum",
     requisitos: {},
-    descricao: "Todos os testes para conduzir animais de montaria podem transformar uma Adaptação em Sucesso em seu resultado."
+    descricao: "Todos os testes para conduzir animais de montaria podem transformar uma Adaptação em um Sucesso em seu resultado."
   },
   {
     id: "estagio_avancado",
@@ -22,7 +22,7 @@ export const CARACTERISTICAS = [
     custo: 1,
     requisitoText: "Apenas na criação inicial",
     requisitos: { criacao: true },
-    descricao: "Aumenta em 1 o Nível de Assimilação inicial, aumentando consequentemente em 1 o Nível de Assimilação e reduzindo consequentemente em 1 o Nível de Determinação . Requer aprovação do(a) Assimilador(a) para realizar a rolagem e escolha de Assimilações adicionais."
+    descricao: "Esta Característica só pode ser selecionada na criação da Ficha inicial do(a) Infectado(a). Aumenta em 1 o Nível de Assimilação inicial, aumentando consequentemente em 1 o Nível de Assimilação e reduzindo consequentemente em 1 o Nível de Determinação . Requer aprovação do(a) Assimilador(a) para realizar a rolagem e escolha de Assimilações adicionais."
   },
   {
     id: "investigador_assimilation",
@@ -135,7 +135,7 @@ export const CARACTERISTICAS = [
     custo: 2,
     requisitoText: "Geografia 2+",
     requisitos: { Geografia: 2 },
-    descricao: "Capaz de explorar a Região na metade do tempo Ponto  Ponto de Assimilação encontra marcos geográficos com sucesso em teste de Geografia ou Sobrevivência."
+    descricao: "É capaz de explorar a Região na metade do tempo e consegue encontrar um marco geográfico arbitrado pelo(a) Assimilador(a) caso tenha êxito em teste de Geografia ou Sobrevivência."
   },
   {
     id: "disciplinado",
@@ -223,7 +223,7 @@ export const CARACTERISTICAS = [
     custo: 2,
     requisitoText: "Percepção 2+",
     requisitos: { Percepção: 2 },
-    descricao: "Escolha um sentido (visão, audição, etc.). Testes de Percepção que utilizem este sentido ganham um Sucesso adicional."
+    descricao: "Escolha um sentido (visão, audição, tato, paladar e olfato). Testes de Percepção que utilizem este sentido ganham um Sucesso adicional."
   },
   // 3 Pontos
   {
@@ -240,7 +240,7 @@ export const CARACTERISTICAS = [
     custo: 3,
     requisitoText: "Engenharia 3+",
     requisitos: { Engenharia: 3 },
-    descricao: "Realiza Construções de forma eficiente, sem necessidade de testes de Engenharia semanais para obter pontos de obra."
+    descricao: "Realiza Construções de forma eficiente, sem necessidade de testes de Engenharia semanais para obter pontos de obra. (pag. 104)"
   },
   {
     id: "contra_ataque",
