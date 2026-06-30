@@ -153,14 +153,6 @@ body::before {
   gap: 16px;
 }
 
-.selector-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-heading);
-  font-weight: 500;
-}
-
 select, input[type="text"], input[type="number"], textarea {
   background: rgba(0, 0, 0, 0);
   border: 1px solid var(--border-color);

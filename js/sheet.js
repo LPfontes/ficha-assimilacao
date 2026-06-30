@@ -985,25 +985,9 @@ export function renderInventorySheet() {
       }
     };
  
-    inputName.addEventListener("input", saveSlot);
-    inputName.addEventListener("change", () => {
-      const typed = inputName.value.trim().toLowerCase();
-      const dbItem = (worldState.itensDb || []).find(it => it.name.toLowerCase() === typed);
-      if (dbItem) {
-        selE.value = dbItem.escassez;
-        inputEffect.value = dbItem.efeito;
-        slot.categorias = dbItem.categorias || [];
-        slot.categoria = dbItem.categoria || (dbItem.categorias && dbItem.categorias.length > 0 ? dbItem.categorias[dbItem.categorias.length - 1] : 'nenhuma');
-        saveSlot();
-        renderInventorySheet();
-      } else {
-        saveSlot();
-      }
-    });
     selQ.addEventListener("change", saveSlot);
     selP.addEventListener("change", saveSlot);
     selE.addEventListener("change", saveSlot);
-    inputEffect.addEventListener("input", saveSlot);
 
     const btnGerenciarCat = row.querySelector(".btn-gerenciar-cat");
     if (btnGerenciarCat) {

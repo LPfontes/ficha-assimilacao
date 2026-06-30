@@ -367,10 +367,7 @@
     flex-wrap: wrap;
     gap: 4px;
   }
-  .selector-container {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
+
   /* Landing content padding and max width */
   .landing-content {
     padding: 16px 12px;

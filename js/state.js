@@ -13,7 +13,6 @@ export const el = {
   modalBody: document.getElementById("modal-body"),
   
   // Header Controls
-  charSelector: document.getElementById("char-selector"),
   btnNewChar: document.getElementById("btn-new-char"),
   btnExportJson: document.getElementById("btn-export-json"),
   btnImportJson: document.getElementById("btn-import-json"),
@@ -280,31 +279,6 @@ export function saveCurrentCharacterImmediate() {
 }
 
 export function updateCharSelector() {
-  el.charSelector.innerHTML = "";
-  if (state.characters.length === 0) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "Nenhum personagem salvo";
-    opt.disabled = true;
-    opt.selected = true;
-    el.charSelector.appendChild(opt);
-    el.btnExportJson.disabled = true;
-    el.btnDeleteChar.disabled = true;
-    return;
-  }
-  
-  state.characters.forEach(char => {
-    const opt = document.createElement("option");
-    opt.value = char.id;
-    opt.textContent = char.name;
-    if (state.currentCharacter && char.id === state.currentCharacter.id) {
-      opt.selected = true;
-    }
-    el.charSelector.appendChild(opt);
-  });
-  
-  el.btnExportJson.disabled = false;
-  el.btnDeleteChar.disabled = false;
 }
 
 export function loadCharacter(charId) {

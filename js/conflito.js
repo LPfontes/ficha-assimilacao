@@ -300,7 +300,7 @@ export function renderConflitoSheet() {
                   <span class="conflito-dado-title">DADOS D6</span>
                   <div class="conflito-qty-controls">
                     <button type="button" class="btn-conf-qty-dec" data-sides="6">-</button>
-                    <input type="number" id="conflito-roll-d6" value="${c.grau || 1}" min="0" max="20" class="conflito-dado-input" readonly>
+                    <input type="number" id="conflito-roll-d6" value="${(c.d6Count ?? c.grau) || 1}" min="0" max="20" class="conflito-dado-input" readonly>
                     <button type="button" class="btn-conf-qty-inc" data-sides="6">+</button>
                   </div>
                 </div>
@@ -310,7 +310,7 @@ export function renderConflitoSheet() {
                   <span class="conflito-dado-title">DADOS D10</span>
                   <div class="conflito-qty-controls">
                     <button type="button" class="btn-conf-qty-dec" data-sides="10">-</button>
-                    <input type="number" id="conflito-roll-d10" value="0" min="0" max="20" class="conflito-dado-input" readonly>
+                    <input type="number" id="conflito-roll-d10" value="${c.d10Count || 0}" min="0" max="20" class="conflito-dado-input" readonly>
                     <button type="button" class="btn-conf-qty-inc" data-sides="10">+</button>
                   </div>
                 </div>
@@ -320,7 +320,7 @@ export function renderConflitoSheet() {
                   <span class="conflito-dado-title">DADOS D12</span>
                   <div class="conflito-qty-controls">
                     <button type="button" class="btn-conf-qty-dec" data-sides="12">-</button>
-                    <input type="number" id="conflito-roll-d12" value="0" min="0" max="20" class="conflito-dado-input" readonly>
+                    <input type="number" id="conflito-roll-d12" value="${c.d12Count || 0}" min="0" max="20" class="conflito-dado-input" readonly>
                     <button type="button" class="btn-conf-qty-inc" data-sides="12">+</button>
                   </div>
                 </div>
@@ -658,6 +658,8 @@ function _attachListeners(c) {
       const d6Input = screen.querySelector("#conflito-roll-d6");
       if (d6Input) {
         d6Input.value = c.grau;
+        c.d6Count = c.grau;
+        saveConflito(c);
       }
     });
   });
@@ -670,6 +672,8 @@ function _attachListeners(c) {
       if (input) {
         let val = parseInt(input.value) || 0;
         input.value = Math.max(0, val - 1);
+        c[`d${sides}Count`] = parseInt(input.value);
+        saveConflito(c);
       }
     });
   });
@@ -681,6 +685,8 @@ function _attachListeners(c) {
       if (input) {
         let val = parseInt(input.value) || 0;
         input.value = Math.min(20, val + 1);
+        c[`d${sides}Count`] = parseInt(input.value);
+        saveConflito(c);
       }
     });
   });

@@ -129,16 +129,7 @@
   }
 
   /* Override internal items styles inside drawer */
-  .header-controls .selector-container {
-    width: 100% !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 6px !important;
-  }
-  
-  .header-controls #char-selector {
-    width: 100% !important;
-  }
+
 
   .header-controls .btn {
     width: 100% !important;

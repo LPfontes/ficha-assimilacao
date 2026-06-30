@@ -64,9 +64,6 @@ function initDiceBox() {
 function setupEventListeners() {
   logger.info("Configurando ouvintes de eventos da interface...");
   // Header controls
-  el.charSelector.addEventListener("change", (e) => {
-    if (e.target.value) loadCharacter(e.target.value);
-  });
   el.btnNewChar.addEventListener("click", startWizard);
   el.btnDeleteChar.addEventListener("click", deleteActiveCharacter);
   if (el.btnSettings) {
@@ -118,11 +115,7 @@ function setupEventListeners() {
       }
     });
 
-    // Handle change on character selector specifically to close sidebar
-    el.charSelector.addEventListener("change", () => {
-      el.btnMobileMenu.classList.remove("active");
-      el.headerControls.classList.remove("active");
-    });
+
   }
 
   // Voltar button in mobile sidebar
@@ -223,9 +216,7 @@ function setupEventListeners() {
         state.currentCharacter.notes = el.charNotes.value;
         saveCurrentCharacter();
         
-        // Atualiza a opção no select
-        const option = el.charSelector.querySelector(`option[value="${state.currentCharacter.id}"]`);
-        if (option) option.textContent = state.currentCharacter.name;
+        
       }
     });
   });
