@@ -269,6 +269,7 @@ export function saveCurrentCharacter() {
       logger.error("Erro ao salvar personagem no LocalStorage:", e);
     }
   }, 500);
+  window.dispatchEvent(new CustomEvent("character-saved", { detail: { id: state.currentCharacter.id } }));
 }
 
 export function saveCurrentCharacterImmediate() {

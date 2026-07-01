@@ -8,7 +8,7 @@ async function initFirebase() {
   if (firebaseInstance) return firebaseInstance;
 
   const { initializeApp, getApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
-  const { getFirestore, collection, doc, setDoc, deleteDoc, getDoc, getDocs, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+  const { getFirestore, collection, doc, setDoc, deleteDoc, getDoc, getDocs, onSnapshot, Timestamp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
   const { getAuth, signInAnonymously, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
 
   let app;
@@ -21,7 +21,7 @@ async function initFirebase() {
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  firebaseInstance = { db, auth, collection, doc, setDoc, deleteDoc, getDoc, getDocs, onSnapshot, signInAnonymously, onAuthStateChanged };
+  firebaseInstance = { db, auth, collection, doc, setDoc, deleteDoc, getDoc, getDocs, onSnapshot, signInAnonymously, onAuthStateChanged, Timestamp };
   return firebaseInstance;
 }
 
@@ -48,15 +48,16 @@ async function ensureAuth() {
   });
 }
 
-export async function createRoom(playerName) {
+export async function createRoom(playerName, existingRoomId) {
   await ensureAuth();
   const fb = await initFirebase();
-  const roomId = generateRoomCode();
+  const roomId = existingRoomId || generateRoomCode();
   const playerId = "player_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
   const roomData = {
     hostId: playerId,
     hostName: playerName,
     createdAt: Date.now(),
+    expireAt: fb.Timestamp.fromMillis(Date.now() + 86400000),
     players: { [playerId]: { name: playerName, joinedAt: Date.now() } }
   };
   await fb.setDoc(fb.doc(fb.db, "rooms", roomId), roomData);
@@ -163,4 +164,10 @@ export async function cleanupRoomSignals(roomId) {
   await Promise.all(signalsSnap.docs.map(d => fb.deleteDoc(d.ref)));
   const candidatesSnap = await fb.getDocs(fb.collection(fb.db, "rooms", roomId, "candidates"));
   await Promise.all(candidatesSnap.docs.map(d => fb.deleteDoc(d.ref)));
+}
+
+export async function deleteRoomFirestore(roomId) {
+  const fb = await initFirebase();
+  await cleanupRoomSignals(roomId);
+  await fb.deleteDoc(fb.doc(fb.db, "rooms", roomId));
 }

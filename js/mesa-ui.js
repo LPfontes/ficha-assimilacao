@@ -1,11 +1,13 @@
 import { PeerManager } from "./mesa.js";
+import { deleteRoomFirestore } from "./webrtc-signaling.js";
 import { state, saveCurrentCharacter, loadCharacter } from "./state.js";
 import { esc } from "./screen-utils.js";
 import { logger } from "./logger.js";
-import { DICE_MAP } from "./roller.js";
+import { DICE_MAP, executeCustomRoll } from "./roller.js";
 import { getDieSymbolsHtml, getDieFaceImgSrc } from "./chat.js";
 import { ICONS } from "../icons.js";
 import { getCurrentHealthLevel } from "./health.js";
+import { worldState, saveConflito } from "./world-state.js";
 
 const tableScreen = document.getElementById("table-screen");
 const roomModal = document.getElementById("room-modal");
@@ -23,6 +25,99 @@ let isOnTableScreen = false;
 let _playerStateCache = {};  // playerId → data (para reaplicar após updatePlayerList)
 let _currentMapDataUrl = null; // última imagem de mapa enviada
 let _zoomLevel = 1, _panX = 0, _panY = 0;
+
+// ── Gerenciamento local de salas criadas ─────────────────────────────────────
+const MANAGED_ROOMS_KEY = "assimilação_managed_rooms";
+let _managedRooms = [];
+
+function _loadManagedRooms() {
+  try {
+    const raw = localStorage.getItem(MANAGED_ROOMS_KEY);
+    _managedRooms = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    _managedRooms = [];
+  }
+}
+
+function _saveManagedRooms() {
+  try {
+    localStorage.setItem(MANAGED_ROOMS_KEY, JSON.stringify(_managedRooms));
+  } catch (e) {
+    logger.error("[Mesa] Erro ao salvar salas gerenciadas:", e);
+  }
+}
+
+function _renderManagedRooms() {
+  const list = document.getElementById("managed-rooms-list");
+  if (!list) return;
+  if (_managedRooms.length === 0) {
+    list.innerHTML = `<div class="managed-rooms-empty">Nenhuma sala criada neste dispositivo.</div>`;
+    return;
+  }
+  list.innerHTML = _managedRooms.map((r, idx) => {
+    const date = new Date(r.createdAt).toLocaleString();
+    return `<div class="managed-room-item" data-index="${idx}">
+      <div class="managed-room-info">
+        <span class="managed-room-code">${esc(r.code)}</span>
+        <span class="managed-room-host">${esc(r.hostName)}</span>
+        <span class="managed-room-date">${esc(date)}</span>
+      </div>
+      <div class="managed-room-actions">
+        <button type="button" class="btn btn-sm btn-managed-join" data-code="${esc(r.code)}">Entrar</button>
+        <button type="button" class="btn btn-sm btn-managed-master" data-code="${esc(r.code)}" data-host="${esc(r.hostName)}" title="Entrar como mestre">👑 Mestre</button>
+        <button type="button" class="btn btn-sm btn-managed-delete" data-index="${idx}" style="border-color:var(--color-rust);color:var(--color-rust-glow);">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function _addManagedRoom(code, hostName) {
+  _managedRooms.push({ code, hostName, createdAt: Date.now() });
+  _saveManagedRooms();
+  _renderManagedRooms();
+}
+
+async function _deleteManagedRoom(index) {
+  const room = _managedRooms[index];
+  if (!room) return;
+  try {
+    await deleteRoomFirestore(room.code);
+  } catch (e) {
+    logger.error("[Mesa] Erro ao excluir sala do Firestore:", e);
+  }
+  _managedRooms.splice(index, 1);
+  _saveManagedRooms();
+  _renderManagedRooms();
+}
+
+async function _enterAsMaster(code, hostName) {
+  const playerName = prompt("Seu nome na mesa:", hostName || "Mestre");
+  if (!playerName) return;
+  try {
+    const pm = new PeerManager(handleMessage);
+    pm.onPeerConnected = () => {
+      broadcastCharacterState();
+      if (_currentMapDataUrl) peerManager?.broadcast({ type: "map", playerId: pm.playerId, data: { imageDataUrl: _currentMapDataUrl } });
+    };
+    peerManager = pm;
+    roomCode = await pm.createRoom(playerName, code);
+    document.getElementById("table-room-code-badge").textContent = "Sala: " + roomCode;
+    showTableScreen();
+    updatePlayerList([]);
+    _updateLocalPlayerState();
+    _applyCachedStates();
+    closeRoomModal();
+    logger.info("Sala recriada como mestre: " + roomCode);
+    const idx = _managedRooms.findIndex(r => r.code === code);
+    if (idx !== -1) {
+      _managedRooms[idx].hostName = playerName;
+      _managedRooms[idx].createdAt = Date.now();
+      _saveManagedRooms();
+    }
+  } catch (e) {
+    alert("Erro ao entrar como mestre: " + e.message);
+  }
+}
 
 export function getPeerManager() {
   return peerManager;
@@ -58,6 +153,8 @@ function _onCharSelect(selId, nameInputId) {
 
 export function openRoomModal() {
   _populateCharSelectors();
+  _loadManagedRooms();
+  _renderManagedRooms();
   if (roomModal) roomModal.classList.remove("hidden");
 }
 
@@ -81,10 +178,38 @@ export function initMesaUI() {
     if (e.target === roomModal) closeRoomModal();
   });
 
+  // Delegação de eventos para botões de salas gerenciadas
+  document.getElementById("managed-rooms-list")?.addEventListener("click", (e) => {
+    const joinBtn = e.target.closest(".btn-managed-join");
+    const masterBtn = e.target.closest(".btn-managed-master");
+    const delBtn = e.target.closest(".btn-managed-delete");
+    if (joinBtn) {
+      const code = joinBtn.dataset.code;
+      if (code) {
+        document.getElementById("room-code-input").value = code;
+        document.querySelector('.room-tab[data-room-tab="entrar"]')?.click();
+      }
+    }
+    if (masterBtn) {
+      const code = masterBtn.dataset.code;
+      const hostName = masterBtn.dataset.host;
+      if (code) _enterAsMaster(code, hostName);
+    }
+    if (delBtn) {
+      const idx = parseInt(delBtn.dataset.index);
+      if (!isNaN(idx)) _deleteManagedRoom(idx).catch(e => logger.error("[Mesa] Erro ao excluir sala:", e));
+    }
+  });
+
   document.getElementById("room-char-select")?.addEventListener("change", () => _onCharSelect("room-char-select", "room-player-name"));
   document.getElementById("room-char-select-join")?.addEventListener("change", () => _onCharSelect("room-char-select-join", "room-player-name-join"));
 
   document.getElementById("btn-create-room")?.addEventListener("click", async () => {
+    _loadManagedRooms();
+    if (_managedRooms.length >= 5) {
+      alert("Você já atingiu o limite máximo de 5 salas criadas.\n\nGerencie as salas existentes na aba \"Minhas Salas\" antes de criar uma nova.");
+      return;
+    }
     const charSelect = document.getElementById("room-char-select");
     const charId = charSelect?.value;
     if (charId) {
@@ -101,12 +226,13 @@ export function initMesaUI() {
       };
       peerManager = pm;
       roomCode = await pm.createRoom(playerName);
+      _addManagedRoom(roomCode, playerName);
       document.getElementById("room-code-display").textContent = roomCode;
       document.getElementById("table-room-code-badge").textContent = "Sala: " + roomCode;
       document.getElementById("room-step-create").classList.add("hidden");
       document.getElementById("room-step-waiting").classList.remove("hidden");
       showTableScreen();
-      updatePlayerList([{ id: pm.playerId, name: playerName }]);
+      updatePlayerList([]);
       _updateLocalPlayerState();
       _applyCachedStates();
       logger.info("Sala criada: " + roomCode);
@@ -258,6 +384,13 @@ export function initMesaUI() {
     if (isOnTableScreen) { _updateLocalPlayerState(); broadcastCharacterState(); }
   });
 
+  // Sincroniza mesa quando a ficha é salva (qualquer alteração na sheet)
+  window.addEventListener("character-saved", () => {
+    if (!state.currentCharacter) return;
+    if (document.getElementById("det-" + peerManager?.playerId)) _updateLocalPlayerState();
+    if (peerManager) broadcastCharacterState();
+  });
+
   // Limpar feed de rolagens
   document.getElementById("btn-clear-roll-feed")?.addEventListener("click", () => {
     if (rollFeedEl) {
@@ -267,6 +400,10 @@ export function initMesaUI() {
       if (countEl) countEl.textContent = "0";
     }
   });
+
+  _initChatPanel();
+  _initFichasPicker();
+  _initConflitoPicker();
 }
 
 function handleMessage(data, fromId) {
@@ -283,6 +420,9 @@ function handleMessage(data, fromId) {
         _updateFloatingButton();
       }
       break;
+    case "chat":
+      _receiveChatMessage(data);
+      break;
     case "map":
       if (data.data?.imageDataUrl) {
         setMapImage(data.data.imageDataUrl);
@@ -294,8 +434,9 @@ function handleMessage(data, fromId) {
         const knownIds = new Set(Object.keys(_playerStateCache));
         knownIds.add(peerManager?.playerId);
         const hasNewPlayer = list.some(p => !knownIds.has(p.id));
+        const filteredList = list.filter(p => p.id !== data.hostId);
         console.log("[MESA] _room_update players=" + list.map(p=>p.id).join(",") + " hasNew=" + hasNewPlayer + " cache=" + Object.keys(_playerStateCache).join(","));
-        updatePlayerList(list);
+        updatePlayerList(filteredList);
         _updateLocalPlayerState();
         _applyCachedStates();
         if (hasNewPlayer && peerManager) { console.log("[MESA] _room_update -> broadcastCharacterState"); broadcastCharacterState(); }
@@ -329,7 +470,8 @@ export function broadcastCharacterState() {
         dano: { ...(char.dano || { 6: 0, 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }) },
         maxPts: _getHealthMaxPts(char)
       },
-      det: { atual: char.detPoints || 0, max: char.detNivel || 1 }
+      det: { atual: char.detPoints || 0, max: char.detNivel || 1 },
+      ass: { atual: char.assPoints || 0, max: char.assNivel || 0 }
     }
   });
 }
@@ -386,12 +528,13 @@ function _renderHealthLevelsHTML(saude) {
 function updatePlayerList(players) {
   if (!playerListEl) return;
   playerListEl.innerHTML = players.map(p => {
-    const isMe = p.id === peerManager?.playerId;
+    const isMe = p.id === peerManager?.playerId && !!state.currentCharacter;
     return `<div class="table-player-item ${isMe ? 'is-me' : ''}" data-player-id="${p.id}">
       <div class="table-player-portrait" id="portrait-${p.id}"></div>
       <div class="table-player-stats">
         <span class="table-player-name">${esc(p.name)} ${isMe ? '(Você)' : ''}</span>
         <div class="stat-det" id="det-${p.id}">Det: --/--</div>
+        <div class="stat-ass" id="ass-${p.id}">Ass: --/--</div>
         <div class="stat-saude" id="saude-${p.id}">Vida: --/--</div>
       </div>
     </div>`;
@@ -426,6 +569,7 @@ function _updateLocalPlayerState() {
   console.log("[MESA] _updateLocalPlayerState id=" + playerId + " det=" + (char.detPoints || 0) + "/" + (char.detNivel || 1));
   const detEl = document.getElementById("det-" + playerId);
   const saudeEl = document.getElementById("saude-" + playerId);
+  const assEl = document.getElementById("ass-" + playerId);
   const portraitEl = document.getElementById("portrait-" + playerId);
   console.log("[MESA] _updateLocalPlayerState found detEl=" + !!detEl + " saudeEl=" + !!saudeEl);
   const maxPts = _getHealthMaxPts(char);
@@ -467,6 +611,9 @@ function _updateLocalPlayerState() {
       }
     });
   }
+  if (assEl) {
+    assEl.innerHTML = `Ass: ${char.assPoints || 0}/${char.assNivel || 0}`;
+  }
   if (portraitEl && char.portrait) portraitEl.innerHTML = `<img src="${char.portrait}" class="table-mini-portrait" alt="${esc(char.name)}">`;
   else if (portraitEl) portraitEl.innerHTML = `<div class="table-mini-portrait-placeholder">${esc(char.name?.[0] || '?')}</div>`;
 }
@@ -477,10 +624,12 @@ function _applyCachedStates() {
     const cached = _playerStateCache[pid];
     const detEl = document.getElementById("det-" + pid);
     const saudeEl = document.getElementById("saude-" + pid);
+    const assEl = document.getElementById("ass-" + pid);
     const portraitEl = document.getElementById("portrait-" + pid);
     console.log("[MESA] _applyCachedStates pid=" + pid + " detEl=" + !!detEl + " saudeEl=" + !!saudeEl + " det=", cached.det);
     if (detEl && cached.det) detEl.innerHTML = `<span class="det-value">Determinação:${cached.det.atual}/${cached.det.max}</span>`;
     if (saudeEl && cached.saude) saudeEl.innerHTML = _renderHealthLevelsHTML(cached.saude);
+    if (assEl && cached.ass) assEl.innerHTML = `Ass: ${cached.ass.atual || 0}/${cached.ass.max || 0}`;
     if (portraitEl) {
       if (cached.portrait) portraitEl.innerHTML = `<img src="${cached.portrait}" class="table-mini-portrait" alt="${esc(cached.nome || '')}">`;
       else portraitEl.innerHTML = `<div class="table-mini-portrait-placeholder">${esc(cached.nome?.[0] || '?')}</div>`;
@@ -499,10 +648,12 @@ function updatePlayerState(playerId, data) {
   if (data) { _playerStateCache[playerId] = data; console.log("[MESA] updatePlayerState CACHED", playerId, data); }
   const detEl = document.getElementById("det-" + playerId);
   const saudeEl = document.getElementById("saude-" + playerId);
+  const assEl = document.getElementById("ass-" + playerId);
   const portraitEl = document.getElementById("portrait-" + playerId);
   console.log("[MESA] updatePlayerState found detEl=" + !!detEl + " saudeEl=" + !!saudeEl);
   if (detEl && data.det) detEl.innerHTML = `<span class="det-value">Determinação:${data.det.atual}/${data.det.max}</span>`;
   if (saudeEl && data.saude) saudeEl.innerHTML = _renderHealthLevelsHTML(data.saude);
+  if (assEl && data.ass) assEl.innerHTML = `Ass: ${data.ass.atual || 0}/${data.ass.max || 0}`;
   if (portraitEl && data.portrait) portraitEl.innerHTML = `<img src="${data.portrait}" class="table-mini-portrait" alt="${esc(data.nome || '')}">`;
   else if (portraitEl && data?.nome) portraitEl.innerHTML = `<div class="table-mini-portrait-placeholder">${esc(data.nome[0] || '?')}</div>`;
   const playerItem = portraitEl?.closest?.(".table-player-item");
@@ -613,6 +764,8 @@ function showTableScreen() {
   } else {
     document.getElementById("table-map-controls")?.classList.add("hidden");
   }
+  _updateAddFichaButton();
+  _updateConflitoButton();
   broadcastCharacterState();
   if (broadcastInterval) clearInterval(broadcastInterval);
   broadcastInterval = setInterval(() => {
@@ -666,6 +819,11 @@ function hideTableScreen() {
   // Restaura a tela anterior, ou landing como fallback
   const target = previousScreen || document.getElementById("landing-screen");
   if (target) target.classList.remove("hidden");
+}
+
+/** Minimiza a mesa (sem desconectar) se ela estiver ativa. */
+export function minimizeMesa() {
+  if (isOnTableScreen) hideTableScreen();
 }
 
 // ── Botão Flutuante ──────────────────────────────────────────────────────────
@@ -735,4 +893,849 @@ function _hoistDiceDrawer() {
   if (!drawer) return;
   if (drawer.parentElement === document.body) return; // já hoistado
   document.body.appendChild(drawer);
+}
+
+// ── Chat Panel ────────────────────────────────────────────────────────────────
+
+let _chatMessages = [];      // { playerId, playerName, text, imageDataUrl, timestamp }
+let _chatUnread   = 0;
+let _chatOpen     = false;
+let _pendingChatImg = null;  // dataUrl da imagem a enviar
+
+function _initChatPanel() {
+  const panel      = document.getElementById("table-chat-panel");
+  const toggleBtn  = document.getElementById("btn-toggle-chat");
+  const closeBtn   = document.getElementById("btn-close-chat");
+  const sendBtn    = document.getElementById("btn-send-chat-msg");
+  const textInput  = document.getElementById("table-chat-text-input");
+  const imgInput   = document.getElementById("table-chat-img-input");
+  const preview    = document.getElementById("table-chat-img-preview");
+  const previewImg = document.getElementById("table-chat-img-preview-img");
+  const cancelImg  = document.getElementById("btn-cancel-chat-img");
+
+  if (!panel) return;
+
+  // Cria lightbox global
+  if (!document.getElementById("chat-img-lightbox")) {
+    const lb = document.createElement("div");
+    lb.id = "chat-img-lightbox";
+    lb.className = "hidden";
+    lb.innerHTML = `<img src="" alt="Imagem ampliada">`;
+    lb.addEventListener("click", () => lb.classList.add("hidden"));
+    document.body.appendChild(lb);
+  }
+
+  // Toggle abrir/fechar
+  toggleBtn?.addEventListener("click", () => _setChatOpen(!_chatOpen));
+  closeBtn?.addEventListener("click",  () => _setChatOpen(false));
+
+  // Auto-resize textarea
+  textInput?.addEventListener("input", () => {
+    textInput.style.height = "auto";
+    textInput.style.height = Math.min(textInput.scrollHeight, 80) + "px";
+  });
+
+  // Enter envia (Shift+Enter quebra linha)
+  textInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      _sendChatMessage();
+    }
+  });
+
+  sendBtn?.addEventListener("click", _sendChatMessage);
+
+  // Selecionar imagem
+  imgInput?.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      _pendingChatImg = evt.target.result;
+      if (previewImg) previewImg.src = _pendingChatImg;
+      if (preview) preview.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  });
+
+  cancelImg?.addEventListener("click", () => {
+    _pendingChatImg = null;
+    if (previewImg) previewImg.src = "";
+    if (preview) preview.classList.add("hidden");
+  });
+
+  _renderChatMessages();
+}
+
+function _setChatOpen(open) {
+  _chatOpen = open;
+  const panel = document.getElementById("table-chat-panel");
+  if (!panel) return;
+  if (open) {
+    panel.classList.remove("collapsed");
+    _chatUnread = 0;
+    _updateChatBadge();
+    // Scroll para o fim
+    const msgs = document.getElementById("table-chat-messages");
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  } else {
+    panel.classList.add("collapsed");
+  }
+}
+
+function _updateChatBadge() {
+  const badge = document.getElementById("chat-unread-badge");
+  if (!badge) return;
+  if (_chatUnread > 0 && !_chatOpen) {
+    badge.textContent = _chatUnread > 9 ? "9+" : _chatUnread;
+    badge.classList.remove("hidden");
+  } else {
+    badge.classList.add("hidden");
+  }
+}
+
+function _sendChatMessage() {
+  const textInput = document.getElementById("table-chat-text-input");
+  const text = textInput?.value.trim() || "";
+  if (!text && !_pendingChatImg) return;
+
+  const playerName = peerManager
+    ? (document.getElementById("room-player-name")?.value ||
+       document.getElementById("room-player-name-join")?.value ||
+       "Eu")
+    : "Eu";
+
+  const msg = {
+    playerId: peerManager?.playerId || "local",
+    playerName,
+    text,
+    imageDataUrl: _pendingChatImg || null,
+    timestamp: Date.now()
+  };
+
+  // Comprime imagem se houver antes de broadcast
+  if (_pendingChatImg && peerManager) {
+    _compressImage(_pendingChatImg, 800, 0.7, (compressed) => {
+      const broadcastMsg = { ...msg, imageDataUrl: compressed || _pendingChatImg };
+      peerManager.broadcast({ type: "chat", playerId: peerManager.playerId, data: broadcastMsg });
+    });
+  } else if (peerManager) {
+    peerManager.broadcast({ type: "chat", playerId: peerManager.playerId, data: msg });
+  }
+
+  _addChatMessage(msg, true);
+
+  // Limpa inputs
+  if (textInput) { textInput.value = ""; textInput.style.height = "auto"; }
+  _pendingChatImg = null;
+  const previewImg = document.getElementById("table-chat-img-preview-img");
+  const preview    = document.getElementById("table-chat-img-preview");
+  if (previewImg) previewImg.src = "";
+  if (preview) preview.classList.add("hidden");
+}
+
+function _receiveChatMessage(data) {
+  if (!data?.data) return;
+  _addChatMessage(data.data, false);
+  if (!_chatOpen) {
+    _chatUnread++;
+    _updateChatBadge();
+  }
+}
+
+function _addChatMessage(msg, isOwn) {
+  _chatMessages.push({ ...msg, isOwn });
+  if (_chatMessages.length > 100) _chatMessages.shift();
+  _renderChatMessages();
+  if (_chatOpen) {
+    const msgs = document.getElementById("table-chat-messages");
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+function _renderChatMessages() {
+  const container = document.getElementById("table-chat-messages");
+  if (!container) return;
+
+  if (_chatMessages.length === 0) {
+    container.innerHTML = `<div class="chat-msg-placeholder">Nenhuma mensagem ainda.<br>Seja o primeiro a falar! 💬</div>`;
+    return;
+  }
+
+  container.innerHTML = "";
+  _chatMessages.forEach((msg) => {
+    const bubble = document.createElement("div");
+    bubble.className = `chat-bubble ${msg.isOwn ? 'is-own' : 'is-other'}`;
+
+    const time = new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const author = esc(msg.playerName || "?");
+
+    let contentHtml = "";
+    if (msg.text) {
+      contentHtml += `<div class="chat-bubble-content">${esc(msg.text)}</div>`;
+    }
+    if (msg.imageDataUrl) {
+      contentHtml += `<img class="chat-bubble-img" src="${msg.imageDataUrl}" alt="imagem" loading="lazy">`;
+    }
+
+    bubble.innerHTML = `
+      <div class="chat-bubble-meta">
+        <span class="chat-bubble-author">${author}</span>
+        <span>${time}</span>
+      </div>
+      ${contentHtml}
+    `;
+
+    // Lightbox ao clicar em imagem
+    const imgEl = bubble.querySelector(".chat-bubble-img");
+    if (imgEl) {
+      imgEl.addEventListener("click", () => {
+        const lb = document.getElementById("chat-img-lightbox");
+        if (!lb) return;
+        lb.querySelector("img").src = msg.imageDataUrl;
+        lb.classList.remove("hidden");
+      });
+    }
+
+    container.appendChild(bubble);
+  });
+}
+
+// ── Fichas Extras do Mestre ────────────────────────────────────────────────
+
+let _extraFichas = []; // Array de { char: CharObject, id: string }
+
+/** Chamado em showTableScreen para mostrar/ocultar o botão conforme isHost */
+function _updateAddFichaButton() {
+  const btn = document.getElementById("btn-add-ficha");
+  if (!btn) return;
+  if (peerManager?.isHost) {
+    btn.classList.remove("hidden");
+  } else {
+    btn.classList.add("hidden");
+  }
+}
+
+function _initFichasPicker() {
+  const btn      = document.getElementById("btn-add-ficha");
+  const modal    = document.getElementById("modal-add-ficha");
+  const closeBtn = document.getElementById("btn-close-add-ficha");
+  const search   = document.getElementById("ficha-picker-search");
+
+  if (!btn || !modal) return;
+
+  btn.addEventListener("click", () => {
+    _openFichasPicker();
+  });
+
+  closeBtn?.addEventListener("click", () => modal.classList.add("hidden"));
+
+  // Fechar ao clicar no overlay
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+
+  // Filtro de busca em tempo real
+  search?.addEventListener("input", () => _renderFichasPickerList(search.value.trim()));
+}
+
+function _openFichasPicker() {
+  const modal  = document.getElementById("modal-add-ficha");
+  const search = document.getElementById("ficha-picker-search");
+  if (!modal) return;
+  if (search) search.value = "";
+  _renderFichasPickerList("");
+  modal.classList.remove("hidden");
+  search?.focus();
+}
+
+function _renderFichasPickerList(filter = "") {
+  const list = document.getElementById("ficha-picker-list");
+  if (!list) return;
+
+  const chars = state.characters || [];
+  const addedIds = new Set(_extraFichas.map(e => e.char.id));
+  const q = filter.toLowerCase();
+
+  const filtered = chars.filter(c =>
+    !q || c.name?.toLowerCase().includes(q) ||
+    c.ocupacao?.toLowerCase().includes(q)
+  );
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="ficha-picker-empty">Nenhuma ficha encontrada.<br>Crie fichas na tela principal.</div>`;
+    return;
+  }
+
+  list.innerHTML = "";
+  filtered.forEach(char => {
+    const isAdded = addedIds.has(char.id);
+    const item = document.createElement("div");
+    item.className = "ficha-picker-item" + (isAdded ? " already-added" : "");
+
+    const avatarHtml = char.portrait
+      ? `<img class="ficha-picker-avatar" src="${char.portrait}" alt="${esc(char.name)}">`
+      : `<div class="ficha-picker-avatar-placeholder">${esc(char.name?.[0] || "?")}</div>`;
+
+    const sub = [char.ocupacao, char.geracao].filter(Boolean).join(" · ") || "Infectado";
+
+    item.innerHTML = `
+      ${avatarHtml}
+      <div class="ficha-picker-info">
+        <div class="ficha-picker-name">${esc(char.name || "Sem nome")}</div>
+        <div class="ficha-picker-sub">${esc(sub)}</div>
+      </div>
+      ${isAdded ? '<span class="ficha-picker-check">✓</span>' : ''}
+    `;
+
+    if (!isAdded) {
+      item.addEventListener("click", () => {
+        _addExtraFicha(char);
+        document.getElementById("modal-add-ficha")?.classList.add("hidden");
+      });
+    }
+
+    list.appendChild(item);
+  });
+}
+
+function _addExtraFicha(char) {
+  // Copia profunda para não afetar o personagem atual
+  const copy = JSON.parse(JSON.stringify(char));
+  const entry = { char: copy, id: "extra-" + copy.id };
+  _extraFichas.push(entry);
+  _renderExtraFichas();
+}
+
+function _removeExtraFicha(id) {
+  _extraFichas = _extraFichas.filter(e => e.id !== id);
+  _renderExtraFichas();
+}
+
+function _renderExtraFichas() {
+  const container = document.getElementById("table-extra-fichas");
+  if (!container) return;
+  container.innerHTML = "";
+
+  _extraFichas.forEach(entry => {
+    const { char, id } = entry;
+    const maxPts = _getHealthMaxPts(char);
+    const item = document.createElement("div");
+    item.className = "extra-ficha-item table-player-item";
+    item.dataset.extraId = id;
+
+    const portraitHtml = char.portrait
+      ? `<img src="${char.portrait}" class="table-mini-portrait" alt="${esc(char.name)}">`
+      : `<div class="table-mini-portrait-placeholder">${esc(char.name?.[0] || "?")}</div>`;
+
+    item.innerHTML = `
+      <div class="table-player-portrait">${portraitHtml}</div>
+      <div class="table-player-stats">
+        <span class="table-player-name">${esc(char.name)}</span>
+        <div class="stat-det" id="extra-det-${id}"></div>
+        <div class="stat-saude" id="extra-saude-${id}"></div>
+        <div class="stat-ass" id="extra-ass-${id}">Ass: ${char.assPoints || 0}/${char.assNivel || 0}</div>
+      </div>
+      <button class="btn-remove-extra-ficha" title="Remover ficha">✕</button>
+    `;
+
+    // Botão de remover
+    item.querySelector(".btn-remove-extra-ficha").addEventListener("click", () => {
+      _removeExtraFicha(id);
+    });
+
+    container.appendChild(item);
+    _renderExtraFichaStats(entry);
+  });
+}
+
+function _renderExtraFichaStats(entry) {
+  const { char, id } = entry;
+  const maxPts = _getHealthMaxPts(char);
+  if (!char.dano) char.dano = { 6:0, 5:0, 4:0, 3:0, 2:0, 1:0 };
+
+  // Determinação
+  const detEl = document.getElementById("extra-det-" + id);
+  if (detEl) {
+    detEl.innerHTML = `
+      <button type="button" class="btn-det-dec">−</button>
+      <span class="det-value">Determinação: ${char.detPoints || 0}/${char.detNivel || 1}</span>
+      <button type="button" class="btn-det-inc">+</button>
+    `;
+    detEl.querySelector(".btn-det-dec").addEventListener("click", () => {
+      if ((char.detPoints || 0) > 0) { char.detPoints--; _renderExtraFichaStats(entry); }
+    });
+    detEl.querySelector(".btn-det-inc").addEventListener("click", () => {
+      if ((char.detPoints || 0) < (char.detNivel || 1)) { char.detPoints++; _renderExtraFichaStats(entry); }
+    });
+  }
+
+  // Saúde
+  const saudeEl = document.getElementById("extra-saude-" + id);
+  if (saudeEl) {
+    saudeEl.innerHTML = _renderHealthLevelsHTML({ dano: char.dano, maxPts });
+
+    saudeEl.querySelectorAll(".health-drop").forEach(drop => {
+      drop.addEventListener("click", () => {
+        const lvlKey = parseInt(drop.dataset.level);
+        const index  = parseInt(drop.dataset.index);
+        const currentDano  = char.dano[lvlKey] || 0;
+        const currentHealth = maxPts - currentDano;
+        const newHealth = currentHealth === index ? index - 1 : index;
+        char.dano[lvlKey] = maxPts - newHealth;
+        if (char.dano[lvlKey] === maxPts && lvlKey > 1) char.dano[lvlKey - 1] = 0;
+        _renderExtraFichaStats(entry);
+      });
+    });
+
+    const decH = saudeEl.querySelector(".btn-health-mesa-dec");
+    const incH = saudeEl.querySelector(".btn-health-mesa-inc");
+    if (decH) decH.addEventListener("click", () => {
+      const activeLvl = _getActiveLevel(char.dano, maxPts);
+      const d = char.dano[activeLvl] || 0;
+      if (d < maxPts) {
+        char.dano[activeLvl] = d + 1;
+        if (char.dano[activeLvl] === maxPts && activeLvl > 1) char.dano[activeLvl - 1] = 0;
+        _renderExtraFichaStats(entry);
+      }
+    });
+    if (incH) incH.addEventListener("click", () => {
+      const activeLvl = _getActiveLevel(char.dano, maxPts);
+      const d = char.dano[activeLvl] || 0;
+      if (d > 0) {
+        char.dano[activeLvl] = d - 1;
+        _renderExtraFichaStats(entry);
+      } else if (activeLvl < 6) {
+        char.dano[activeLvl] = 0;
+        char.dano[activeLvl + 1] = maxPts - 1;
+        _renderExtraFichaStats(entry);
+      }
+    });
+  }
+  const assEl = document.getElementById("extra-ass-" + id);
+  if (assEl) assEl.textContent = `Ass: ${char.assPoints || 0}/${char.assNivel || 0}`;
+}
+
+// ── Conflito na Mesa ──────────────────────────────────────────────────────────────
+
+let _activeConflito = null; // ficha de conflito ativa na mesa
+
+function _updateConflitoButton() {
+  const btn    = document.getElementById("btn-table-conflito");
+  const banner = document.getElementById("table-conflito-banner");
+  if (!btn) return;
+
+  if (peerManager?.isHost) {
+    btn.classList.remove("hidden");
+  } else {
+    btn.classList.add("hidden");
+    if (banner) banner.classList.add("hidden");
+    return;
+  }
+
+  if (_activeConflito) {
+    btn.classList.add("conflito-active");
+    _showConflitoBanner(_activeConflito);
+  } else {
+    btn.classList.remove("conflito-active");
+    if (banner) banner.classList.add("hidden");
+  }
+}
+
+function _initConflitoPicker() {
+  const btn      = document.getElementById("btn-table-conflito");
+  const modal    = document.getElementById("modal-table-conflito");
+  const closeBtn = document.getElementById("btn-close-table-conflito-modal");
+  const search   = document.getElementById("conflito-picker-search");
+
+  if (!btn || !modal) return;
+
+  btn.addEventListener("click", () => {
+    if (_activeConflito) {
+      // já há conflito ativo → re-abre o picker para trocar
+      _openConflitoPicker();
+    } else {
+      _openConflitoPicker();
+    }
+  });
+
+  closeBtn?.addEventListener("click", () => modal.classList.add("hidden"));
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); });
+  search?.addEventListener("input", () => _renderConflitosPickerList(search.value.trim()));
+
+  // Botões do banner
+  document.getElementById("btn-tb-roll-conflito")?.addEventListener("click", _rollConflito);
+  document.getElementById("btn-tb-ativacoes")?.addEventListener("click", () => {
+    const modal = document.getElementById("modal-mesa-ativacoes");
+    const panel = document.querySelector(".mesa-ativacoes-panel");
+    const nomeEl = document.getElementById("mesa-ativacoes-conflito-nome");
+    if (!modal) return;
+    if (nomeEl && _activeConflito) nomeEl.textContent = _activeConflito.nome || "Conflito";
+    _renderMesaAtivacoes();
+    if (panel) {
+      panel.style.position = "";
+      panel.style.left = "";
+      panel.style.top = "";
+      panel.style.margin = "";
+    }
+    modal.classList.remove("hidden");
+  });
+  document.getElementById("btn-tb-end-conflito")?.addEventListener("click", () => {
+    _activeConflito = null;
+    _updateConflitoButton();
+  });
+  document.getElementById("btn-close-mesa-ativacoes")?.addEventListener("click", () => {
+    document.getElementById("modal-mesa-ativacoes")?.classList.add("hidden");
+  });
+  _makeMesaAtivacoesDraggable();
+  document.getElementById("btn-mesa-ativacoes-roll")?.addEventListener("click", () => {
+    _rollConflito();
+  });
+  document.getElementById("modal-mesa-ativacoes")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.add("hidden");
+  });
+
+  // +/- dos investimentos e reset nas ativações da mesa
+  document.getElementById("mesa-ativacoes-list")?.addEventListener("click", (e) => {
+    const inc = e.target.closest(".btn-invest-inc");
+    const dec = e.target.closest(".btn-invest-dec");
+    const reset = e.target.closest(".btn-reset-ativacao");
+    if (inc) _updateMesaInvestment(parseInt(inc.dataset.idx), inc.dataset.type, 1);
+    if (dec) _updateMesaInvestment(parseInt(dec.dataset.idx), dec.dataset.type, -1);
+    if (reset) _resetMesaAtivacao(parseInt(reset.dataset.idx));
+  });
+
+  // +/- dos dados no banner
+  document.querySelectorAll(".btn-conf-tb-dec").forEach(b => {
+    b.addEventListener("click", () => {
+      const input = document.getElementById(`tb-conflito-d${b.dataset.sides}`);
+      if (input) input.value = Math.max(0, parseInt(input.value || 0) - 1);
+    });
+  });
+  document.querySelectorAll(".btn-conf-tb-inc").forEach(b => {
+    b.addEventListener("click", () => {
+      const input = document.getElementById(`tb-conflito-d${b.dataset.sides}`);
+      if (input) input.value = Math.min(20, parseInt(input.value || 0) + 1);
+    });
+  });
+}
+
+function _openConflitoPicker() {
+  const modal  = document.getElementById("modal-table-conflito");
+  const search = document.getElementById("conflito-picker-search");
+  if (!modal) return;
+  if (search) search.value = "";
+  _renderConflitosPickerList("");
+  modal.classList.remove("hidden");
+  search?.focus();
+}
+
+function _renderConflitosPickerList(filter = "") {
+  const list = document.getElementById("conflito-picker-list");
+  if (!list) return;
+
+  const conflitos = worldState.conflitos || [];
+  const q = filter.toLowerCase();
+  const filtered = conflitos.filter(c =>
+    !q || c.nome?.toLowerCase().includes(q) ||
+    c.tipoConflito?.toLowerCase().includes(q)
+  );
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="ficha-picker-empty">Nenhum conflito encontrado.<br>Crie conflitos na tela de mundo.</div>`;
+    return;
+  }
+
+  const statusClassMap = { "Ativo": "status-ativo", "Contido": "status-contido", "Resolvido": "status-resolvido" };
+
+  list.innerHTML = "";
+  filtered.forEach(c => {
+    const isActive = _activeConflito?.id === c.id;
+    const item = document.createElement("div");
+    item.className = "ficha-picker-item" + (isActive ? " already-added" : "");
+
+    const statusClass = statusClassMap[c.status] || "status-ativo";
+    const grau = c.grau || 1;
+    const d6 = c.d6Count ?? grau;
+    const d10 = c.d10Count ?? 0;
+    const d12 = c.d12Count ?? 0;
+    const diceStr = [d6 && `${d6}d6`, d10 && `${d10}d10`, d12 && `${d12}d12`].filter(Boolean).join(" + ") || `${grau}d6`;
+
+    item.innerHTML = `
+      <div class="ficha-picker-avatar-placeholder" style="background:rgba(190,49,53,0.18); border-color:rgba(190,49,53,0.35); color:var(--color-rust-glow); font-size:18px;">⚔️</div>
+      <div class="ficha-picker-info">
+        <div class="ficha-picker-name">${esc(c.nome || "Sem nome")}</div>
+        <div class="ficha-picker-sub">${esc(diceStr)}</div>
+      </div>
+      <span class="conflito-picker-item-type">${esc(c.tipoConflito || "")}</span>
+      <span class="conflito-picker-item-status ${statusClass}">${esc(c.status || "Ativo")}</span>
+      ${isActive ? '<span class="ficha-picker-check">✓</span>' : ''}
+    `;
+
+    item.addEventListener("click", () => {
+      _setActiveConflito(c);
+      document.getElementById("modal-table-conflito")?.classList.add("hidden");
+    });
+
+    list.appendChild(item);
+  });
+}
+
+function _setActiveConflito(c) {
+  _activeConflito = c;
+  _updateConflitoButton();
+  // Pré-carrega os valores de dados do conflito no banner
+  const d6Input  = document.getElementById("tb-conflito-d6");
+  const d10Input = document.getElementById("tb-conflito-d10");
+  const d12Input = document.getElementById("tb-conflito-d12");
+  if (d6Input)  d6Input.value  = c.d6Count  ?? (c.grau || 1);
+  if (d10Input) d10Input.value = c.d10Count ?? 0;
+  if (d12Input) d12Input.value = c.d12Count ?? 0;
+}
+
+function _showConflitoBanner(c) {
+  const banner   = document.getElementById("table-conflito-banner");
+  const nomeEl   = document.getElementById("table-conflito-banner-nome");
+  const tipoEl   = document.getElementById("table-conflito-banner-tipo");
+  if (!banner) return;
+  if (nomeEl) nomeEl.textContent = c.nome || "Conflito";
+  if (tipoEl) tipoEl.textContent = c.tipoConflito || "";
+  banner.classList.remove("hidden");
+}
+
+function _makeMesaAtivacoesDraggable() {
+  const panel = document.querySelector(".mesa-ativacoes-panel");
+  const handle = document.querySelector(".mesa-ativacoes-header");
+  if (!panel || !handle) return;
+  let isDragging = false, startX, startY, origLeft, origTop;
+  handle.addEventListener("mousedown", (e) => {
+    if (e.target.closest("button")) return;
+    isDragging = true;
+    const rect = panel.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    origLeft = rect.left;
+    origTop = rect.top;
+    panel.style.position = "fixed";
+    panel.style.left = origLeft + "px";
+    panel.style.top = origTop + "px";
+    panel.style.margin = "0";
+    document.body.style.cursor = "grabbing";
+    panel.style.pointerEvents = "none";
+    handle.style.pointerEvents = "auto";
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    panel.style.left = (origLeft + e.clientX - startX) + "px";
+    panel.style.top = (origTop + e.clientY - startY) + "px";
+  });
+  document.addEventListener("mouseup", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    document.body.style.cursor = "";
+    panel.style.pointerEvents = "";
+    handle.style.pointerEvents = "";
+  });
+}
+
+function _diceImgMesa(type) {
+  const map = { S: "assets/d6/6(D6).webp", A: "assets/d6/ad.webp", P: "assets/d6/3-4(D6).webp" };
+  return map[type] || `assets/d6/${type}.webp`;
+}
+
+function _renderMesaAtivacoes() {
+  const list = document.getElementById("mesa-ativacoes-list");
+  if (!list) return;
+  const ativacoes = _activeConflito?.ativacoes || [];
+  if (ativacoes.length === 0) {
+    list.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:16px 0;">Nenhuma ativação neste conflito.</div>`;
+    return;
+  }
+  list.innerHTML = ativacoes.map((act, idx) => {
+    const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
+    const requiredS = (cleanTrigger.match(/S/g) || []).length;
+    const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
+    const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
+    const investedS = act.investedS || 0;
+    const investedA = act.investedA || 0;
+    const investedP = act.investedP || 0;
+    const isCompleted = (requiredS + requiredA + requiredP) > 0 &&
+      investedS >= requiredS && investedA >= requiredA && investedP >= requiredP;
+    const itemClass = "conflito-ativacao-item" + (isCompleted ? " completed-item" : "");
+    const triggerHtml = cleanTrigger.split("").map(ch => {
+      if (ch === "S") return `<img src="${_diceImgMesa('S')}" class="mesa-dice-img" title="Sucesso">`;
+      if (ch === "A" || ch === "B") return `<img src="${_diceImgMesa('A')}" class="mesa-dice-img" title="Adaptação">`;
+      if (ch === "C" || ch === "P") return `<img src="${_diceImgMesa('P')}" class="mesa-dice-img" title="Pressão">`;
+      return `<span>${esc(ch)}</span>`;
+    }).join("");
+    return `<div class="${itemClass}">
+      <div class="conflito-ativacao-title-row">
+        <span class="conflito-ativacao-titulo">${esc(act.titulo)}</span>
+      </div>
+      <div style="display:flex;gap:4px;margin:4px 0;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:10px;color:var(--text-muted);">Gatilho:</span>
+        ${triggerHtml}
+      </div>
+      <div class="conflito-ativacao-efeito">${esc(act.efeito)}</div>
+      <div class="mesa-ativacao-actions" style="display:flex; gap:4px; margin-top:4px;">
+        ${isCompleted ? `<button class="btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
+        <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação">Editar</button>
+      </div>
+      <div class="conflito-ativacao-investimento" style="margin-top:6px;">
+        <div class="investimento-label-row" style="display:flex;align-items:center;gap:4px;">
+          <span class="investimento-label">Partitura:</span>
+          <div class="investimento-controls">
+            ${requiredS > 0 ? `
+            <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
+              <img src="${_diceImgMesa('S')}" alt="S">
+              <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
+              <span class="invest-val ${investedS >= requiredS ? 'met' : ''}">${investedS}/${requiredS}</span>
+              <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
+            </div>` : ""}
+            ${requiredA > 0 ? `
+            <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
+              <img src="${_diceImgMesa('A')}" alt="A">
+              <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
+              <span class="invest-val ${investedA >= requiredA ? 'met' : ''}">${investedA}/${requiredA}</span>
+              <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
+            </div>` : ""}
+            ${requiredP > 0 ? `
+            <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
+              <img src="${_diceImgMesa('P')}" alt="P">
+              <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
+              <span class="invest-val ${investedP >= requiredP ? 'met' : ''}">${investedP}/${requiredP}</span>
+              <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
+            </div>` : ""}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function _updateMesaInvestment(idx, type, delta) {
+  const c = _activeConflito;
+  if (!c || !c.ativacoes || !c.ativacoes[idx]) return;
+  const act = c.ativacoes[idx];
+  const key = `invested${type}`;
+  act[key] = delta > 0 ? (act[key] || 0) + delta : Math.max(0, (act[key] || 0) + delta);
+  const list = document.getElementById("mesa-ativacoes-list");
+  if (!list) return;
+  const group = list.querySelector(`.btn-invest-inc[data-idx="${idx}"][data-type="${type}"]`)?.closest(".investimento-control-group");
+  if (!group) return;
+  const valSpan = group.querySelector(".invest-val");
+  if (!valSpan) return;
+  const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
+  const requiredS = (cleanTrigger.match(/S/g) || []).length;
+  const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
+  const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
+  const requiredMap = { S: requiredS, A: requiredA, P: requiredP };
+  const required = requiredMap[type] || 0;
+  valSpan.textContent = `${act[key]}/${required}`;
+  valSpan.classList.toggle("met", act[key] >= required && required > 0);
+  const item = group.closest(".conflito-ativacao-item");
+  if (item) {
+    const totalRequired = requiredS + requiredA + requiredP;
+    const isCompleted = totalRequired > 0 &&
+      (act.investedS || 0) >= requiredS &&
+      (act.investedA || 0) >= requiredA &&
+      (act.investedP || 0) >= requiredP;
+    item.classList.toggle("completed-item", isCompleted);
+    const actionsContainer = item.querySelector(".mesa-ativacao-actions");
+    if (actionsContainer) {
+      let resetBtn = actionsContainer.querySelector(".btn-reset-ativacao");
+      if (isCompleted && !resetBtn) {
+        resetBtn = document.createElement("button");
+        resetBtn.className = "btn-reset-ativacao";
+        resetBtn.dataset.idx = idx;
+        resetBtn.title = "Gastar todas as investidas e resetar";
+        resetBtn.textContent = "Gastar";
+        actionsContainer.insertBefore(resetBtn, actionsContainer.firstChild);
+      } else if (!isCompleted && resetBtn) {
+        resetBtn.remove();
+      }
+    }
+  }
+  saveConflito(c);
+}
+
+function _resetMesaAtivacao(idx) {
+  const c = _activeConflito;
+  if (!c || !c.ativacoes || !c.ativacoes[idx]) return;
+  const act = c.ativacoes[idx];
+  act.investedS = 0;
+  act.investedA = 0;
+  act.investedP = 0;
+  const list = document.getElementById("mesa-ativacoes-list");
+  if (list) {
+    const item = list.querySelector(`.btn-reset-ativacao[data-idx="${idx}"]`)?.closest(".conflito-ativacao-item");
+    if (item) {
+      item.classList.remove("completed-item");
+      const resetBtn = item.querySelector(".btn-reset-ativacao");
+      if (resetBtn) resetBtn.remove();
+      item.querySelectorAll(".invest-val").forEach(span => {
+        const required = span.textContent.split("/")[1];
+        span.textContent = `0/${required}`;
+        span.classList.remove("met");
+      });
+    }
+  }
+  saveConflito(c);
+
+  const msg = `Ativação: ${act.titulo} - ${act.efeito}`;
+  const pm = getPeerManager();
+  const playerName = pm ? (pm.isHost ? "Mestre" : "Jogador") : "Mestre";
+  const chatData = {
+    text: msg,
+    playerName,
+    timestamp: Date.now()
+  };
+  _addChatMessage(chatData, true);
+  if (pm) {
+    pm.broadcast({ type: "chat", playerId: pm.playerId, data: chatData });
+  }
+}
+
+function _rollConflito() {
+  const d6  = parseInt(document.getElementById("tb-conflito-d6")?.value)  || 0;
+  const d10 = parseInt(document.getElementById("tb-conflito-d10")?.value) || 0;
+  const d12 = parseInt(document.getElementById("tb-conflito-d12")?.value) || 0;
+
+  const parts = [];
+  if (d6  > 0) parts.push(`${d6}d6`);
+  if (d10 > 0) parts.push(`${d10}d10`);
+  if (d12 > 0) parts.push(`${d12}d12`);
+
+  if (parts.length === 0) { alert("Selecione pelo menos um dado para rolar!"); return; }
+
+  const formula = parts.join("+");
+  const label   = `Conflito${_activeConflito ? ': ' + _activeConflito.nome : ''}`;
+
+  const customFormulaInput = document.getElementById("dice-custom-formula");
+  if (customFormulaInput) customFormulaInput.value = formula;
+
+  const handler = (e) => {
+    document.removeEventListener("roll-added", handler);
+    const entry = e.detail;
+    const rollData = {
+      formula: entry.formula || formula,
+      label,
+      timestamp: Date.now(),
+      results: entry.results.map(r => ({ sides: r.sides, value: r.value, symbols: r.symbols })),
+      keptDiceIndexes: [...(entry.keptDiceIndexes || [])]
+    };
+    addOwnRollToFeed(rollData);
+    const pm = getPeerManager();
+    if (pm) {
+      pm.broadcast({
+        type: "roll",
+        playerId: pm.playerId,
+        data: rollData
+      });
+    }
+  };
+
+  document.addEventListener("roll-added", handler);
+  executeCustomRoll();
 }

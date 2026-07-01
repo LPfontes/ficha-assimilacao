@@ -1353,3 +1353,15 @@ export function renderSavedMacrosSheet() {
   }
 }
 
+// Re-renderiza seções da ficha quando alterações vêm da mesa
+let _sheetRenderGuard = 0;
+window.addEventListener("character-saved", () => {
+  if (!state.currentCharacter) return;
+  const now = Date.now();
+  if (now - _sheetRenderGuard < 100) return;
+  _sheetRenderGuard = now;
+  renderCaboGuerraSheet();
+  renderHealthSheet();
+  renderMutationsSheet();
+});
+

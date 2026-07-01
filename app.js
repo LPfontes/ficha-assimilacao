@@ -7,7 +7,7 @@ import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
 import { initLandingScreen, showLandingScreen, renderCharactersList } from "./js/landing.js";
 import { worldState, loadAllWorldData } from "./js/world-state.js";
-import { initMesaUI, broadcastCharacterState, broadcastRoll } from "./js/mesa-ui.js";
+import { initMesaUI, broadcastCharacterState, broadcastRoll, minimizeMesa } from "./js/mesa-ui.js";
 
 // ==========================================
 // INICIALIZAÇÃO DA APLICAÇÃO
@@ -79,10 +79,11 @@ function setupEventListeners() {
     el.btnCloudSync.addEventListener("click", openCloudSyncModal);
   }
   
-  // Logo home button - volta para landing screen
+  // Logo home button - volta para landing screen (minimiza a mesa se estiver ativa)
   const btnHome = document.getElementById("btn-home");
   if (btnHome) {
     btnHome.addEventListener("click", () => {
+      minimizeMesa(); // no-op se a mesa não estiver ativa
       goToLanding();
     });
   }

@@ -355,7 +355,7 @@ img.dice-tag:hover {
   border: 2px solid var(--color-blue-glow);
   border-radius: var(--radius-lg);
   box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
-  z-index: 1000;
+  z-index: 1500;
   display: flex;
   flex-direction: column;
   overflow: hidden;

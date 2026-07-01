@@ -16,8 +16,8 @@ export class PeerManager {
     this._roomUnsub = null;
   }
 
-  async createRoom(playerName) {
-    const { roomId, playerId } = await createRoom(playerName);
+  async createRoom(playerName, existingRoomId) {
+    const { roomId, playerId } = await createRoom(playerName, existingRoomId);
     this.roomId = roomId;
     this.playerId = playerId;
     this.isHost = true;

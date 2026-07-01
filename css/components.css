@@ -279,18 +279,18 @@
 .health-warning-orange {
   background-color: rgba(249, 115, 22, 0.15);
   border-color: rgba(249, 115, 22, 0.5);
-  color: #7c2d12;
+  color: #ff9e7e;
 }
 
 .health-warning-red {
   background-color: rgba(239, 68, 68, 0.15);
   border-color: rgba(239, 68, 68, 0.5);
-  color: #7f1d1d;
+  color: #ff7878;
 }
 
 .health-warning-darkred {
   background-color: rgba(153, 27, 27, 0.15);
-  border-color: rgba(153, 27, 27, 0.6);
+  border-color: rgba(255, 103, 103, 0.6);
 }
 
 .drawer-health-alert {

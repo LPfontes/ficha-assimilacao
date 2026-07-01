@@ -128,14 +128,166 @@
         <button id="btn-open-roller-table" class="btn btn-sm table-roller-btn" title="Abrir Rolador de Dados">
           <span style="font-size:1.1em;">🎲</span> Lançar Dados
         </button>
+        <button id="btn-table-conflito" class="btn btn-sm table-conflito-btn hidden" title="Ativar / Gerenciar Conflito">
+          ⚔️ Conflito
+        </button>
         <button class="btn btn-sm" id="btn-leave-table" style="border-color:var(--color-rust); color:var(--color-rust-glow);">Sair da Mesa</button>
       </div>
+
+      <!-- Painel de Conflito Ativo (banner abaixo da toolbar, só visível quando há conflito ativo) -->
+      <div id="table-conflito-banner" class="hidden">
+        <span id="table-conflito-banner-nome">Conflito</span>
+        <span id="table-conflito-banner-tipo" class="conflito-banner-tipo"></span>
+        <div class="conflito-banner-dice-row" id="table-conflito-dice-row">
+          <span class="conflito-dice-group">
+            <button class="btn-conf-tb-dec" data-sides="6">−</button>
+            <span class="conflito-dice-label">d6</span>
+            <input type="number" id="tb-conflito-d6" class="conflito-dice-input" min="0" max="20" value="1">
+            <button class="btn-conf-tb-inc" data-sides="6">+</button>
+          </span>
+          <span class="conflito-dice-group">
+            <button class="btn-conf-tb-dec" data-sides="10">−</button>
+            <span class="conflito-dice-label">d10</span>
+            <input type="number" id="tb-conflito-d10" class="conflito-dice-input" min="0" max="20" value="0">
+            <button class="btn-conf-tb-inc" data-sides="10">+</button>
+          </span>
+          <span class="conflito-dice-group">
+            <button class="btn-conf-tb-dec" data-sides="12">−</button>
+            <span class="conflito-dice-label">d12</span>
+            <input type="number" id="tb-conflito-d12" class="conflito-dice-input" min="0" max="20" value="0">
+            <button class="btn-conf-tb-inc" data-sides="12">+</button>
+          </span>
+          <button id="btn-tb-roll-conflito" class="btn btn-sm table-conflito-roll-btn" title="Rolar dados do conflito">
+            🎲 Rolar Conflito
+          </button>
+          <button id="btn-tb-ativacoes" class="btn btn-sm" title="Ativações do conflito" style="font-size:10px;">📋 Ativações</button>
+          <button id="btn-tb-end-conflito" class="btn btn-sm" title="Encerrar conflito ativo" style="border-color:var(--color-rust);color:var(--color-rust-glow);font-size:10px;">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal: Selecionar Ficha de Conflito -->
+      <div id="modal-table-conflito" class="ficha-picker-overlay hidden">
+        <div class="ficha-picker-box conflito-picker-box">
+          <div class="ficha-picker-header">
+            <span>⚔️ Selecionar Conflito</span>
+            <button id="btn-close-table-conflito-modal" class="btn btn-sm">✕</button>
+          </div>
+          <div class="ficha-picker-search-row">
+            <input type="text" id="conflito-picker-search" placeholder="Buscar conflito..." autocomplete="off">
+          </div>
+          <div id="conflito-picker-list" class="ficha-picker-list"></div>
+        </div>
+      </div>
+
+      <!-- Modal: Ativações do Conflito (card-glass overlay na mesa) -->
+      <div id="modal-mesa-ativacoes" class="mesa-ativacoes-overlay hidden">
+        <div class="card-glass mesa-ativacoes-panel">
+
+          <!-- Cabeçalho -->
+          <div class="mesa-ativacoes-header">
+            <div class="mesa-ativacoes-title-row">
+              <span class="mesa-ativacoes-title">⚔️ <span id="mesa-ativacoes-conflito-nome">Conflito</span></span>
+              <div id="mesa-ativacoes-last-roll" class="conflito-last-roll-counter" style="display:none;"></div>
+            </div>
+            <button id="btn-close-mesa-ativacoes" class="btn btn-sm" title="Fechar painel">✕</button>
+          </div>
+
+          <!-- Corpo com scroll -->
+          <div class="mesa-ativacoes-body">
+
+            <!-- Lista de Ativações do Conflito -->
+            <div class="mesa-ativacoes-section">
+              <div class="mesa-ativacoes-section-header">
+                <span class="mesa-section-label">Ativações</span>
+                <button id="btn-mesa-nova-ativacao-toggle" class="btn btn-sm" title="Nova ativação" style="font-size:10px;padding:2px 8px;">+ Nova</button>
+              </div>
+
+              <!-- Mini formulário de nova ativação (colapsável) -->
+              <div id="mesa-nova-ativacao-form" class="mesa-nova-ativacao-form hidden">
+                <div class="mesa-form-group">
+                  <label class="ws-label">Gatilho</label>
+                  <div class="mesa-gatilho-builder">
+                    <div class="mesa-gatilho-preview-row">
+                      <span id="mesa-gatilho-preview" class="mesa-gatilho-preview">Clique em +/− abaixo</span>
+                      <button type="button" id="btn-mesa-gatilho-clear" class="btn-mesa-clear">✕</button>
+                    </div>
+                    <div class="mesa-gatilho-dice-row">
+                      <div class="mesa-gatilho-dice-group">
+                        <img src="assets/d6/6(D6).webp" alt="S" class="mesa-dice-img">
+                        <div class="mesa-dice-btns">
+                          <button type="button" class="btn-mesa-gatilho-qty" data-type="S" data-dir="dec">−</button>
+                          <span id="mesa-gatilho-count-s" class="mesa-gatilho-count">0</span>
+                          <button type="button" class="btn-mesa-gatilho-qty" data-type="S" data-dir="inc">+</button>
+                        </div>
+                      </div>
+                      <div class="mesa-gatilho-dice-group">
+                        <img src="assets/d6/ad.webp" alt="A" class="mesa-dice-img">
+                        <div class="mesa-dice-btns">
+                          <button type="button" class="btn-mesa-gatilho-qty" data-type="A" data-dir="dec">−</button>
+                          <span id="mesa-gatilho-count-a" class="mesa-gatilho-count">0</span>
+                          <button type="button" class="btn-mesa-gatilho-qty" data-type="A" data-dir="inc">+</button>
+                        </div>
+                      </div>
+                      <div class="mesa-gatilho-dice-group">
+                        <img src="assets/d6/3-4(D6).webp" alt="P" class="mesa-dice-img">
+                        <div class="mesa-dice-btns">
+                          <button type="button" class="btn-mesa-gatilho-qty" data-type="P" data-dir="dec">−</button>
+                          <span id="mesa-gatilho-count-p" class="mesa-gatilho-count">0</span>
+                          <button type="button" class="btn-mesa-gatilho-qty" data-type="P" data-dir="inc">+</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mesa-form-group">
+                  <input type="text" id="mesa-nova-ativacao-titulo" placeholder="Título / Nome da Ação" class="mesa-form-input">
+                </div>
+                <div class="mesa-form-group">
+                  <textarea id="mesa-nova-ativacao-efeito" placeholder="Efeito / Descrição..." class="mesa-form-textarea" rows="2"></textarea>
+                </div>
+                <div class="mesa-form-actions">
+                  <button id="btn-mesa-cancel-ativacao" class="btn btn-sm btn-secondary">Cancelar</button>
+                  <button id="btn-mesa-confirm-ativacao" class="btn btn-sm btn-primary">Adicionar</button>
+                </div>
+              </div>
+
+              <div id="mesa-ativacoes-list" class="mesa-ativacoes-list"></div>
+            </div>
+
+            <!-- Ameaças Ativas -->
+            <div class="mesa-ativacoes-section" id="mesa-ameacas-section">
+              <div class="mesa-ativacoes-section-header">
+                <span class="mesa-section-label">Ameaças</span>
+              </div>
+              <div id="mesa-ameacas-list" class="mesa-ameacas-list"></div>
+            </div>
+
+          </div><!-- /body -->
+
+          <!-- Rodapé: botão rolar conflito -->
+          <div class="mesa-ativacoes-footer">
+            <button id="btn-mesa-ativacoes-roll" class="btn btn-sm table-conflito-roll-btn" style="width:100%;">
+              🎲 Rolar Conflito
+            </button>
+          </div>
+
+        </div>
+      </div>
+
       <div id="table-main-area">
 
         <!-- Coluna esquerda: Jogadores -->
         <div id="table-player-panel">
-          <div id="table-player-panel-header">Jogadores</div>
+          <div id="table-player-panel-header">
+            <span>Jogadores</span>
+            <button id="btn-add-ficha" class="btn btn-sm hidden" title="Adicionar ficha extra">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              Ficha
+            </button>
+          </div>
           <div id="table-player-list"></div>
+          <!-- fichas extras do mestre ficam aqui -->
+          <div id="table-extra-fichas"></div>
         </div>
 
         <!-- Centro: Mapa -->
@@ -166,7 +318,67 @@
           </div>
         </div>
 
+        <!-- Painel de Chat (overlay sobre o mapa, à direita do roll-panel) -->
+        <div id="table-chat-panel" class="collapsed">
+          <!-- Botão de toggle -->
+          <button id="btn-toggle-chat" title="Chat" aria-label="Abrir / Fechar Chat">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path d="M20 2H4a2 2 0 00-2 2v13a2 2 0 002 2h3l3 3 3-3h5a2 2 0 002-2V4a2 2 0 00-2-2zm-9 10H7v-2h4v2zm6 0h-4v-2h4v2zm0-4H7V6h10v2z"/>
+            </svg>
+            <span id="chat-toggle-label">Chat</span>
+            <span id="chat-unread-badge" class="chat-unread-badge hidden">0</span>
+          </button>
+
+          <!-- Corpo do chat (visível quando expandido) -->
+          <div id="table-chat-body">
+            <div id="table-chat-header">
+              <span>💬 Chat da Mesa</span>
+              <button id="btn-close-chat" class="btn btn-sm" title="Fechar">✕</button>
+            </div>
+
+            <!-- Área de mensagens -->
+            <div id="table-chat-messages"></div>
+
+            <!-- Preview de imagem -->
+            <div id="table-chat-img-preview" class="hidden">
+              <img id="table-chat-img-preview-img" src="" alt="preview">
+              <button id="btn-cancel-chat-img" title="Cancelar imagem">✕</button>
+            </div>
+
+            <!-- Input bar -->
+            <div id="table-chat-input-bar">
+              <label for="table-chat-img-input" id="btn-chat-img-attach" title="Anexar imagem">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <path d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/>
+                </svg>
+              </label>
+              <input type="file" id="table-chat-img-input" accept="image/*" style="display:none">
+              <textarea id="table-chat-text-input" placeholder="Mensagem... (Enter para enviar)" rows="1"></textarea>
+              <button id="btn-send-chat-msg" title="Enviar">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
+
+      <!-- Modal: Adicionar Ficha Extra (só Mestre) -->
+      <div id="modal-add-ficha" class="ficha-picker-overlay hidden">
+        <div class="ficha-picker-box">
+          <div class="ficha-picker-header">
+            <span>📋 Adicionar Ficha ao Painel</span>
+            <button id="btn-close-add-ficha" class="btn btn-sm">✕</button>
+          </div>
+          <div class="ficha-picker-search-row">
+            <input type="text" id="ficha-picker-search" placeholder="Buscar ficha..." autocomplete="off">
+          </div>
+          <div id="ficha-picker-list" class="ficha-picker-list"></div>
+        </div>
+      </div>
+
     </section>
 
 
@@ -1053,6 +1265,7 @@
           <div class="room-tabs">
             <div class="room-tab active" data-room-tab="criar">Criar Sala</div>
             <div class="room-tab" data-room-tab="entrar">Entrar</div>
+            <div class="room-tab" data-room-tab="salas">Minhas Salas</div>
           </div>
           <div class="room-tab-content" id="room-tab-criar">
             <label class="ws-label">Ficha do Personagem <small style="color:var(--text-muted);font-weight:normal;">(opcional)</small></label>
@@ -1073,6 +1286,9 @@
             <label class="ws-label" style="margin-top:8px;">Seu Nome</label>
             <input type="text" id="room-player-name-join" placeholder="Seu nome na mesa" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
             <button type="button" class="btn btn-sm btn-primary" id="btn-join-room" style="width:100%; margin-top:8px;">Entrar na Sala</button>
+          </div>
+          <div class="room-tab-content hidden" id="room-tab-salas">
+            <div id="managed-rooms-list" class="managed-rooms-list"></div>
           </div>
         </div>
         <div id="room-step-waiting" class="room-step hidden">

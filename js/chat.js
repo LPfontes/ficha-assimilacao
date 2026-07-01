@@ -42,9 +42,9 @@ export function appendRollToChat(formula) {
   } else if (worldState.sheetMode === "conflito") {
     maxKeep = state.activeRollResults.length;
   } else {
-    if (el.modEmpenho.checked) maxKeep++;
-    if (el.modOrigemOcupacao.checked) maxKeep++;
-    if (el.modOrigemEvento.checked) maxKeep++;
+    if (el.modEmpenho?.checked) maxKeep++;
+    if (el.modOrigemOcupacao?.checked) maxKeep++;
+    if (el.modOrigemEvento?.checked) maxKeep++;
     if (state.selectedRoll.agirPorInstinto) maxKeep++;
     const bonusKeep = parseInt(el.modBonusKeep?.value) || 0;
     maxKeep += Math.max(0, bonusKeep);
