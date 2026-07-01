@@ -959,6 +959,7 @@ function _attachListeners(c) {
     const required = requiredMap[type] || 0;
 
     const btn = screen.querySelector(`.btn-invest-inc[data-idx="${idx}"][data-type="${type}"], .btn-invest-dec[data-idx="${idx}"][data-type="${type}"]`);
+    const item = btn?.closest('.conflito-ativacao-item');
     if (btn) {
       const group = btn.closest('.investimento-control-group');
       if (group) {
@@ -970,32 +971,28 @@ function _attachListeners(c) {
       }
     }
 
-    const el = screen.querySelector(`[data-idx="${idx}"]`);
-    if (el) {
-      const item = el.closest('.conflito-ativacao-item');
-      if (item) {
-        const totalRequired = requiredS + requiredA + requiredP;
-        const isCompleted = totalRequired > 0 &&
-          (act.investedS || 0) >= requiredS &&
-          (act.investedA || 0) >= requiredA &&
-          (act.investedP || 0) >= requiredP;
-        item.classList.toggle('completed-item', isCompleted);
+    if (item) {
+      const totalRequired = requiredS + requiredA + requiredP;
+      const isCompleted = totalRequired > 0 &&
+        (act.investedS || 0) >= requiredS &&
+        (act.investedA || 0) >= requiredA &&
+        (act.investedP || 0) >= requiredP;
+      item.classList.toggle('completed-item', isCompleted);
 
-        const editBtn = item.querySelector('.btn-edit-ativacao');
-        if (editBtn) {
-          const container = editBtn.parentNode;
-          let resetBtn = container.querySelector('.btn-reset-ativacao');
-          if (isCompleted && !resetBtn) {
-            resetBtn = document.createElement('button');
-            resetBtn.className = 'btn-reset-ativacao';
-            resetBtn.dataset.idx = idx;
-            resetBtn.title = 'Gastar todas as investidas e resetar';
-            resetBtn.textContent = 'Gastar';
-            resetBtn.addEventListener('click', () => _resetAtivacao(idx));
-            container.insertBefore(resetBtn, editBtn);
-          } else if (!isCompleted && resetBtn) {
-            resetBtn.remove();
-          }
+      const editBtn = item.querySelector('.btn-edit-ativacao');
+      if (editBtn) {
+        const container = editBtn.parentNode;
+        let resetBtn = container.querySelector('.btn-reset-ativacao');
+        if (isCompleted && !resetBtn) {
+          resetBtn = document.createElement('button');
+          resetBtn.className = 'btn-reset-ativacao';
+          resetBtn.dataset.idx = idx;
+          resetBtn.title = 'Gastar todas as investidas e resetar';
+          resetBtn.textContent = 'Gastar';
+          resetBtn.addEventListener('click', () => _resetAtivacao(idx));
+          container.insertBefore(resetBtn, editBtn);
+        } else if (!isCompleted && resetBtn) {
+          resetBtn.remove();
         }
       }
     }
@@ -1024,6 +1021,19 @@ function _attachListeners(c) {
     act.snapshotS = 0;
     act.snapshotA = 0;
     act.snapshotP = 0;
+
+    const item = screen.querySelector(`.conflito-ativacao-item [data-idx="${idx}"]`)?.closest('.conflito-ativacao-item');
+    if (item) {
+      item.classList.remove('completed-item');
+      item.querySelectorAll('.invest-val').forEach(span => {
+        const required = span.textContent.split('/')[1];
+        span.textContent = `0/${required}`;
+        span.classList.remove('met');
+      });
+      const resetBtn = item.querySelector('.btn-reset-ativacao');
+      resetBtn?.remove();
+    }
+
     saveConflito(c);
   }
 

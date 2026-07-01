@@ -649,7 +649,6 @@
 /* Painel de Investimento na Ativação (Partitura) */
 .conflito-ativacao-investimento {
   border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding-top: 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -664,7 +663,7 @@
 
 .investimento-controls {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .investimento-control-group {
