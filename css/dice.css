@@ -38,6 +38,7 @@ display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1;
   min-height: 0;
+  gap: 20px;
 }
 .grid-2-col {
   display: grid;

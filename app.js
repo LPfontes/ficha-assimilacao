@@ -1,7 +1,7 @@
-import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, exportActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations, updateCloudSyncBadge } from "./js/state.js";
+import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations, updateCloudSyncBadge } from "./js/state.js";
 import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
-import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openManageItemsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal, openCloudSyncModal } from "./js/modals.js";
+import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openManageItemsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal, openCloudSyncModal, openExportModal } from "./js/modals.js";
 import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
@@ -85,7 +85,7 @@ function setupEventListeners() {
   }
 
   // Export/Import JSON
-  el.btnExportJson.addEventListener("click", exportActiveCharacter);
+  el.btnExportJson.addEventListener("click", openExportModal);
   el.btnImportJson.addEventListener("click", () => el.fileImport.click());
   el.fileImport.addEventListener("change", importCharacterFile);
 

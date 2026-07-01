@@ -1,4 +1,4 @@
-const CACHE_NAME = 'assimilacao-rpg-v1';
+const CACHE_NAME = 'assimilacao-rpg-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -23,6 +23,8 @@ const ASSETS = [
   './js/health.js',
   './js/chat.js',
   './js/logger.js',
+  './js/conflito.js',
+  './css/conflito.css',
   './dice/libs/three.min.js',
   './dice/libs/cannon.min.js',
   './dice/libs/teal.js',

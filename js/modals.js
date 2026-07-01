@@ -3068,6 +3068,57 @@ window.addEventListener("beforeunload", (e) => {
 });
 
 // ==========================================
+// MODAL: EXPORTAR FICHA
+// ==========================================
+export function openExportModal() {
+  if (!el.modalContainer || !el.modalBody) return;
+  el.modalContainer.classList.remove("hidden");
+
+  const chars = state.characters || [];
+  const listHtml = chars.length === 0
+    ? `<div class="world-list-empty" style="padding:20px;text-align:center;color:var(--text-muted);">Nenhuma ficha salva.</div>`
+    : chars.map(char => `
+      <div class="world-list-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:6px;">
+        <span style="font-weight:600;font-size:var(--font-size-md);">${esc(char.name)}</span>
+        <button class="btn btn-sm btn-blue btn-export-char-modal" data-id="${char.id}" style="white-space:nowrap;">Exportar</button>
+      </div>
+    `).join("");
+
+  el.modalBody.innerHTML = `
+    <div class="settings-modal-content card-glass">
+      <h3 class="modal-title">Exportar Ficha</h3>
+      <div style="margin-top:12px;font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:12px;">
+        Selecione a ficha que deseja exportar como arquivo JSON.
+      </div>
+      <div style="max-height:400px;overflow-y:auto;">
+        ${listHtml}
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <button id="btn-close-export-modal" class="btn btn-md">Fechar</button>
+      </div>
+    </div>
+  `;
+
+  el.modalBody.querySelectorAll(".btn-export-char-modal").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const char = state.characters.find(c => c.id === id);
+      if (!char) return;
+      const blob = new Blob([JSON.stringify(char, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${char.name.toLowerCase().replace(/\s+/g, "_")}_ficha.json`;
+      a.click();
+    });
+  });
+
+  const closeBtn = el.modalContainer.querySelector(".modal-close");
+  if (closeBtn) closeBtn.onclick = () => el.modalContainer.classList.add("hidden");
+  document.getElementById("btn-close-export-modal").onclick = () => el.modalContainer.classList.add("hidden");
+  el.modalContainer.onclick = (e) => { if (e.target === el.modalContainer) el.modalContainer.classList.add("hidden"); };
+}
+
+// ==========================================
 // MODAL: GERENCIAR BANCO DE ITENS
 // ==========================================
 export function openManageItemsModal() {

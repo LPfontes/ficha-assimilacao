@@ -126,6 +126,31 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.btn-obj-princ-dec,
+.btn-obj-princ-inc {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  user-select: none;
+  font-weight: bold;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-obj-princ-dec:hover,
+.btn-obj-princ-inc:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 .conflito-dado-input {
   width: 40px;
   background: transparent;
@@ -510,7 +535,7 @@
 }
 
 .last-roll-label {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-xm);
   font-weight: bold;
   text-transform: uppercase;
   color: var(--text-secondary);
@@ -631,7 +656,7 @@
 }
 
 .investimento-label {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-xm);
   font-weight: bold;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -686,8 +711,8 @@
 }
 
 .investimento-control-group img {
-  width: 14px;
-  height: 14px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   vertical-align: middle;
   border-radius: 2px;
@@ -901,7 +926,8 @@
   flex-direction: column;
   gap: 8px;
 }
-.conflito-objetivos-sec-list{
+.conflito-objetivos-sec-list,
+.conflito-objetivos-princ-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -1034,6 +1060,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  width: 100%;
 }
 
 .conflito-ameaca-title-row span {
@@ -1063,14 +1090,14 @@
 }
 
 .ameaca-ativacoes-header span {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-xm);
   text-transform: uppercase;
   color: var(--text-muted);
   font-weight: bold;
 }
 
 .ameaca-ativacao-empty {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-xm);
   color: var(--text-muted);
   font-style: italic;
   padding: 4px 0;
@@ -1165,7 +1192,6 @@
   top: 4px;
   right: 4px;
   border: none;
-  background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   font-size: 12px;
@@ -1192,6 +1218,35 @@
 
 .btn-delete-ativacao:hover {
   color: var(--color-danger);
+}
+
+.btn-reset-ativacao {
+  background: rgba(255,255,0,0.1);
+  border: 1px solid rgba(255,200,0,0.3);
+  color: var(--color-gold-glow);
+  font-size: var(--font-size-sm);
+  padding: 2px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btn-reset-ativacao:hover {
+  background: rgba(255,255,0,0.2);
+}
+
+.btn-edit-ativacao {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  padding: 2px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btn-edit-ativacao:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
 }
 
 .conflito-ativacoes-header {

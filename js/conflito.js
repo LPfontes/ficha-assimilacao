@@ -13,8 +13,25 @@ const STATUS_CLASS_MAP = {
   "Resolvido": "status-resolvido"
 };
 
+const _USE_SIMBOLOS_ALT_KEY = "conflito_simbolos_alt";
+function _isSimbolosAlt() { return localStorage.getItem(_USE_SIMBOLOS_ALT_KEY) === "true"; }
+function _toggleSimbolos() {
+  const cur = _isSimbolosAlt();
+  localStorage.setItem(_USE_SIMBOLOS_ALT_KEY, cur ? "false" : "true");
+}
+function _diceImg(type) {
+  if (_isSimbolosAlt()) {
+    const map = { S: "assets/sucesso.webp", A: "assets/adaptacao.webp", P: "assets/pressao.webp" };
+    return map[type] || `assets/d6/${type}.webp`;
+  }
+  const map = { S: "assets/d6/6(D6).webp", A: "assets/d6/ad.webp", P: "assets/d6/3-4(D6).webp" };
+  return map[type] || `assets/d6/${type}.webp`;
+}
+
 let activeThreatIdxForModal = null;
 let editingActivationState = null; // { idx, ameacaIdx (or null), isAmeaca }
+let _editingAmeacaIdx = null;
+let _pendingAmeacaRollIdx = null;
 
 function _renderTriggerBadges(gatilho) {
   const chars = gatilho.toUpperCase().replace(/\s+/g, "").split("");
@@ -22,20 +39,27 @@ function _renderTriggerBadges(gatilho) {
     if (char === "C" || char === "P") {
       return `
       <div class="investimento-control-group group-p">
-      <img src="assets/d6/3-4(D6).webp" alt="P" title="Pressão" class="conflito-trigger-badge-img badge-img-p">
+      <img src="${_diceImg('P')}" alt="P" title="Pressão" class="conflito-trigger-badge-img badge-img-p">
       </div>`;
     } else if (char === "S") {
       return `<div class="investimento-control-group group-s">
-      <img src="assets/d6/6(D6).webp" alt="S" title="Sucesso" class="conflito-trigger-badge-img badge-img-s">
+      <img src="${_diceImg('S')}" alt="S" title="Sucesso" class="conflito-trigger-badge-img badge-img-s">
       </div>`;
     } else if (char === "B" || char === "A") {
       return `
       <div class="investimento-control-group group-a">
-      <img src="assets/d6/ad.webp" alt="A" title="Adaptação" class="conflito-trigger-badge-img badge-img-a">
+      <img src="${_diceImg('A')}" alt="A" title="Adaptação" class="conflito-trigger-badge-img badge-img-a">
       </div>`;
     }
     return `<span class="conflito-trigger-badge-char">${char}</span>`;
   }).join("");
+}
+
+function _getAtivacaoItemClass(isCompleted, extraClass) {
+  let cls = "conflito-ativacao-item";
+  if (isCompleted) cls += " completed-item";
+  if (extraClass) cls += " " + extraClass;
+  return cls;
 }
 
 function _renderAmeacaActivations(a, ameacaIdx) {
@@ -59,48 +83,37 @@ function _renderAmeacaActivations(a, ameacaIdx) {
       investedA >= requiredA &&
       investedP >= requiredP;
 
-    let statusBadgeHtml = "";
-    if (totalRequired > 0) {
-      if (isCompleted) {
-        statusBadgeHtml = `<span class="conflito-completion-badge completed" style="font-size: 8px; padding: 1px 3px;" title="Requisitos preenchidos!">Ativada</span>`;
-      } else if (totalInvested > 0) {
-        statusBadgeHtml = `<span class="conflito-completion-badge progressing" style="font-size: 8px; padding: 1px 3px;" title="Investido: ${totalInvested} de ${totalRequired}">Partitura: ${totalInvested}/${totalRequired}</span>`;
-      }
-    }
-
     return `
-      <div class="conflito-ativacao-item ${isCompleted ? 'completed-item' : ''} ameaca-ativacao-card">
+      <div class="${_getAtivacaoItemClass(isCompleted, 'ameaca-ativacao-card')}">
         <!-- Partitura da Ameaça -->
         <div class="conflito-ativacao-investimento ameaca-ativacao-investimento">
-        <div class="investimento-label-row">
+        <div class="investimento-label-row" style="display:flex; align-items: center; gap:4px; ">
           <span class="investimento-label">Partitura:</span>
+          <button class="btn-delete-ativacao-ameaca btn-danger btn-sm" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Excluir Ativação da Ameaça">&times;</button>
           <div class="investimento-controls">
             ${requiredS > 0 ? `
             <div class="investimento-control-group group-s">
-              <img src="assets/d6/6(D6).webp" alt="S" title="Sucesso" class="conflito-trigger-badge-img badge-img-s">
+              <img src="${_diceImg('S')}" alt="S" title="Sucesso" class="conflito-trigger-badge-img badge-img-s">
               <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">-</button>
-              <span>${investedS}/${requiredS}</span>
+              <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
               <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">+</button>
             </div>` : ""}
             ${requiredA > 0 ? `
             <div class="investimento-control-group group-a">
-              <img src="assets/d6/ad.webp" alt="A" title="Adaptação" class="conflito-trigger-badge-img badge-img-a">
+              <img src="${_diceImg('A')}" alt="A" title="Adaptação" class="conflito-trigger-badge-img badge-img-a">
               <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">-</button>
-              <span>${investedA}/${requiredA}</span>
+              <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
               <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">+</button>
             </div>` : ""}
             ${requiredP > 0 ? `
             <div class="investimento-control-group group-p">
-              <img src="assets/d6/3-4(D6).webp" alt="P" title="Pressão" class="conflito-trigger-badge-img badge-img-p">
+              <img src="${_diceImg('P')}" alt="P" title="Pressão" class="conflito-trigger-badge-img badge-img-p">
               <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">-</button>
-              <span>${investedP}/${requiredP}</span>
+              <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
               <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">+</button>
             </div>` : ""}
             <div class="conflito-ativacao-title-row-left">
               <span class="conflito-ativacao-titulo ameaca-ativacao-titulo">Ativação</span>
-            </div>
-            <div class="conflito-ativacao-title-row ameaca-ativacao-title-row">
-              ${statusBadgeHtml}
             </div>
           </div>
           </div
@@ -112,8 +125,8 @@ function _renderAmeacaActivations(a, ameacaIdx) {
         </div>
 
         <div style="display:flex; gap:4px; margin-top:4px;">
+          ${isCompleted ? `<button class="btn-reset-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Gastar todas as investidas e resetar" style="background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;">Gastar</button>` : ""}
           <button class="btn-edit-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Editar Ativação da Ameaça" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;">Editar</button>
-          <button class="btn-delete-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Excluir Ativação da Ameaça">&times;</button>
         </div>
       </div>
     `;
@@ -130,6 +143,26 @@ function _renderCondicionantes(condicionantes) {
     <div class="world-list-item" data-cond-idx="${idx}" style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.06);">
       <input type="text" class="cond-texto" value="${esc(cond)}" placeholder="Ex: Ao sofrer dano, ganha +1 Pressão..." style="flex: 1; font-size: 12px; background: transparent; border: none; color: #fff; padding: 2px 0; outline: none;">
       <button class="btn btn-sm btn-danger btn-remove-cond" data-idx="${idx}" style="padding: 1px 6px; font-size: 11px; height: 18px; line-height: 1.2;">&times;</button>
+    </div>
+  `).join("");
+}
+
+function _renderObjetivosPrincipais(objetivosPrincipais) {
+  if (!objetivosPrincipais || objetivosPrincipais.length === 0) {
+    return `<div class="world-list-empty" style="font-size: 11px; padding: 12px; color: var(--text-muted);">Nenhum objetivo principal definido.</div>`;
+  }
+  return objetivosPrincipais.map((obj, idx) => `
+    <div class="objetivo-principal-item" data-obj-idx="${idx}" style="margin-bottom: 12px; padding: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); border-radius: 4px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <label class="ws-label" style="margin-bottom: 0;">Objetivo Principal ${idx + 1}</label>
+        <div class="conflito-qty-controls" style="display:flex; align-items:center; gap:4px;">
+          <button type="button" class="btn-obj-princ-dec" data-idx="${idx}">-</button>
+          <input type="number" value="${obj.valor || 0}" min="0" max="99" class="conflito-dado-input obj-princ-val" readonly style="width: 32px; text-align: center;">
+          <button type="button" class="btn-obj-princ-inc" data-idx="${idx}">+</button>
+          <button type="button" class="btn btn-sm btn-danger btn-remove-obj-princ" data-idx="${idx}" style="margin-left:8px; font-size:12px; padding:2px 6px;">&times;</button>
+        </div>
+      </div>
+      <textarea class="ws-textarea obj-princ-desc" placeholder="Descreva o objetivo principal..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(obj.descricao || '')}</textarea>
     </div>
   `).join("");
 }
@@ -175,20 +208,27 @@ function _renderAmeacas(c) {
       <div class="conflito-ameaca-title-row">
           <span>${esc(a.nome)}</span>
           <span class="attr-value-badge">${badgeText}</span>
+          <button class="btn btn-sm btn-edit-ameaca btn-blue" data-idx="${idx}" title="Editar Ameaça">Editar</button>
+          <button class="btn btn-sm btn-danger btn-remove-ameaca" data-idx="${idx}">&times;</button>
         </div>
         <div class="conflito-ameaca-descricao">
           ${esc(a.descricao || "Sem descrição.")}
         </div>
-        
+
         <!-- Lista de Ativações da Ameaça -->
         <div class="ameaca-ativacoes-container">
         <button type="button" class="btn btn-sm btn-add-ativacao-ameaca btn-blue" data-ameaca-idx="${idx}">+ Ativação</button>
           <div class="ameaca-ativacoes-header">
+            <div id="conflito-last-roll-container-ameaca-${idx}" class="conflito-last-roll-counter">
+              <span class="last-roll-label">Disponível:</span>
+              <span class="conflito-result-badge badge-s" title="Sucessos">S: 0</span>
+              <span class="conflito-result-badge badge-a" title="Adaptações">A: 0</span>
+              <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: 0</span>
+            </div>
             <span>Ativações da Ameaça</span>
             <div class="conflito-ativacao-header-row">
               <div class="conflito-ameaca-actions">
                 <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}">🎲 Rolar</button>
-                <button class="btn btn-sm btn-danger btn-remove-ameaca" data-idx="${idx}">&times;</button>
               </div>
               <span>Dados: ${diceDesc}</span>
             </div>
@@ -209,6 +249,15 @@ export function loadConflitoSheet(conflito) {
       conflito.objetivosSecundarios.push({
         descricao: conflito.objetivoSecundario,
         valor: conflito.objSecundarioVal || 0
+      });
+    }
+  }
+  if (!conflito.objetivosPrincipais) {
+    conflito.objetivosPrincipais = [];
+    if (conflito.objetivoPrincipal) {
+      conflito.objetivosPrincipais.push({
+        descricao: conflito.objetivoPrincipal,
+        valor: conflito.objPrincipalVal || 0
       });
     }
   }
@@ -334,7 +383,7 @@ export function renderConflitoSheet() {
               <div class="conflito-condicionantes-section" style="background:transparent;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <h4 class="ws-label" style="margin: 0; font-size: var(--font-size-md);">Condicionantes da Cena</h4>
-                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-cond" style="font-size: 10px; padding: 2px 8px; line-height: 1.2;">+ Condicionante</button>
+                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-cond" style="font-size: 12px; padding: 2px 10px; line-height: 1.2;">+ Condicionante</button>
                 </div>
                 <div id="conflito-condicionantes-list" class="conflito-condicionantes-list">
                   ${_renderCondicionantes(c.condicionantes)}
@@ -343,16 +392,14 @@ export function renderConflitoSheet() {
             </div>
             
             <div class="conflito-objetivos-panel">
-              <div>
+              <div id="conflito-objetivos-principais-container">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <label class="ws-label" style="margin-bottom: 0;">Objetivo Principal</label>
-                  <div class="conflito-qty-controls">
-                    <button type="button" class="btn-obj-dec btn-conf-qty-dec" data-target="principal">-</button>
-                    <input type="number" id="conflito-obj-principal-val" value="${c.objPrincipalVal || 0}" min="0" max="99" class="conflito-dado-input" readonly style="width: 32px; text-align: center;">
-                    <button type="button" class="btn-obj-inc btn-conf-qty-inc" data-target="principal">+</button>
-                  </div>
+                  <label class="ws-label" style="margin-bottom: 0;">Objetivos Principais</label>
+                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-obj-princ" style="font-size: 12px; padding: 2px 10px; line-height: 1.2;">+ Objetivo</button>
                 </div>
-                <textarea id="conflito-obj-principal" class="ws-textarea" placeholder="Descreva o objetivo principal..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(c.objetivoPrincipal || '')}</textarea>
+                <div id="conflito-objetivos-princ-list" class="conflito-objetivos-princ-list">
+                  ${_renderObjetivosPrincipais(c.objetivosPrincipais)}
+                </div>
               </div>
               <div id="conflito-objetivos-secundarios-container">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -392,6 +439,7 @@ export function renderConflitoSheet() {
           <div class="conflito-ativacoes-header">
             <h3 class="ws-section-title conflito-section-title">Ativações do Conflito</h3>
             <div id="conflito-last-roll-container"></div>
+            <button id="btn-toggle-simbolos" class="btn btn-sm" style="font-size:9px;padding:2px 6px;" title="Alternar símbolos dos dados">🎲</button>
           </div>
           <div id="conflito-ativacoes-list" class="conflito-ativacoes-list">
             ${c.ativacoes.map((act, idx) => {
@@ -411,59 +459,50 @@ export function renderConflitoSheet() {
       investedA >= requiredA &&
       investedP >= requiredP;
 
-    let statusBadgeHtml = "";
-    if (totalRequired > 0) {
-      if (isCompleted) {
-        statusBadgeHtml = `<span class="conflito-completion-badge completed" title="Requisitos preenchidos!">Ativada</span>`;
-      } else if (totalInvested > 0) {
-        statusBadgeHtml = `<span class="conflito-completion-badge progressing" title="Investido: ${totalInvested} de ${totalRequired} necessários">Partitura: ${totalInvested}/${totalRequired}</span>`;
-      }
-    }
-
     return `
-                <div class="conflito-ativacao-item ${isCompleted ? 'completed-item' : ''}">
+                <div class="${_getAtivacaoItemClass(isCompleted)}">
                   
                   <!-- Painel de Investimento (Partitura do Conflito) -->
                   <div class="conflito-ativacao-investimento">
-                  <div class="investimento-label-row">
+                  <div class="investimento-label-row" style="display:flex; align-items: center; gap:4px;">
                     <span class="investimento-label">Partitura:</span>
                     <div class="investimento-controls">
                       ${requiredS > 0 ? `
                       <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
-                        <img src="assets/d6/6(D6).webp" alt="S" title="Sucesso">
+                        <img src="${_diceImg('S')}" alt="S" title="Sucesso">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
                         <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
                       </div>` : ""}
                       ${requiredA > 0 ? `
                       <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
-                        <img src="assets/d6/ad.webp" alt="A" title="Adaptação">
+                        <img src="${_diceImg('A')}" alt="A" title="Adaptação">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
                         <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
                       </div>` : ""}
                       ${requiredP > 0 ? `
                       <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
-                        <img src="assets/d6/3-4(D6).webp" alt="P" title="Pressão">
+                        <img src="${_diceImg('P')}" alt="P" title="Pressão">
                         <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
                         <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
                         <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
                       </div>` : ""}
                     </div>
                     </div>
+                  <div style="display:flex; gap:4px; margin-top:4px;">
+                    ${isCompleted ? `<button class="btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
+                    <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação">Editar</button>
+                  </div>
                   </div>
                   <div class="conflito-ativacao-title-row">
                   <span title="Ativação">
-                  
-
                     <span class="conflito-ativacao-titulo">${act.titulo}</span>
-                    ${statusBadgeHtml}
                   </span>
                   </div>
                   <div class="conflito-ativacao-efeito">${act.efeito}</div>
 
                   <div style="display:flex; gap:4px; margin-top:4px;">
-                    <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;">Editar</button>
                     <button class="btn-delete-ativacao" data-idx="${idx}" title="Excluir Ativação">&times;</button>
                   </div>
                 </div>
@@ -512,8 +551,40 @@ export function renderConflitoSheet() {
         </div>
         <div class="conflito-modal-body">
           <div class="conflito-form-group">
-            <label class="ws-label" for="modal-ativacao-gatilho">Custo / Gatilho (Ex: PPP, S, AA)</label>
-            <input type="text" id="modal-ativacao-gatilho" placeholder="Ex: PPP" class="conflito-form-input-trigger" style="width: 100%; box-sizing: border-box; text-transform: uppercase;">
+            <label class="ws-label">Custo / Gatilho</label>
+            <div id="gatilho-builder" style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; min-height:36px; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:4px;">
+                <span id="gatilho-preview" style="display:flex; align-items:center; gap:4px; min-height:26px;"></span>
+                <button type="button" id="btn-gatilho-clear" style="margin-left:auto; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;" title="Limpar">&times;</button>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <div class="investimento-control-group group-s" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                  <img src="${_diceImg('S')}" alt="S" style="width:36px;height:36px;">
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                    <button type="button" class="btn-gatilho-qty" data-type="S" data-dir="dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                    <span id="gatilho-count-s" class="invest-val" style="min-width:16px;">0</span>
+                    <button type="button" class="btn-gatilho-qty" data-type="S" data-dir="inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                  </div>
+                </div>
+                <div class="investimento-control-group group-a" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                  <img src="${_diceImg('A')}" alt="A" style="width:36px;height:36px;">
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                    <button type="button" class="btn-gatilho-qty" data-type="A" data-dir="dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                    <span id="gatilho-count-a" class="invest-val" style="min-width:16px;">0</span>
+                    <button type="button" class="btn-gatilho-qty" data-type="A" data-dir="inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                  </div>
+                </div>
+                <div class="investimento-control-group group-p" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                  <img src="${_diceImg('P')}" alt="P" style="width:36px;height:36px;">
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                    <button type="button" class="btn-gatilho-qty" data-type="P" data-dir="dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                    <span id="gatilho-count-p" class="invest-val" style="min-width:16px;">0</span>
+                    <button type="button" class="btn-gatilho-qty" data-type="P" data-dir="inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="modal-ativacao-gatilho">
           </div>
           <div class="conflito-form-group">
             <label class="ws-label" for="modal-ativacao-titulo">Título / Nome da Ação</label>
@@ -607,32 +678,8 @@ function _attachListeners(c) {
   screen.querySelector("#conflito-tipo")?.addEventListener("change", e => { c.tipoConflito = e.target.value; saveConflito(c); });
   screen.querySelector("#conflito-descricao")?.addEventListener("input", e => { c.descricao = e.target.value; saveConflito(c); });
   screen.querySelector("#conflito-notas")?.addEventListener("input", e => { c.notas = e.target.value; saveConflito(c); });
-  screen.querySelector("#conflito-obj-principal")?.addEventListener("input", e => { c.objetivoPrincipal = e.target.value; saveConflito(c); });
-
-
-  screen.querySelectorAll(".btn-obj-dec").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.target;
-      if (target === "principal") {
-        c.objPrincipalVal = Math.max(0, (c.objPrincipalVal || 0) - 1);
-        screen.querySelector("#conflito-obj-principal-val").value = c.objPrincipalVal;
-        saveConflito(c);
-      }
-    });
-  });
-
-  screen.querySelectorAll(".btn-obj-inc").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.target;
-      if (target === "principal") {
-        c.objPrincipalVal = (c.objPrincipalVal || 0) + 1;
-        screen.querySelector("#conflito-obj-principal-val").value = c.objPrincipalVal;
-        saveConflito(c);
-      }
-    });
-  });
-
-  _attachObjetivosSecundariosListeners(c);
+  try { _attachObjetivosPrincipaisListeners(c); } catch(e) { console.error("Erro objetivos principais:", e); }
+  try { _attachObjetivosSecundariosListeners(c); } catch(e) { console.error("Erro objetivos secundários:", e); }
 
   screen.querySelector("#conflito-status")?.addEventListener("change", e => {
     c.status = e.target.value;
@@ -723,17 +770,69 @@ function _attachListeners(c) {
   // Abrir o modal
   const modalTitle = screen.querySelector("#conflito-modal-nova-ativacao .conflito-modal-title");
   const confirmBtn = screen.querySelector("#btn-confirm-add-ativacao");
+  // Gatilho builder (individual + e -)
+  const previewEl = screen.querySelector("#gatilho-preview");
+  const hiddenGatilho = screen.querySelector("#modal-ativacao-gatilho");
+  const countS = screen.querySelector("#gatilho-count-s");
+  const countA = screen.querySelector("#gatilho-count-a");
+  const countP = screen.querySelector("#gatilho-count-p");
+  const getCounts = () => ({
+    S: parseInt(countS?.textContent || "0"),
+    A: parseInt(countA?.textContent || "0"),
+    P: parseInt(countP?.textContent || "0")
+  });
+
+  const setCounts = (s, a, p) => {
+    if (countS) countS.textContent = s;
+    if (countA) countA.textContent = a;
+    if (countP) countP.textContent = p;
+  };
+
+  const updateGatilhoPreview = () => {
+    const counts = getCounts();
+    let val = "";
+    for (const ch of ["S","A","P"]) {
+      val += ch.repeat(counts[ch]);
+    }
+    if (hiddenGatilho) hiddenGatilho.value = val;
+    if (previewEl) {
+      if (!val) {
+        previewEl.innerHTML = "Clique em + ou - acima";
+      } else {
+        previewEl.innerHTML = val.split("").map(ch => `<img src="${_diceImg(ch)}" alt="${ch}" style="width:22px;height:22px;vertical-align:middle;">`).join("");
+      }
+    }
+  };
+
+  screen.querySelectorAll(".btn-gatilho-qty").forEach(btn => {
+    btn.addEventListener("click", () => {
+      try {
+        const type = btn.dataset.type;
+        const dir = btn.dataset.dir;
+        const counts = getCounts();
+        if (dir === "inc") counts[type]++;
+        else counts[type] = Math.max(0, counts[type] - 1);
+        setCounts(counts.S, counts.A, counts.P);
+        updateGatilhoPreview();
+      } catch(e) { console.error("Erro gatilho qty:", e); }
+    });
+  });
+  screen.querySelector("#btn-gatilho-clear")?.addEventListener("click", () => {
+    setCounts(0, 0, 0);
+    updateGatilhoPreview();
+  });
+
   screen.querySelector("#btn-open-nova-ativacao-modal")?.addEventListener("click", () => {
     activeThreatIdxForModal = null;
     editingActivationState = null;
     if (modal) {
       modalTitle.textContent = "Nova Ativação";
       confirmBtn.textContent = "Adicionar";
-      screen.querySelector("#modal-ativacao-gatilho").value = "";
+      setCounts(0, 0, 0);
+      updateGatilhoPreview();
       screen.querySelector("#modal-ativacao-titulo").value = "";
       screen.querySelector("#modal-ativacao-efeito").value = "";
       modal.classList.remove("hidden");
-      screen.querySelector("#modal-ativacao-gatilho").focus();
     }
   });
 
@@ -818,11 +917,18 @@ function _attachListeners(c) {
       activeThreatIdxForModal = null;
       modalTitle.textContent = "Editar Ativação";
       confirmBtn.textContent = "Salvar";
-      screen.querySelector("#modal-ativacao-gatilho").value = act.gatilho;
+      {
+        const val = act.gatilho || "";
+        setCounts(
+          (val.match(/S/g) || []).length,
+          (val.match(/A/g) || []).length,
+          (val.match(/P/g) || []).length
+        );
+      }
+      updateGatilhoPreview();
       screen.querySelector("#modal-ativacao-titulo").value = act.titulo;
       screen.querySelector("#modal-ativacao-efeito").value = act.efeito;
       modal.classList.remove("hidden");
-      screen.querySelector("#modal-ativacao-gatilho").focus();
     });
   });
 
@@ -839,61 +945,90 @@ function _attachListeners(c) {
   });
 
   // Listeners para os botões de incremento/decremento da partitura (investimento)
+  function _updateInvestment(idx, type, delta) {
+    const act = c.ativacoes[idx];
+    if (!act) return;
+    const key = `invested${type}`;
+    act[key] = delta > 0 ? (act[key] || 0) + delta : Math.max(0, (act[key] || 0) + delta);
+
+    const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
+    const requiredS = (cleanTrigger.match(/S/g) || []).length;
+    const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
+    const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
+    const requiredMap = { S: requiredS, A: requiredA, P: requiredP };
+    const required = requiredMap[type] || 0;
+
+    const btn = screen.querySelector(`.btn-invest-inc[data-idx="${idx}"][data-type="${type}"], .btn-invest-dec[data-idx="${idx}"][data-type="${type}"]`);
+    if (btn) {
+      const group = btn.closest('.investimento-control-group');
+      if (group) {
+        const valSpan = group.querySelector('.invest-val');
+        if (valSpan) {
+          valSpan.textContent = `${act[key]}/${required}`;
+          valSpan.classList.toggle('met', act[key] >= required && required > 0);
+        }
+      }
+    }
+
+    const el = screen.querySelector(`[data-idx="${idx}"]`);
+    if (el) {
+      const item = el.closest('.conflito-ativacao-item');
+      if (item) {
+        const totalRequired = requiredS + requiredA + requiredP;
+        const isCompleted = totalRequired > 0 &&
+          (act.investedS || 0) >= requiredS &&
+          (act.investedA || 0) >= requiredA &&
+          (act.investedP || 0) >= requiredP;
+        item.classList.toggle('completed-item', isCompleted);
+
+        const editBtn = item.querySelector('.btn-edit-ativacao');
+        if (editBtn) {
+          const container = editBtn.parentNode;
+          let resetBtn = container.querySelector('.btn-reset-ativacao');
+          if (isCompleted && !resetBtn) {
+            resetBtn = document.createElement('button');
+            resetBtn.className = 'btn-reset-ativacao';
+            resetBtn.dataset.idx = idx;
+            resetBtn.title = 'Gastar todas as investidas e resetar';
+            resetBtn.textContent = 'Gastar';
+            resetBtn.addEventListener('click', () => _resetAtivacao(idx));
+            container.insertBefore(resetBtn, editBtn);
+          } else if (!isCompleted && resetBtn) {
+            resetBtn.remove();
+          }
+        }
+      }
+    }
+
+    saveConflito(c);
+  }
+
   screen.querySelectorAll(".btn-invest-inc").forEach(btn => {
     btn.addEventListener("click", () => {
-      const idx = parseInt(btn.dataset.idx);
-      const type = btn.dataset.type;
-      const act = c.ativacoes[idx];
-      const key = `invested${type}`;
-
-      // Calcula o total rolado desse tipo
-      let totalRolled = 0;
-      if (c.rolagens && c.rolagens.length > 0) {
-        const lastRoll = c.rolagens[c.rolagens.length - 1];
-        if (type === "S") totalRolled = lastRoll.bonusSuccesses || 0;
-        if (type === "A") totalRolled = lastRoll.bonusAdaptations || 0;
-        if (type === "P") totalRolled = lastRoll.bonusPressures || 0;
-
-        lastRoll.keptDiceIndexes.forEach(idx => {
-          const die = lastRoll.results[idx];
-          if (die && die.symbols) {
-            die.symbols.forEach(sym => {
-              if (sym === "A" && type === "S") totalRolled++;
-              if (sym === "B" && type === "A") totalRolled++;
-              if (sym === "C" && type === "P") totalRolled++;
-            });
-          }
-        });
-      }
-
-      // Calcula o total investido nessa rodada (desde o último snapshot)
-      let newlyInvestedOfThisType = 0;
-      c.ativacoes.forEach(a => {
-        newlyInvestedOfThisType += (a[key] || 0) - (a[`snapshot${type}`] || 0);
-      });
-
-      const available = totalRolled - newlyInvestedOfThisType;
-      if (available <= 0) {
-        // Sem pontos disponíveis deste tipo nesta rolagem
-        return;
-      }
-
-      act[key] = (act[key] || 0) + 1;
-      saveConflito(c);
-      renderConflitoSheet();
+      _updateInvestment(parseInt(btn.dataset.idx), btn.dataset.type, 1);
     });
   });
 
   screen.querySelectorAll(".btn-invest-dec").forEach(btn => {
     btn.addEventListener("click", () => {
-      const idx = parseInt(btn.dataset.idx);
-      const type = btn.dataset.type;
-      const act = c.ativacoes[idx];
-      const key = `invested${type}`;
-      act[key] = Math.max(0, (act[key] || 0) - 1);
-      saveConflito(c);
-      renderConflitoSheet();
+      _updateInvestment(parseInt(btn.dataset.idx), btn.dataset.type, -1);
     });
+  });
+
+  function _resetAtivacao(idx) {
+    const act = c.ativacoes[idx];
+    if (!act) return;
+    act.investedS = 0;
+    act.investedA = 0;
+    act.investedP = 0;
+    act.snapshotS = 0;
+    act.snapshotA = 0;
+    act.snapshotP = 0;
+    saveConflito(c);
+  }
+
+  screen.querySelectorAll(".btn-reset-ativacao").forEach(btn => {
+    btn.addEventListener("click", () => _resetAtivacao(parseInt(btn.dataset.idx)));
   });
 
   screen.querySelector("#btn-toggle-guia")?.addEventListener("click", () => {
@@ -903,6 +1038,11 @@ function _attachListeners(c) {
       const isHidden = body.classList.toggle("hidden");
       if (arrow) arrow.textContent = isHidden ? "▼" : "▲";
     }
+  });
+
+  screen.querySelector("#btn-toggle-simbolos")?.addEventListener("click", () => {
+    _toggleSimbolos();
+    renderConflitoSheet();
   });
 
   const _attachSingleRefListener = (containerId, fieldKey, stateKey) => {
@@ -983,8 +1123,9 @@ function _attachListeners(c) {
   // --- CONTROLES DE AMEAÇAS ---
   const ameacaModal = screen.querySelector("#conflito-modal-nova-ameaca");
   
-  // Abrir modal de ameaça
+  // Abrir modal de ameaça (add)
   screen.querySelector("#btn-conflito-add-ameaca")?.addEventListener("click", () => {
+    _editingAmeacaIdx = null;
     if (ameacaModal) {
       screen.querySelector("#modal-ameaca-nome").value = "";
       screen.querySelector("#modal-ameaca-descricao").value = "";
@@ -992,9 +1133,30 @@ function _attachListeners(c) {
       screen.querySelector("#modal-ameaca-d10").value = "0";
       screen.querySelector("#modal-ameaca-d12").value = "0";
       screen.querySelector("#modal-ameaca-objetivo").value = "Principal";
+      screen.querySelector("#btn-confirm-add-ameaca").textContent = "Adicionar";
       ameacaModal.classList.remove("hidden");
       screen.querySelector("#modal-ameaca-nome").focus();
     }
+  });
+
+  // Abrir modal de ameaça (edit)
+  screen.querySelectorAll(".btn-edit-ameaca").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      const a = c.ameacas?.[idx];
+      if (!a) return;
+      _editingAmeacaIdx = idx;
+      screen.querySelector("#modal-ameaca-nome").value = a.nome || "";
+      screen.querySelector("#modal-ameaca-descricao").value = a.descricao || "";
+      screen.querySelector("#modal-ameaca-d6").value = a.d6 ?? 1;
+      screen.querySelector("#modal-ameaca-d10").value = a.d10 ?? 0;
+      screen.querySelector("#modal-ameaca-d12").value = a.d12 ?? 0;
+      screen.querySelector("#modal-ameaca-objetivo").value = a.objetivoTipo || "Principal";
+      screen.querySelector("#btn-confirm-add-ameaca").textContent = "Salvar";
+      ameacaModal.classList.remove("hidden");
+      screen.querySelector("#modal-ameaca-nome").focus();
+    });
   });
 
   // Fechar modal de ameaça
@@ -1035,16 +1197,16 @@ function _attachListeners(c) {
       return;
     }
 
-    const newAmeaca = { nome, descricao, d6, d10, d12, objetivoTipo };
-    
-    // Inicializa a lista se não houver
-    if (!c.ameacas) c.ameacas = [];
+    const ameacaData = { nome, descricao, d6, d10, d12, objetivoTipo };
 
-    // Adiciona ao conflito
-    c.ameacas.push(newAmeaca);
-    
-    // Salva no DB global para autocompletar futuramente
-    saveAmeacaToDb(newAmeaca);
+    if (_editingAmeacaIdx !== null && c.ameacas && c.ameacas[_editingAmeacaIdx]) {
+      c.ameacas[_editingAmeacaIdx] = { ...c.ameacas[_editingAmeacaIdx], ...ameacaData };
+      _editingAmeacaIdx = null;
+    } else {
+      if (!c.ameacas) c.ameacas = [];
+      c.ameacas.push(ameacaData);
+      saveAmeacaToDb(ameacaData);
+    }
 
     saveConflito(c);
     hideAmeacaModal();
@@ -1090,6 +1252,7 @@ function _attachListeners(c) {
         customFormulaInput.value = formula;
       }
 
+      _pendingAmeacaRollIdx = idx;
       executeCustomRoll();
     });
   });
@@ -1104,11 +1267,11 @@ function _attachListeners(c) {
       if (modal) {
         modalTitle.textContent = "Nova Ativação";
         confirmBtn.textContent = "Adicionar";
-        screen.querySelector("#modal-ativacao-gatilho").value = "";
+        setCounts(0, 0, 0);
+        updateGatilhoPreview();
         screen.querySelector("#modal-ativacao-titulo").value = "";
         screen.querySelector("#modal-ativacao-efeito").value = "";
         modal.classList.remove("hidden");
-        screen.querySelector("#modal-ativacao-gatilho").focus();
       }
     });
   });
@@ -1126,11 +1289,18 @@ function _attachListeners(c) {
       activeThreatIdxForModal = null;
       modalTitle.textContent = "Editar Ativação da Ameaça";
       confirmBtn.textContent = "Salvar";
-      screen.querySelector("#modal-ativacao-gatilho").value = act.gatilho;
+      {
+        const val = act.gatilho || "";
+        setCounts(
+          (val.match(/S/g) || []).length,
+          (val.match(/A/g) || []).length,
+          (val.match(/P/g) || []).length
+        );
+      }
+      updateGatilhoPreview();
       screen.querySelector("#modal-ativacao-titulo").value = act.titulo;
       screen.querySelector("#modal-ativacao-efeito").value = act.efeito;
       modal.classList.remove("hidden");
-      screen.querySelector("#modal-ativacao-gatilho").focus();
     });
   });
 
@@ -1151,42 +1321,159 @@ function _attachListeners(c) {
     });
   });
 
-  // Incrementar partitura da ativação da ameaça
+  function _updateAmeacaInvestment(ameacaIdx, actIdx, type, delta) {
+    const a = c.ameacas[ameacaIdx];
+    if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
+    const act = a.ativacoes[actIdx];
+    const key = `invested${type}`;
+    act[key] = delta > 0 ? (act[key] || 0) + delta : Math.max(0, (act[key] || 0) + delta);
+
+    const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
+    const requiredS = (cleanTrigger.match(/S/g) || []).length;
+    const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
+    const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
+    const requiredMap = { S: requiredS, A: requiredA, P: requiredP };
+    const required = requiredMap[type] || 0;
+
+    const selector = `.btn-invest-ameaca-inc[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"][data-type="${type}"], .btn-invest-ameaca-dec[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"][data-type="${type}"]`;
+    const btn = screen.querySelector(selector);
+    if (btn) {
+      const group = btn.closest('.investimento-control-group');
+      if (group) {
+        const valSpan = group.querySelector('.invest-val');
+        if (valSpan) {
+          valSpan.textContent = `${act[key]}/${required}`;
+          valSpan.classList.toggle('met', act[key] >= required && required > 0);
+        }
+      }
+    }
+
+    const el = screen.querySelector(`[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"]`);
+    if (el) {
+      const item = el.closest('.conflito-ativacao-item');
+      if (item) {
+        const totalRequired = requiredS + requiredA + requiredP;
+        const isCompleted = totalRequired > 0 &&
+          (act.investedS || 0) >= requiredS &&
+          (act.investedA || 0) >= requiredA &&
+          (act.investedP || 0) >= requiredP;
+        item.classList.toggle('completed-item', isCompleted);
+
+        const editBtn = item.querySelector('.btn-edit-ativacao-ameaca');
+        if (editBtn) {
+          const container = editBtn.parentNode;
+          let resetBtn = container.querySelector('.btn-reset-ativacao-ameaca');
+          if (isCompleted && !resetBtn) {
+            resetBtn = document.createElement('button');
+            resetBtn.className = 'btn-reset-ativacao-ameaca';
+            resetBtn.dataset.ameacaIdx = ameacaIdx;
+            resetBtn.dataset.actIdx = actIdx;
+            resetBtn.title = 'Gastar todas as investidas e resetar';
+            resetBtn.textContent = 'Gastar';
+            resetBtn.style.cssText = 'background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;';
+            resetBtn.addEventListener('click', (e) => { e.stopPropagation(); _resetAmeacaAtivacao(ameacaIdx, actIdx); });
+            container.insertBefore(resetBtn, editBtn);
+          } else if (!isCompleted && resetBtn) {
+            resetBtn.remove();
+          }
+        }
+      }
+    }
+
+    saveConflito(c);
+  }
+
+  function _resetAmeacaAtivacao(ameacaIdx, actIdx) {
+    const a = c.ameacas[ameacaIdx];
+    if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
+    const act = a.ativacoes[actIdx];
+    act.investedS = 0;
+    act.investedA = 0;
+    act.investedP = 0;
+    saveConflito(c);
+  }
+
   screen.querySelectorAll(".btn-invest-ameaca-inc").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const ameacaIdx = parseInt(btn.dataset.ameacaIdx);
-      const actIdx = parseInt(btn.dataset.actIdx);
-      const type = btn.dataset.type;
-      const a = c.ameacas[ameacaIdx];
-      if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
-
-      const act = a.ativacoes[actIdx];
-      const key = `invested${type}`;
-      act[key] = (act[key] || 0) + 1;
-
-      saveConflito(c);
-      renderConflitoSheet();
+      _updateAmeacaInvestment(parseInt(btn.dataset.ameacaIdx), parseInt(btn.dataset.actIdx), btn.dataset.type, 1);
     });
   });
 
-  // Decrementar partitura da ativação da ameaça
   screen.querySelectorAll(".btn-invest-ameaca-dec").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const ameacaIdx = parseInt(btn.dataset.ameacaIdx);
-      const actIdx = parseInt(btn.dataset.actIdx);
-      const type = btn.dataset.type;
-      const a = c.ameacas[ameacaIdx];
-      if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
+      _updateAmeacaInvestment(parseInt(btn.dataset.ameacaIdx), parseInt(btn.dataset.actIdx), btn.dataset.type, -1);
+    });
+  });
 
-      const act = a.ativacoes[actIdx];
-      const key = `invested${type}`;
-      act[key] = Math.max(0, (act[key] || 0) - 1);
+  screen.querySelectorAll(".btn-reset-ativacao-ameaca").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _resetAmeacaAtivacao(parseInt(btn.dataset.ameacaIdx), parseInt(btn.dataset.actIdx));
+    });
+  });
+}
 
+function _attachObjetivosPrincipaisListeners(c) {
+  const screen = getScreen();
+  if (!screen) return;
+  const container = screen.querySelector("#conflito-objetivos-principais-container");
+  if (!container) return;
+
+  const newContainer = container.cloneNode(true);
+  container.parentNode.replaceChild(newContainer, container);
+
+  newContainer.addEventListener("click", (e) => {
+    if (e.target.closest("#btn-conflito-add-obj-princ")) {
+      if (!c.objetivosPrincipais) c.objetivosPrincipais = [];
+      c.objetivosPrincipais.push({ descricao: "", valor: 0 });
       saveConflito(c);
       renderConflitoSheet();
-    });
+      return;
+    }
+
+    const btnDec = e.target.closest(".btn-obj-princ-dec");
+    if (btnDec) {
+      const idx = parseInt(btnDec.dataset.idx);
+      c.objetivosPrincipais[idx].valor = Math.max(0, (c.objetivosPrincipais[idx].valor || 0) - 1);
+      saveConflito(c);
+      const valInput = btnDec.parentElement.querySelector(".obj-princ-val");
+      if (valInput) valInput.value = c.objetivosPrincipais[idx].valor;
+      return;
+    }
+
+    const btnInc = e.target.closest(".btn-obj-princ-inc");
+    if (btnInc) {
+      const idx = parseInt(btnInc.dataset.idx);
+      c.objetivosPrincipais[idx].valor = (c.objetivosPrincipais[idx].valor || 0) + 1;
+      saveConflito(c);
+      const valInput = btnInc.parentElement.querySelector(".obj-princ-val");
+      if (valInput) valInput.value = c.objetivosPrincipais[idx].valor;
+      return;
+    }
+
+    const btnRemove = e.target.closest(".btn-remove-obj-princ");
+    if (btnRemove) {
+      const idx = parseInt(btnRemove.dataset.idx);
+      if (confirm("Remover este objetivo principal?")) {
+        c.objetivosPrincipais.splice(idx, 1);
+        saveConflito(c);
+        renderConflitoSheet();
+      }
+      return;
+    }
+  });
+
+  newContainer.addEventListener("input", (e) => {
+    if (e.target.classList.contains("obj-princ-desc")) {
+      const itemEl = e.target.closest(".objetivo-principal-item");
+      if (itemEl) {
+        const idx = parseInt(itemEl.dataset.objIdx);
+        c.objetivosPrincipais[idx].descricao = e.target.value;
+        saveConflito(c);
+      }
+    }
   });
 }
 
@@ -1194,13 +1481,10 @@ function _attachObjetivosSecundariosListeners(c) {
   const container = getScreen().querySelector("#conflito-objetivos-secundarios-container");
   if (!container) return;
 
-  // Use event delegation on the container
-  // Clone the container to remove any previously attached listeners (just in case)
   const newContainer = container.cloneNode(true);
   container.parentNode.replaceChild(newContainer, container);
 
   newContainer.addEventListener("click", (e) => {
-    // Adicionar Objetivo
     if (e.target.closest("#btn-conflito-add-obj-sec")) {
       if (!c.objetivosSecundarios) c.objetivosSecundarios = [];
       c.objetivosSecundarios.push({ descricao: "", valor: 0 });
@@ -1328,69 +1612,93 @@ export function renderConflitoRollLog() {
 export function renderConflitoLastRollCounter() {
   const c = worldState.currentConflito;
   if (!c) return;
-  const container = document.getElementById("conflito-last-roll-container");
-  if (!container) return;
 
-  if (c.rolagens && c.rolagens.length > 0) {
-    const lastRoll = c.rolagens[c.rolagens.length - 1];
-    let sucessos = lastRoll.bonusSuccesses || 0;
-    let adaptacoes = lastRoll.bonusAdaptations || 0;
-    let pressoes = lastRoll.bonusPressures || 0;
+  const updateContainer = (container, rolagens, activations) => {
+    if (!container) return;
+    if (rolagens && rolagens.length > 0) {
+      const lastRoll = rolagens[rolagens.length - 1];
+      let sucessos = lastRoll.bonusSuccesses || 0;
+      let adaptacoes = lastRoll.bonusAdaptations || 0;
+      let pressoes = lastRoll.bonusPressures || 0;
 
-    lastRoll.keptDiceIndexes.forEach(idx => {
-      const die = lastRoll.results[idx];
-      if (die && die.symbols) {
-        die.symbols.forEach(sym => {
-          if (sym === "A") sucessos++;
-          if (sym === "B") adaptacoes++;
-          if (sym === "C") pressoes++;
-        });
-      }
-    });
+      lastRoll.keptDiceIndexes.forEach(idx => {
+        const die = lastRoll.results[idx];
+        if (die && die.symbols) {
+          die.symbols.forEach(sym => {
+            if (sym === "A") sucessos++;
+            if (sym === "B") adaptacoes++;
+            if (sym === "C") pressoes++;
+          });
+        }
+      });
 
-    // Calcula os descontos de investimentos recém-feitos (nesta rodada)
-    let newlyInvestedS = 0;
-    let newlyInvestedA = 0;
-    let newlyInvestedP = 0;
-    c.ativacoes.forEach(act => {
-      newlyInvestedS += (act.investedS || 0) - (act.snapshotS || 0);
-      newlyInvestedA += (act.investedA || 0) - (act.snapshotA || 0);
-      newlyInvestedP += (act.investedP || 0) - (act.snapshotP || 0);
-    });
+      let newlyInvestedS = 0;
+      let newlyInvestedA = 0;
+      let newlyInvestedP = 0;
+      (activations || []).forEach(act => {
+        newlyInvestedS += (act.investedS || 0) - (act.snapshotS || 0);
+        newlyInvestedA += (act.investedA || 0) - (act.snapshotA || 0);
+        newlyInvestedP += (act.investedP || 0) - (act.snapshotP || 0);
+      });
 
-    const dispS = Math.max(0, sucessos - newlyInvestedS);
-    const dispA = Math.max(0, adaptacoes - newlyInvestedA);
-    const dispP = Math.max(0, pressoes - newlyInvestedP);
+      const dispS = Math.max(0, sucessos - newlyInvestedS);
+      const dispA = Math.max(0, adaptacoes - newlyInvestedA);
+      const dispP = Math.max(0, pressoes - newlyInvestedP);
 
-    container.innerHTML = `
-      <span class="last-roll-label">Disponível:</span>
-      <span class="conflito-result-badge badge-s" title="Sucessos">S: ${dispS}</span>
-      <span class="conflito-result-badge badge-a" title="Adaptações">A: ${dispA}</span>
-      <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: ${dispP}</span>
-    `;
-    container.className = "conflito-last-roll-counter";
-  } else {
-    container.innerHTML = `
-      <span class="last-roll-label" style="font-size: 10px; color: var(--text-muted);">Sem rolagens recentes</span>
-    `;
-    container.className = "conflito-last-roll-counter empty";
-  }
+      container.innerHTML = `
+        <span class="last-roll-label">Disponível:</span>
+        <span class="conflito-result-badge badge-s" title="Sucessos">S: ${dispS}</span>
+        <span class="conflito-result-badge badge-a" title="Adaptações">A: ${dispA}</span>
+        <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: ${dispP}</span>
+      `;
+      container.className = "conflito-last-roll-counter";
+    } else {
+      container.innerHTML = `
+        <span class="last-roll-label" style="font-size: 10px; color: var(--text-muted);">Sem rolagens recentes</span>
+      `;
+      container.className = "conflito-last-roll-counter empty";
+    }
+  };
+
+  const mainContainer = document.getElementById("conflito-last-roll-container");
+  updateContainer(mainContainer, c.rolagens, c.ativacoes);
+
+  (c.ameacas || []).forEach((a, idx) => {
+    const amContainer = document.getElementById(`conflito-last-roll-container-ameaca-${idx}`);
+    updateContainer(amContainer, a.rolagens, a.ativacoes);
+  });
 }
 
 // Escuta evento global de rolagem finalizada para registrar no histórico do conflito atual
 document.addEventListener("roll-added", (e) => {
   if (worldState.sheetMode === "conflito" && worldState.currentConflito) {
     const c = worldState.currentConflito;
-    if (!c.rolagens) c.rolagens = [];
-    c.rolagens.push(e.detail);
-    if (c.rolagens.length > 10) c.rolagens.shift();
 
-    // Snapshot das ativações no momento em que a rolagem ocorre
-    c.ativacoes.forEach(act => {
-      act.snapshotS = act.investedS || 0;
-      act.snapshotA = act.investedA || 0;
-      act.snapshotP = act.investedP || 0;
-    });
+    if (_pendingAmeacaRollIdx !== null) {
+      const a = c.ameacas && c.ameacas[_pendingAmeacaRollIdx];
+      if (a) {
+        if (!a.rolagens) a.rolagens = [];
+        a.rolagens.push(e.detail);
+        if (a.rolagens.length > 10) a.rolagens.shift();
+        a.ativacoes?.forEach(act => {
+          act.snapshotS = act.investedS || 0;
+          act.snapshotA = act.investedA || 0;
+          act.snapshotP = act.investedP || 0;
+        });
+      }
+      _pendingAmeacaRollIdx = null;
+    } else {
+      if (!c.rolagens) c.rolagens = [];
+      c.rolagens.push(e.detail);
+      if (c.rolagens.length > 10) c.rolagens.shift();
+
+      // Snapshot das ativações no momento em que a rolagem ocorre
+      c.ativacoes.forEach(act => {
+        act.snapshotS = act.investedS || 0;
+        act.snapshotA = act.investedA || 0;
+        act.snapshotP = act.investedP || 0;
+      });
+    }
 
     saveConflito(c);
     renderConflitoRollLog();

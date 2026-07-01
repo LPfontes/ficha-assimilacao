@@ -195,6 +195,7 @@ export function createNewConflito(name = "Novo Conflito") {
     objetivoSecundario: "",
     objPrincipalVal: 0,
     objSecundarioVal: 0,
+    objetivosPrincipais: [],
     condicionantes: [],
   };
 }
