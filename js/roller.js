@@ -3,6 +3,7 @@ import { getCurrentHealthLevel } from "./health.js";
 import { appendRollToChat, renderResultsPanel, updateResultsSummary, getDieSymbolsHtml, getDieFaceImgSrc } from "./chat.js";
 import { logger } from "./logger.js";
 import { worldState } from "./world-state.js";
+import { getPeerManager, addOwnRollToFeed } from "./mesa-ui.js";
 
 // ==========================================
 // MAPEAMENTO DE DADOS (PÁG 43)
@@ -931,4 +932,63 @@ export function executeMacroRoll(macro) {
   
   // Execute roll using existing logic
   execute3DPhysicsRoll();
+}
+
+function _broadcastRoll(formula, results) {
+  const label = state.selectedRoll?.instinto
+    ? (state.selectedRoll.skill
+      ? `${state.selectedRoll.skill} (${state.selectedRoll.instinto})`
+      : state.selectedRoll.instinto)
+    : state.selectedRoll?.skill || "";
+
+  const rollData = {
+    formula,
+    label,
+    timestamp: Date.now(),
+    results: results.map(r => ({ sides: r.sides, value: r.value, symbols: r.symbols })),
+    keptDiceIndexes: JSON.parse(JSON.stringify(state.keptDiceIndexes))
+  };
+
+  // Registra no feed local da mesa (rolagem própria)
+  addOwnRollToFeed(rollData);
+
+  // Transmite para os outros jogadores
+  const pm = getPeerManager();
+  if (!pm) return;
+  pm.broadcast({
+    type: "roll",
+    playerId: pm.playerId,
+    data: rollData
+  });
+}
+
+export function sendRollToMesa(isInstinto) {
+  const history = state.currentCharacter?.rollHistory || [];
+  const lastRoll = history.length > 0 ? history[history.length - 1] : null;
+  if (!lastRoll) return;
+
+  const label = lastRoll.label || "";
+  const formula = lastRoll.formula || "";
+
+  const rollData = {
+    formula,
+    label,
+    timestamp: Date.now(),
+    results: lastRoll.results.map(r => ({
+      sides: r.sides,
+      value: r.value,
+      symbols: [...(r.symbols || [])]
+    })),
+    keptDiceIndexes: [...(lastRoll.keptDiceIndexes || [])]
+  };
+
+  addOwnRollToFeed(rollData);
+
+  const pm = getPeerManager();
+  if (!pm) return;
+  pm.broadcast({
+    type: "roll",
+    playerId: pm.playerId,
+    data: rollData
+  });
 }

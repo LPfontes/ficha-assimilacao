@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/landing.css">
   <link rel="stylesheet" href="css/world-sheets.css">
+  <link rel="stylesheet" href="css/mesa.css">
 </head>
 <body>
 
@@ -109,10 +110,65 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
             Importar Ficha
           </button>
+          <button id="btn-mesa-landing" class="btn btn-landing-secondary" style="border-color:var(--color-gold-glow); color:var(--color-gold-glow);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg>
+            Mesa de Jogo
+          </button>
           <input type="file" id="file-import-landing" accept=".json" style="display:none">
         </div>
       </div>
     </section>
+
+    <!-- TELA DE MESA - Jogo Multiplayer -->
+    <section id="table-screen" class="screen hidden">
+      <div id="table-toolbar">
+        <span class="table-title">Mesa de Jogo</span>
+        <span class="room-code-badge" id="table-room-code-badge"></span>
+        <span id="table-host-badge"></span>
+        <button id="btn-open-roller-table" class="btn btn-sm table-roller-btn" title="Abrir Rolador de Dados">
+          <span style="font-size:1.1em;">🎲</span> Lançar Dados
+        </button>
+        <button class="btn btn-sm" id="btn-leave-table" style="border-color:var(--color-rust); color:var(--color-rust-glow);">Sair da Mesa</button>
+      </div>
+      <div id="table-main-area">
+
+        <!-- Coluna esquerda: Jogadores -->
+        <div id="table-player-panel">
+          <div id="table-player-panel-header">Jogadores</div>
+          <div id="table-player-list"></div>
+        </div>
+
+        <!-- Centro: Mapa -->
+        <div id="table-map-panel">
+          <div id="table-map-viewport">
+            <img id="table-map-image" src="" alt="Mapa" style="display:none;">
+          </div>
+          <div id="table-map-placeholder">Aguardando mapa do Mestre...</div>
+          <div id="table-map-controls" class="hidden">
+            <button id="btn-zoom-out" class="btn btn-sm" title="Menos zoom">−</button>
+            <span id="zoom-level-display">100%</span>
+            <button id="btn-zoom-in" class="btn btn-sm" title="Mais zoom">+</button>
+            <button id="btn-zoom-reset" class="btn btn-sm" title="Resetar zoom">⟲</button>
+            <label for="btn-table-map-upload">Alterar Mapa</label>
+            <input type="file" id="btn-table-map-upload" accept="image/*" style="display:none">
+          </div>
+        </div>
+
+        <!-- Coluna direita: Rolagens -->
+        <div id="table-roll-panel">
+          <div id="table-roll-feed-container">
+            <div id="table-roll-feed-header">
+              <span>Rolagens: </span>
+              <span id="table-roll-count">0</span>
+              <button id="btn-clear-roll-feed" class="btn btn-sm" style="margin-left:auto;font-size:9px;padding:2px 6px;" title="Limpar rolagens">Limpar</button>
+            </div>
+            <div id="table-roll-feed"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
 
     <!-- TELA 1: ASSISTENTE DE CRIAÇÃO (WIZARD) - Oculto por padrão -->
     <section id="wizard-screen" class="screen card-glass hidden">
@@ -867,6 +923,7 @@
             <div class="results-dice-grid" id="normal-panel-dice-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
             <div class="roll-summary-inline" id="normal-panel-summary" style="margin-top:8px; display: flex; gap: 16px;"></div>
             <div class="roll-narrative" id="normal-panel-narrative" style="margin-top:8px; font-size: var(--font-size-xs); line-height: 1.4; border-left: 2px solid var(--color-rust); padding-left: 6px;"></div>
+            <button id="btn-send-normal-to-mesa" class="btn btn-sm" style="margin-top:8px; padding:4px 12px; font-size:var(--font-size-xs);" title="Enviar resultado para a Mesa">📨 Enviar para Mesa</button>
           </div>
         </div>
       </div>
@@ -951,6 +1008,7 @@
             <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado (Toque nos dados para selecionar quais manter)</h4>
             <div class="results-dice-grid" id="instinto-panel-dice-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
             <div class="roll-summary-inline" id="instinto-panel-summary" style="margin-top:8px; display: flex; gap: 16px;"></div>
+            <button id="btn-send-instinto-to-mesa" class="btn btn-sm" style="margin-top:8px; padding:4px 12px; font-size:var(--font-size-xs);" title="Enviar resultado para a Mesa">📨 Enviar para Mesa</button>
           </div>
         </div>
       </div>
@@ -982,6 +1040,55 @@
       <div id="modal-body"></div>
     </div>
   </div>
+
+  <!-- Modal de Sala (Mesa) -->
+  <div id="room-modal" class="conflito-modal hidden">
+    <div class="conflito-modal-content card-glass">
+      <div class="conflito-modal-header">
+        <h4 class="conflito-modal-title">Mesa de Jogo</h4>
+        <button type="button" class="btn-close-modal" id="btn-close-room-modal">&times;</button>
+      </div>
+      <div class="conflito-modal-body">
+        <div id="room-step-create" class="room-step">
+          <div class="room-tabs">
+            <div class="room-tab active" data-room-tab="criar">Criar Sala</div>
+            <div class="room-tab" data-room-tab="entrar">Entrar</div>
+          </div>
+          <div class="room-tab-content" id="room-tab-criar">
+            <label class="ws-label">Ficha do Personagem <small style="color:var(--text-muted);font-weight:normal;">(opcional)</small></label>
+            <select id="room-char-select" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
+              <option value="">-- Nenhuma (apenas Mestre) --</option>
+            </select>
+            <label class="ws-label" style="margin-top:8px;">Seu Nome</label>
+            <input type="text" id="room-player-name" placeholder="Seu nome na mesa" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
+            <button type="button" class="btn btn-sm btn-primary" id="btn-create-room" style="width:100%; margin-top:8px;">Criar Sala</button>
+          </div>
+          <div class="room-tab-content hidden" id="room-tab-entrar">
+            <label class="ws-label">Código da Sala</label>
+            <input type="text" id="room-code-input" placeholder="Ex: ABC123" class="conflito-form-input" style="width:100%; box-sizing:border-box; text-transform:uppercase;" maxlength="6">
+            <label class="ws-label" style="margin-top:8px;">Ficha do Personagem</label>
+            <select id="room-char-select-join" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
+              <option value="">-- Selecione uma ficha (obrigatório) --</option>
+            </select>
+            <label class="ws-label" style="margin-top:8px;">Seu Nome</label>
+            <input type="text" id="room-player-name-join" placeholder="Seu nome na mesa" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
+            <button type="button" class="btn btn-sm btn-primary" id="btn-join-room" style="width:100%; margin-top:8px;">Entrar na Sala</button>
+          </div>
+        </div>
+        <div id="room-step-waiting" class="room-step hidden">
+          <p style="font-size:13px; color:var(--text-secondary); text-align:center;">Compartilhe o código abaixo com os jogadores:</p>
+          <div class="room-code-display" id="room-code-display">------</div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-sm" id="btn-copy-room-code" style="flex:1;">Copiar Código</button>
+          </div>
+        </div>
+      </div>
+      <div class="conflito-modal-footer">
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-cancel-room">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Overlay de Rolagem (Canto Superior Direito) -->
   <div id="dice-overlay" class="dice-overlay hidden">
     <div class="dice-overlay-header">

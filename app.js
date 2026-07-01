@@ -7,6 +7,7 @@ import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
 import { initLandingScreen, showLandingScreen, renderCharactersList } from "./js/landing.js";
 import { worldState, loadAllWorldData } from "./js/world-state.js";
+import { initMesaUI, broadcastCharacterState, broadcastRoll } from "./js/mesa-ui.js";
 
 // ==========================================
 // INICIALIZAÇÃO DA APLICAÇÃO
@@ -24,9 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initDiceBox();
   setupEventListeners();
+  setupRoomTabs();
   
   // Inicializa a tela de entrada (Landing)
   initLandingScreen();
+  initMesaUI();
   showLandingScreen();
 });
 
@@ -776,6 +779,14 @@ function setupEventListeners() {
     }
   });
 
+  // Enviar resultado para a Mesa
+  document.getElementById("btn-send-normal-to-mesa")?.addEventListener("click", () => {
+    import("./js/roller.js").then(({ sendRollToMesa }) => sendRollToMesa(false));
+  });
+  document.getElementById("btn-send-instinto-to-mesa")?.addEventListener("click", () => {
+    import("./js/roller.js").then(({ sendRollToMesa }) => sendRollToMesa(true));
+  });
+
   const btnClearChat = document.getElementById("btn-clear-chat");
   if (btnClearChat) {
     btnClearChat.addEventListener("click", () => {
@@ -812,6 +823,26 @@ function goToLanding() {
   import("./js/landing.js").then(({ showLandingScreen, renderCharactersList }) => {
     showLandingScreen();
   });
+}
+
+function setupRoomTabs() {
+  const tabs = document.querySelectorAll(".room-tab");
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      const target = tab.dataset.roomTab;
+      document.querySelectorAll(".room-tab-content").forEach(c => c.classList.add("hidden"));
+      const content = document.getElementById("room-tab-" + target);
+      if (content) content.classList.remove("hidden");
+    });
+  });
+  const joinStep = document.getElementById("room-step-join");
+  if (joinStep) {
+    document.querySelector("[data-room-tab='entrar']")?.addEventListener("click", () => {
+      document.getElementById("room-step-join")?.classList.remove("hidden");
+    });
+  }
 }
 
 function updateXpDisplay() {

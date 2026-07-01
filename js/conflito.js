@@ -116,7 +116,7 @@ function _renderAmeacaActivations(a, ameacaIdx) {
               <span class="conflito-ativacao-titulo ameaca-ativacao-titulo">Ativação</span>
             </div>
           </div>
-          </div
+          </div>
           
           <div class="conflito-ativacao-info">
             <span class="conflito-ativacao-titulo ameaca-ativacao-titulo">${esc(act.titulo)}</span>

@@ -134,6 +134,14 @@ export const state = {
   // Histórico de rolagens recentes
   activeRollResults: [],
   keptDiceIndexes: [],
+  // Estado da Mesa de Jogo
+  mesa: {
+    roomId: null,
+    isHost: false,
+    players: [],
+    mapImage: null,
+    rolls: []
+  },
   // Estado temporário do Wizard de Criação
   wizardData: {
     step: 1,
