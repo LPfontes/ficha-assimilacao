@@ -439,7 +439,7 @@ export function renderConflitoSheet() {
           <div class="conflito-ativacoes-header">
             <h3 class="ws-section-title conflito-section-title">Ativações do Conflito</h3>
             <div id="conflito-last-roll-container"></div>
-            <button id="btn-toggle-simbolos" class="btn btn-sm" style="font-size:9px;padding:2px 6px;" title="Alternar símbolos dos dados">🎲</button>
+            <button id="btn-toggle-simbolos" class="btn btn-sm" style="font-size:10px;padding:2px 10px;" title="Alternar símbolos dos dados">Trocar Dados</button>
           </div>
           <div id="conflito-ativacoes-list" class="conflito-ativacoes-list">
             ${c.ativacoes.map((act, idx) => {
