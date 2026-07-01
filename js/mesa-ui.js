@@ -479,7 +479,7 @@ function _applyCachedStates() {
     const saudeEl = document.getElementById("saude-" + pid);
     const portraitEl = document.getElementById("portrait-" + pid);
     console.log("[MESA] _applyCachedStates pid=" + pid + " detEl=" + !!detEl + " saudeEl=" + !!saudeEl + " det=", cached.det);
-    if (detEl && cached.det) detEl.innerHTML = `<span class="det-value">${cached.det.atual}/${cached.det.max}</span>`;
+    if (detEl && cached.det) detEl.innerHTML = `<span class="det-value">Determinação:${cached.det.atual}/${cached.det.max}</span>`;
     if (saudeEl && cached.saude) saudeEl.innerHTML = _renderHealthLevelsHTML(cached.saude);
     if (portraitEl) {
       if (cached.portrait) portraitEl.innerHTML = `<img src="${cached.portrait}" class="table-mini-portrait" alt="${esc(cached.nome || '')}">`;
@@ -501,7 +501,7 @@ function updatePlayerState(playerId, data) {
   const saudeEl = document.getElementById("saude-" + playerId);
   const portraitEl = document.getElementById("portrait-" + playerId);
   console.log("[MESA] updatePlayerState found detEl=" + !!detEl + " saudeEl=" + !!saudeEl);
-  if (detEl && data.det) detEl.innerHTML = `<span class="det-value">${data.det.atual}/${data.det.max}</span>`;
+  if (detEl && data.det) detEl.innerHTML = `<span class="det-value">Determinação:${data.det.atual}/${data.det.max}</span>`;
   if (saudeEl && data.saude) saudeEl.innerHTML = _renderHealthLevelsHTML(data.saude);
   if (portraitEl && data.portrait) portraitEl.innerHTML = `<img src="${data.portrait}" class="table-mini-portrait" alt="${esc(data.nome || '')}">`;
   else if (portraitEl && data?.nome) portraitEl.innerHTML = `<div class="table-mini-portrait-placeholder">${esc(data.nome[0] || '?')}</div>`;
