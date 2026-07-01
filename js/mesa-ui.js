@@ -531,6 +531,8 @@ function addRollToFeed(data, isOwn = false) {
   // Monta dados com face + símbolos
   let resultsHtml = "";
   let totalSucessos = 0;
+  let totalAdaptacao = 0;
+  let totalPressao = 0;
 
   if (Array.isArray(data.data?.results) && data.data.results.length > 0) {
     const keptIndexes = Array.isArray(data.data?.keptDiceIndexes) ? data.data.keptDiceIndexes : [];
@@ -543,24 +545,32 @@ function addRollToFeed(data, isOwn = false) {
 
       const isKept = keptIndexes.includes(idx);
 
-      if (isKept) totalSucessos += symbols.filter(s => s === "A").length;
+      if (isKept) {
+        totalSucessos += symbols.filter(s => s === "A").length;
+        totalAdaptacao += symbols.filter(s => s === "B").length;
+        totalPressao += symbols.filter(s => s === "C").length;
+      }
 
       const imgSrc = getDieFaceImgSrc(r.sides, r.value);
       const faceHtml = imgSrc
         ? `<img src="${imgSrc}" class="feed-die-face" alt="d${r.sides}:${r.value}" title="d${r.sides} = ${r.value}">`
         : `<span class="roll-die die-d${r.sides}" title="d${r.sides}">${r.value ?? "?"}</span>`;
 
-      const symHtml = r.sides !== 10 ? getDieSymbolsHtml(symbols) : null;
-
       const keptClass = isKept ? ' kept' : '';
       return `<div class="feed-die-card die-d${r.sides}${keptClass}">${faceHtml}</div>`;
     }).join("");
 
     const sucessosBadge = totalSucessos > 0
-      ? `<span class="feed-roll-sucessos" title="Sucessos">${totalSucessos} <small>suces.</small></span>`
+      ? `<span class="feed-roll-sucessos" title="Sucessos">${totalSucessos} <small>sucesso</small></span>`
       : `<span class="feed-roll-fracasso">Fracasso</span>`;
+    const adaptacaoBadge = totalAdaptacao > 0
+      ? `<span class="feed-roll-adaptacao" title="Adaptação">${totalAdaptacao} <small>adaptação</small></span>`
+      : "";
+    const pressaoBadge = totalPressao > 0
+      ? `<span class="feed-roll-pressao" title="Pressão">${totalPressao} <small>pressão</small></span>`
+      : "";
 
-    resultsHtml = `<div class="roll-dice-row">${diceHtml}</div><div class="roll-result-summary">${sucessosBadge}</div>`;
+    resultsHtml = `<div class="roll-dice-row">${diceHtml}</div><div class="roll-result-summary">${sucessosBadge} ${adaptacaoBadge} ${pressaoBadge}</div>`;
   }
 
   entry.innerHTML = `
