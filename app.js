@@ -6,6 +6,7 @@ import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco,
 import { ICONS } from "./icons.js";
 import { logger } from "./js/logger.js";
 import { initLandingScreen, showLandingScreen, renderCharactersList } from "./js/landing.js";
+import { initPlayer } from "./js/player.js";
 import { worldState, loadAllWorldData } from "./js/world-state.js";
 import { initMesaUI, broadcastCharacterState, broadcastRoll, minimizeMesa } from "./js/mesa-ui.js";
 
@@ -31,6 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initLandingScreen();
   initMesaUI();
   showLandingScreen();
+
+  initPlayer();
 });
 
 // Renderização dos ícones SVG inline baseados em data-icon

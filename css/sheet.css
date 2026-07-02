@@ -700,7 +700,7 @@
 .mutation-sheet-item.suit-singulares { border-left-color: hsl(297, 41.7%, 24.9%); }
 
 .suit-tag-evolutivas { background-color: rgba(244, 63, 94, 0.12); color: hsl(1, 50%, 50%); }
-.suit-tag-adaptativas { background-color: rgba(234, 179, 8, 0.12); color: hsl(188, 92.7%, 50%); }
+.suit-tag-adaptativas { background-color: rgba(234, 179, 8, 0.12); color: hsl(64, 93%, 50%); }
 .suit-tag-inoportunas { background-color: rgba(168, 85, 247, 0.12); color: hsl(195, 84.6%, 50%); }
 .suit-tag-singulares { background-color: rgba(16, 185, 129, 0.12); color: hsl(291, 50%, 50%); }
 
@@ -819,19 +819,19 @@
 .ass-point-badge.success-badge {
   background: rgba(0, 255, 102, 0.08);
   border: 1px solid rgba(0, 255, 102, 0.2);
-  color: #00ff66;
+  color: #a80000;
 }
 
 .ass-point-badge.adaptation-badge {
   background: rgba(234, 179, 8, 0.08);
   border: 1px solid rgba(234, 179, 8, 0.2);
-  color: #eab308;
+  color: #a6a400;
 }
 
 .ass-point-badge.pressure-badge {
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: #016e8b;
 }
 
 .btn-point-adjust {

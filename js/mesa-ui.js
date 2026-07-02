@@ -295,6 +295,11 @@ export function initMesaUI() {
     roomCode = "";
     _playerStateCache = {};
     _currentMapDataUrl = null;
+    _isSceneMode = false;
+    _currentSceneId = null;
+    const cenaDisplay = document.getElementById("table-cena-display");
+    if (cenaDisplay) { cenaDisplay.classList.add("hidden"); cenaDisplay.style.opacity = ""; cenaDisplay.style.transition = ""; }
+    document.getElementById("table-cena-controls")?.classList.add("hidden");
     previousScreen = null;
     isOnTableScreen = false;
     delete document.body.dataset.mesaVisited;
@@ -404,6 +409,7 @@ export function initMesaUI() {
   _initChatPanel();
   _initFichasPicker();
   _initConflitoPicker();
+  _initCenasPanel();
 }
 
 function handleMessage(data, fromId) {
@@ -426,6 +432,20 @@ function handleMessage(data, fromId) {
     case "map":
       if (data.data?.imageDataUrl) {
         setMapImage(data.data.imageDataUrl);
+      }
+      break;
+    case "scene":
+      if (data.data) {
+        const { sceneId, src, name } = data.data;
+        if (sceneId && src) {
+          if (!_scenes.find(s => s.id === sceneId)) {
+            _scenes.push({ id: sceneId, name: name || "Cena", src, isPredefined: false });
+          }
+          _switchScene(sceneId);
+        } else if (sceneId === null) {
+          _setSceneMode(false);
+          _currentSceneId = null;
+        }
       }
       break;
     case "_room_update":
@@ -761,8 +781,10 @@ function showTableScreen() {
 
   if (peerManager?.isHost) {
     document.getElementById("table-map-controls")?.classList.remove("hidden");
+    document.getElementById("btn-table-cenas")?.classList.remove("hidden");
   } else {
     document.getElementById("table-map-controls")?.classList.add("hidden");
+    document.getElementById("btn-table-cenas")?.classList.add("hidden");
   }
   _updateAddFichaButton();
   _updateConflitoButton();
@@ -819,6 +841,241 @@ function hideTableScreen() {
   // Restaura a tela anterior, ou landing como fallback
   const target = previousScreen || document.getElementById("landing-screen");
   if (target) target.classList.remove("hidden");
+}
+
+// ── Scene Manager ──────────────────────────────────────────────────────────────
+
+const CENAS_PREDEFINIDAS = [
+  { id: "predef_fundo1", name: "Floresta", src: "assets/fundo1.webp", isPredefined: true },
+  { id: "predef_fundo2", name: "Abrigo", src: "assets/fundo2.jpeg", isPredefined: true }
+];
+const SCENES_STORAGE_KEY = "assimilacao_cenas";
+let _scenes = [];
+let _currentSceneId = null;
+let _isSceneMode = false;
+
+function _loadScenes() {
+  try {
+    const raw = localStorage.getItem(SCENES_STORAGE_KEY);
+    const uploaded = raw ? JSON.parse(raw) : [];
+    const predefinedIds = new Set(CENAS_PREDEFINIDAS.map(s => s.id));
+    _scenes = [...CENAS_PREDEFINIDAS, ...uploaded.filter(s => !predefinedIds.has(s.id))];
+  } catch (e) {
+    _scenes = [...CENAS_PREDEFINIDAS];
+  }
+}
+
+function _saveScenes() {
+  try {
+    const uploaded = _scenes.filter(s => !s.isPredefined);
+    localStorage.setItem(SCENES_STORAGE_KEY, JSON.stringify(uploaded));
+  } catch (e) {
+    logger.error("[Cenas] Erro ao salvar cenas:", e);
+  }
+}
+
+function _addScene(name, dataUrl) {
+  const id = "scene_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+  _scenes.push({ id, name, src: dataUrl, isPredefined: false });
+  _saveScenes();
+  _renderCenasGallery();
+}
+
+function _removeScene(id) {
+  _scenes = _scenes.filter(s => s.id !== id);
+  _saveScenes();
+  _renderCenasGallery();
+  if (_currentSceneId === id) {
+    _setSceneMode(false);
+    _currentSceneId = null;
+  }
+}
+
+function _setSceneMode(active) {
+  _isSceneMode = active;
+  const mapImg = document.getElementById("table-map-image");
+  const mapPlaceholder = document.getElementById("table-map-placeholder");
+  const cenaDisplay = document.getElementById("table-cena-display");
+  const cenaControls = document.getElementById("table-cena-controls");
+  const mapControls = document.getElementById("table-map-controls");
+
+  if (active) {
+    mapImg.style.display = "none";
+    mapPlaceholder.style.display = "none";
+    cenaDisplay.classList.remove("hidden");
+    cenaControls.classList.remove("hidden");
+    mapControls.classList.add("hidden");
+  } else {
+    cenaDisplay.classList.add("hidden");
+    cenaControls.classList.add("hidden");
+    mapImg.style.display = _currentMapDataUrl ? "block" : "none";
+    mapPlaceholder.style.display = _currentMapDataUrl ? "none" : "";
+    mapControls.classList.remove("hidden");
+  }
+}
+
+function _switchScene(sceneId) {
+  const scene = _scenes.find(s => s.id === sceneId);
+  if (!scene) return;
+
+  const img = document.getElementById("table-cena-image");
+  const newSrc = scene.src;
+
+  _currentSceneId = sceneId;
+
+  if (!_isSceneMode) {
+    _cenaZoom = 1; _cenaPanX = 0; _cenaPanY = 0;
+    _setSceneMode(true);
+    img.style.opacity = "0";
+    img.src = newSrc;
+    void img.offsetHeight;
+    img.style.transition = "opacity 0.35s ease";
+    img.style.opacity = "1";
+    _applyCenaZoom();
+  } else if (img.src !== newSrc) {
+    img.style.transition = "opacity 0.3s ease";
+    img.style.opacity = "0";
+    setTimeout(() => {
+      img.src = newSrc;
+      img.style.transition = "opacity 0.35s ease";
+      img.style.opacity = "1";
+    }, 300);
+  }
+
+  if (peerManager?.isHost) {
+    peerManager.broadcast({ type: "scene", playerId: peerManager.playerId, data: { sceneId: scene.id, src: scene.src, name: scene.name } });
+  }
+}
+
+function _openCenasModal() {
+  _loadScenes();
+  _renderCenasGallery();
+  const modal = document.getElementById("modal-cenas");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function _closeCenasModal() {
+  const modal = document.getElementById("modal-cenas");
+  if (modal) modal.classList.add("hidden");
+}
+
+function _renderCenasGallery() {
+  const list = document.getElementById("cenas-gallery-list");
+  if (!list) return;
+
+  list.innerHTML = _scenes.map(s => {
+    const isActive = s.id === _currentSceneId;
+    return `<div class="cena-thumb ${isActive ? 'active' : ''}" data-id="${esc(s.id)}">
+      <div class="cena-thumb-image-wrapper">
+        <img class="cena-thumb-image" src="${esc(s.src)}" alt="${esc(s.name)}" loading="lazy">
+        ${isActive ? '<span class="cena-thumb-check">✓</span>' : ''}
+        ${!s.isPredefined ? `<button class="cena-thumb-delete" data-id="${esc(s.id)}">✕</button>` : ''}
+      </div>
+      <div class="cena-thumb-name">${esc(s.name)}</div>
+    </div>`;
+  }).join("");
+
+  list.querySelectorAll(".cena-thumb").forEach(el => {
+    el.addEventListener("click", (e) => {
+      if (e.target.closest(".cena-thumb-delete")) return;
+      _switchScene(el.dataset.id);
+      _closeCenasModal();
+    });
+  });
+
+  list.querySelectorAll(".cena-thumb-delete").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _removeScene(btn.dataset.id);
+    });
+  });
+}
+
+let _cenaZoom = 1, _cenaPanX = 0, _cenaPanY = 0;
+let _cenaIsPanning = false, _cenaPanStartX, _cenaPanStartY;
+
+function _applyCenaZoom() {
+  const img = document.getElementById("table-cena-image");
+  if (!img) return;
+  const pct = Math.round(_cenaZoom * 100);
+  img.style.transform = `translate(${_cenaPanX}px, ${_cenaPanY}px) scale(${_cenaZoom})`;
+  const display = document.getElementById("cena-zoom-level-display");
+  if (display) display.textContent = pct + "%";
+  img.classList.toggle("zoomable", _cenaZoom > 1);
+}
+
+function _initCenasPanel() {
+  _loadScenes();
+
+  document.getElementById("btn-table-cenas")?.addEventListener("click", _openCenasModal);
+  document.getElementById("btn-close-cenas-modal")?.addEventListener("click", _closeCenasModal);
+  document.getElementById("modal-cenas")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) _closeCenasModal();
+  });
+
+  document.getElementById("btn-cenas-upload")?.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const dataUrl = evt.target.result;
+      _compressImage(dataUrl, 1600, 0.7, (compressed) => {
+        const name = file.name.replace(/\.[^.]+$/, "").substring(0, 30);
+        _addScene(name, compressed || dataUrl);
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("btn-back-to-map")?.addEventListener("click", () => {
+    _setSceneMode(false);
+    _currentSceneId = null;
+    if (peerManager?.isHost) {
+      peerManager.broadcast({ type: "scene", playerId: peerManager.playerId, data: { sceneId: null } });
+    }
+  });
+
+  // Zoom controls
+  const cenaImg = document.getElementById("table-cena-image");
+
+  document.getElementById("btn-cena-zoom-in")?.addEventListener("click", () => {
+    _cenaZoom = Math.min(5, _cenaZoom + 0.25);
+    _applyCenaZoom();
+  });
+  document.getElementById("btn-cena-zoom-out")?.addEventListener("click", () => {
+    _cenaZoom = Math.max(0.25, _cenaZoom - 0.25);
+    _applyCenaZoom();
+  });
+  document.getElementById("btn-cena-zoom-reset")?.addEventListener("click", () => {
+    _cenaZoom = 1; _cenaPanX = 0; _cenaPanY = 0;
+    _applyCenaZoom();
+  });
+
+  // Pan via mouse drag
+  cenaImg?.addEventListener("mousedown", (e) => {
+    if (_cenaZoom <= 1) return;
+    _cenaIsPanning = true;
+    _cenaPanStartX = e.clientX - _cenaPanX;
+    _cenaPanStartY = e.clientY - _cenaPanY;
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!_cenaIsPanning) return;
+    _cenaPanX = e.clientX - _cenaPanStartX;
+    _cenaPanY = e.clientY - _cenaPanStartY;
+    _applyCenaZoom();
+  });
+  document.addEventListener("mouseup", () => { _cenaIsPanning = false; });
+
+  // Scroll zoom
+  cenaImg?.addEventListener("wheel", (e) => {
+    if (cenaImg.style.display === "none") return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    _cenaZoom = Math.max(0.25, Math.min(5, _cenaZoom + delta));
+    _applyCenaZoom();
+  }, { passive: false });
 }
 
 /** Minimiza a mesa (sem desconectar) se ela estiver ativa. */

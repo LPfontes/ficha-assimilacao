@@ -131,6 +131,9 @@
         <button id="btn-table-conflito" class="btn btn-sm table-conflito-btn hidden" title="Ativar / Gerenciar Conflito">
           ⚔️ Conflito
         </button>
+        <button id="btn-table-cenas" class="btn btn-sm table-cenas-btn hidden" title="Gerenciar Cenas de Fundo">
+          🖼️ Cenas
+        </button>
         <button class="btn btn-sm" id="btn-leave-table" style="border-color:var(--color-rust); color:var(--color-rust-glow);">Sair da Mesa</button>
       </div>
 
@@ -304,6 +307,18 @@
             <label for="btn-table-map-upload">Alterar Mapa</label>
             <input type="file" id="btn-table-map-upload" accept="image/*" style="display:none">
           </div>
+          <div id="table-cena-display" class="hidden">
+            <img id="table-cena-image" src="" alt="Cena">
+          </div>
+          <div id="table-cena-controls" class="hidden">
+            <button id="btn-back-to-map" class="btn btn-sm">Voltar ao Mapa</button>
+            <div id="table-cena-zoom">
+              <button id="btn-cena-zoom-out" class="btn btn-sm" title="Menos zoom">−</button>
+              <span id="cena-zoom-level-display">100%</span>
+              <button id="btn-cena-zoom-in" class="btn btn-sm" title="Mais zoom">+</button>
+              <button id="btn-cena-zoom-reset" class="btn btn-sm" title="Resetar zoom">⟲</button>
+            </div>
+          </div>
         </div>
 
         <!-- Coluna direita: Rolagens -->
@@ -376,6 +391,21 @@
             <input type="text" id="ficha-picker-search" placeholder="Buscar ficha..." autocomplete="off">
           </div>
           <div id="ficha-picker-list" class="ficha-picker-list"></div>
+        </div>
+      </div>
+
+      <!-- Modal: Gerenciar Cenas -->
+      <div id="modal-cenas" class="ficha-picker-overlay hidden">
+        <div class="ficha-picker-box">
+          <div class="ficha-picker-header">
+            <span>🎨 Gerenciar Cenas</span>
+            <button id="btn-close-cenas-modal" class="btn btn-sm">✕</button>
+          </div>
+          <div class="ficha-picker-search-row" style="display:flex;gap:8px;">
+            <label for="btn-cenas-upload" class="btn btn-sm" style="cursor:pointer;flex:1;text-align:center;">+ Upload de Imagem</label>
+            <input type="file" id="btn-cenas-upload" accept="image/*" style="display:none">
+          </div>
+          <div id="cenas-gallery-list" class="ficha-picker-list"></div>
         </div>
       </div>
 
@@ -1302,6 +1332,70 @@
       <div class="conflito-modal-footer">
         <button type="button" class="btn btn-sm btn-secondary" id="btn-cancel-room">Cancelar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Mini-Player Flutuante (canto inferior direito) -->
+  <div id="mini-player" class="mini-player hidden">
+    <div class="player-progress-bar" id="player-progress">
+      <div class="player-progress-fill" id="player-progress-fill"></div>
+    </div>
+    <div class="player-body">
+      <div class="player-track-art" id="player-track-art">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M16 12a4 4 0 01-8 0" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="player-info-group">
+        <div class="player-track-info" id="player-track-info-click">
+          <div class="player-track-name" id="player-track-name">Nenhuma faixa</div>
+          <div class="player-track-sub">Assimilação RPG</div>
+        </div>
+        <div class="player-row2">
+          <span class="player-time" id="player-time-current">00:00</span>
+          <span class="player-time-sep">/</span>
+          <span class="player-time" id="player-time-total">00:00</span>
+          <button class="player-btn player-btn-shuffle" id="player-btn-shuffle" title="Aleatório">
+            <svg id="player-shuffle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.4;">
+              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+            </svg>
+          </button>
+          <button class="player-btn player-btn-repeat" id="player-btn-repeat" title="Repetir">
+            <svg id="player-repeat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.4;">
+              <path d="M4 4v5h5M20 20v-5h-5"/><path d="M16 4a8 8 0 014.24 3.76M8 20a8 8 0 01-4.24-3.76"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="player-actions">
+        <button class="player-btn player-btn-prev" id="player-btn-prev" title="Anterior">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 5h1.5v10H5V5zm3 5l7-5v10l-7-5z"/></svg>
+        </button>
+        <button class="player-btn player-btn-play" id="player-btn-play" title="Play/Pause">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path id="player-play-icon" d="M6.5 4.5l9 5.5-9 5.5V4.5z"/>
+          </svg>
+        </button>
+        <button class="player-btn player-btn-next" id="player-btn-next" title="Próxima">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.5 5H15v10h-1.5V5zm-7 5l7-5v10l-7-5z"/></svg>
+        </button>
+      </div>
+      <div class="player-volume-wrap">
+        <button class="player-btn" id="player-btn-volume" title="Volume">
+          <svg id="player-volume-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M9 4L5 7.5H2v5h3l4 3.5V4z"/>
+            <path d="M15.5 5.5a7 7 0 010 9M13 8a3.5 3.5 0 010 4"/>
+          </svg>
+        </button>
+        <input type="range" class="player-volume-slider" id="player-volume-slider" min="0" max="1" step="0.05" value="0.8">
+      </div>
+      <button class="player-btn player-btn-expand" id="player-btn-expand" title="Lista de faixas">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <polyline points="4 8 10 14 16 8"/>
+        </svg>
+      </button>
     </div>
   </div>
 
