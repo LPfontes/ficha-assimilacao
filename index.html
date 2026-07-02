@@ -27,7 +27,67 @@
         <img src="assets/logotipoAssimilacao.webp" alt="Assimilação RPG Logo" style="height: 40px; width: auto; max-width: 100%; display:block;">
       </button>
     </div>
-    
+
+    <!-- Mini-Player inline no header -->
+    <div id="mini-player" class="mini-player hidden">
+      <div class="player-body">
+        <div class="player-track-art" id="player-track-art">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M16 12a4 4 0 01-8 0" stroke-width="2.5"/>
+            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="player-info-group">
+          <div class="player-track-info" id="player-track-info-click">
+            <div class="player-track-name" id="player-track-name">Nenhuma faixa</div>
+          </div>
+          <div class="player-row2">
+            <span class="player-time" id="player-time-current">00:00</span>
+            <span class="player-time-sep">/</span>
+            <span class="player-time" id="player-time-total">00:00</span>
+          </div>
+        </div>
+        <div class="player-actions">
+          <button class="player-btn player-btn-prev" id="player-btn-prev" title="Anterior">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 5h1.5v10H5V5zm3 5l7-5v10l-7-5z"/></svg>
+          </button>
+          <button class="player-btn player-btn-play" id="player-btn-play" title="Play/Pause">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path id="player-play-icon" d="M6.5 4.5l9 5.5-9 5.5V4.5z"/>
+            </svg>
+          </button>
+          <button class="player-btn player-btn-next" id="player-btn-next" title="Próxima">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.5 5H15v10h-1.5V5zm-7 5l7-5v10l-7-5z"/></svg>
+          </button>
+        </div>
+        <div class="player-volume-wrap">
+          <button class="player-btn" id="player-btn-volume" title="Volume">
+            <svg id="player-volume-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M9 4L5 7.5H2v5h3l4 3.5V4z"/>
+              <path d="M15.5 5.5a7 7 0 010 9M13 8a3.5 3.5 0 010 4"/>
+            </svg>
+          </button>
+          <input type="range" class="player-volume-slider" id="player-volume-slider" min="0" max="1" step="0.05" value="0.8">
+        </div>
+        <button class="player-btn player-btn-shuffle" id="player-btn-shuffle" title="Aleatório">
+          <svg id="player-shuffle-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:0.4;">
+            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+          </svg>
+        </button>
+        <button class="player-btn player-btn-repeat" id="player-btn-repeat" title="Repetir">
+          <svg id="player-repeat-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:0.4;">
+            <path d="M4 4v5h5M20 20v-5h-5"/><path d="M16 4a8 8 0 014.24 3.76M8 20a8 8 0 01-4.24-3.76"/>
+          </svg>
+        </button>
+        <button class="player-btn player-btn-expand" id="player-btn-expand" title="Lista de faixas">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <polyline points="4 8 10 14 16 8"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <button id="btn-mobile-menu" type="button" class="btn-mobile-menu" title="Abrir Menu">
       <span class="menu-bar"></span>
       <span class="menu-bar"></span>
@@ -49,7 +109,7 @@
         <span class="btn-icon" data-icon="import"></span> <span class="btn-text">Importar</span>
       </button>
       <input type="file" id="file-import" accept=".json" style="display: none;">
-      <button id="btn-export-json" class="btn export-json" title="Exportar Ficha JSON" disabled>
+      <button id="btn-export-json" class="btn export-json" title="Exportar Ficha JSON">
         <span class="btn-icon" data-icon="export"></span> <span class="btn-text">Exportar</span>
       </button>
       <button id="btn-assimilation-test" class="btn hide-on-desktop" title="Realizar Teste de Assimilação">
@@ -1335,70 +1395,8 @@
     </div>
   </div>
 
-  <!-- Mini-Player Flutuante (canto inferior direito) -->
-  <div id="mini-player" class="mini-player hidden">
-    <div class="player-progress-bar" id="player-progress">
-      <div class="player-progress-fill" id="player-progress-fill"></div>
-    </div>
-    <div class="player-body">
-      <div class="player-track-art" id="player-track-art">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M16 12a4 4 0 01-8 0" stroke-width="2.5"/>
-          <circle cx="12" cy="12" r="2" fill="currentColor"/>
-        </svg>
-      </div>
-      <div class="player-info-group">
-        <div class="player-track-info" id="player-track-info-click">
-          <div class="player-track-name" id="player-track-name">Nenhuma faixa</div>
-          <div class="player-track-sub">Assimilação RPG</div>
-        </div>
-        <div class="player-row2">
-          <span class="player-time" id="player-time-current">00:00</span>
-          <span class="player-time-sep">/</span>
-          <span class="player-time" id="player-time-total">00:00</span>
-          <button class="player-btn player-btn-shuffle" id="player-btn-shuffle" title="Aleatório">
-            <svg id="player-shuffle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.4;">
-              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
-            </svg>
-          </button>
-          <button class="player-btn player-btn-repeat" id="player-btn-repeat" title="Repetir">
-            <svg id="player-repeat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.4;">
-              <path d="M4 4v5h5M20 20v-5h-5"/><path d="M16 4a8 8 0 014.24 3.76M8 20a8 8 0 01-4.24-3.76"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="player-actions">
-        <button class="player-btn player-btn-prev" id="player-btn-prev" title="Anterior">
-          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 5h1.5v10H5V5zm3 5l7-5v10l-7-5z"/></svg>
-        </button>
-        <button class="player-btn player-btn-play" id="player-btn-play" title="Play/Pause">
-          <svg viewBox="0 0 20 20" fill="currentColor">
-            <path id="player-play-icon" d="M6.5 4.5l9 5.5-9 5.5V4.5z"/>
-          </svg>
-        </button>
-        <button class="player-btn player-btn-next" id="player-btn-next" title="Próxima">
-          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.5 5H15v10h-1.5V5zm-7 5l7-5v10l-7-5z"/></svg>
-        </button>
-      </div>
-      <div class="player-volume-wrap">
-        <button class="player-btn" id="player-btn-volume" title="Volume">
-          <svg id="player-volume-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-            <path d="M9 4L5 7.5H2v5h3l4 3.5V4z"/>
-            <path d="M15.5 5.5a7 7 0 010 9M13 8a3.5 3.5 0 010 4"/>
-          </svg>
-        </button>
-        <input type="range" class="player-volume-slider" id="player-volume-slider" min="0" max="1" step="0.05" value="0.8">
-      </div>
-      <button class="player-btn player-btn-expand" id="player-btn-expand" title="Lista de faixas">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <polyline points="4 8 10 14 16 8"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
+  <!-- Botão flutuante do player (canto inferior esquerdo) -->
+  <button id="player-fab" class="player-fab" title="Abrir Player de Música">
   <!-- Overlay de Rolagem (Canto Superior Direito) -->
   <div id="dice-overlay" class="dice-overlay hidden">
     <div class="dice-overlay-header">
