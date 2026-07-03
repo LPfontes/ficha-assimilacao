@@ -1,6 +1,7 @@
 import { logger } from "./logger.js";
 
 const audio = new Audio();
+audio.preload = "none";
 let playlist = [];
 let currentIndex = -1;
 let isPlaying = false;
