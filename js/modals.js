@@ -386,9 +386,9 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
           border: 1px solid;
           box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        .points-badge.a { color: #00ff66; background: rgba(0,255,102,0.08); border-color: rgba(0,255,102,0.25); }
-        .points-badge.b { color: #eab308; background: rgba(234,179,8,0.08); border-color: rgba(234,179,8,0.25); }
-        .points-badge.c { color: #ef4444; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); }
+        .points-badge.a { color: var(--color-sucesso); background: rgba(0,255,102,0.08); border-color: rgba(0,255,102,0.25); }
+        .points-badge.b { color: var(--color-adaptacao); background: rgba(234,179,8,0.08); border-color: rgba(234,179,8,0.25); }
+        .points-badge.c { color: var(--color-pressao); background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); }
         .singulares-config-box {
           margin: 20px auto;
           background: rgba(255,255,255,0.02);
@@ -632,10 +632,10 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         border: 2px solid;
         text-align: center;
       }
-      .tarot-card-front.evolutivas { border-color: #00ff66; color: #00ff66; }
-      .tarot-card-front.adaptativas { border-color: #eab308; color: #eab308; }
-      .tarot-card-front.inoportunas { border-color: #ef4444; color: #ef4444; }
-      .tarot-card-front.singulares { border-color: #a855f7; color: #a855f7; }
+      .tarot-card-front.evolutivas { border-color: var(--color-sucesso); color: var(--color-sucesso); }
+      .tarot-card-front.adaptativas { border-color: var(--color-adaptacao); color: var(--color-adaptacao); }
+      .tarot-card-front.inoportunas { border-color: var(--color-pressao); color: var(--color-pressao); }
+      .tarot-card-front.singulares { border-color: var(--color-singular); color: var(--color-singular); }
       
       .card-suit-symbol { font-size: 24px; margin-bottom: 4px; }
       .card-name-title { font-size: 11px; font-family: var(--font-heading); font-weight: bold; line-height: 1.2; word-break: break-word; }
@@ -686,9 +686,9 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       }
       .mut-title { font-weight: bold; font-size: var(--font-size-lg); }
       .mut-cost { font-size: 10px; font-family: var(--font-heading); padding: 1px 6px; border-radius: 4px; font-weight: bold; }
-      .mut-cost.evolutivas { background: rgba(0,255,102,0.15); color: #00ff66; border: 1px solid rgba(0,255,102,0.3); }
-      .mut-cost.adaptativas { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
-      .mut-cost.inoportunas { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+      .mut-cost.evolutivas { background: rgba(0,255,102,0.15); color: var(--color-sucesso); border: 1px solid rgba(0,255,102,0.3); }
+      .mut-cost.adaptativas { background: rgba(234,179,8,0.15); color: var(--color-adaptacao); border: 1px solid rgba(234,179,8,0.3); }
+      .mut-cost.inoportunas { background: rgba(239,68,68,0.15); color: var(--color-pressao); border: 1px solid rgba(239,68,68,0.3); }
       .mut-cost.singulares { background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
       .mut-desc { font-size: var(--font-size-md); color: var(--text-secondary); line-height: 1.3; }
       .mut-req { font-size: var(--font-size-md); color: var(--color-blue-glow); margin-top: 3px; font-weight: 500; }
@@ -699,9 +699,9 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         <h3>🔮 Selecionar Mutações Sorteadas</h3>
         <p style="font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0;">Toque em cada carta para revelar e ver as opções de mutação.</p>
         <div class="points-bar">
-          <span style="color:#00ff66;">Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
-          <span style="color:#eab308;">Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
-          <span style="color:#ef4444;">Pressões: <strong id="val-pts-c">${ptsC}</strong></span>
+          <span style="color:var(--color-sucesso);">Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
+          <span style="color:var(--color-adaptacao);">Adaptações: <strong id="val-pts-b">${ptsB}</strong></span>
+          <span style="color:var(--color-pressao);">Pressões: <strong id="val-pts-c">${ptsC}</strong></span>
         </div>
       </div>
 
@@ -711,10 +711,10 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
     if (catCards.length === 0) return "";
 
     let title = "Evolutivas";
-    let color = "#00ff66";
-    if (cat === "adaptativas") { title = "Adaptativas"; color = "#eab308"; }
-    if (cat === "inoportunas") { title = "Inoportunas"; color = "#ef4444"; }
-    if (cat === "singulares") { title = "Singulares"; color = "#a855f7"; }
+    let color = "var(--color-sucesso)";
+    if (cat === "adaptativas") { title = "Adaptativas"; color = "var(--color-adaptacao)"; }
+    if (cat === "inoportunas") { title = "Inoportunas"; color = "var(--color-pressao)"; }
+    if (cat === "singulares") { title = "Singulares"; color = "var(--color-singular)"; }
 
     return `
             <div class="tarot-carousel-group">
@@ -1603,10 +1603,10 @@ export function openAssimilationLibraryModal() {
   let ptsC = char.ptsC || 0;
 
   const categories = [
-    { key: "evolutivas", label: "Evolutivas", color: "#00ff66", suitSymbol: "♥" },
-    { key: "adaptativas", label: "Adaptativas", color: "#eab308", suitSymbol: "♦" },
-    { key: "inoportunas", label: "Inoportunas", color: "#ef4444", suitSymbol: "♠" },
-    { key: "singulares", label: "Singulares", color: "#a855f7", suitSymbol: "♣" }
+    { key: "evolutivas", label: "Evolutivas", color: "var(--color-sucesso)", suitSymbol: "♥" },
+    { key: "adaptativas", label: "Adaptativas", color: "var(--color-adaptacao)", suitSymbol: "♦" },
+    { key: "inoportunas", label: "Inoportunas", color: "var(--color-pressao)", suitSymbol: "♠" },
+    { key: "singulares", label: "Singulares", color: "var(--color-singular)", suitSymbol: "♣" }
   ];
 
   let activeTab = 0;
@@ -1761,9 +1761,9 @@ export function openAssimilationLibraryModal() {
         Selecione mutações para adquirir com seus pontos disponíveis.
       </p>
       <div class="lib-points-bar">
-        <span style="color:#00ff66;">♥ Sucesso: <strong>${curA}</strong></span>
-        <span style="color:#eab308;">♦ Adaptação: <strong>${curB}</strong></span>
-        <span style="color:#ef4444;">♠ Pressão: <strong>${curC}</strong></span>
+        <span style="color:var(--color-sucesso);">♥ Sucesso: <strong>${curA}</strong></span>
+        <span style="color:var(--color-adaptacao);">♦ Adaptação: <strong>${curB}</strong></span>
+        <span style="color:var(--color-pressao);">♠ Pressão: <strong>${curC}</strong></span>
       </div>
       <div class="lib-tab-bar">
         ${categories.map((cat, i) =>

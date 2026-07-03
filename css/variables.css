@@ -9,7 +9,7 @@
   --border-color-glow: rgba(44, 36, 27, 0.6);
   
   /* Acentos Temáticos */
-  --color-blue-glow: hsl(191.09, 71.88%, 30%); /* Ciano escuro */
+  --color-blue-glow: hsl(191.09, 71.88%, 50%); /* Ciano escuro */
   --color-blue-dark: #0a3a45;
   --color-rust: #8d2428; /* Vermelho escuro */
   --color-rust-glow: #be3135;
@@ -58,6 +58,12 @@
   --color-official-cyan-dark: #0a3a45;
   --color-official-glow: #125d6e;
   --bg-official-card: rgba(230, 220, 200, 0.9);
+
+  /* Cores dos Atributos */
+  --color-sucesso: #a80000;
+  --color-adaptacao: #a6a400;
+  --color-pressao: hsl(192.6,98.6%,50%);
+  --color-singular: #a855f7;
 }
 
 /* Reset Geral */
