@@ -948,6 +948,14 @@ function _attachListeners(c) {
   function _updateInvestment(idx, type, delta) {
     const act = c.ativacoes[idx];
     if (!act) return;
+
+    if (delta > 0) {
+      const avail = _getAvailableDice(c.rolagens, c.ativacoes);
+      if ((avail[type] || 0) <= 0) {
+        return;
+      }
+    }
+
     const key = `invested${type}`;
     act[key] = delta > 0 ? (act[key] || 0) + delta : Math.max(0, (act[key] || 0) + delta);
 
@@ -998,6 +1006,7 @@ function _attachListeners(c) {
     }
 
     saveConflito(c);
+    renderConflitoLastRollCounter();
   }
 
   screen.querySelectorAll(".btn-invest-inc").forEach(btn => {
@@ -1035,6 +1044,7 @@ function _attachListeners(c) {
     }
 
     saveConflito(c);
+    renderConflitoLastRollCounter();
   }
 
   screen.querySelectorAll(".btn-reset-ativacao").forEach(btn => {
@@ -1334,6 +1344,14 @@ function _attachListeners(c) {
   function _updateAmeacaInvestment(ameacaIdx, actIdx, type, delta) {
     const a = c.ameacas[ameacaIdx];
     if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
+
+    if (delta > 0) {
+      const avail = _getAvailableDice(a.rolagens, a.ativacoes);
+      if ((avail[type] || 0) <= 0) {
+        return;
+      }
+    }
+
     const act = a.ativacoes[actIdx];
     const key = `invested${type}`;
     act[key] = delta > 0 ? (act[key] || 0) + delta : Math.max(0, (act[key] || 0) + delta);
@@ -1391,6 +1409,7 @@ function _attachListeners(c) {
     }
 
     saveConflito(c);
+    renderConflitoLastRollCounter();
   }
 
   function _resetAmeacaAtivacao(ameacaIdx, actIdx) {
@@ -1400,7 +1419,25 @@ function _attachListeners(c) {
     act.investedS = 0;
     act.investedA = 0;
     act.investedP = 0;
+    act.snapshotS = 0;
+    act.snapshotA = 0;
+    act.snapshotP = 0;
+
+    const el = screen.querySelector(`.btn-invest-ameaca-inc[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"], .btn-invest-ameaca-dec[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"]`);
+    const item = el?.closest('.conflito-ativacao-item');
+    if (item) {
+      item.classList.remove('completed-item');
+      item.querySelectorAll('.invest-val').forEach(span => {
+        const required = span.textContent.split('/')[1];
+        span.textContent = `0/${required}`;
+        span.classList.remove('met');
+      });
+      const resetBtn = item.querySelector('.btn-reset-ativacao-ameaca');
+      resetBtn?.remove();
+    }
+
     saveConflito(c);
+    renderConflitoLastRollCounter();
   }
 
   screen.querySelectorAll(".btn-invest-ameaca-inc").forEach(btn => {
@@ -1619,63 +1656,141 @@ export function renderConflitoRollLog() {
   }).reverse().join("");
 }
 
+function _getAvailableDice(rolagens, activations) {
+  if (!rolagens || rolagens.length === 0) {
+    return { S: 0, A: 0, P: 0 };
+  }
+  const lastRoll = rolagens[rolagens.length - 1];
+  let sucessos = lastRoll.bonusSuccesses || 0;
+  let adaptacoes = lastRoll.bonusAdaptations || 0;
+  let pressoes = lastRoll.bonusPressures || 0;
+
+  lastRoll.keptDiceIndexes.forEach(idx => {
+    const die = lastRoll.results[idx];
+    if (die && die.symbols) {
+      die.symbols.forEach(sym => {
+        if (sym === "A") sucessos++;
+        if (sym === "B") adaptacoes++;
+        if (sym === "C") pressoes++;
+      });
+    }
+  });
+
+  let newlyInvestedS = 0;
+  let newlyInvestedA = 0;
+  let newlyInvestedP = 0;
+  (activations || []).forEach(act => {
+    newlyInvestedS += (act.investedS || 0) - (act.snapshotS || 0);
+    newlyInvestedA += (act.investedA || 0) - (act.snapshotA || 0);
+    newlyInvestedP += (act.investedP || 0) - (act.snapshotP || 0);
+  });
+
+  return {
+    S: Math.max(0, sucessos - newlyInvestedS),
+    A: Math.max(0, adaptacoes - newlyInvestedA),
+    P: Math.max(0, pressoes - newlyInvestedP)
+  };
+}
+
+function _adjustRollPool(type, delta, isThreat, threatIdx) {
+  const c = worldState.currentConflito;
+  if (!c) return;
+
+  let target;
+  if (isThreat) {
+    if (!c.ameacas || !c.ameacas[threatIdx]) return;
+    target = c.ameacas[threatIdx];
+  } else {
+    target = c;
+  }
+
+  if (!target.rolagens) {
+    target.rolagens = [];
+  }
+  if (target.rolagens.length === 0) {
+    target.rolagens.push({
+      bonusSuccesses: 0,
+      bonusAdaptations: 0,
+      bonusPressures: 0,
+      keptDiceIndexes: [],
+      results: [],
+      formula: "Ajuste Manual",
+      timestamp: new Date().toLocaleTimeString()
+    });
+  }
+
+  const lastRoll = target.rolagens[target.rolagens.length - 1];
+  
+  // Prevent available from going below 0
+  const avail = _getAvailableDice(target.rolagens, target.ativacoes);
+  if (delta < 0 && (avail[type] || 0) <= 0) {
+    return;
+  }
+
+  if (type === "S") {
+    lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) + delta;
+  } else if (type === "A") {
+    lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) + delta;
+  } else if (type === "P") {
+    lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) + delta;
+  }
+
+  saveConflito(c);
+  renderConflitoLastRollCounter();
+}
+
 export function renderConflitoLastRollCounter() {
   const c = worldState.currentConflito;
   if (!c) return;
 
-  const updateContainer = (container, rolagens, activations) => {
+  const updateContainer = (container, rolagens, activations, isThreat = false, threatIdx = null) => {
     if (!container) return;
-    if (rolagens && rolagens.length > 0) {
-      const lastRoll = rolagens[rolagens.length - 1];
-      let sucessos = lastRoll.bonusSuccesses || 0;
-      let adaptacoes = lastRoll.bonusAdaptations || 0;
-      let pressoes = lastRoll.bonusPressures || 0;
+    
+    const avail = _getAvailableDice(rolagens, activations);
 
-      lastRoll.keptDiceIndexes.forEach(idx => {
-        const die = lastRoll.results[idx];
-        if (die && die.symbols) {
-          die.symbols.forEach(sym => {
-            if (sym === "A") sucessos++;
-            if (sym === "B") adaptacoes++;
-            if (sym === "C") pressoes++;
-          });
-        }
+    container.innerHTML = `
+      <span class="last-roll-label">Disponível:</span>
+      <span class="conflito-result-badge badge-s" style="display: inline-flex; align-items: center; gap: 4px;" title="Sucessos">
+        <button type="button" class="btn-pool-adjust btn-pool-dec" data-type="S" data-threat="${isThreat}" data-threat-idx="${threatIdx}">-</button>
+        <span>S: ${avail.S}</span>
+        <button type="button" class="btn-pool-adjust btn-pool-inc" data-type="S" data-threat="${isThreat}" data-threat-idx="${threatIdx}">+</button>
+      </span>
+      <span class="conflito-result-badge badge-a" style="display: inline-flex; align-items: center; gap: 4px;" title="Adaptações">
+        <button type="button" class="btn-pool-adjust btn-pool-dec" data-type="A" data-threat="${isThreat}" data-threat-idx="${threatIdx}">-</button>
+        <span>A: ${avail.A}</span>
+        <button type="button" class="btn-pool-adjust btn-pool-inc" data-type="A" data-threat="${isThreat}" data-threat-idx="${threatIdx}">+</button>
+      </span>
+      <span class="conflito-result-badge badge-p" style="display: inline-flex; align-items: center; gap: 4px;" title="Ameaças/Pressões">
+        <button type="button" class="btn-pool-adjust btn-pool-dec" data-type="P" data-threat="${isThreat}" data-threat-idx="${threatIdx}">-</button>
+        <span>P: ${avail.P}</span>
+        <button type="button" class="btn-pool-adjust btn-pool-inc" data-type="P" data-threat="${isThreat}" data-threat-idx="${threatIdx}">+</button>
+      </span>
+    `;
+    container.className = "conflito-last-roll-counter";
+  };
+
+  const registerAdjustListeners = (container) => {
+    if (!container) return;
+    container.querySelectorAll(".btn-pool-adjust").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const type = btn.dataset.type;
+        const isThreat = btn.dataset.threat === "true";
+        const threatIdx = btn.dataset.threatIdx !== "null" ? parseInt(btn.dataset.threatIdx) : null;
+        const delta = btn.classList.contains("btn-pool-inc") ? 1 : -1;
+        _adjustRollPool(type, delta, isThreat, threatIdx);
       });
-
-      let newlyInvestedS = 0;
-      let newlyInvestedA = 0;
-      let newlyInvestedP = 0;
-      (activations || []).forEach(act => {
-        newlyInvestedS += (act.investedS || 0) - (act.snapshotS || 0);
-        newlyInvestedA += (act.investedA || 0) - (act.snapshotA || 0);
-        newlyInvestedP += (act.investedP || 0) - (act.snapshotP || 0);
-      });
-
-      const dispS = Math.max(0, sucessos - newlyInvestedS);
-      const dispA = Math.max(0, adaptacoes - newlyInvestedA);
-      const dispP = Math.max(0, pressoes - newlyInvestedP);
-
-      container.innerHTML = `
-        <span class="last-roll-label">Disponível:</span>
-        <span class="conflito-result-badge badge-s" title="Sucessos">S: ${dispS}</span>
-        <span class="conflito-result-badge badge-a" title="Adaptações">A: ${dispA}</span>
-        <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: ${dispP}</span>
-      `;
-      container.className = "conflito-last-roll-counter";
-    } else {
-      container.innerHTML = `
-        <span class="last-roll-label" style="font-size: 10px; color: var(--text-muted);">Sem rolagens recentes</span>
-      `;
-      container.className = "conflito-last-roll-counter empty";
-    }
+    });
   };
 
   const mainContainer = document.getElementById("conflito-last-roll-container");
-  updateContainer(mainContainer, c.rolagens, c.ativacoes);
+  updateContainer(mainContainer, c.rolagens, c.ativacoes, false, null);
+  registerAdjustListeners(mainContainer);
 
   (c.ameacas || []).forEach((a, idx) => {
     const amContainer = document.getElementById(`conflito-last-roll-container-ameaca-${idx}`);
-    updateContainer(amContainer, a.rolagens, a.ativacoes);
+    updateContainer(amContainer, a.rolagens, a.ativacoes, true, idx);
+    registerAdjustListeners(amContainer);
   });
 }
 
