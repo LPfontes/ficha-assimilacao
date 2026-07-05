@@ -342,7 +342,7 @@ export function renderWizardTraits() {
         <div class="name-row">
           <span class="name">${trait.nome}</span>
           <span class="tag-cost">${trait.custo} XP</span>
-          ${isOwned ? '<span style="color:#00ff66; font-size:11px; font-weight:bold;">Adquirido</span>' : ''}
+          ${isOwned ? '<span style="color:#00ff66; font-size:14px; font-weight:bold;">Adquirido</span>' : ''}
         </div>
         <div class="req">Requisito: ${trait.requisitoText}</div>
         <div class="desc">${trait.descricao}</div>
