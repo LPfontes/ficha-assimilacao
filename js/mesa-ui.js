@@ -8,6 +8,8 @@ import { getDieSymbolsHtml, getDieFaceImgSrc } from "./chat.js";
 import { ICONS } from "../icons.js";
 import { getCurrentHealthLevel } from "./health.js";
 import { worldState, saveConflito } from "./world-state.js";
+import { handleIncomingMusicAction, updatePlayerControlsUI, broadcastMusicState } from "./player.js";
+
 
 const tableScreen = document.getElementById("table-screen");
 const roomModal = document.getElementById("room-modal");
@@ -25,6 +27,8 @@ let isOnTableScreen = false;
 let _playerStateCache = {};  // playerId → data (para reaplicar após updatePlayerList)
 let _currentMapDataUrl = null; // última imagem de mapa enviada
 let _zoomLevel = 1, _panX = 0, _panY = 0;
+let _hiddenFichaIds = new Set();
+let _lastPlayersList = [];
 
 // ── Gerenciamento local de salas criadas ─────────────────────────────────────
 const MANAGED_ROOMS_KEY = "assimilação_managed_rooms";
@@ -98,9 +102,15 @@ async function _enterAsMaster(code, hostName) {
     pm.onPeerConnected = () => {
       broadcastCharacterState();
       if (_currentMapDataUrl) peerManager?.broadcast({ type: "map", playerId: pm.playerId, data: { imageDataUrl: _currentMapDataUrl } });
+      if (pm.isHost) {
+        broadcastMusicState();
+        broadcastFichasVisibility();
+      }
     };
     peerManager = pm;
     roomCode = await pm.createRoom(playerName, code);
+    updatePlayerControlsUI();
+    document.body.classList.toggle("is-mesa-host", pm.isHost || false);
     document.getElementById("table-room-code-badge").textContent = "Sala: " + roomCode;
     showTableScreen();
     updatePlayerList([]);
@@ -223,9 +233,15 @@ export function initMesaUI() {
       pm.onPeerConnected = () => {
         broadcastCharacterState();
         if (_currentMapDataUrl) peerManager?.broadcast({ type: "map", playerId: pm.playerId, data: { imageDataUrl: _currentMapDataUrl } });
+        if (pm.isHost) {
+          broadcastMusicState();
+          broadcastFichasVisibility();
+        }
       };
       peerManager = pm;
       roomCode = await pm.createRoom(playerName);
+      updatePlayerControlsUI();
+      document.body.classList.toggle("is-mesa-host", pm.isHost || false);
       _addManagedRoom(roomCode, playerName);
       document.getElementById("room-code-display").textContent = roomCode;
       document.getElementById("table-room-code-badge").textContent = "Sala: " + roomCode;
@@ -261,10 +277,16 @@ export function initMesaUI() {
       pm.onPeerConnected = () => {
         broadcastCharacterState();
         if (_currentMapDataUrl) peerManager?.broadcast({ type: "map", playerId: pm.playerId, data: { imageDataUrl: _currentMapDataUrl } });
+        if (pm.isHost) {
+          broadcastMusicState();
+          broadcastFichasVisibility();
+        }
       };
       peerManager = pm;
       roomCode = code;
       await pm.joinRoom(code, playerName);
+      updatePlayerControlsUI();
+      document.body.classList.toggle("is-mesa-host", pm.isHost || false);
       document.getElementById("room-step-create").classList.add("hidden");
       document.getElementById("room-step-waiting").classList.remove("hidden");
       document.getElementById("room-code-display").textContent = code;
@@ -291,6 +313,10 @@ export function initMesaUI() {
     if (peerManager) {
       await peerManager.leave();
       peerManager = null;
+      updatePlayerControlsUI();
+      document.body.classList.remove("is-mesa-host");
+      _hiddenFichaIds.clear();
+      _lastPlayersList = [];
     }
     roomCode = "";
     _playerStateCache = {};
@@ -410,6 +436,7 @@ export function initMesaUI() {
   _initFichasPicker();
   _initConflitoPicker();
   _initCenasPanel();
+  _initFichasVisibility();
 }
 
 function handleMessage(data, fromId) {
@@ -448,6 +475,11 @@ function handleMessage(data, fromId) {
         }
       }
       break;
+    case "music":
+      if (data.data) {
+        handleIncomingMusicAction(data.data);
+      }
+      break;
     case "_room_update":
       if (data.players) {
         const list = Object.entries(data.players).map(([id, p]) => ({ id, name: p.name }));
@@ -455,8 +487,10 @@ function handleMessage(data, fromId) {
         knownIds.add(peerManager?.playerId);
         const hasNewPlayer = list.some(p => !knownIds.has(p.id));
         const filteredList = list.filter(p => p.id !== data.hostId);
+        _lastPlayersList = filteredList;
         console.log("[MESA] _room_update players=" + list.map(p=>p.id).join(",") + " hasNew=" + hasNewPlayer + " cache=" + Object.keys(_playerStateCache).join(","));
         updatePlayerList(filteredList);
+        _applyFichasVisibility();
         _updateLocalPlayerState();
         _applyCachedStates();
         if (hasNewPlayer && peerManager) { console.log("[MESA] _room_update -> broadcastCharacterState"); broadcastCharacterState(); }
@@ -547,9 +581,11 @@ function _renderHealthLevelsHTML(saude) {
 
 function updatePlayerList(players) {
   if (!playerListEl) return;
+
   playerListEl.innerHTML = players.map(p => {
     const isMe = p.id === peerManager?.playerId && !!state.currentCharacter;
-    return `<div class="table-player-item ${isMe ? 'is-me' : ''}" data-player-id="${p.id}">
+    const isHidden = _hiddenFichaIds.has(p.id);
+    return `<div class="table-player-item ${isMe ? 'is-me' : ''} ${isHidden ? 'hidden-ficha' : ''}" data-player-id="${p.id}">
       <div class="table-player-portrait" id="portrait-${p.id}"></div>
       <div class="table-player-stats">
         <span class="table-player-name">${esc(p.name)} ${isMe ? '(Você)' : ''}</span>
@@ -1366,11 +1402,13 @@ let _extraFichas = []; // Array de { char: CharObject, id: string }
 /** Chamado em showTableScreen para mostrar/ocultar o botão conforme isHost */
 function _updateAddFichaButton() {
   const btn = document.getElementById("btn-add-ficha");
-  if (!btn) return;
+  const btnVis = document.getElementById("btn-manage-fichas-visibility");
   if (peerManager?.isHost) {
-    btn.classList.remove("hidden");
+    btn?.classList.remove("hidden");
+    btnVis?.classList.remove("hidden");
   } else {
-    btn.classList.add("hidden");
+    btn?.classList.add("hidden");
+    btnVis?.classList.add("hidden");
   }
 }
 
@@ -1479,7 +1517,8 @@ function _renderExtraFichas() {
     const { char, id } = entry;
     const maxPts = _getHealthMaxPts(char);
     const item = document.createElement("div");
-    item.className = "extra-ficha-item table-player-item";
+    const isHidden = _hiddenFichaIds.has(id);
+    item.className = `extra-ficha-item table-player-item ${isHidden ? 'hidden-ficha' : ''}`;
     item.dataset.extraId = id;
 
     const portraitHtml = char.portrait
@@ -1505,6 +1544,7 @@ function _renderExtraFichas() {
     container.appendChild(item);
     _renderExtraFichaStats(entry);
   });
+  _applyFichasVisibility();
 }
 
 function _renderExtraFichaStats(entry) {
@@ -1996,3 +2036,146 @@ function _rollConflito() {
   document.addEventListener("roll-added", handler);
   executeCustomRoll();
 }
+
+// ── Gerenciamento de Visibilidade das Fichas (Mestre) ───────────────────────
+
+function _initFichasVisibility() {
+  const btn = document.getElementById("btn-manage-fichas-visibility");
+  const modal = document.getElementById("modal-fichas-visibility");
+  const closeBtn = document.getElementById("btn-close-fichas-visibility");
+
+  if (!btn || !modal) return;
+
+  btn.addEventListener("click", () => {
+    _renderFichasVisibilityList();
+    modal.classList.remove("hidden");
+  });
+
+  closeBtn?.addEventListener("click", () => modal.classList.add("hidden"));
+
+  // Fechar ao clicar no overlay
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+}
+
+function _renderFichasVisibilityList() {
+  const container = document.getElementById("fichas-visibility-list");
+  if (!container) return;
+  container.innerHTML = "";
+
+  // 1. Jogadores Conectados
+  _lastPlayersList.forEach(p => {
+    const isHidden = _hiddenFichaIds.has(p.id);
+    const item = document.createElement("div");
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+    item.style.justifyContent = "space-between";
+    item.style.padding = "6px 8px";
+    item.style.background = "rgba(255,255,255,0.05)";
+    item.style.borderRadius = "4px";
+
+    item.innerHTML = `
+      <span style="font-size: 13px; font-weight: 500;">👤 ${esc(p.name)} (Jogador)</span>
+      <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+        <input type="checkbox" class="visibility-checkbox" data-id="${p.id}" ${isHidden ? "checked" : ""}>
+        <span style="font-size: 11px; color: ${isHidden ? "#ff5555" : "#55ff55"}; font-weight: bold;">${isHidden ? "Oculto" : "Visível"}</span>
+      </label>
+    `;
+
+    item.querySelector(".visibility-checkbox").addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      if (checked) {
+        _hiddenFichaIds.add(p.id);
+      } else {
+        _hiddenFichaIds.delete(p.id);
+      }
+      const span = e.target.nextElementSibling;
+      if (span) {
+        span.textContent = checked ? "Oculto" : "Visível";
+        span.style.color = checked ? "#ff5555" : "#55ff55";
+      }
+      _applyFichasVisibility();
+      broadcastFichasVisibility();
+    });
+
+    container.appendChild(item);
+  });
+
+  // 2. Fichas Extras do Mestre
+  _extraFichas.forEach(entry => {
+    const isHidden = _hiddenFichaIds.has(entry.id);
+    const item = document.createElement("div");
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+    item.style.justifyContent = "space-between";
+    item.style.padding = "6px 8px";
+    item.style.background = "rgba(255,255,255,0.05)";
+    item.style.borderRadius = "4px";
+
+    item.innerHTML = `
+      <span style="font-size: 13px; font-weight: 500;">📋 ${esc(entry.char.name)} (Ficha Mestre)</span>
+      <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+        <input type="checkbox" class="visibility-checkbox" data-id="${entry.id}" ${isHidden ? "checked" : ""}>
+        <span style="font-size: 11px; color: ${isHidden ? "#ff5555" : "#55ff55"}; font-weight: bold;">${isHidden ? "Oculto" : "Visível"}</span>
+      </label>
+    `;
+
+    item.querySelector(".visibility-checkbox").addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      if (checked) {
+        _hiddenFichaIds.add(entry.id);
+      } else {
+        _hiddenFichaIds.delete(entry.id);
+      }
+      const span = e.target.nextElementSibling;
+      if (span) {
+        span.textContent = checked ? "Oculto" : "Visível";
+        span.style.color = checked ? "#ff5555" : "#55ff55";
+      }
+      _applyFichasVisibility();
+      broadcastFichasVisibility();
+    });
+
+    container.appendChild(item);
+  });
+
+  if (_lastPlayersList.length === 0 && _extraFichas.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:16px; color:var(--color-text-muted); font-size:12px;">Nenhuma ficha disponível na mesa no momento.</div>`;
+  }
+}
+
+function _applyFichasVisibility() {
+  // Aplicar em Jogadores
+  document.querySelectorAll("#table-player-list .table-player-item").forEach(item => {
+    const playerId = item.dataset.playerId;
+    if (_hiddenFichaIds.has(playerId)) {
+      item.classList.add("hidden-ficha");
+    } else {
+      item.classList.remove("hidden-ficha");
+    }
+  });
+
+  // Aplicar em Fichas Extras
+  document.querySelectorAll("#table-extra-fichas .extra-ficha-item").forEach(item => {
+    const extraId = item.dataset.extraId;
+    if (_hiddenFichaIds.has(extraId)) {
+      item.classList.add("hidden-ficha");
+    } else {
+      item.classList.remove("hidden-ficha");
+    }
+  });
+}
+
+function broadcastFichasVisibility() {
+  if (peerManager && peerManager.isHost) {
+    peerManager.broadcast({
+      type: "fichas_visibility",
+      playerId: peerManager.playerId,
+      data: {
+        hiddenIds: Array.from(_hiddenFichaIds)
+      }
+    });
+  }
+}
+

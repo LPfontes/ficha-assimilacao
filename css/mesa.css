@@ -2027,3 +2027,11 @@
     padding: 6px;
   }
 }
+
+/* Ocultação de fichas na mesa para todos */
+.table-player-item.hidden-ficha {
+  display: none !important;
+}
+
+
+

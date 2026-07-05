@@ -347,6 +347,9 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
               Ficha
             </button>
+            <button id="btn-manage-fichas-visibility" class="btn btn-sm hidden" title="Gerenciar visibilidade das fichas" style="margin-left: 4px;">
+              👁️ Visibilidade
+            </button>
           </div>
           <div id="table-player-list"></div>
           <!-- fichas extras do mestre ficam aqui -->
@@ -466,6 +469,22 @@
             <input type="file" id="btn-cenas-upload" accept="image/*" style="display:none">
           </div>
           <div id="cenas-gallery-list" class="ficha-picker-list"></div>
+        </div>
+      </div>
+
+      <!-- Modal: Gerenciar Visibilidade das Fichas (só Mestre) -->
+      <div id="modal-fichas-visibility" class="ficha-picker-overlay hidden">
+        <div class="ficha-picker-box">
+          <div class="ficha-picker-header">
+            <span>👁️ Gerenciar Visibilidade das Fichas</span>
+            <button id="btn-close-fichas-visibility" class="btn btn-sm">✕</button>
+          </div>
+          <div class="ficha-picker-content" style="padding: 12px; max-height: 350px; overflow-y: auto;">
+            <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 12px;">
+              Selecione as fichas que deseja **ocultar** para os participantes jogadores.
+            </p>
+            <div id="fichas-visibility-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+          </div>
         </div>
       </div>
 

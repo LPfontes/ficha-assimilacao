@@ -361,3 +361,14 @@
     height: 12px;
   }
 }
+
+/* Sincronização de música para não-mestres */
+.player-expanded-item.disabled {
+  pointer-events: none !important;
+  cursor: default !important;
+  opacity: 0.7;
+}
+.player-expanded-item.disabled:hover {
+  background: transparent !important;
+}
+

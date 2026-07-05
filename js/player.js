@@ -1,4 +1,5 @@
 import { logger } from "./logger.js";
+import { getPeerManager } from "./mesa-ui.js";
 
 const audio = new Audio();
 audio.preload = "none";
@@ -11,6 +12,9 @@ let repeat = "none";
 let shuffleOrder = [];
 let shuffleIndex = -1;
 
+let syncInterval = null;
+let autoplayBlocked = false;
+
 const dom = {};
 
 export function initPlayer() {
@@ -20,7 +24,9 @@ export function initPlayer() {
   setupKeyboardShortcut();
   setupFab();
   loadPlaylist();
+  updatePlayerControlsUI();
 }
+
 
 function setupFab() {
   const fab = document.getElementById("player-fab");
@@ -64,8 +70,25 @@ async function loadPlaylist() {
 function setupAudioEvents() {
   audio.addEventListener("timeupdate", updateProgress);
   audio.addEventListener("loadedmetadata", updateDuration);
-  audio.addEventListener("play", () => { isPlaying = true; updatePlayButton(); });
-  audio.addEventListener("pause", () => { isPlaying = false; updatePlayButton(); saveState(); });
+  audio.addEventListener("play", () => {
+    isPlaying = true;
+    updatePlayButton();
+    const pm = getPeerManager();
+    if (pm && pm.isHost) {
+      broadcastMusicEvent("play");
+      startPeriodicSync();
+    }
+  });
+  audio.addEventListener("pause", () => {
+    isPlaying = false;
+    updatePlayButton();
+    saveState();
+    const pm = getPeerManager();
+    if (pm && pm.isHost) {
+      broadcastMusicEvent("pause");
+      stopPeriodicSync();
+    }
+  });
   audio.addEventListener("ended", onTrackEnd);
   audio.addEventListener("error", onAudioError);
   audio.volume = volume;
@@ -89,13 +112,20 @@ function setupControls() {
   dom["player-progress"]?.addEventListener("click", (e) => {
     const rect = dom["player-progress"].getBoundingClientRect();
     const pct = (e.clientX - rect.left) / rect.width;
-    if (audio.duration) audio.currentTime = pct * audio.duration;
+    if (audio.duration) {
+      audio.currentTime = pct * audio.duration;
+      const pm = getPeerManager();
+      if (pm && pm.isHost) {
+        broadcastMusicEvent("sync");
+      }
+    }
   });
 
   dom["player-btn-expand"]?.addEventListener("click", openExpandedPlayer);
   const trackInfoClick = document.getElementById("player-track-info-click");
   trackInfoClick?.addEventListener("click", openExpandedPlayer);
 }
+
 
 function setupKeyboardShortcut() {
   document.addEventListener("keydown", (e) => {
@@ -310,7 +340,11 @@ function updatePlayButton() {
 function updateMiniPlayer() {
   const track = playlist[currentIndex];
   if (!track) return;
-  if (dom["player-track-name"]) dom["player-track-name"].textContent = track.title;
+  if (dom["player-track-name"]) {
+    dom["player-track-name"].textContent = autoplayBlocked
+      ? `${track.title} ⚠️ (Clique para ativar áudio)`
+      : track.title;
+  }
 }
 
 function updateShuffleIcon() {
@@ -350,6 +384,8 @@ function openExpandedPlayer() {
 }
 
 function renderExpandedContent() {
+  const pm = getPeerManager();
+  const isMaster = pm ? pm.isHost : true;
   let html = `<div class="player-expanded">
     <div class="player-expanded-header">
       <div class="player-expanded-art" id="player-expanded-art">
@@ -368,7 +404,8 @@ function renderExpandedContent() {
   playlist.forEach((track, i) => {
     const active = i === currentIndex ? " active" : "";
     const playing = i === currentIndex && isPlaying ? " playing" : "";
-    html += `<div class="player-expanded-item${active}${playing}" data-index="${i}">
+    const disabledClass = isMaster ? "" : " disabled";
+    html += `<div class="player-expanded-item${active}${playing}${disabledClass}" data-index="${i}">
       <span class="player-item-num">${String(i + 1).padStart(2, "0")}</span>
       <span class="player-item-title">${track.title}</span>
       <span class="player-item-indicator">${i === currentIndex ? (isPlaying ? "▶" : "⏸") : ""}</span>
@@ -380,6 +417,10 @@ function renderExpandedContent() {
   setTimeout(() => {
     document.querySelectorAll(".player-expanded-item").forEach(el => {
       el.addEventListener("click", () => {
+        const pm = getPeerManager();
+        const isMaster = pm ? pm.isHost : true;
+        if (!isMaster) return;
+
         const idx = parseInt(el.dataset.index, 10);
         if (idx === currentIndex) { togglePlay(); }
         else { playTrack(idx); }
@@ -400,3 +441,137 @@ window.addEventListener("beforeunload", saveState);
 export function getPlayerState() {
   return { currentIndex, isPlaying, playlist, volume, shuffle, repeat };
 }
+
+// ── Funções de Sincronização de Música via WebRTC ───────────────────────────
+
+export function updatePlayerControlsUI() {
+  const pm = getPeerManager();
+  const isMaster = pm ? pm.isHost : true;
+
+  const controlsToToggle = [
+    dom["player-btn-play"],
+    dom["player-btn-prev"],
+    dom["player-btn-next"],
+    dom["player-btn-shuffle"],
+    dom["player-btn-repeat"]
+  ];
+
+  controlsToToggle.forEach(btn => {
+    if (btn) {
+      btn.disabled = !isMaster;
+      btn.style.opacity = isMaster ? "" : "0.3";
+      btn.style.pointerEvents = isMaster ? "" : "none";
+    }
+  });
+}
+
+function broadcastMusicEvent(action) {
+  const pm = getPeerManager();
+  if (pm && pm.isHost) {
+    const data = {
+      action,
+      index: currentIndex,
+      time: audio.currentTime,
+      isPlaying: isPlaying,
+      timestamp: Date.now()
+    };
+    pm.broadcast({
+      type: "music",
+      playerId: pm.playerId,
+      data: data
+    });
+  }
+}
+
+export function broadcastMusicState() {
+  broadcastMusicEvent("sync");
+}
+
+function startPeriodicSync() {
+  if (syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(() => {
+    const pm = getPeerManager();
+    if (pm && pm.isHost && isPlaying) {
+      broadcastMusicEvent("sync");
+    }
+  }, 5000);
+}
+
+function stopPeriodicSync() {
+  if (syncInterval) {
+    clearInterval(syncInterval);
+    syncInterval = null;
+  }
+}
+
+export function handleIncomingMusicAction(data) {
+  const pm = getPeerManager();
+  if (pm?.isHost) return; // Se for o mestre, ignora
+
+  const { action, index, time, isPlaying: hostIsPlaying, timestamp } = data;
+
+  // Mostrar mini player
+  dom["mini-player"]?.classList.remove("hidden");
+
+  // Calcular tempo estimado compensando latência
+  const latency = timestamp ? (Date.now() - timestamp) / 1000 : 0;
+  const targetTime = time + latency;
+
+  if (action === "sync" || action === "play" || action === "trackChange") {
+    if (currentIndex !== index) {
+      currentIndex = index;
+      loadTrack(index);
+    }
+
+    if (hostIsPlaying) {
+      if (audio.paused) {
+        audio.play()
+          .then(() => {
+            autoplayBlocked = false;
+            updateMiniPlayer();
+          })
+          .catch(err => {
+            logger.error("Player: Autoplay bloqueado pelo navegador:", err);
+            showAutoplayNotice();
+          });
+      }
+      if (Math.abs(audio.currentTime - targetTime) > 2) {
+        audio.currentTime = targetTime;
+      }
+    } else {
+      if (!audio.paused) {
+        audio.pause();
+      }
+      if (Math.abs(audio.currentTime - targetTime) > 2) {
+        audio.currentTime = targetTime;
+      }
+    }
+  } else if (action === "pause") {
+    if (!audio.paused) {
+      audio.pause();
+    }
+    if (time !== undefined) {
+      audio.currentTime = time;
+    }
+  }
+}
+
+function showAutoplayNotice() {
+  if (autoplayBlocked) return;
+  autoplayBlocked = true;
+  updateMiniPlayer();
+
+  const activateAudio = () => {
+    if (autoplayBlocked) {
+      audio.play().then(() => {
+        autoplayBlocked = false;
+        updateMiniPlayer();
+        document.removeEventListener("click", activateAudio);
+      }).catch(err => {
+        logger.error("Player: Falha ao ativar áudio pós-clique:", err);
+      });
+    }
+  };
+  document.addEventListener("click", activateAudio);
+}
+
