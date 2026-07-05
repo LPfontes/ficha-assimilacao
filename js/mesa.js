@@ -60,7 +60,7 @@ export class PeerManager {
     for (const [pid, peer] of this.peers) {
       const state = peer.dc?.readyState || "no-dc";
       console.log("[MESA] broadcast peer=" + pid + " dcState=" + state);
-      if (peer.dc.readyState === "open") {
+      if (peer.dc?.readyState === "open") {
         try {
           peer.dc.send(JSON.stringify(data));
           console.log("[MESA] broadcast SENT to " + pid);
