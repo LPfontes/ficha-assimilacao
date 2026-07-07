@@ -969,7 +969,7 @@ export function renderInventorySheet() {
     const selE = row.querySelector(".select-escassez");
     const inputEffect = row.querySelector(".item-effect");
 
-    const saveSlot = () => {
+    const saveSlot = (skipDbSave = false) => {
       char.inventario[i] = {
         name: inputName.value,
         qualidade: parseInt(selQ.value),
@@ -980,14 +980,51 @@ export function renderInventorySheet() {
         efeito: inputEffect.value
       };
       saveCurrentCharacter();
-      if (inputName.value.trim() !== "") {
+      if (!skipDbSave && inputName.value.trim() !== "") {
         saveItemToDb(char.inventario[i]);
       }
     };
  
-    selQ.addEventListener("change", saveSlot);
-    selP.addEventListener("change", saveSlot);
-    selE.addEventListener("change", saveSlot);
+    selQ.addEventListener("change", () => saveSlot(false));
+    selP.addEventListener("change", () => saveSlot(false));
+    selE.addEventListener("change", () => saveSlot(false));
+
+    inputName.addEventListener("input", () => saveSlot(true));
+    inputName.addEventListener("change", () => {
+      const typedName = inputName.value.trim();
+      const oldName = slot.name || "";
+      if (typedName !== oldName) {
+        let itemData = {
+          name: inputName.value,
+          qualidade: parseInt(selQ.value),
+          pressao: parseInt(selP.value),
+          escassez: parseInt(selE.value),
+          categoria: slot.categoria || 'nenhuma',
+          categorias: slot.categorias || [],
+          efeito: inputEffect.value
+        };
+
+        if (typedName !== "" && worldState.itensDb) {
+          const dbItem = worldState.itensDb.find(it => it.name.toLowerCase() === typedName.toLowerCase());
+          if (dbItem && (!oldName || oldName.trim() === "")) {
+            itemData.escassez = dbItem.escassez !== undefined ? dbItem.escassez : itemData.escassez;
+            itemData.categoria = (dbItem.categorias && dbItem.categorias.length > 0) ? dbItem.categorias[0] : (dbItem.categoria || 'nenhuma');
+            itemData.categorias = dbItem.categorias || [];
+            itemData.efeito = dbItem.efeito || itemData.efeito;
+          }
+        }
+
+        char.inventario[i] = itemData;
+        saveCurrentCharacter();
+        if (typedName !== "") {
+          saveItemToDb(char.inventario[i]);
+        }
+        renderInventorySheet();
+      }
+    });
+
+    inputEffect.addEventListener("input", () => saveSlot(true));
+    inputEffect.addEventListener("change", () => saveSlot(false));
 
     const btnGerenciarCat = row.querySelector(".btn-gerenciar-cat");
     if (btnGerenciarCat) {
