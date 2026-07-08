@@ -96,6 +96,55 @@ function setupEventListeners() {
   el.btnImportJson.addEventListener("click", () => el.fileImport.click());
   el.fileImport.addEventListener("change", importCharacterFile);
 
+  const btnImportCode = document.getElementById("btn-import-code");
+  if (btnImportCode) {
+    btnImportCode.addEventListener("click", async () => {
+      const code = prompt("Digite o código de compartilhamento da nuvem:");
+      if (!code) return;
+      
+      const { buscarFichaCompartilhada } = await import("./js/campanha.js");
+      try {
+        const result = await buscarFichaCompartilhada(code);
+        const { tipo, data } = result;
+        
+        if (tipo === "infectado") {
+          const { state } = await import("./js/state.js");
+          const exists = state.characters.some(c => c.id === data.id);
+          if (exists) {
+            if (!confirm(`Você já possui a ficha "${data.name}". Deseja substituí-la?`)) return;
+            state.characters = state.characters.filter(c => c.id !== data.id);
+          }
+          state.characters.push(data);
+          localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
+        } else if (tipo === "campanha") {
+          const raw = localStorage.getItem("assimilação_managed_campaigns");
+          const list = raw ? JSON.parse(raw) : [];
+          if (!list.some(c => c.code === data.id)) {
+            list.push({ code: data.id, hostName: data.mestreNome, name: data.nome, createdAt: Date.now() });
+            localStorage.setItem("assimilação_managed_campaigns", JSON.stringify(list));
+          }
+        } else {
+          const { worldState } = await import("./js/world-state.js");
+          const listName = tipo === "refugio" ? "refugios" : tipo === "regiao" ? "regioes" : tipo === "conflito" ? "conflitos" : "locais";
+          const list = worldState[listName] || [];
+          const exists = list.some(x => x.id === data.id);
+          if (exists) {
+            if (!confirm(`Você já possui a ficha de ${tipo} "${data.nome}". Deseja substituí-la?`)) return;
+            worldState[listName] = list.filter(x => x.id !== data.id);
+          }
+          worldState[listName].push(data);
+          localStorage.setItem("assimilação_rpg_" + listName + "_db", JSON.stringify(worldState[listName]));
+        }
+        
+        const { renderCharactersList } = await import("./js/landing.js");
+        renderCharactersList();
+        alert(`Ficha "${data.name || data.nome}" importada com sucesso da nuvem!`);
+      } catch (err) {
+        alert("Erro ao buscar ficha compartilhada: " + err.message);
+      }
+    });
+  }
+
   // Mobile Menu Toggling
   if (el.btnMobileMenu && el.headerControls) {
     el.btnMobileMenu.addEventListener("click", (e) => {

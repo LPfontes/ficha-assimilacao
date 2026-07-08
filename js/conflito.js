@@ -225,12 +225,14 @@ function _renderAmeacas(c) {
               <span class="conflito-result-badge badge-a" title="Adaptações">A: 0</span>
               <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: 0</span>
             </div>
-            <span>Ativações da Ameaça</span>
+            <div class="ameaca-ativacoes-header">
             <div class="conflito-ativacao-header-row">
-              <div class="conflito-ameaca-actions">
-                <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}">🎲 Rolar</button>
+              <span>Ativações da Ameaça</span>
+                <div class="conflito-ameaca-actions">
+                  <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}">🎲 Rolar</button>
+                </div>
+                <span>Dados: ${diceDesc}</span>
               </div>
-              <span>Dados: ${diceDesc}</span>
             </div>
           </div>
           <div class="ameaca-ativacoes-list">

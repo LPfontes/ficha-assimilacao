@@ -265,6 +265,12 @@ export function saveCurrentCharacter() {
         state.hasUnsavedCloudChanges = true;
         updateCloudSyncBadge();
       }
+      // Se estiver em uma campanha ativa, sincronizar a alteração com o Firestore
+      if (state.activeCampaignId) {
+        import("./campanha.js").then(({ compartilharFicha }) => {
+          compartilharFicha(state.activeCampaignId, state.currentCharacter, state.currentUser?.uid || "player", state.currentCharacter.name || "Jogador").catch(e => {});
+        });
+      }
     } catch (e) {
       logger.error("Erro ao salvar personagem no LocalStorage:", e);
     }
@@ -281,6 +287,12 @@ export function saveCurrentCharacterImmediate() {
     if (state.currentUser) {
       state.hasUnsavedCloudChanges = true;
       updateCloudSyncBadge();
+    }
+    // Sincronizar imediatamente com a campanha se ativa
+    if (state.activeCampaignId) {
+      import("./campanha.js").then(({ compartilharFicha }) => {
+        compartilharFicha(state.activeCampaignId, state.currentCharacter, state.currentUser?.uid || "player", state.currentCharacter.name || "Jogador").catch(e => {});
+      });
     }
   } catch (e) {
     logger.error("Erro ao salvar personagem imediatamente no LocalStorage:", e);

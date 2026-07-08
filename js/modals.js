@@ -2469,10 +2469,15 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
                 <div style="display:flex; flex-direction:column; gap:6px;">
                   ${cloudCharactersCache.map(char => `
                     <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
-                      <span style="font-size:11px; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${char.name}</span>
-                      <button class="btn btn-xs btn-cloud-delete-char" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-danger); color:var(--color-danger); background:rgba(239,68,68,0.04); cursor:pointer;">
-                        🗑️ Apagar
-                      </button>
+                      <span style="font-size:11px; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${char.name}</span>
+                      <div style="display:flex; gap:4px;">
+                        <button class="btn btn-xs btn-cloud-share-char" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-blue-glow); color:var(--color-blue-glow); background:rgba(18,93,110,0.04); cursor:pointer;">
+                          🔗 Código
+                        </button>
+                        <button class="btn btn-xs btn-cloud-delete-char" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-danger); color:var(--color-danger); background:rgba(239,68,68,0.04); cursor:pointer;">
+                          🗑️ Apagar
+                        </button>
+                      </div>
                     </div>
                   `).join('')}
                 </div>
@@ -2818,6 +2823,33 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
             alert("Erro ao apagar a ficha. Tente novamente.");
             btn.disabled = false;
             btn.textContent = "🗑️ Apagar";
+          }
+        });
+      });
+
+      el.modalBody.querySelectorAll(".btn-cloud-share-char").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const charId = btn.getAttribute("data-char-id");
+          const char = cloudCharactersCache.find(c => c.id === charId);
+          if (!char) return;
+
+          btn.disabled = true;
+          const origText = btn.textContent;
+          btn.textContent = "Gerando...";
+
+          try {
+            const { gerarCodigoCompartilhamento } = await import("./campanha.js");
+            const charToShare = { ...char, _sheetType: "infectado" };
+            const code = await gerarCodigoCompartilhamento(charToShare);
+            
+            prompt("Código de Compartilhamento gerado para a ficha da nuvem (copiado para a área de transferência):", code);
+            navigator.clipboard.writeText(code).catch(() => {});
+          } catch (e) {
+            logger.error("Erro ao gerar código de compartilhamento da nuvem", e);
+            alert("Erro ao compartilhar a ficha: " + e.message);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = origText;
           }
         });
       });

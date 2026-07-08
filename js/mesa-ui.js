@@ -9,6 +9,24 @@ import { ICONS } from "../icons.js";
 import { getCurrentHealthLevel } from "./health.js";
 import { worldState, saveConflito } from "./world-state.js";
 import { handleIncomingMusicAction, updatePlayerControlsUI, broadcastMusicState } from "./player.js";
+import {
+  criarCampanha,
+  entrarCampanha,
+  compartilharFicha,
+  removerFichaCompartilhada,
+  adicionarNota,
+  removerNota,
+  adicionarEvento,
+  removerEvento,
+  alterarStatusEvento,
+  adicionarHistoria,
+  removerHistoria,
+  atualizarSessaoAtiva,
+  escutarCampanha
+} from "./campanha.js";
+
+let activeCampanha = null;
+let _campanhaUnsub = null;
 
 
 const tableScreen = document.getElementById("table-screen");
@@ -303,10 +321,6 @@ export function initMesaUI() {
     }
   });
 
-  document.getElementById("btn-copy-room-code")?.addEventListener("click", () => {
-    navigator.clipboard.writeText(roomCode).catch(() => {});
-  });
-
   document.getElementById("btn-leave-table")?.addEventListener("click", async () => {
     // "Sair" desconecta de verdade
     if (broadcastInterval) { clearInterval(broadcastInterval); broadcastInterval = null; }
@@ -333,8 +347,11 @@ export function initMesaUI() {
     _updateFloatingButton();
     hideTableScreen();
     closeRoomModal();
-    document.getElementById("room-step-create").classList.remove("hidden");
-    document.getElementById("room-step-waiting").classList.add("hidden");
+    if (activeCampanha) {
+      showCampaignScreen(activeCampanha);
+    } else {
+      document.getElementById("landing-screen")?.classList.remove("hidden");
+    }
   });
 
   document.getElementById("btn-table-map-upload")?.addEventListener("change", (e) => {
@@ -595,6 +612,8 @@ function updatePlayerList(players) {
       </div>
     </div>`;
   }).join("");
+
+  _renderExtraFichas();
 }
 
 function _handleHealthDropClick(e) {
@@ -1509,9 +1528,11 @@ function _removeExtraFicha(id) {
 }
 
 function _renderExtraFichas() {
-  const container = document.getElementById("table-extra-fichas");
+  const container = document.getElementById("table-player-list");
   if (!container) return;
-  container.innerHTML = "";
+  
+  // Remover itens extras existentes para evitar duplicados
+  container.querySelectorAll(".extra-ficha-item").forEach(item => item.remove());
 
   _extraFichas.forEach(entry => {
     const { char, id } = entry;
@@ -1533,18 +1554,74 @@ function _renderExtraFichas() {
         <div class="stat-saude" id="extra-saude-${id}"></div>
         <div class="stat-ass" id="extra-ass-${id}">Ass: ${char.assPoints || 0}/${char.assNivel || 0}</div>
       </div>
-      <button class="btn-remove-extra-ficha" title="Remover ficha">✕</button>
+      <div class="extra-ficha-actions">
+        <button class="btn-roll-extra-ficha" title="Rolar dado para esta ficha">&#x1F3B2;</button>
+        <button class="btn-remove-extra-ficha" title="Remover ficha">✕</button>
+      </div>
     `;
 
     // Botão de remover
-    item.querySelector(".btn-remove-extra-ficha").addEventListener("click", () => {
+    item.querySelector(".btn-remove-extra-ficha").addEventListener("click", (e) => {
+      e.stopPropagation();
       _removeExtraFicha(id);
+    });
+
+    // Botao de rolagem
+    item.querySelector(".btn-roll-extra-ficha").addEventListener("click", (e) => {
+      e.stopPropagation();
+      _openDrawerForExtraFicha(char);
     });
 
     container.appendChild(item);
     _renderExtraFichaStats(entry);
   });
   _applyFichasVisibility();
+}
+
+function _openDrawerForExtraFicha(char) {
+  const drawer = document.getElementById("dice-drawer");
+  if (!drawer) return;
+
+  const prevChar = state.currentCharacter;
+  state.currentCharacter = char;
+
+  const titleEl = drawer.querySelector(".modal-title");
+  const prevTitle = titleEl?.textContent;
+  if (titleEl) titleEl.textContent = '🎲 Painel de Rolagem — ' + (char.name || 'Ficha Extra');
+
+  import("./roller.js").then(({ updateDiceDrawerUI }) => updateDiceDrawerUI());
+
+  drawer.classList.remove("hidden");
+
+  const restore = () => {
+    state.currentCharacter = prevChar;
+    if (titleEl && prevTitle) titleEl.textContent = prevTitle;
+    import("./roller.js").then(({ updateDiceDrawerUI }) => updateDiceDrawerUI());
+    drawer.removeEventListener("click", onOverlay);
+    closeBtn?.removeEventListener("click", restore);
+  };
+
+  const onOverlay = (e) => { if (e.target === drawer) restore(); };
+  const closeBtn = drawer.querySelector("#btn-close-drawer");
+  closeBtn?.addEventListener("click", restore, { once: true });
+  drawer.addEventListener("click", onOverlay);
+}
+function _performExtraFichaRoll(charName, label, numDice) {
+  const results = Array.from({ length: numDice }, () => ({
+    sides: 10, value: Math.ceil(Math.random() * 10), symbols: []
+  }));
+  const keptDiceIndexes = results.map((_, i) => i);
+  const rollData = {
+    formula: `${numDice}d10`,
+    label: `${charName}: ${label}`,
+    timestamp: Date.now(),
+    results,
+    keptDiceIndexes
+  };
+  addOwnRollToFeed(rollData);
+  if (peerManager) {
+    peerManager.broadcast({ type: "roll", playerId: peerManager.playerId, data: rollData });
+  }
 }
 
 function _renderExtraFichaStats(entry) {
@@ -2157,7 +2234,7 @@ function _applyFichasVisibility() {
   });
 
   // Aplicar em Fichas Extras
-  document.querySelectorAll("#table-extra-fichas .extra-ficha-item").forEach(item => {
+  document.querySelectorAll("#table-player-list .extra-ficha-item").forEach(item => {
     const extraId = item.dataset.extraId;
     if (_hiddenFichaIds.has(extraId)) {
       item.classList.add("hidden-ficha");
@@ -2179,3 +2256,588 @@ function broadcastFichasVisibility() {
   }
 }
 
+// ==========================================
+// CAMPAIGN SCREEN UI HANDLERS & LIFECYCLE
+// ==========================================
+
+export function showCampaignScreen(campaignData) {
+  activeCampanha = campaignData;
+  state.activeCampaignId = campaignData.id;
+
+  // Sincronizar em tempo real com Firestore
+  if (_campanhaUnsub) _campanhaUnsub();
+  escutarCampanha(campaignData.id, (updatedMesa) => {
+    activeCampanha = updatedMesa;
+    _renderCampaignDashboard();
+  }).then(unsub => {
+    _campanhaUnsub = unsub;
+  });
+
+  // Trocar telas
+  document.getElementById("landing-screen")?.classList.add("hidden");
+  document.getElementById("table-screen")?.classList.add("hidden");
+  document.getElementById("campaign-screen")?.classList.remove("hidden");
+  
+  _initCampaignListeners();
+  _renderCampaignDashboard();
+}
+
+function hideCampaignScreen() {
+  if (_campanhaUnsub) {
+    _campanhaUnsub();
+    _campanhaUnsub = null;
+  }
+  activeCampanha = null;
+  state.activeCampaignId = null;
+  document.getElementById("campaign-screen")?.classList.add("hidden");
+  document.getElementById("landing-screen")?.classList.remove("hidden");
+}
+
+let _campaignListenersInitialized = false;
+function _initCampaignListeners() {
+  if (_campaignListenersInitialized) return;
+  _campaignListenersInitialized = true;
+
+  // Sub-abas da Campanha
+  const tabBtns = document.querySelectorAll(".campaign-tab-btn");
+  tabBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      
+      const targetPanel = btn.dataset.tab;
+      document.querySelectorAll(".campaign-tab-panel").forEach(p => p.classList.remove("active"));
+      document.getElementById(targetPanel)?.classList.add("active");
+    });
+  });
+
+  // Botão Voltar ao Início
+  document.getElementById("btn-camp-leave")?.addEventListener("click", hideCampaignScreen);
+
+  // Compartilhar Ficha
+  document.getElementById("btn-camp-share-char")?.addEventListener("click", async () => {
+    const sel = document.getElementById("camp-share-char-select");
+    const charId = sel.value;
+    if (!charId) { alert("Selecione uma ficha!"); return; }
+    const char = state.characters.find(c => c.id === charId);
+    if (char) {
+      const playerName = localStorage.getItem("assimilação_player_name_" + activeCampanha.id) || state.currentUser?.displayName || "Jogador";
+      await compartilharFicha(activeCampanha.id, char, state.currentUser?.uid || "player", playerName);
+      alert(`Ficha de "${char.name}" compartilhada com sucesso!`);
+    }
+  });
+
+  // Criar Nota
+  document.getElementById("btn-camp-add-note")?.addEventListener("click", async () => {
+    const titleInput = document.getElementById("camp-note-title-input");
+    const contentInput = document.getElementById("camp-note-content-input");
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+    if (!title || !content) { alert("Preencha o título e o conteúdo da nota!"); return; }
+    
+    const author = (activeCampanha.mestreId === state.currentUser?.uid) 
+      ? activeCampanha.mestreNome 
+      : (localStorage.getItem("assimilação_player_name_" + activeCampanha.id) || "Jogador");
+      
+    await adicionarNota(activeCampanha.id, title, content, author);
+    titleInput.value = "";
+    contentInput.value = "";
+  });
+
+  // Agendar Evento
+  document.getElementById("btn-camp-add-event")?.addEventListener("click", async () => {
+    const titleInput = document.getElementById("camp-event-title-input");
+    const dateInput = document.getElementById("camp-event-date-input");
+    const descInput = document.getElementById("camp-event-desc-input");
+    const title = titleInput.value.trim();
+    const date = dateInput.value.trim();
+    const desc = descInput.value.trim();
+    if (!title) { alert("Preencha o título do evento!"); return; }
+    
+    await adicionarEvento(activeCampanha.id, title, desc, date);
+    titleInput.value = "";
+    dateInput.value = "";
+    descInput.value = "";
+  });
+
+  // Registrar Crônica / História
+  document.getElementById("btn-camp-add-chronicle")?.addEventListener("click", async () => {
+    const input = document.getElementById("camp-chronicle-input");
+    const text = input.value.trim();
+    if (!text) return;
+    
+    const author = (activeCampanha.mestreId === state.currentUser?.uid) 
+      ? activeCampanha.mestreNome 
+      : (localStorage.getItem("assimilação_player_name_" + activeCampanha.id) || "Jogador");
+      
+    await adicionarHistoria(activeCampanha.id, text, author);
+    input.value = "";
+  });
+  
+  // Registrar Crônica pressionando Enter
+  document.getElementById("camp-chronicle-input")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      document.getElementById("btn-camp-add-chronicle")?.click();
+    }
+  });
+
+  // Botão primário do cabeçalho da campanha (Iniciar / Entrar na Sessão)
+  document.getElementById("btn-camp-session-action")?.addEventListener("click", () => {
+    _handleSessionAction();
+  });
+
+  // Fechar Visualizador de Ficha
+  document.getElementById("btn-close-ficha-viewer")?.addEventListener("click", () => {
+    document.getElementById("modal-ficha-viewer")?.classList.add("hidden");
+  });
+  
+  document.getElementById("modal-ficha-viewer")?.addEventListener("click", (e) => {
+    if (e.target.id === "modal-ficha-viewer") {
+      document.getElementById("modal-ficha-viewer")?.classList.add("hidden");
+    }
+  });
+}
+
+function _renderCampaignDashboard() {
+  if (!activeCampanha) return;
+
+  // Atualizar Header
+  document.getElementById("camp-title").textContent = activeCampanha.nome;
+  document.getElementById("camp-gm-name").textContent = activeCampanha.mestreNome;
+  document.getElementById("camp-code-display").textContent = "CÓDIGO: " + activeCampanha.id;
+
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+  
+  // Status da sessão e botão do cabeçalho
+  const statusIndicator = document.getElementById("camp-session-status");
+  const actionBtn = document.getElementById("btn-camp-session-action");
+  
+  if (activeCampanha.sessaoAtiva) {
+    statusIndicator.className = "session-status-indicator active";
+    statusIndicator.querySelector(".status-text").textContent = "Sessão Ativa";
+    actionBtn.textContent = isMestre ? "Retornar à Mesa" : "Entrar na Sessão";
+    actionBtn.disabled = false;
+  } else {
+    statusIndicator.className = "session-status-indicator inactive";
+    statusIndicator.querySelector(".status-text").textContent = "Sessão Inativa";
+    actionBtn.textContent = isMestre ? "Iniciar Sessão" : "Aguardando Mestre";
+    actionBtn.disabled = !isMestre; // Jogadores não podem clicar se inativa
+  }
+
+  // Ocultar formulário de eventos para jogadores
+  const eventForm = document.getElementById("camp-event-form");
+  if (eventForm) {
+    if (isMestre) {
+      eventForm.classList.remove("hidden");
+    } else {
+      eventForm.classList.add("hidden");
+    }
+  }
+
+  // Preencher dropdown de compartilhamento de fichas
+  const shareSelect = document.getElementById("camp-share-char-select");
+  if (shareSelect) {
+    const currentVal = shareSelect.value;
+    shareSelect.innerHTML = '<option value="">-- Selecione uma Ficha --</option>';
+    (state.characters || []).forEach(char => {
+      const opt = document.createElement("option");
+      opt.value = char.id;
+      opt.textContent = char.name;
+      shareSelect.appendChild(opt);
+    });
+    shareSelect.value = currentVal;
+  }
+
+  // Renderizar sub-seções
+  _renderCampaignFichas();
+  _renderCampaignNotas();
+  _renderCampaignEventos();
+  _renderCampaignHistoria();
+}
+
+function _renderCampaignFichas() {
+  const grid = document.getElementById("camp-fichas-grid");
+  if (!grid) return;
+
+  const fichas = Object.values(activeCampanha.fichas || {});
+  if (fichas.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:32px; color:var(--text-muted);">Nenhuma ficha compartilhada nesta mesa ainda.</div>';
+    return;
+  }
+
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+
+  grid.innerHTML = fichas.map(item => {
+    const portrait = item.data?.portrait || item.data?.imagem || "";
+    const avatarHtml = portrait 
+      ? `<img src="${esc(portrait)}" alt="">`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`;
+
+    const isOwner = item.donoId === state.currentUser?.uid;
+    const canDelete = isMestre || isOwner;
+    const deleteBtn = canDelete 
+      ? `<div class="ficha-camp-actions">
+           <button class="btn-remove-ficha-camp" data-id="${esc(item.id)}" title="Remover da Mesa">✕</button>
+         </div>`
+      : "";
+
+    const typeLabels = {
+      infectado: "🧬 Infectado",
+      refugio: "🏕️ Refúgio",
+      regiao: "🗺️ Região",
+      conflito: "⚔️ Conflito",
+      local: "📍 Local"
+    };
+
+    return `
+      <div class="ficha-camp-card" data-id="${esc(item.id)}">
+        <div class="ficha-camp-avatar">${avatarHtml}</div>
+        <div class="ficha-camp-name">${esc(item.nome)}</div>
+        <div class="ficha-camp-type">${esc(typeLabels[item.tipo] || item.tipo)}</div>
+        <div class="ficha-camp-owner">Dono: ${esc(item.donoNome)}</div>
+        ${deleteBtn}
+      </div>
+    `;
+  }).join("");
+
+  // Adicionar click listener nos cards para abrir o visualizador de ficha
+  grid.querySelectorAll(".ficha-camp-card").forEach(card => {
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".btn-remove-ficha-camp")) return;
+      const id = card.dataset.id;
+      const targetFicha = activeCampanha.fichas[id];
+      if (targetFicha) {
+        _openSharedFichaViewer(targetFicha);
+      }
+    });
+  });
+
+  // Click listener para excluir
+  grid.querySelectorAll(".btn-remove-ficha-camp").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      if (confirm("Deseja mesmo remover esta ficha da mesa?")) {
+        await removerFichaCompartilhada(activeCampanha.id, id);
+      }
+    });
+  });
+}
+
+function _renderCampaignNotas() {
+  const list = document.getElementById("camp-notes-list");
+  if (!list) return;
+
+  const notas = [...(activeCampanha.notas || [])].sort((a, b) => b.timestamp - a.timestamp);
+  if (notas.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-muted);">Nenhuma nota cadastrada.</div>';
+    return;
+  }
+
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+
+  list.innerHTML = notas.map(note => {
+    const timeStr = new Date(note.timestamp).toLocaleString();
+    const canDelete = isMestre || note.autor === state.currentUser?.displayName;
+    const deleteBtn = canDelete 
+      ? `<button class="btn btn-sm btn-danger-dropdown btn-remove-note" data-id="${esc(note.id)}" style="position:absolute; top:12px; right:12px; padding:2px 6px; font-size:10px;">✕</button>` 
+      : "";
+
+    return `
+      <div class="note-card-camp">
+        <div class="note-header-camp">
+          <span class="note-title-camp">${esc(note.titulo)}</span>
+        </div>
+        <div class="note-content-camp">${esc(note.conteudo)}</div>
+        <div class="note-meta-camp">
+          <span>Autor: <strong>${esc(note.autor)}</strong></span>
+          <span>•</span>
+          <span>${esc(timeStr)}</span>
+        </div>
+        ${deleteBtn}
+      </div>
+    `;
+  }).join("");
+
+  list.querySelectorAll(".btn-remove-note").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      if (confirm("Remover esta nota?")) {
+        await removerNota(activeCampanha.id, id);
+      }
+    });
+  });
+}
+
+function _renderCampaignEventos() {
+  const list = document.getElementById("camp-events-list");
+  if (!list) return;
+
+  const eventos = [...(activeCampanha.eventos || [])].sort((a, b) => b.timestamp - a.timestamp);
+  if (eventos.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-muted);">Nenhum evento registrado.</div>';
+    return;
+  }
+
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+
+  list.innerHTML = eventos.map(evt => {
+    const statusLabel = evt.status === "ativo" ? "Ativo" : "Resolvido";
+    const statusClass = evt.status === "ativo" ? "active" : "resolved";
+    
+    // Controles para o Mestre
+    const mestreControls = isMestre 
+      ? `<div style="display:flex; gap:6px;">
+           <button class="btn btn-sm btn-toggle-event" data-id="${esc(evt.id)}" data-status="${evt.status}">${evt.status === 'ativo' ? 'Resolver' : 'Reativar'}</button>
+           <button class="btn btn-sm btn-remove-event" data-id="${esc(evt.id)}" style="border-color:var(--color-rust);color:var(--color-rust-glow);">Excluir</button>
+         </div>`
+      : "";
+
+    return `
+      <div class="event-card-camp">
+        <div class="event-details-camp">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="event-title-camp">${esc(evt.titulo)}</span>
+            <span class="event-status-badge ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="event-desc-camp">${esc(evt.descricao || "Sem descrição.")}</div>
+          <div style="font-size:var(--font-size-xs); color:var(--color-gold-glow); margin-top:2px;">
+            Cronograma: <strong>${esc(evt.dataHora || "Indefinido")}</strong>
+          </div>
+        </div>
+        ${mestreControls}
+      </div>
+    `;
+  }).join("");
+
+  list.querySelectorAll(".btn-toggle-event").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const status = btn.dataset.status;
+      const nextStatus = status === "ativo" ? "resolvido" : "ativo";
+      await alterarStatusEvento(activeCampanha.id, id, nextStatus);
+    });
+  });
+
+  list.querySelectorAll(".btn-remove-event").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      if (confirm("Excluir este evento?")) {
+        await removerEvento(activeCampanha.id, id);
+      }
+    });
+  });
+}
+
+function _renderCampaignHistoria() {
+  const feed = document.getElementById("camp-chronicle-feed");
+  if (!feed) return;
+
+  const entradas = [...(activeCampanha.historia || [])].sort((a, b) => a.timestamp - b.timestamp);
+  if (entradas.length === 0) {
+    feed.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-muted);">A crônica está vazia. Comece a registrar a história!</div>';
+    return;
+  }
+
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+
+  feed.innerHTML = entradas.map(entry => {
+    const dateStr = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const deleteBtn = isMestre 
+      ? `<button class="btn-remove-hist" data-id="${esc(entry.id)}" style="background:none;border:none;color:var(--color-rust-glow);cursor:pointer;font-size:10px;margin-left:8px;">Excluir</button>`
+      : "";
+    return `
+      <div class="chronicle-entry">
+        <div class="chronicle-text">${esc(entry.texto)}</div>
+        <div class="chronicle-meta">
+          Por <strong>${esc(entry.autor)}</strong> às ${esc(dateStr)} ${deleteBtn}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  feed.scrollTop = feed.scrollHeight; // Auto-scroll to bottom
+
+  feed.querySelectorAll(".btn-remove-hist").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      await removerHistoria(activeCampanha.id, id);
+    });
+  });
+}
+
+async function _handleSessionAction() {
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+  const playerName = localStorage.getItem("assimilação_player_name_" + activeCampanha.id) || state.currentUser?.displayName || "Jogador";
+  
+  if (isMestre) {
+    if (!activeCampanha.sessaoAtiva) {
+      await atualizarSessaoAtiva(activeCampanha.id, true);
+    }
+    await _startWebRTCSession(activeCampanha.id, activeCampanha.mestreNome, true);
+  } else {
+    if (activeCampanha.sessaoAtiva) {
+      await _startWebRTCSession(activeCampanha.id, playerName, false);
+    } else {
+      alert("A sessão de jogo não foi iniciada pelo Mestre!");
+    }
+  }
+}
+
+async function _startWebRTCSession(campaignId, playerName, isHost) {
+  try {
+    const pm = new PeerManager(handleMessage);
+    pm.onPeerConnected = () => {
+      broadcastCharacterState();
+      if (_currentMapDataUrl) peerManager?.broadcast({ type: "map", playerId: pm.playerId, data: { imageDataUrl: _currentMapDataUrl } });
+      if (pm.isHost) {
+        broadcastMusicState();
+        broadcastFichasVisibility();
+      }
+    };
+    peerManager = pm;
+    
+    if (isHost) {
+      roomCode = await pm.createRoom(playerName, campaignId);
+    } else {
+      roomCode = campaignId;
+      await pm.joinRoom(campaignId, playerName);
+    }
+
+    updatePlayerControlsUI();
+    document.body.classList.toggle("is-mesa-host", pm.isHost || false);
+    document.getElementById("table-room-code-badge").textContent = "Sala: " + roomCode;
+    
+    // Esconder tela de campanha e mostrar mesa de jogo
+    document.getElementById("campaign-screen")?.classList.add("hidden");
+    showTableScreen();
+    
+    updatePlayerList([]);
+    _updateLocalPlayerState();
+    _applyCachedStates();
+    
+    logger.info("Conectado à sessão da mesa: " + roomCode);
+  } catch (e) {
+    alert("Erro ao conectar à sessão: " + e.message);
+  }
+}
+
+function _openSharedFichaViewer(fichaObj) {
+  const modal = document.getElementById("modal-ficha-viewer");
+  const title = document.getElementById("ficha-viewer-title");
+  const body = document.getElementById("ficha-viewer-body");
+  if (!modal || !body) return;
+
+  title.textContent = `Visualizando Ficha: ${fichaObj.nome}`;
+  
+  const char = fichaObj.data;
+  
+  // Calcular pontos de vida
+  const maxPts = 1 + (char.instintos?.Potência || 0) + (char.instintos?.Resolução || 0);
+  const totalMax = 6 * maxPts;
+  let totalCurrent = 0;
+  for (let lvl = 1; lvl <= 6; lvl++) totalCurrent += maxPts - (char.dano?.[lvl] || 0);
+
+  // Renderizar características
+  const traits = char.traits || [];
+  const traitsHtml = traits.length > 0 
+    ? traits.map(t => `<div class="lib-item-viewer"><div class="lib-item-title">${esc(t.name)}</div><div class="lib-item-desc">${esc(t.effect)}</div></div>`).join("")
+    : '<div style="color:var(--text-muted); font-size:12px;">Nenhuma característica.</div>';
+
+  // Renderizar mutações / assimilações
+  const mutations = char.mutations || [];
+  const mutationsHtml = mutations.length > 0 
+    ? mutations.map(m => `<div class="lib-item-viewer"><div class="lib-item-title">${esc(m.name)} (Nível ${m.level || 1})</div><div class="lib-item-desc">${esc(m.desc)}</div></div>`).join("")
+    : '<div style="color:var(--text-muted); font-size:12px;">Nenhuma mutação/assimilação.</div>';
+
+  // Renderizar inventário
+  const slots = char.inventory || {};
+  const slotsHtml = Object.values(slots).length > 0
+    ? Object.values(slots).map(s => s.name ? `<div class="lib-item-viewer"><div class="lib-item-title">${esc(s.name)}</div><div class="lib-item-desc">Qtde: ${s.qty || 1} • Tipo: ${s.type || "Geral"}</div></div>` : "").join("")
+    : '<div style="color:var(--text-muted); font-size:12px;">Inventário vazio.</div>';
+
+  body.innerHTML = `
+    <div class="ficha-viewer-grid">
+      <!-- Coluna Esquerda: Dados Básicos e Atributos -->
+      <div class="ficha-viewer-block">
+        <div class="ficha-viewer-block-title">Identidade</div>
+        <div class="ficha-viewer-stat-row">
+          <span class="ficha-viewer-stat-name">Ocupação</span>
+          <span class="ficha-viewer-stat-value">${esc(char.ocupacao || "Nenhuma")}</span>
+        </div>
+        <div class="ficha-viewer-stat-row">
+          <span class="ficha-viewer-stat-name">Geração</span>
+          <span class="ficha-viewer-stat-value">${esc(char.generation || "Indefinida")}</span>
+        </div>
+        <div class="ficha-viewer-stat-row">
+          <span class="ficha-viewer-stat-name">Evento de Infecção</span>
+          <span class="ficha-viewer-stat-value">${esc(char.evento || "Desconhecido")}</span>
+        </div>
+        
+        <div class="ficha-viewer-block-title" style="margin-top:16px;">Atributos Básicos</div>
+        <div class="ficha-viewer-stat-row">
+          <span class="ficha-viewer-stat-name">Determinação</span>
+          <span class="ficha-viewer-stat-value">${char.detPoints || 0} / ${char.detNivel || 1}</span>
+        </div>
+        <div class="ficha-viewer-stat-row">
+          <span class="ficha-viewer-stat-name">Assimilação</span>
+          <span class="ficha-viewer-stat-value">${char.assPoints || 0} / ${char.assNivel || 0}</span>
+        </div>
+        <div class="ficha-viewer-stat-row">
+          <span class="ficha-viewer-stat-name">Saúde Total</span>
+          <span class="ficha-viewer-stat-value">${totalCurrent} / ${totalMax}</span>
+        </div>
+        
+        <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Instintos)</div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Astúcia</span><span class="ficha-viewer-stat-value">${char.instintos?.Astúcia || 0}</span></div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Potência</span><span class="ficha-viewer-stat-value">${char.instintos?.Potência || 0}</span></div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Resolução</span><span class="ficha-viewer-stat-value">${char.instintos?.Resolução || 0}</span></div>
+        
+        <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Conhecimentos)</div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Erudição</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Erudição || 0}</span></div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Sobrevivência</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Sobrevivência || 0}</span></div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Tática</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Tática || 0}</span></div>
+        
+        <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Práticas)</div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Calejado</span><span class="ficha-viewer-stat-value">${char.praticas?.Calejado || 0}</span></div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Manuseio</span><span class="ficha-viewer-stat-value">${char.praticas?.Manuseio || 0}</span></div>
+        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Ofício</span><span class="ficha-viewer-stat-value">${char.praticas?.Ofício || 0}</span></div>
+      </div>
+      
+      <!-- Coluna Direita: Características, Assimilações e Inventário -->
+      <div class="ficha-viewer-block">
+        <div class="ficha-viewer-block-title">Características</div>
+        <div class="lib-list-viewer">${traitsHtml}</div>
+        
+        <div class="ficha-viewer-block-title" style="margin-top:16px;">Mutações & Assimilações</div>
+        <div class="lib-list-viewer">${mutationsHtml}</div>
+        
+        <div class="ficha-viewer-block-title" style="margin-top:16px;">Inventário</div>
+        <div class="lib-list-viewer">${slotsHtml}</div>
+      </div>
+    </div>
+  `;
+
+  modal.classList.remove("hidden");
+}
+
+// Helper extra para entrar em campanha a partir do card na Landing
+export async function _enterCampaign(code) {
+  try {
+    const { entrarCampanha } = await import("./campanha.js");
+    const data = await entrarCampanha(code);
+    
+    // Garantir registro no localStorage de campanhas se não existir
+    const raw = localStorage.getItem("assimilação_managed_campaigns");
+    let list = raw ? JSON.parse(raw) : [];
+    if (!list.some(c => c.code === data.id)) {
+      list.push({ code: data.id, hostName: data.mestreNome, name: data.nome, createdAt: Date.now() });
+      localStorage.setItem("assimilação_managed_campaigns", JSON.stringify(list));
+    }
+    
+    const { showCampaignScreen } = await import("./mesa-ui.js");
+    showCampaignScreen(data);
+  } catch (e) {
+    alert("Erro ao acessar campanha: " + e.message);
+  }
+}

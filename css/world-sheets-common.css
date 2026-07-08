@@ -179,9 +179,19 @@
   color: #fff;
 }
 
+.badge-campanha {
+  background: var(--color-blue-glow) !important;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
 /* Borda colorida dos cards por tipo */
 .character-card[data-sheet-type="infectado"] {
   border-color: var(--color-infectado-border);
+}
+
+.character-card[data-sheet-type="campanha"] {
+  border-color: rgba(18, 93, 110, 0.6);
 }
 
 .character-card[data-sheet-type="refugio"] {

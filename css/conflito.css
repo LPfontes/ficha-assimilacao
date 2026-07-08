@@ -1083,6 +1083,7 @@
 
 .ameaca-ativacoes-header {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   gap: 6px;
@@ -1124,7 +1125,6 @@
 .conflito-ativacao-header-row{
   display: flex;
   align-items: center;
-  flex-direction: column;
   gap: 6px;
 }
 .conflito-ativacao-title-row-left{

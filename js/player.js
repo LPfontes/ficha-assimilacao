@@ -22,22 +22,8 @@ export function initPlayer() {
   setupAudioEvents();
   setupControls();
   setupKeyboardShortcut();
-  setupFab();
   loadPlaylist();
   updatePlayerControlsUI();
-}
-
-
-function setupFab() {
-  const fab = document.getElementById("player-fab");
-  if (!fab) return;
-  fab.addEventListener("click", () => {
-    if (currentIndex >= 0) {
-      openExpandedPlayer();
-    } else if (playlist.length > 0) {
-      playTrack(0);
-    }
-  });
 }
 
 function cacheDom() {

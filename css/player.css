@@ -2,7 +2,7 @@
 .player-fab {
   position: fixed;
   bottom: 24px;
-  left: 24px;
+  right: 160px;
   width: 44px;
   height: 44px;
   border-radius: 50%;

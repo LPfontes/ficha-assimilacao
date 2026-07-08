@@ -561,7 +561,7 @@ img.dice-tag:hover {
 .chat-message .roll-summary-inline {
   display: flex;
   gap: 12px;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-md);
   background-color: rgba(0, 0, 0, 0.25);
   padding: 6px 10px;
   border-radius: var(--radius-sm);
@@ -575,7 +575,7 @@ img.dice-tag:hover {
 }
 
 .chat-message .roll-narrative {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-md);
   color: var(--text-secondary);
   line-height: 1.4;
   background-color: rgba(0, 0, 0, 0.01);

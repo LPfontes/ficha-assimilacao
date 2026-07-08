@@ -9,22 +9,61 @@ const emptyState = document.getElementById("empty-state");
 const btnCreateFirstChar = document.getElementById("btn-create-first-char");
 const btnImportLanding = document.getElementById("btn-import-landing");
 const fileImportLanding = document.getElementById("file-import-landing");
+const btnEntrarCampanhaLanding = document.getElementById("btn-entrar-campanha-landing");
 
 let openDropdownId = null;
+let activeFilterTab = "all";
 
 export function initLandingScreen() {
   btnCreateFirstChar?.addEventListener("click", () => {
-    openSheetTypeModal();
+    handleCreateClick();
   });
 
   btnImportLanding?.addEventListener("click", () => {
     fileImportLanding.click();
   });
 
+  btnEntrarCampanhaLanding?.addEventListener("click", async () => {
+    const code = prompt("Digite o código da campanha:");
+    if (!code) return;
+
+    const { entrarCampanha } = await import("./campanha.js");
+    const { showCampaignScreen } = await import("./mesa-ui.js");
+    try {
+      const data = await entrarCampanha(code);
+
+      // Registrar localmente no atalho de campanhas gerenciadas
+      const raw = localStorage.getItem("assimilação_managed_campaigns");
+      const list = raw ? JSON.parse(raw) : [];
+      if (!list.some(c => c.code === data.id)) {
+        list.push({ code: data.id, hostName: data.mestreNome, name: data.nome, createdAt: Date.now() });
+        localStorage.setItem("assimilação_managed_campaigns", JSON.stringify(list));
+      }
+
+      renderCharactersList();
+      showCampaignScreen(data);
+    } catch (err) {
+      alert("Erro ao entrar na campanha: " + err.message);
+    }
+  });
+
   fileImportLanding?.addEventListener("change", (e) => {
     importCharacterFromFile(e);
     fileImportLanding.value = "";
   });
+
+  // Configurar escutadores para as abas de filtro
+  const tabsContainer = document.getElementById("landing-tabs");
+  if (tabsContainer) {
+    tabsContainer.querySelectorAll(".landing-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabsContainer.querySelectorAll(".landing-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        activeFilterTab = tab.dataset.tab;
+        renderCharactersList();
+      });
+    });
+  }
 
   document.addEventListener("click", (e) => {
     if (openDropdownId && !e.target.closest(".char-actions")) {
@@ -41,10 +80,19 @@ export function initLandingScreen() {
   });
 }
 
+function handleCreateClick() {
+  if (activeFilterTab === "all") {
+    openSheetTypeModal();
+  } else {
+    _createSheetByType(activeFilterTab);
+  }
+}
+
 export function showLandingScreen(restore = true) {
   landingScreen.classList.remove("hidden");
   el.wizardScreen.classList.add("hidden");
   el.sheetScreen.classList.add("hidden");
+  document.getElementById("campaign-screen")?.classList.add("hidden");
   ["refugio-screen","regiao-screen","conflito-screen","local-screen"].forEach(id => {
     document.getElementById(id)?.classList.add("hidden");
   });
@@ -84,6 +132,11 @@ function openSheetTypeModal() {
         <span class="type-emoji">📍</span>
         <span class="type-label" style="color:hsl(270,45%,62%);">Local</span>
         <span class="type-desc">Ponto de interesse narrativo</span>
+      </div>
+      <div class="sheet-type-card" data-type="campanha" tabindex="0">
+        <span class="type-emoji">📋</span>
+        <span class="type-label" style="color:var(--color-blue-glow);">Campanha</span>
+        <span class="type-desc">Ficha de fichas para organizar dados</span>
       </div>
     </div>
   `;
@@ -137,6 +190,30 @@ async function _createSheetByType(type) {
       startNewLocal();
       break;
     }
+    case "campanha": {
+      const name = prompt("Nome da Campanha:", "Minha Campanha");
+      if (!name) return;
+      const mestre = prompt("Seu Nome (Mestre):", "Mestre");
+      if (!mestre) return;
+
+      const { criarCampanha } = await import("./campanha.js");
+      const { showCampaignScreen } = await import("./mesa-ui.js");
+      try {
+        const campaignData = await criarCampanha(name, mestre);
+        
+        // Registrar localmente no atalho
+        const raw = localStorage.getItem("assimilação_managed_campaigns");
+        const list = raw ? JSON.parse(raw) : [];
+        list.push({ code: campaignData.id, hostName: campaignData.mestreNome, name: campaignData.nome, createdAt: Date.now() });
+        localStorage.setItem("assimilação_managed_campaigns", JSON.stringify(list));
+        
+        renderCharactersList();
+        showCampaignScreen(campaignData);
+      } catch (err) {
+        alert("Erro ao criar campanha: " + err.message);
+      }
+      break;
+    }
   }
 }
 
@@ -149,17 +226,26 @@ export function renderCharactersList() {
 
   window._worldStateCharacters = state.characters;
 
+  const rawCamps = localStorage.getItem("assimilação_managed_campaigns");
+  const campaigns = rawCamps ? JSON.parse(rawCamps) : [];
+
   const allItems = [
     ...state.characters.map(c => ({ ...c, _sheetType: "infectado" })),
     ...(worldState.refugios  || []).map(r => ({ ...r, _sheetType: "refugio"  })),
     ...(worldState.regioes   || []).map(r => ({ ...r, _sheetType: "regiao"   })),
     ...(worldState.conflitos || []).map(c => ({ ...c, _sheetType: "conflito" })),
     ...(worldState.locais    || []).map(l => ({ ...l, _sheetType: "local"    })),
+    ...campaigns.map(c => ({ id: c.code, name: c.name, hostName: c.hostName, createdAt: c.createdAt || Date.now(), _sheetType: "campanha" })),
   ].sort((a, b) => {
-    const tsA = _extractTimestamp(a.id);
-    const tsB = _extractTimestamp(b.id);
+    const tsA = a._sheetType === "campanha" ? a.createdAt : _extractTimestamp(a.id);
+    const tsB = b._sheetType === "campanha" ? b.createdAt : _extractTimestamp(b.id);
     return tsB - tsA;
   });
+
+  // Filtrar itens com base na aba ativa
+  const filteredItems = activeFilterTab === "all"
+    ? allItems
+    : allItems.filter(item => item._sheetType === activeFilterTab);
 
   const TYPE_BADGES = {
     infectado: `<span class="sheet-type-badge badge-infectado">🧬 Infectado</span>`,
@@ -167,6 +253,7 @@ export function renderCharactersList() {
     regiao:    `<span class="sheet-type-badge badge-regiao">🗺️ Região</span>`,
     conflito:  `<span class="sheet-type-badge badge-conflito">⚔️ Conflito</span>`,
     local:     `<span class="sheet-type-badge badge-local">📍 Local</span>`,
+    campanha:  `<span class="sheet-type-badge badge-campanha">📋 Campanha</span>`,
   };
 
   const TYPE_SUB = {
@@ -175,9 +262,10 @@ export function renderCharactersList() {
     regiao:    item => `Perigo ${item.perigo||0} • Tam ${item.tamanho||0}`,
     conflito:  item => `${item.tipoConflito||"Conflito"} • Grau ${item.grau||0}`,
     local:     item => item.tipoLocal || "",
+    campanha:  item => `Mestre: ${item.hostName || "Mestre"}`,
   };
 
-  let cardsHtml = allItems.map(item => {
+  let cardsHtml = filteredItems.map(item => {
     const type = item._sheetType;
     const name = item.name || item.nome || "Sem nome";
     const subInfo = TYPE_SUB[type]?.(item) || "";
@@ -186,27 +274,28 @@ export function renderCharactersList() {
       ? `<img src="${escapeHtml(portrait)}" alt="" class="char-card-avatar-img">`
       : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="char-card-avatar-svg"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`;
 
-    const actionsHtml = type === "infectado" ? `
+    const actionsHtml = `
       <div class="char-actions">
         <button class="btn-char-action" title="Mais ações" data-action="menu">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
         </button>
         <div class="char-actions-dropdown" data-dropdown="${escapeHtml(item.id)}">
-          <button data-action="export" data-id="${escapeHtml(item.id)}">${ICONS.export} Exportar Ficha</button>
-          <div class="dropdown-divider"></div>
-          <button data-action="duplicate" data-id="${escapeHtml(item.id)}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Duplicar Ficha
+          <button data-action="share-code" data-id="${escapeHtml(item.id)}" data-type="${type}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Código Nuvem
           </button>
           <div class="dropdown-divider"></div>
-          <button data-action="delete" data-id="${escapeHtml(item.id)}" class="btn-danger-dropdown">${ICONS.trash} Excluir Ficha</button>
+          ${type === "infectado" ? `
+            <button data-action="duplicate" data-id="${escapeHtml(item.id)}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Duplicar Ficha
+            </button>
+            <div class="dropdown-divider"></div>
+          ` : ""}
+          <button data-action="delete-any" data-id="${escapeHtml(item.id)}" data-type="${type}" class="btn-danger-dropdown">
+            ${ICONS.trash} Excluir
+          </button>
         </div>
-      </div>
-    ` : `
-      <div class="char-actions">
-        <button class="btn-char-action btn-world-delete" title="Excluir" data-world-type="${type}" data-world-id="${escapeHtml(item.id)}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-        </button>
       </div>
     `;
 
@@ -235,7 +324,32 @@ export function renderCharactersList() {
     </article>
   `;
 
-  if (emptyState) emptyState.classList.toggle("hidden", allItems.length > 0);
+  if (emptyState) {
+    emptyState.classList.toggle("hidden", filteredItems.length > 0);
+    const titleEl = emptyState.querySelector(".empty-title");
+    const subEl = emptyState.querySelector(".empty-sub");
+    if (titleEl && subEl) {
+      const titles = {
+        all: "Nenhuma ficha encontrada",
+        infectado: "Nenhum infectado encontrado",
+        refugio: "Nenhum refúgio encontrado",
+        regiao: "Nenhuma região encontrada",
+        conflito: "Nenhum conflito encontrado",
+        local: "Nenhum local encontrado"
+      };
+      const subtitles = {
+        all: "Crie ou importe um elemento para começar",
+        infectado: "Crie seu primeiro personagem para começar",
+        refugio: "Crie seu primeiro refúgio para começar",
+        regiao: "Crie sua primeira região para começar",
+        conflito: "Crie seu primeiro conflito para começar",
+        local: "Crie seu primeiro local para começar"
+      };
+      titleEl.textContent = titles[activeFilterTab] || titles.all;
+      subEl.textContent = subtitles[activeFilterTab] || subtitles.all;
+    }
+  }
+
   charactersList.innerHTML = cardsHtml;
   attachCardListeners();
 }
@@ -261,6 +375,15 @@ function attachCardListeners() {
       if (!id) return;
       if (type === "infectado") {
         handleLoadCharacter(id);
+      } else if (type === "campanha") {
+        const { entrarCampanha } = await import("./campanha.js");
+        const { showCampaignScreen } = await import("./mesa-ui.js");
+        try {
+          const campaignData = await entrarCampanha(id);
+          showCampaignScreen(campaignData);
+        } catch (err) {
+          alert("Erro ao abrir campanha: " + err.message);
+        }
       } else {
         await _openWorldSheet(type, id);
       }
@@ -268,7 +391,7 @@ function attachCardListeners() {
   });
 
   const createCard = document.getElementById("btn-create-card");
-  if (createCard) createCard.addEventListener("click", openSheetTypeModal);
+  if (createCard) createCard.addEventListener("click", handleCreateClick);
 
   document.querySelectorAll("[data-action='menu']").forEach(btn => {
     btn.addEventListener("click", e => {
@@ -277,22 +400,61 @@ function attachCardListeners() {
       if (card?.dataset.charId) toggleDropdown(card.dataset.charId);
     });
   });
-  document.querySelectorAll("[data-action='export']").forEach(btn => {
-    btn.addEventListener("click", e => { e.stopPropagation(); handleExportCharacter(btn.dataset.id); closeDropdown(); });
+  document.querySelectorAll("[data-action='share-code']").forEach(btn => {
+    btn.addEventListener("click", async e => {
+      e.stopPropagation();
+      closeDropdown();
+      const id = btn.dataset.id;
+      const type = btn.dataset.type;
+      
+      let sheetObj = null;
+      if (type === "infectado") {
+        sheetObj = state.characters.find(c => c.id === id);
+      } else if (type === "campanha") {
+        const raw = localStorage.getItem("assimilação_managed_campaigns");
+        const list = raw ? JSON.parse(raw) : [];
+        const item = list.find(c => c.code === id);
+        if (item) {
+          const { entrarCampanha } = await import("./campanha.js");
+          try {
+            sheetObj = await entrarCampanha(id);
+          } catch(err) {}
+        }
+      } else {
+        const { worldState } = _getWorldState();
+        const listName = type === "refugio" ? "refugios" : type === "regiao" ? "regioes" : type === "conflito" ? "conflitos" : "locais";
+        sheetObj = (worldState[listName] || []).find(x => x.id === id);
+      }
+      
+      if (!sheetObj) { alert("Ficha não encontrada!"); return; }
+      sheetObj._sheetType = type;
+
+      const { gerarCodigoCompartilhamento } = await import("./campanha.js");
+      try {
+        const code = await gerarCodigoCompartilhamento(sheetObj);
+        prompt("Ficha compartilhada na nuvem! Código de Compartilhamento (copiado para a área de transferência):", code);
+        navigator.clipboard.writeText(code).catch(() => {});
+      } catch (err) {
+        alert("Erro ao compartilhar ficha: " + err.message);
+      }
+    });
   });
+
   document.querySelectorAll("[data-action='duplicate']").forEach(btn => {
     btn.addEventListener("click", e => { e.stopPropagation(); handleDuplicateCharacter(btn.dataset.id); closeDropdown(); });
   });
-  document.querySelectorAll("[data-action='delete']").forEach(btn => {
-    btn.addEventListener("click", e => { e.stopPropagation(); handleDeleteCharacter(btn.dataset.id); closeDropdown(); });
-  });
 
-  document.querySelectorAll(".btn-world-delete").forEach(btn => {
-    btn.addEventListener("click", async e => {
+  document.querySelectorAll("[data-action='delete-any']").forEach(btn => {
+    btn.addEventListener("click", e => {
       e.stopPropagation();
-      const type = btn.dataset.worldType;
-      const id = btn.dataset.worldId;
-      await _deleteWorldSheet(type, id);
+      closeDropdown();
+      const id = btn.dataset.id;
+      const type = btn.dataset.type;
+      if (type === "infectado") {
+        handleDeleteCharacter(id);
+      } else {
+        _deleteWorldSheet(type, id);
+      }
     });
   });
 }
@@ -329,7 +491,7 @@ async function _openWorldSheet(type, id) {
 }
 
 async function _deleteWorldSheet(type, id) {
-  const labels = { refugio: "Refúgio", regiao: "Região", conflito: "Conflito", local: "Local" };
+  const labels = { refugio: "Refúgio", regiao: "Região", conflito: "Conflito", local: "Local", campanha: "Campanha" };
   if (!confirm(`Excluir este ${labels[type] || "item"}? Esta ação não pode ser desfeita.`)) return;
   const ws = await import("./world-state.js");
   switch (type) {
@@ -337,6 +499,13 @@ async function _deleteWorldSheet(type, id) {
     case "regiao":   ws.deleteRegiao(id);   break;
     case "conflito": ws.deleteConflito(id); break;
     case "local":    ws.deleteLocal(id);    break;
+    case "campanha": {
+      const raw = localStorage.getItem("assimilação_managed_campaigns");
+      let list = raw ? JSON.parse(raw) : [];
+      list = list.filter(c => c.code !== id);
+      localStorage.setItem("assimilação_managed_campaigns", JSON.stringify(list));
+      break;
+    }
   }
   renderCharactersList();
 }

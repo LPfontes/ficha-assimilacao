@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="css/landing.css">
   <link rel="stylesheet" href="css/world-sheets.css">
   <link rel="stylesheet" href="css/mesa.css">
+  <link rel="stylesheet" href="css/campaign.css">
 </head>
 <body>
 
@@ -108,6 +109,9 @@
       <button id="btn-import-json" class="btn import-json" title="Importar Ficha JSON">
         <span class="btn-icon" data-icon="import"></span> <span class="btn-text">Importar</span>
       </button>
+      <button id="btn-import-code" class="btn" title="Importar Ficha da Nuvem via Código">
+        <span class="btn-icon" data-icon="cloud"></span> <span class="btn-text">Importar Código</span>
+      </button>
       <input type="file" id="file-import" accept=".json" style="display: none;">
       <button id="btn-export-json" class="btn export-json" title="Exportar Ficha JSON">
         <span class="btn-icon" data-icon="export"></span> <span class="btn-text">Exportar</span>
@@ -148,6 +152,31 @@
           <p class="landing-subtitle">Selecione um personagem para continuar ou crie um novo</p>
         </div>
 
+        <!-- Abas de Filtro de Fichas -->
+        <div class="landing-tabs" id="landing-tabs">
+          <button class="landing-tab active" data-tab="all">
+            <span class="tab-emoji">📂</span> Todos
+          </button>
+          <button class="landing-tab" data-tab="infectado">
+            <span class="tab-emoji">🧬</span> Infectados
+          </button>
+          <button class="landing-tab" data-tab="refugio">
+            <span class="tab-emoji">🏕️</span> Refúgios
+          </button>
+          <button class="landing-tab" data-tab="regiao">
+            <span class="tab-emoji">🗺️</span> Regiões
+          </button>
+          <button class="landing-tab" data-tab="conflito">
+            <span class="tab-emoji">⚔️</span> Conflitos
+          </button>
+          <button class="landing-tab" data-tab="local">
+            <span class="tab-emoji">📍</span> Locais
+          </button>
+          <button class="landing-tab" data-tab="campanha">
+            <span class="tab-emoji">📋</span> Campanhas
+          </button>
+        </div>
+
         <!-- Grid de personagens -->
         <div id="characters-list" class="characters-grid"></div>
 
@@ -174,7 +203,126 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg>
             Mesa de Jogo
           </button>
+          <button id="btn-entrar-campanha-landing" class="btn btn-landing-secondary" style="border-color:var(--color-blue-glow); color:var(--color-blue-glow);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Entrar Campanha
+          </button>
           <input type="file" id="file-import-landing" accept=".json" style="display:none">
+        </div>
+      </div>
+    </section>
+
+    <!-- TELA DE CAMPANHA (DASHBOARD/LOBBY DA MESA) -->
+    <section id="campaign-screen" class="screen hidden">
+      <div class="campaign-container">
+        <!-- Cabeçalho da Campanha -->
+        <div class="campaign-header-block">
+          <div class="campaign-info-meta">
+            <h2 id="camp-title">Nome da Campanha</h2>
+            <div class="campaign-meta-details">
+              <span class="campaign-gm-badge">Mestre: <strong id="camp-gm-name">Nome do Mestre</strong></span>
+              <span class="campaign-code-badge" id="camp-code-display">CÓDIGO: ------</span>
+              <div id="camp-session-status" class="session-status-indicator inactive">
+                <span class="status-dot">●</span> <span class="status-text">Sessão Inativa</span>
+              </div>
+            </div>
+          </div>
+          <div class="campaign-header-actions">
+            <!-- Botão primário dinâmico: Iniciar Sessão (Mestre) ou Entrar na Sessão (Jogador) -->
+            <button id="btn-camp-session-action" class="btn btn-landing-primary" style="padding: 12px 24px;">
+              Entrar na Sessão
+            </button>
+            <button id="btn-camp-leave" class="btn btn-landing-secondary" style="border-color:var(--color-rust); color:var(--color-rust-glow);">
+              Voltar ao Início
+            </button>
+          </div>
+        </div>
+
+        <!-- Abas de Navegação -->
+        <div class="campaign-nav-tabs">
+          <button class="campaign-tab-btn active" data-tab="camp-tab-fichas">
+            <span>🧬</span> Fichas da Mesa
+          </button>
+          <button class="campaign-tab-btn" data-tab="camp-tab-notas">
+            <span>✏️</span> Notas
+          </button>
+          <button class="campaign-tab-btn" data-tab="camp-tab-eventos">
+            <span>⚔️</span> Eventos
+          </button>
+          <button class="campaign-tab-btn" data-tab="camp-tab-historia">
+            <span>📖</span> Diário da Crônica
+          </button>
+        </div>
+
+        <!-- Conteúdo das Abas -->
+        <div class="campaign-tab-contents">
+          
+          <!-- Aba Fichas -->
+          <div class="campaign-tab-panel active" id="camp-tab-fichas">
+            <div class="fichas-section-header">
+              <h3 style="color:var(--text-primary); font-family:var(--font-heading);">Fichas Sincronizadas</h3>
+              <div style="display:flex; gap:10px;" id="camp-fichas-actions-container">
+                <!-- Dropdown e botão de compartilhar ficha (aparece para o jogador) -->
+                <select id="camp-share-char-select" class="camp-input" style="max-width:200px;">
+                  <option value="">-- Selecione uma Ficha --</option>
+                </select>
+                <button id="btn-camp-share-char" class="btn btn-sm">Compartilhar Ficha</button>
+              </div>
+            </div>
+            <div class="fichas-grid-camp" id="camp-fichas-grid">
+              <!-- Cards de fichas compartilhadas serão injetados aqui -->
+            </div>
+          </div>
+
+          <!-- Aba Notas -->
+          <div class="campaign-tab-panel" id="camp-tab-notas">
+            <div class="camp-form-inline">
+              <h4 style="color:var(--color-blue-glow); font-family:var(--font-heading);">Adicionar Nova Nota</h4>
+              <div class="camp-form-row">
+                <input type="text" id="camp-note-title-input" class="camp-input" placeholder="Título da Nota">
+              </div>
+              <textarea id="camp-note-content-input" class="camp-textarea" placeholder="Conteúdo da Nota..."></textarea>
+              <div style="display:flex; justify-content:flex-end;">
+                <button id="btn-camp-add-note" class="btn btn-sm">Criar Nota</button>
+              </div>
+            </div>
+            <div class="notes-list" id="camp-notes-list">
+              <!-- Notas serão injetadas aqui -->
+            </div>
+          </div>
+
+          <!-- Aba Eventos -->
+          <div class="campaign-tab-panel" id="camp-tab-eventos">
+            <!-- Formulário apenas para o Mestre, mas visível se quisermos -->
+            <div class="camp-form-inline gm-only-block" id="camp-event-form">
+              <h4 style="color:var(--color-blue-glow); font-family:var(--font-heading);">Agendar Novo Evento (Mestre)</h4>
+              <div class="camp-form-row">
+                <input type="text" id="camp-event-title-input" class="camp-input" placeholder="Título do Evento">
+                <input type="text" id="camp-event-date-input" class="camp-input" placeholder="Quando (Ex: Dia 3, Rodada 2...)">
+              </div>
+              <textarea id="camp-event-desc-input" class="camp-textarea" placeholder="Descrição do Evento ou Ameaça..."></textarea>
+              <div style="display:flex; justify-content:flex-end;">
+                <button id="btn-camp-add-event" class="btn btn-sm">Agendar Evento</button>
+              </div>
+            </div>
+            <div class="events-list" id="camp-events-list">
+              <!-- Eventos serão injetados aqui -->
+            </div>
+          </div>
+
+          <!-- Aba História / Crônica -->
+          <div class="campaign-tab-panel" id="camp-tab-historia">
+            <div class="chronicle-container">
+              <div class="chronicle-feed" id="camp-chronicle-feed">
+                <!-- Crônica injetada aqui -->
+              </div>
+              <div class="chronicle-input-row">
+                <input type="text" id="camp-chronicle-input" class="camp-input" placeholder="Adicionar nova entrada na história da crônica...">
+                <button id="btn-camp-add-chronicle" class="btn btn-sm">Registrar</button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -352,8 +500,6 @@
             </button>
           </div>
           <div id="table-player-list"></div>
-          <!-- fichas extras do mestre ficam aqui -->
-          <div id="table-extra-fichas"></div>
         </div>
 
         <!-- Centro: Mapa -->
@@ -1414,8 +1560,19 @@
     </div>
   </div>
 
-  <!-- Botão flutuante do player (canto inferior esquerdo) -->
-  <button id="player-fab" class="player-fab" title="Abrir Player de Música">
+  <!-- Modal de Visualização de Ficha Compartilhada -->
+  <div id="modal-ficha-viewer" class="ficha-viewer-overlay hidden">
+    <div class="ficha-viewer-box">
+      <div class="ficha-viewer-header">
+        <span class="ficha-viewer-title" id="ficha-viewer-title">Visualizando Ficha</span>
+        <button id="btn-close-ficha-viewer" class="btn btn-sm">✕</button>
+      </div>
+      <div class="ficha-viewer-body" id="ficha-viewer-body">
+        <!-- Detalhes preenchidos por JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- Overlay de Rolagem (Canto Superior Direito) -->
   <div id="dice-overlay" class="dice-overlay hidden">
     <div class="dice-overlay-header">
