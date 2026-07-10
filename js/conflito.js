@@ -1026,6 +1026,15 @@ function _attachListeners(c) {
   function _resetAtivacao(idx) {
     const act = c.ativacoes[idx];
     if (!act) return;
+
+    // Deduct spent dice from conflict's last roll
+    const lastRoll = c.rolagens && c.rolagens[c.rolagens.length - 1];
+    if (lastRoll) {
+      lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
+      lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
+      lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
+    }
+
     act.investedS = 0;
     act.investedA = 0;
     act.investedP = 0;
@@ -1418,6 +1427,15 @@ function _attachListeners(c) {
     const a = c.ameacas[ameacaIdx];
     if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
     const act = a.ativacoes[actIdx];
+
+    // Deduct spent dice from threat's last roll
+    const lastRoll = a.rolagens && a.rolagens[a.rolagens.length - 1];
+    if (lastRoll) {
+      lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
+      lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
+      lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
+    }
+
     act.investedS = 0;
     act.investedA = 0;
     act.investedP = 0;
@@ -1662,35 +1680,40 @@ function _getAvailableDice(rolagens, activations) {
   if (!rolagens || rolagens.length === 0) {
     return { S: 0, A: 0, P: 0 };
   }
-  const lastRoll = rolagens[rolagens.length - 1];
-  let sucessos = lastRoll.bonusSuccesses || 0;
-  let adaptacoes = lastRoll.bonusAdaptations || 0;
-  let pressoes = lastRoll.bonusPressures || 0;
+  let sucessos = 0;
+  let adaptacoes = 0;
+  let pressoes = 0;
 
-  lastRoll.keptDiceIndexes.forEach(idx => {
-    const die = lastRoll.results[idx];
-    if (die && die.symbols) {
-      die.symbols.forEach(sym => {
-        if (sym === "A") sucessos++;
-        if (sym === "B") adaptacoes++;
-        if (sym === "C") pressoes++;
-      });
-    }
+  rolagens.forEach(roll => {
+    sucessos += roll.bonusSuccesses || 0;
+    adaptacoes += roll.bonusAdaptations || 0;
+    pressoes += roll.bonusPressures || 0;
+
+    (roll.keptDiceIndexes || []).forEach(idx => {
+      const die = roll.results[idx];
+      if (die && die.symbols) {
+        die.symbols.forEach(sym => {
+          if (sym === "A") sucessos++;
+          if (sym === "B") adaptacoes++;
+          if (sym === "C") pressoes++;
+        });
+      }
+    });
   });
 
-  let newlyInvestedS = 0;
-  let newlyInvestedA = 0;
-  let newlyInvestedP = 0;
+  let investedS = 0;
+  let investedA = 0;
+  let investedP = 0;
   (activations || []).forEach(act => {
-    newlyInvestedS += (act.investedS || 0) - (act.snapshotS || 0);
-    newlyInvestedA += (act.investedA || 0) - (act.snapshotA || 0);
-    newlyInvestedP += (act.investedP || 0) - (act.snapshotP || 0);
+    investedS += act.investedS || 0;
+    investedA += act.investedA || 0;
+    investedP += act.investedP || 0;
   });
 
   return {
-    S: Math.max(0, sucessos - newlyInvestedS),
-    A: Math.max(0, adaptacoes - newlyInvestedA),
-    P: Math.max(0, pressoes - newlyInvestedP)
+    S: Math.max(0, sucessos - investedS),
+    A: Math.max(0, adaptacoes - investedA),
+    P: Math.max(0, pressoes - investedP)
   };
 }
 

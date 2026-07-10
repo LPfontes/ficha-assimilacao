@@ -529,6 +529,16 @@
   font-size: var(--font-size-sm);
 }
 
+.ficha-viewer-aptitudes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+  row-gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+
 .ficha-viewer-stat-name {
   color: var(--text-muted);
 }

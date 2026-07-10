@@ -2038,9 +2038,21 @@ function _resetMesaAtivacao(idx) {
   const c = _activeConflito;
   if (!c || !c.ativacoes || !c.ativacoes[idx]) return;
   const act = c.ativacoes[idx];
+
+  // Deduct spent dice from conflict's last roll
+  const lastRoll = c.rolagens && c.rolagens[c.rolagens.length - 1];
+  if (lastRoll) {
+    lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
+    lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
+    lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
+  }
+
   act.investedS = 0;
   act.investedA = 0;
   act.investedP = 0;
+  act.snapshotS = 0;
+  act.snapshotA = 0;
+  act.snapshotP = 0;
   const list = document.getElementById("mesa-ativacoes-list");
   if (list) {
     const item = list.querySelector(`.btn-reset-ativacao[data-idx="${idx}"]`)?.closest(".conflito-ativacao-item");
@@ -2789,19 +2801,34 @@ function _openSharedFichaViewer(fichaObj) {
         </div>
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Instintos)</div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Astúcia</span><span class="ficha-viewer-stat-value">${char.instintos?.Astúcia || 0}</span></div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Potência</span><span class="ficha-viewer-stat-value">${char.instintos?.Potência || 0}</span></div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Resolução</span><span class="ficha-viewer-stat-value">${char.instintos?.Resolução || 0}</span></div>
+        <div class="ficha-viewer-aptitudes-grid">
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Influência</span><span class="ficha-viewer-stat-value">${char.instintos?.Influência || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Percepção</span><span class="ficha-viewer-stat-value">${char.instintos?.Percepção || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Potência</span><span class="ficha-viewer-stat-value">${char.instintos?.Potência || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Reação</span><span class="ficha-viewer-stat-value">${char.instintos?.Reação || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Resolução</span><span class="ficha-viewer-stat-value">${char.instintos?.Resolução || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Sagacidade</span><span class="ficha-viewer-stat-value">${char.instintos?.Sagacidade || 0}</span></div>
+        </div>
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Conhecimentos)</div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Erudição</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Erudição || 0}</span></div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Sobrevivência</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Sobrevivência || 0}</span></div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Tática</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Tática || 0}</span></div>
+        <div class="ficha-viewer-aptitudes-grid">
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Biologia</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Biologia || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Engenharia</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Engenharia || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Erudição</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Erudição || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Geografia</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Geografia || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Medicina</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Medicina || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Segurança</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Segurança || 0}</span></div>
+        </div>
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Práticas)</div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Calejado</span><span class="ficha-viewer-stat-value">${char.praticas?.Calejado || 0}</span></div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Manuseio</span><span class="ficha-viewer-stat-value">${char.praticas?.Manuseio || 0}</span></div>
-        <div class="ficha-viewer-stat-row"><span class="ficha-viewer-stat-name">Ofício</span><span class="ficha-viewer-stat-value">${char.praticas?.Ofício || 0}</span></div>
+        <div class="ficha-viewer-aptitudes-grid">
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Armas</span><span class="ficha-viewer-stat-value">${char.praticas?.Armas || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Atletismo</span><span class="ficha-viewer-stat-value">${char.praticas?.Atletismo || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Expressão</span><span class="ficha-viewer-stat-value">${char.praticas?.Expressão || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Furtividade</span><span class="ficha-viewer-stat-value">${char.praticas?.Furtividade || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Manufaturas</span><span class="ficha-viewer-stat-value">${char.praticas?.Manufaturas || 0}</span></div>
+          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Sobrevivência</span><span class="ficha-viewer-stat-value">${char.praticas?.Sobrevivência || 0}</span></div>
+        </div>
       </div>
       
       <!-- Coluna Direita: Características, Assimilações e Inventário -->
