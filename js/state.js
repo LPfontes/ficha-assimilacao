@@ -247,6 +247,7 @@ export function updateCloudSyncBadge() {
 
 export function saveCurrentCharacter() {
   if (!state.currentCharacter) return;
+  if (state.currentCharacter.isExtraSheet) return;
   const index = state.characters.findIndex(c => c.id === state.currentCharacter.id);
   if (index !== -1) {
     state.characters[index] = state.currentCharacter;
@@ -265,7 +266,7 @@ export function saveCurrentCharacter() {
         state.hasUnsavedCloudChanges = true;
         updateCloudSyncBadge();
       }
-      // Se estiver em uma campanha ativa, sincronizar a alteração com o Firestore
+      // Se estiver em uma campanha activa, sincronizar a alteração com o Firestore
       if (state.activeCampaignId) {
         import("./campanha.js").then(({ compartilharFicha }) => {
           compartilharFicha(state.activeCampaignId, state.currentCharacter, state.currentUser?.uid || "player", state.currentCharacter.name || "Jogador").catch(e => {});
@@ -280,6 +281,7 @@ export function saveCurrentCharacter() {
 
 export function saveCurrentCharacterImmediate() {
   if (!state.currentCharacter) return;
+  if (state.currentCharacter.isExtraSheet) return;
   if (saveTimeout) clearTimeout(saveTimeout);
   try {
     localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));

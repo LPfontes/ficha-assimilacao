@@ -1,5 +1,4 @@
-import { PeerManager } from "./mesa.js";
-import { deleteRoomFirestore } from "./webrtc-signaling.js";
+import { PeerManager, deleteRoomFirestore } from "./mesa.js";
 import { state, saveCurrentCharacter, loadCharacter } from "./state.js";
 import { esc } from "./screen-utils.js";
 import { logger } from "./logger.js";
@@ -123,6 +122,7 @@ async function _enterAsMaster(code, hostName) {
       if (pm.isHost) {
         broadcastMusicState();
         broadcastFichasVisibility();
+        _broadcastExtraFichas();
       }
     };
     peerManager = pm;
@@ -214,8 +214,9 @@ export function initMesaUI() {
     if (joinBtn) {
       const code = joinBtn.dataset.code;
       if (code) {
-        document.getElementById("room-code-input").value = code;
-        document.querySelector('.room-tab[data-room-tab="entrar"]')?.click();
+        const room = _managedRooms.find(r => r.code === code);
+        const hostName = room ? room.hostName : "Mestre";
+        _enterAsMaster(code, hostName);
       }
     }
     if (masterBtn) {
@@ -254,6 +255,7 @@ export function initMesaUI() {
         if (pm.isHost) {
           broadcastMusicState();
           broadcastFichasVisibility();
+          _broadcastExtraFichas();
         }
       };
       peerManager = pm;
@@ -298,6 +300,7 @@ export function initMesaUI() {
         if (pm.isHost) {
           broadcastMusicState();
           broadcastFichasVisibility();
+          _broadcastExtraFichas();
         }
       };
       peerManager = pm;
@@ -458,10 +461,28 @@ export function initMesaUI() {
 
 function handleMessage(data, fromId) {
   if (!data) return;
-  console.log("[MESA] handleMessage type=" + data.type + " from=" + fromId, data.type === "state" ? data.data : "");
   switch (data.type) {
     case "state":
       updatePlayerState(data.playerId, data.data);
+      break;
+    case "master_update_player_state":
+      if (data.data) {
+        const targetPid = data.data.targetPlayerId;
+        // 1. Render/cache state for this player
+        updatePlayerState(targetPid, data.data);
+
+        // 2. If it is ME, modify our local character and save/refresh UI
+        if (peerManager && peerManager.playerId === targetPid) {
+          const char = state.currentCharacter;
+          if (char) {
+            if (data.data.saude?.dano) char.dano = data.data.saude.dano;
+            if (data.data.det?.atual !== undefined) char.detPoints = data.data.det.atual;
+            if (data.data.ass?.atual !== undefined) char.assPoints = data.data.ass.atual;
+            saveCurrentCharacter();
+            _updateLocalPlayerState();
+          }
+        }
+      }
       break;
     case "roll":
       addRollToFeed(data);
@@ -497,6 +518,12 @@ function handleMessage(data, fromId) {
         handleIncomingMusicAction(data.data);
       }
       break;
+    case "extra_fichas":
+      if (Array.isArray(data.data)) {
+        _extraFichas = data.data;
+        _renderExtraFichas();
+      }
+      break;
     case "_room_update":
       if (data.players) {
         const list = Object.entries(data.players).map(([id, p]) => ({ id, name: p.name }));
@@ -505,12 +532,11 @@ function handleMessage(data, fromId) {
         const hasNewPlayer = list.some(p => !knownIds.has(p.id));
         const filteredList = list.filter(p => p.id !== data.hostId);
         _lastPlayersList = filteredList;
-        console.log("[MESA] _room_update players=" + list.map(p=>p.id).join(",") + " hasNew=" + hasNewPlayer + " cache=" + Object.keys(_playerStateCache).join(","));
         updatePlayerList(filteredList);
         _applyFichasVisibility();
         _updateLocalPlayerState();
         _applyCachedStates();
-        if (hasNewPlayer && peerManager) { console.log("[MESA] _room_update -> broadcastCharacterState"); broadcastCharacterState(); }
+        if (hasNewPlayer && peerManager) broadcastCharacterState();
         if (data.hostId) {
           const hostBadge = document.getElementById("table-host-badge");
           if (hostBadge) hostBadge.textContent = data.hostId === peerManager?.playerId ? "Você é o Mestre" : "Mestre: " + (list.find(p => p.id === data.hostId)?.name || "");
@@ -526,9 +552,8 @@ function _getHealthMaxPts(char) {
 }
 
 export function broadcastCharacterState() {
-  if (!peerManager || !state.currentCharacter) { console.log("[MESA] broadcastCharacterState SKIP", { pm: !!peerManager, char: !!state.currentCharacter }); return; }
+  if (!peerManager || !state.currentCharacter) { return; }
   const char = state.currentCharacter;
-  console.log("[MESA] broadcastCharacterState", char.name, char.detPoints, char.detNivel, char.dano);
   peerManager.broadcast({
     type: "state",
     playerId: peerManager.playerId,
@@ -559,7 +584,7 @@ function _getActiveLevel(dano, maxPts) {
   return 1;
 }
 
-function _renderHealthLevelsHTML(saude) {
+function _renderHealthLevelsHTML(saude, isEditable = true) {
   if (!saude || !saude.dano) return '<span class="stat-saude">Vida: --/--</span>';
   const dano = saude.dano;
   if (dano[6] === undefined) { dano[6] = 0; dano[5] = 0; dano[4] = 0; dano[3] = 0; dano[2] = 0; dano[1] = 0; }
@@ -578,15 +603,20 @@ function _renderHealthLevelsHTML(saude) {
     const isFilled = i <= (maxPts - activeDano);
     dropsHtml += `<span class="health-drop ${isFilled ? 'filled' : ''}" data-index="${i}" data-level="${activeLvl}">${ICONS.saude}</span>`;
   }
+
+  const buttonsHtml = isEditable ? `
+          <div style="display:flex; gap:3px;">
+            <button type="button" class="btn-health-mesa-dec" data-player="local">−</button>
+            <button type="button" class="btn-health-mesa-inc" data-player="local">+</button>
+          </div>
+  ` : '';
+
   return `
     <div class="health-levels-container" style="margin-top:4px;">
       <div class="health-level-row active" data-level="${activeLvl}">
         <div class="health-level-label">
           <span class="name">${activeLvl}. ${lvlNames[activeLvl]}</span>
-          <div style="display:flex; gap:3px;">
-            <button type="button" class="btn-health-mesa-dec" data-player="local">−</button>
-            <button type="button" class="btn-health-mesa-inc" data-player="local">+</button>
-          </div>
+          ${buttonsHtml}
         </div>
         <div class="health-drops" style="display:flex; align-items:center; gap:6px;">
           ${dropsHtml}
@@ -638,15 +668,13 @@ function _handleHealthDropClick(e) {
 }
 
 function _updateLocalPlayerState() {
-  if (!peerManager || !state.currentCharacter) { console.log("[MESA] _updateLocalPlayerState SKIP pm=" + !!peerManager + " char=" + !!state.currentCharacter); return; }
+  if (!peerManager || !state.currentCharacter) { return; }
   const char = state.currentCharacter;
   const playerId = peerManager.playerId;
-  console.log("[MESA] _updateLocalPlayerState id=" + playerId + " det=" + (char.detPoints || 0) + "/" + (char.detNivel || 1));
   const detEl = document.getElementById("det-" + playerId);
   const saudeEl = document.getElementById("saude-" + playerId);
   const assEl = document.getElementById("ass-" + playerId);
   const portraitEl = document.getElementById("portrait-" + playerId);
-  console.log("[MESA] _updateLocalPlayerState found detEl=" + !!detEl + " saudeEl=" + !!saudeEl);
   const maxPts = _getHealthMaxPts(char);
   if (detEl) {
     detEl.innerHTML = `<button type="button" class="btn-det-dec" data-player="${playerId}">−</button><span class="det-value">Determinação: ${char.detPoints || 0}/${char.detNivel || 1}</span><button type="button" class="btn-det-inc" data-player="${playerId}">+</button>`;
@@ -694,48 +722,132 @@ function _updateLocalPlayerState() {
 }
 
 function _applyCachedStates() {
-  console.log("[MESA] _applyCachedStates", Object.keys(_playerStateCache));
-  for (const pid of Object.keys(_playerStateCache)) {
-    const cached = _playerStateCache[pid];
-    const detEl = document.getElementById("det-" + pid);
-    const saudeEl = document.getElementById("saude-" + pid);
-    const assEl = document.getElementById("ass-" + pid);
-    const portraitEl = document.getElementById("portrait-" + pid);
-    console.log("[MESA] _applyCachedStates pid=" + pid + " detEl=" + !!detEl + " saudeEl=" + !!saudeEl + " det=", cached.det);
-    if (detEl && cached.det) detEl.innerHTML = `<span class="det-value">Determinação:${cached.det.atual}/${cached.det.max}</span>`;
-    if (saudeEl && cached.saude) saudeEl.innerHTML = _renderHealthLevelsHTML(cached.saude);
-    if (assEl && cached.ass) assEl.innerHTML = `Ass: ${cached.ass.atual || 0}/${cached.ass.max || 0}`;
-    if (portraitEl) {
-      if (cached.portrait) portraitEl.innerHTML = `<img src="${cached.portrait}" class="table-mini-portrait" alt="${esc(cached.nome || '')}">`;
-      else portraitEl.innerHTML = `<div class="table-mini-portrait-placeholder">${esc(cached.nome?.[0] || '?')}</div>`;
-    }
-    const playerItem = portraitEl?.closest?.(".table-player-item");
-    if (playerItem && cached.nome) {
-      const nameEl = playerItem.querySelector(".table-player-name");
-      const isMe = playerItem.dataset.playerId === peerManager?.playerId;
-      if (nameEl) nameEl.textContent = cached.nome + (isMe ? " (Você)" : "");
-    }
+  
+  for (const [pid, cached] of Object.entries(_playerStateCache)) {
+    updatePlayerState(pid, cached);
   }
 }
 
 function updatePlayerState(playerId, data) {
-  console.log("[MESA] updatePlayerState pid=" + playerId + " hasDet=" + !!data?.det + " hasSaude=" + !!data?.saude + " nome=" + data?.nome);
-  if (data) { _playerStateCache[playerId] = data; console.log("[MESA] updatePlayerState CACHED", playerId, data); }
+  if (data) {
+    _playerStateCache[playerId] = data;
+  }
   const detEl = document.getElementById("det-" + playerId);
   const saudeEl = document.getElementById("saude-" + playerId);
   const assEl = document.getElementById("ass-" + playerId);
   const portraitEl = document.getElementById("portrait-" + playerId);
-  console.log("[MESA] updatePlayerState found detEl=" + !!detEl + " saudeEl=" + !!saudeEl);
-  if (detEl && data.det) detEl.innerHTML = `<span class="det-value">Determinação:${data.det.atual}/${data.det.max}</span>`;
-  if (saudeEl && data.saude) saudeEl.innerHTML = _renderHealthLevelsHTML(data.saude);
-  if (assEl && data.ass) assEl.innerHTML = `Ass: ${data.ass.atual || 0}/${data.ass.max || 0}`;
-  if (portraitEl && data.portrait) portraitEl.innerHTML = `<img src="${data.portrait}" class="table-mini-portrait" alt="${esc(data.nome || '')}">`;
-  else if (portraitEl && data?.nome) portraitEl.innerHTML = `<div class="table-mini-portrait-placeholder">${esc(data.nome[0] || '?')}</div>`;
+  const isMe = (playerId === peerManager?.playerId);
+  const isHost = peerManager?.isHost;
+  const isEditable = isHost && !isMe; // Master can edit other players, not themselves (which is handled locally)
+
+  if (detEl && data.det) {
+    if (isEditable) {
+      detEl.innerHTML = `<button type="button" class="btn-det-dec" data-player="${playerId}">−</button><span class="det-value">Determinação: ${data.det.atual}/${data.det.max}</span><button type="button" class="btn-det-inc" data-player="${playerId}">+</button>`;
+      
+      const decBtn = detEl.querySelector(".btn-det-dec");
+      const incBtn = detEl.querySelector(".btn-det-inc");
+      if (decBtn) {
+        decBtn.onclick = () => {
+          if (data.det.atual > 0) {
+            data.det.atual--;
+            _sendMasterUpdatePlayerState(playerId, data);
+          }
+        };
+      }
+      if (incBtn) {
+        incBtn.onclick = () => {
+          if (data.det.atual < data.det.max) {
+            data.det.atual++;
+            _sendMasterUpdatePlayerState(playerId, data);
+          }
+        };
+      }
+    } else {
+      detEl.innerHTML = `<span class="det-value">Determinação: ${data.det.atual}/${data.det.max}</span>`;
+    }
+  }
+
+  if (saudeEl && data.saude) {
+    const maxPts = data.saude.maxPts || 2;
+    saudeEl.innerHTML = _renderHealthLevelsHTML(data.saude, isEditable);
+
+    if (isEditable) {
+      saudeEl.querySelectorAll(".health-drop").forEach(drop => {
+        drop.onclick = () => {
+          const lvlKey = parseInt(drop.dataset.level);
+          const index  = parseInt(drop.dataset.index);
+          if (!data.saude.dano) data.saude.dano = { 6: 0, 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+          const currentDano  = data.saude.dano[lvlKey] || 0;
+          const currentHealth = maxPts - currentDano;
+          const newHealth = currentHealth === index ? index - 1 : index;
+          data.saude.dano[lvlKey] = maxPts - newHealth;
+          if (data.saude.dano[lvlKey] === maxPts && lvlKey > 1) data.saude.dano[lvlKey - 1] = 0;
+          _sendMasterUpdatePlayerState(playerId, data);
+        };
+      });
+
+      const decH = saudeEl.querySelector(".btn-health-mesa-dec");
+      const incH = saudeEl.querySelector(".btn-health-mesa-inc");
+      if (decH) {
+        decH.onclick = () => {
+          const activeLvl = _getActiveLevel(data.saude.dano || {}, maxPts);
+          const d = data.saude.dano[activeLvl] || 0;
+          if (d < maxPts) {
+            data.saude.dano[activeLvl] = d + 1;
+            if (data.saude.dano[activeLvl] === maxPts && activeLvl > 1) data.saude.dano[activeLvl - 1] = 0;
+            _sendMasterUpdatePlayerState(playerId, data);
+          }
+        };
+      }
+      if (incH) {
+        incH.onclick = () => {
+          const activeLvl = _getActiveLevel(data.saude.dano || {}, maxPts);
+          const d = data.saude.dano[activeLvl] || 0;
+          if (d > 0) {
+            data.saude.dano[activeLvl] = d - 1;
+            _sendMasterUpdatePlayerState(playerId, data);
+          } else if (activeLvl < 6) {
+            data.saude.dano[activeLvl] = 0;
+            data.saude.dano[activeLvl + 1] = maxPts - 1;
+            _sendMasterUpdatePlayerState(playerId, data);
+          }
+        };
+      }
+    }
+  }
+
+  if (assEl && data.ass) {
+    assEl.innerHTML = `Ass: ${data.ass.atual || 0}/${data.ass.max || 0}`;
+  }
+
+  if (portraitEl) {
+    if (data.portrait) portraitEl.innerHTML = `<img src="${data.portrait}" class="table-mini-portrait" alt="${esc(data.nome || '')}">`;
+    else portraitEl.innerHTML = `<div class="table-mini-portrait-placeholder">${esc(data.nome?.[0] || '?')}</div>`;
+  }
+
   const playerItem = portraitEl?.closest?.(".table-player-item");
   if (playerItem && data.nome) {
     const nameEl = playerItem.querySelector(".table-player-name");
-    const isMe = playerItem.dataset.playerId === peerManager?.playerId;
     if (nameEl) nameEl.textContent = data.nome + (isMe ? " (Você)" : "");
+  }
+}
+
+function _sendMasterUpdatePlayerState(playerId, data) {
+  updatePlayerState(playerId, data);
+
+  if (peerManager && peerManager.isHost) {
+    peerManager.broadcast({
+      type: "master_update_player_state",
+      playerId: peerManager.playerId,
+      data: {
+        targetPlayerId: playerId,
+        nome: data.nome,
+        portrait: data.portrait,
+        saude: data.saude,
+        det: data.det,
+        ass: data.ass
+      }
+    });
   }
 }
 let _totalRollCount = 0;
@@ -1514,17 +1626,29 @@ function _renderFichasPickerList(filter = "") {
   });
 }
 
+function _broadcastExtraFichas() {
+  if (peerManager && peerManager.isHost) {
+    peerManager.broadcast({
+      type: "extra_fichas",
+      playerId: peerManager.playerId,
+      data: _extraFichas
+    });
+  }
+}
+
 function _addExtraFicha(char) {
   // Copia profunda para não afetar o personagem atual
   const copy = JSON.parse(JSON.stringify(char));
   const entry = { char: copy, id: "extra-" + copy.id };
   _extraFichas.push(entry);
   _renderExtraFichas();
+  _broadcastExtraFichas();
 }
 
 function _removeExtraFicha(id) {
   _extraFichas = _extraFichas.filter(e => e.id !== id);
   _renderExtraFichas();
+  _broadcastExtraFichas();
 }
 
 function _renderExtraFichas() {
@@ -1533,6 +1657,8 @@ function _renderExtraFichas() {
   
   // Remover itens extras existentes para evitar duplicados
   container.querySelectorAll(".extra-ficha-item").forEach(item => item.remove());
+
+  const isHost = peerManager?.isHost;
 
   _extraFichas.forEach(entry => {
     const { char, id } = entry;
@@ -1560,17 +1686,23 @@ function _renderExtraFichas() {
       </div>
     `;
 
-    // Botão de remover
-    item.querySelector(".btn-remove-extra-ficha").addEventListener("click", (e) => {
-      e.stopPropagation();
-      _removeExtraFicha(id);
-    });
+    // Hide actions for non-host
+    if (!isHost) {
+      const actionsEl = item.querySelector(".extra-ficha-actions");
+      if (actionsEl) actionsEl.style.display = "none";
+    } else {
+      // Botão de remover
+      item.querySelector(".btn-remove-extra-ficha").addEventListener("click", (e) => {
+        e.stopPropagation();
+        _removeExtraFicha(id);
+      });
 
-    // Botao de rolagem
-    item.querySelector(".btn-roll-extra-ficha").addEventListener("click", (e) => {
-      e.stopPropagation();
-      _openDrawerForExtraFicha(char);
-    });
+      // Botao de rolagem
+      item.querySelector(".btn-roll-extra-ficha").addEventListener("click", (e) => {
+        e.stopPropagation();
+        _openDrawerForExtraFicha(char);
+      });
+    }
 
     container.appendChild(item);
     _renderExtraFichaStats(entry);
@@ -1583,6 +1715,7 @@ function _openDrawerForExtraFicha(char) {
   if (!drawer) return;
 
   const prevChar = state.currentCharacter;
+  char.isExtraSheet = true;
   state.currentCharacter = char;
 
   const titleEl = drawer.querySelector(".modal-title");
@@ -1605,6 +1738,10 @@ function _openDrawerForExtraFicha(char) {
   const closeBtn = drawer.querySelector("#btn-close-drawer");
   closeBtn?.addEventListener("click", restore, { once: true });
   drawer.addEventListener("click", onOverlay);
+}
+
+export function broadcastExtraFichasUpdate() {
+  _broadcastExtraFichas();
 }
 function _performExtraFichaRoll(charName, label, numDice) {
   const results = Array.from({ length: numDice }, () => ({
@@ -1629,63 +1766,83 @@ function _renderExtraFichaStats(entry) {
   const maxPts = _getHealthMaxPts(char);
   if (!char.dano) char.dano = { 6:0, 5:0, 4:0, 3:0, 2:0, 1:0 };
 
+  const isHost = peerManager?.isHost;
+
   // Determinação
   const detEl = document.getElementById("extra-det-" + id);
   if (detEl) {
-    detEl.innerHTML = `
-      <button type="button" class="btn-det-dec">−</button>
-      <span class="det-value">Determinação: ${char.detPoints || 0}/${char.detNivel || 1}</span>
-      <button type="button" class="btn-det-inc">+</button>
-    `;
-    detEl.querySelector(".btn-det-dec").addEventListener("click", () => {
-      if ((char.detPoints || 0) > 0) { char.detPoints--; _renderExtraFichaStats(entry); }
-    });
-    detEl.querySelector(".btn-det-inc").addEventListener("click", () => {
-      if ((char.detPoints || 0) < (char.detNivel || 1)) { char.detPoints++; _renderExtraFichaStats(entry); }
-    });
+    if (isHost) {
+      detEl.innerHTML = `
+        <button type="button" class="btn-det-dec">−</button>
+        <span class="det-value">Determinação: ${char.detPoints || 0}/${char.detNivel || 1}</span>
+        <button type="button" class="btn-det-inc">+</button>
+      `;
+      detEl.querySelector(".btn-det-dec").addEventListener("click", () => {
+        if ((char.detPoints || 0) > 0) {
+          char.detPoints--;
+          _renderExtraFichaStats(entry);
+          _broadcastExtraFichas();
+        }
+      });
+      detEl.querySelector(".btn-det-inc").addEventListener("click", () => {
+        if ((char.detPoints || 0) < (char.detNivel || 1)) {
+          char.detPoints++;
+          _renderExtraFichaStats(entry);
+          _broadcastExtraFichas();
+        }
+      });
+    } else {
+      detEl.innerHTML = `<span class="det-value">Determinação: ${char.detPoints || 0}/${char.detNivel || 1}</span>`;
+    }
   }
 
   // Saúde
   const saudeEl = document.getElementById("extra-saude-" + id);
   if (saudeEl) {
-    saudeEl.innerHTML = _renderHealthLevelsHTML({ dano: char.dano, maxPts });
+    saudeEl.innerHTML = _renderHealthLevelsHTML({ dano: char.dano, maxPts }, isHost);
 
-    saudeEl.querySelectorAll(".health-drop").forEach(drop => {
-      drop.addEventListener("click", () => {
-        const lvlKey = parseInt(drop.dataset.level);
-        const index  = parseInt(drop.dataset.index);
-        const currentDano  = char.dano[lvlKey] || 0;
-        const currentHealth = maxPts - currentDano;
-        const newHealth = currentHealth === index ? index - 1 : index;
-        char.dano[lvlKey] = maxPts - newHealth;
-        if (char.dano[lvlKey] === maxPts && lvlKey > 1) char.dano[lvlKey - 1] = 0;
-        _renderExtraFichaStats(entry);
+    if (isHost) {
+      saudeEl.querySelectorAll(".health-drop").forEach(drop => {
+        drop.addEventListener("click", () => {
+          const lvlKey = parseInt(drop.dataset.level);
+          const index  = parseInt(drop.dataset.index);
+          const currentDano  = char.dano[lvlKey] || 0;
+          const currentHealth = maxPts - currentDano;
+          const newHealth = currentHealth === index ? index - 1 : index;
+          char.dano[lvlKey] = maxPts - newHealth;
+          if (char.dano[lvlKey] === maxPts && lvlKey > 1) char.dano[lvlKey - 1] = 0;
+          _renderExtraFichaStats(entry);
+          _broadcastExtraFichas();
+        });
       });
-    });
 
-    const decH = saudeEl.querySelector(".btn-health-mesa-dec");
-    const incH = saudeEl.querySelector(".btn-health-mesa-inc");
-    if (decH) decH.addEventListener("click", () => {
-      const activeLvl = _getActiveLevel(char.dano, maxPts);
-      const d = char.dano[activeLvl] || 0;
-      if (d < maxPts) {
-        char.dano[activeLvl] = d + 1;
-        if (char.dano[activeLvl] === maxPts && activeLvl > 1) char.dano[activeLvl - 1] = 0;
-        _renderExtraFichaStats(entry);
-      }
-    });
-    if (incH) incH.addEventListener("click", () => {
-      const activeLvl = _getActiveLevel(char.dano, maxPts);
-      const d = char.dano[activeLvl] || 0;
-      if (d > 0) {
-        char.dano[activeLvl] = d - 1;
-        _renderExtraFichaStats(entry);
-      } else if (activeLvl < 6) {
-        char.dano[activeLvl] = 0;
-        char.dano[activeLvl + 1] = maxPts - 1;
-        _renderExtraFichaStats(entry);
-      }
-    });
+      const decH = saudeEl.querySelector(".btn-health-mesa-dec");
+      const incH = saudeEl.querySelector(".btn-health-mesa-inc");
+      if (decH) decH.addEventListener("click", () => {
+        const activeLvl = _getActiveLevel(char.dano, maxPts);
+        const d = char.dano[activeLvl] || 0;
+        if (d < maxPts) {
+          char.dano[activeLvl] = d + 1;
+          if (char.dano[activeLvl] === maxPts && activeLvl > 1) char.dano[activeLvl - 1] = 0;
+          _renderExtraFichaStats(entry);
+          _broadcastExtraFichas();
+        }
+      });
+      if (incH) incH.addEventListener("click", () => {
+        const activeLvl = _getActiveLevel(char.dano, maxPts);
+        const d = char.dano[activeLvl] || 0;
+        if (d > 0) {
+          char.dano[activeLvl] = d - 1;
+          _renderExtraFichaStats(entry);
+          _broadcastExtraFichas();
+        } else if (activeLvl < 6) {
+          char.dano[activeLvl] = 0;
+          char.dano[activeLvl + 1] = maxPts - 1;
+          _renderExtraFichaStats(entry);
+          _broadcastExtraFichas();
+        }
+      });
+    }
   }
   const assEl = document.getElementById("extra-ass-" + id);
   if (assEl) assEl.textContent = `Ass: ${char.assPoints || 0}/${char.assNivel || 0}`;
@@ -1763,6 +1920,95 @@ function _initConflitoPicker() {
     document.getElementById("modal-mesa-ativacoes")?.classList.add("hidden");
   });
   _makeMesaAtivacoesDraggable();
+
+  // Nova ativação form toggling
+  const newAtivBtn = document.getElementById("btn-mesa-nova-ativacao-toggle");
+  const newAtivForm = document.getElementById("mesa-nova-ativacao-form");
+  const cancelAtivBtn = document.getElementById("btn-mesa-cancel-ativacao");
+  const confirmAtivBtn = document.getElementById("btn-mesa-confirm-ativacao");
+
+  if (newAtivBtn && newAtivForm) {
+    newAtivBtn.addEventListener("click", () => {
+      newAtivForm.classList.toggle("hidden");
+      _resetMesaNovaAtivacaoForm();
+    });
+  }
+
+  if (cancelAtivBtn && newAtivForm) {
+    cancelAtivBtn.addEventListener("click", () => {
+      newAtivForm.classList.add("hidden");
+      _resetMesaNovaAtivacaoForm();
+    });
+  }
+
+  // Clear trigger builder
+  document.getElementById("btn-mesa-gatilho-clear")?.addEventListener("click", () => {
+    _newAtivacaoGatilho = { S: 0, A: 0, P: 0 };
+    _updateMesaGatilhoPreview();
+  });
+
+  // Trigger dice builder buttons +/-
+  document.querySelectorAll(".btn-mesa-gatilho-qty").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const type = btn.dataset.type;
+      const dir = btn.dataset.dir;
+      if (dir === "inc") {
+        _newAtivacaoGatilho[type] = Math.min(10, _newAtivacaoGatilho[type] + 1);
+      } else {
+        _newAtivacaoGatilho[type] = Math.max(0, _newAtivacaoGatilho[type] - 1);
+      }
+      _updateMesaGatilhoPreview();
+    });
+  });
+
+  if (confirmAtivBtn && newAtivForm) {
+    confirmAtivBtn.addEventListener("click", () => {
+      const titleInput = document.getElementById("mesa-nova-ativacao-titulo");
+      const effectInput = document.getElementById("mesa-nova-ativacao-efeito");
+      const title = titleInput?.value.trim() || "";
+      const effect = effectInput?.value.trim() || "";
+
+      if (!title) {
+        alert("Digite um título para a ativação!");
+        return;
+      }
+
+      // Build trigger string (e.g. "S S A")
+      const parts = [];
+      for (let i = 0; i < _newAtivacaoGatilho.S; i++) parts.push("S");
+      for (let i = 0; i < _newAtivacaoGatilho.A; i++) parts.push("A");
+      for (let i = 0; i < _newAtivacaoGatilho.P; i++) parts.push("P");
+      const triggerStr = parts.join(" ");
+
+      if (!triggerStr) {
+        alert("Defina pelo menos um dado de gatilho!");
+        return;
+      }
+
+      if (!_activeConflito) {
+        alert("Nenhum conflito ativo na mesa!");
+        return;
+      }
+
+      if (!_activeConflito.ativacoes) _activeConflito.ativacoes = [];
+
+      const newAct = {
+        titulo: title,
+        efeito: effect,
+        gatilho: triggerStr,
+        investedS: 0,
+        investedA: 0,
+        investedP: 0
+      };
+
+      _activeConflito.ativacoes.push(newAct);
+      saveConflito(_activeConflito);
+      _renderMesaAtivacoes();
+
+      newAtivForm.classList.add("hidden");
+      _resetMesaNovaAtivacaoForm();
+    });
+  }
   document.getElementById("btn-mesa-ativacoes-roll")?.addEventListener("click", () => {
     _rollConflito();
   });
@@ -1778,6 +2024,22 @@ function _initConflitoPicker() {
     if (inc) _updateMesaInvestment(parseInt(inc.dataset.idx), inc.dataset.type, 1);
     if (dec) _updateMesaInvestment(parseInt(dec.dataset.idx), dec.dataset.type, -1);
     if (reset) _resetMesaAtivacao(parseInt(reset.dataset.idx));
+  });
+
+  // +/- dos investimentos e reset nas ativações de ameaças da mesa
+  document.getElementById("mesa-ameacas-list")?.addEventListener("click", (e) => {
+    const inc = e.target.closest(".btn-invest-ameaca-inc-mesa");
+    const dec = e.target.closest(".btn-invest-ameaca-dec-mesa");
+    const reset = e.target.closest(".btn-reset-ativacao-ameaca-mesa");
+    if (inc) {
+      _updateMesaAmeacaInvestment(parseInt(inc.dataset.ameacaIdx), parseInt(inc.dataset.actIdx), inc.dataset.type, 1);
+    }
+    if (dec) {
+      _updateMesaAmeacaInvestment(parseInt(dec.dataset.ameacaIdx), parseInt(dec.dataset.actIdx), dec.dataset.type, -1);
+    }
+    if (reset) {
+      _resetMesaAmeacaAtivacao(parseInt(reset.dataset.ameacaIdx), parseInt(reset.dataset.actIdx));
+    }
   });
 
   // +/- dos dados no banner
@@ -1878,6 +2140,42 @@ function _showConflitoBanner(c) {
   banner.classList.remove("hidden");
 }
 
+let _newAtivacaoGatilho = { S: 0, A: 0, P: 0 };
+
+function _resetMesaNovaAtivacaoForm() {
+  _newAtivacaoGatilho = { S: 0, A: 0, P: 0 };
+  const title = document.getElementById("mesa-nova-ativacao-titulo");
+  const effect = document.getElementById("mesa-nova-ativacao-efeito");
+  if (title) title.value = "";
+  if (effect) effect.value = "";
+  _updateMesaGatilhoPreview();
+}
+
+function _updateMesaGatilhoPreview() {
+  const sSpan = document.getElementById("mesa-gatilho-count-s");
+  const aSpan = document.getElementById("mesa-gatilho-count-a");
+  const pSpan = document.getElementById("mesa-gatilho-count-p");
+  if (sSpan) sSpan.textContent = _newAtivacaoGatilho.S;
+  if (aSpan) aSpan.textContent = _newAtivacaoGatilho.A;
+  if (pSpan) pSpan.textContent = _newAtivacaoGatilho.P;
+
+  const parts = [];
+  for (let i = 0; i < _newAtivacaoGatilho.S; i++) parts.push("S");
+  for (let i = 0; i < _newAtivacaoGatilho.A; i++) parts.push("A");
+  for (let i = 0; i < _newAtivacaoGatilho.P; i++) parts.push("P");
+
+  const preview = document.getElementById("mesa-gatilho-preview");
+  if (preview) {
+    if (parts.length === 0) {
+      preview.textContent = "Clique em +/− abaixo";
+      preview.style.color = "";
+    } else {
+      preview.textContent = parts.join(" ");
+      preview.style.color = "var(--color-rust-glow)";
+    }
+  }
+}
+
 function _makeMesaAtivacoesDraggable() {
   const panel = document.querySelector(".mesa-ativacoes-panel");
   const handle = document.querySelector(".mesa-ativacoes-header");
@@ -1920,72 +2218,214 @@ function _diceImgMesa(type) {
 
 function _renderMesaAtivacoes() {
   const list = document.getElementById("mesa-ativacoes-list");
-  if (!list) return;
-  const ativacoes = _activeConflito?.ativacoes || [];
-  if (ativacoes.length === 0) {
-    list.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:16px 0;">Nenhuma ativação neste conflito.</div>`;
-    return;
-  }
-  list.innerHTML = ativacoes.map((act, idx) => {
-    const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
-    const requiredS = (cleanTrigger.match(/S/g) || []).length;
-    const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
-    const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
-    const investedS = act.investedS || 0;
-    const investedA = act.investedA || 0;
-    const investedP = act.investedP || 0;
-    const isCompleted = (requiredS + requiredA + requiredP) > 0 &&
-      investedS >= requiredS && investedA >= requiredA && investedP >= requiredP;
-    const itemClass = "conflito-ativacao-item" + (isCompleted ? " completed-item" : "");
-    const triggerHtml = cleanTrigger.split("").map(ch => {
-      if (ch === "S") return `<img src="${_diceImgMesa('S')}" class="mesa-dice-img" title="Sucesso">`;
-      if (ch === "A" || ch === "B") return `<img src="${_diceImgMesa('A')}" class="mesa-dice-img" title="Adaptação">`;
-      if (ch === "C" || ch === "P") return `<img src="${_diceImgMesa('P')}" class="mesa-dice-img" title="Pressão">`;
-      return `<span>${esc(ch)}</span>`;
-    }).join("");
-    return `<div class="${itemClass}">
-      <div class="conflito-ativacao-title-row">
-        <span class="conflito-ativacao-titulo">${esc(act.titulo)}</span>
-      </div>
-      <div style="display:flex;gap:4px;margin:4px 0;flex-wrap:wrap;align-items:center;">
-        <span style="font-size:10px;color:var(--text-muted);">Gatilho:</span>
-        ${triggerHtml}
-      </div>
-      <div class="conflito-ativacao-efeito">${esc(act.efeito)}</div>
-      <div class="mesa-ativacao-actions" style="display:flex; gap:4px; margin-top:4px;">
-        ${isCompleted ? `<button class="btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
-        <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação">Editar</button>
-      </div>
-      <div class="conflito-ativacao-investimento" style="margin-top:6px;">
-        <div class="investimento-label-row" style="display:flex;align-items:center;gap:4px;">
-          <span class="investimento-label">Partitura:</span>
-          <div class="investimento-controls">
-            ${requiredS > 0 ? `
-            <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
-              <img src="${_diceImgMesa('S')}" alt="S">
-              <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
-              <span class="invest-val ${investedS >= requiredS ? 'met' : ''}">${investedS}/${requiredS}</span>
-              <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
-            </div>` : ""}
-            ${requiredA > 0 ? `
-            <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
-              <img src="${_diceImgMesa('A')}" alt="A">
-              <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
-              <span class="invest-val ${investedA >= requiredA ? 'met' : ''}">${investedA}/${requiredA}</span>
-              <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
-            </div>` : ""}
-            ${requiredP > 0 ? `
-            <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
-              <img src="${_diceImgMesa('P')}" alt="P">
-              <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
-              <span class="invest-val ${investedP >= requiredP ? 'met' : ''}">${investedP}/${requiredP}</span>
-              <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
-            </div>` : ""}
+  if (list) {
+    const ativacoes = _activeConflito?.ativacoes || [];
+    if (ativacoes.length === 0) {
+      list.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:16px 0;">Nenhuma ativação neste conflito.</div>`;
+    } else {
+      list.innerHTML = ativacoes.map((act, idx) => {
+        const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
+        const requiredS = (cleanTrigger.match(/S/g) || []).length;
+        const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
+        const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
+        const investedS = act.investedS || 0;
+        const investedA = act.investedA || 0;
+        const investedP = act.investedP || 0;
+        const isCompleted = (requiredS + requiredA + requiredP) > 0 &&
+          investedS >= requiredS && investedA >= requiredA && investedP >= requiredP;
+        const itemClass = "conflito-ativacao-item" + (isCompleted ? " completed-item" : "");
+        const triggerHtml = cleanTrigger.split("").map(ch => {
+          if (ch === "S") return `<img src="${_diceImgMesa('S')}" class="mesa-dice-img" title="Sucesso">`;
+          if (ch === "A" || ch === "B") return `<img src="${_diceImgMesa('A')}" class="mesa-dice-img" title="Adaptação">`;
+          if (ch === "C" || ch === "P") return `<img src="${_diceImgMesa('P')}" class="mesa-dice-img" title="Pressão">`;
+          return `<span>${esc(ch)}</span>`;
+        }).join("");
+        return `<div class="${itemClass}">
+          <div class="conflito-ativacao-title-row">
+            <span class="conflito-ativacao-titulo">${esc(act.titulo)}</span>
           </div>
-        </div>
-      </div>
-    </div>`;
-  }).join("");
+          <div style="display:flex;gap:4px;margin:4px 0;flex-wrap:wrap;align-items:center;">
+            <span style="font-size:10px;color:var(--text-muted);">Gatilho:</span>
+            ${triggerHtml}
+          </div>
+          <div class="conflito-ativacao-efeito">${esc(act.efeito)}</div>
+          <div class="mesa-ativacao-actions" style="display:flex; gap:4px; margin-top:4px;">
+            ${isCompleted ? `<button class="btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
+            <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação">Editar</button>
+          </div>
+          <div class="conflito-ativacao-investimento" style="margin-top:6px;">
+            <div class="investimento-label-row" style="display:flex;align-items:center;gap:4px;">
+              <span class="investimento-label">Partitura:</span>
+              <div class="investimento-controls">
+                ${requiredS > 0 ? `
+                <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
+                  <img src="${_diceImgMesa('S')}" alt="S">
+                  <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
+                  <span class="invest-val ${investedS >= requiredS ? 'met' : ''}">${investedS}/${requiredS}</span>
+                  <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
+                </div>` : ""}
+                ${requiredA > 0 ? `
+                <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
+                  <img src="${_diceImgMesa('A')}" alt="A">
+                  <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
+                  <span class="invest-val ${investedA >= requiredA ? 'met' : ''}">${investedA}/${requiredA}</span>
+                  <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
+                </div>` : ""}
+                ${requiredP > 0 ? `
+                <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
+                  <img src="${_diceImgMesa('P')}" alt="P">
+                  <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
+                  <span class="invest-val ${investedP >= requiredP ? 'met' : ''}">${investedP}/${requiredP}</span>
+                  <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
+                </div>` : ""}
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }).join("");
+    }
+  }
+
+  // Renderizar Ameaças Ativas
+  const ameacasList = document.getElementById("mesa-ameacas-list");
+  const ameacasSection = document.getElementById("mesa-ameacas-section");
+  if (ameacasList) {
+    const ameacas = _activeConflito?.ameacas || [];
+    if (ameacas.length === 0) {
+      if (ameacasSection) ameacasSection.style.display = "none";
+      ameacasList.innerHTML = "";
+    } else {
+      if (ameacasSection) ameacasSection.style.display = "block";
+      ameacasList.innerHTML = ameacas.map((a, ameacaIdx) => {
+        const diceDesc = [
+          a.d6 > 0 ? `${a.d6}d6` : '',
+          a.d10 > 0 ? `${a.d10}d10` : '',
+          a.d12 > 0 ? `${a.d12}d12` : ''
+        ].filter(Boolean).join(" + ") || "Sem dados";
+
+        const actsHtml = (a.ativacoes || []).map((act, actIdx) => {
+          const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
+          const requiredS = (cleanTrigger.match(/S/g) || []).length;
+          const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
+          const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
+          const investedS = act.investedS || 0;
+          const investedA = act.investedA || 0;
+          const investedP = act.investedP || 0;
+          const isCompleted = (requiredS + requiredA + requiredP) > 0 &&
+            investedS >= requiredS && investedA >= requiredA && investedP >= requiredP;
+          const itemClass = "conflito-ativacao-item" + (isCompleted ? " completed-item" : "");
+          const triggerHtml = cleanTrigger.split("").map(ch => {
+            if (ch === "S") return `<img src="${_diceImgMesa('S')}" class="mesa-dice-img" title="Sucesso">`;
+            if (ch === "A" || ch === "B") return `<img src="${_diceImgMesa('A')}" class="mesa-dice-img" title="Adaptação">`;
+            if (ch === "C" || ch === "P") return `<img src="${_diceImgMesa('P')}" class="mesa-dice-img" title="Pressão">`;
+            return `<span>${esc(ch)}</span>`;
+          }).join("");
+
+          return `<div class="${itemClass}">
+            <div class="conflito-ativacao-title-row">
+              <span class="conflito-ativacao-titulo">${esc(act.titulo)}</span>
+            </div>
+            <div style="display:flex;gap:4px;margin:4px 0;flex-wrap:wrap;align-items:center;">
+              <span style="font-size:10px;color:var(--text-muted);">Gatilho:</span>
+              ${triggerHtml}
+            </div>
+            <div class="conflito-ativacao-efeito">${esc(act.efeito)}</div>
+            <div class="mesa-ativacao-actions" style="display:flex; gap:4px; margin-top:4px;">
+              ${isCompleted ? `<button class="btn-reset-ativacao-ameaca-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
+            </div>
+            <div class="conflito-ativacao-investimento" style="margin-top:6px;">
+              <div class="investimento-label-row" style="display:flex;align-items:center;gap:4px;">
+                <span class="investimento-label">Partitura:</span>
+                <div class="investimento-controls">
+                  ${requiredS > 0 ? `
+                  <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
+                    <img src="${_diceImgMesa('S')}" alt="S">
+                    <button type="button" class="btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">-</button>
+                    <span class="invest-val ${investedS >= requiredS ? 'met' : ''}">${investedS}/${requiredS}</span>
+                    <button type="button" class="btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">+</button>
+                  </div>` : ""}
+                  ${requiredA > 0 ? `
+                  <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
+                    <img src="${_diceImgMesa('A')}" alt="A">
+                    <button type="button" class="btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">-</button>
+                    <span class="invest-val ${investedA >= requiredA ? 'met' : ''}">${investedA}/${requiredA}</span>
+                    <button type="button" class="btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">+</button>
+                  </div>` : ""}
+                  ${requiredP > 0 ? `
+                  <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
+                    <img src="${_diceImgMesa('P')}" alt="P">
+                    <button type="button" class="btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">-</button>
+                    <span class="invest-val ${investedP >= requiredP ? 'met' : ''}">${investedP}/${requiredP}</span>
+                    <button type="button" class="btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">+</button>
+                  </div>` : ""}
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }).join("");
+
+        return `
+          <div class="conflito-ameaca-card" style="margin-bottom:12px; padding:10px; border:1px solid rgba(255,255,255,0.08); border-radius:6px; background:rgba(0,0,0,0.15);">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px; margin-bottom:6px;">
+              <strong style="color:var(--color-rust-glow);">${esc(a.nome)}</strong>
+              <span style="font-size:10px; color:var(--text-muted);">Dados: ${diceDesc}</span>
+            </div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px; font-style:italic;">${esc(a.descricao || "Sem descrição.")}</div>
+            <div class="ameaca-ativacoes-list-mesa">
+              ${actsHtml || '<div style="font-size:10px; color:var(--text-muted); padding:8px 0;">Nenhuma ativação específica.</div>'}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+  }
+}
+
+function _updateMesaAmeacaInvestment(ameacaIdx, actIdx, type, delta) {
+  const c = _activeConflito;
+  if (!c || !c.ameacas || !c.ameacas[ameacaIdx]) return;
+  const ameaca = c.ameacas[ameacaIdx];
+  if (!ameaca.ativacoes || !ameaca.ativacoes[actIdx]) return;
+  const act = ameaca.ativacoes[actIdx];
+  const key = `invested${type}`;
+  act[key] = delta > 0 ? (act[key] || 0) + delta : Math.max(0, (act[key] || 0) + delta);
+  _renderMesaAtivacoes();
+  saveConflito(c);
+}
+
+function _resetMesaAmeacaAtivacao(ameacaIdx, actIdx) {
+  const c = _activeConflito;
+  if (!c || !c.ameacas || !c.ameacas[ameacaIdx]) return;
+  const ameaca = c.ameacas[ameacaIdx];
+  if (!ameaca.ativacoes || !ameaca.ativacoes[actIdx]) return;
+  const act = ameaca.ativacoes[actIdx];
+
+  const lastRoll = c.rolagens && c.rolagens[c.rolagens.length - 1];
+  if (lastRoll) {
+    lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
+    lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
+    lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
+  }
+
+  act.investedS = 0;
+  act.investedA = 0;
+  act.investedP = 0;
+
+  _renderMesaAtivacoes();
+  saveConflito(c);
+
+  const msg = `Ativação da Ameaça ${ameaca.nome}: ${act.titulo} - ${act.efeito}`;
+  if (peerManager) {
+    peerManager.broadcast({
+      type: "chat",
+      playerId: peerManager.playerId,
+      data: {
+        text: `⚠️ **Mestre ativou:** ${msg}`,
+        senderName: "Mestre",
+        timestamp: Date.now()
+      }
+    });
+  }
 }
 
 function _updateMesaInvestment(idx, type, delta) {
@@ -2705,6 +3145,7 @@ async function _startWebRTCSession(campaignId, playerName, isHost) {
       if (pm.isHost) {
         broadcastMusicState();
         broadcastFichasVisibility();
+        _broadcastExtraFichas();
       }
     };
     peerManager = pm;

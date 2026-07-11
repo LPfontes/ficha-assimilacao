@@ -439,8 +439,8 @@ export function getDieSymbolsHtml(symbols) {
 }
 
 export function toggleKeepDie(index) {
-  if (worldState.sheetMode === "conflito") {
-    logger.info(`Chat: Tentativa de alterar seleção do dado mantido ignorada (sheetMode é conflito).`);
+  if (worldState.sheetMode === "conflito" && !state.currentCharacter) {
+    logger.info(`Chat: Tentativa de alterar seleção do dado mantido ignorada (sheetMode é conflito e sem personagem).`);
     return;
   }
   logger.info(`Chat: Alterando seleção do dado mantido no painel (Índice clicado: ${index})`);
@@ -473,7 +473,13 @@ export function toggleKeepDie(index) {
   // Sync the roll entry kept indices
   lastRoll.keptDiceIndexes = [...state.keptDiceIndexes];
   if (char) {
-    saveCurrentCharacter();
+    if (char.isExtraSheet) {
+      import("./mesa-ui.js").then(({ broadcastExtraFichasUpdate }) => {
+        broadcastExtraFichasUpdate();
+      });
+    } else {
+      saveCurrentCharacter();
+    }
   }
   
   renderChatHistory();
