@@ -10,6 +10,7 @@ const githubPagesEnv = {
   FIREBASE_APP_ID: "1:631521996104:web:547f5bed92e2524732577d",
   GCS_BUCKET_NAME: "mesa_assimilacao",
   WS_SERVER_URL: "wss://mesa-server-631521996104.southamerica-east1.run.app"
+  
 };
 
 // Auxiliar para carregar o arquivo .env via fetch em tempo de execução
