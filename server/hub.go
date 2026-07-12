@@ -269,19 +269,6 @@ func (h *Hub) handleUnregister(client *Client) {
 			delete(h.rooms, roomId)
 			log.Printf("[HUB] Sala %s descarregada da memória (inativa)", roomId)
 		} else {
-			// If host disconnected, assign a new host from remaining active players
-			if room.HostID == client.playerId {
-				for newHostId := range room.Players {
-					room.HostID = newHostId
-					room.Players[newHostId].isHost = true
-					log.Printf("[HUB] Novo Mestre eleito para a sala %s: %s (%s)", roomId, room.Players[newHostId].playerName, newHostId)
-
-					if err := UpdateRoomSharedState(roomId, "hostId", newHostId); err != nil {
-						log.Printf("[HUB] Falha ao registrar novo host no DB: %v", err)
-					}
-					break
-				}
-			}
 			h.broadcastRoomUpdate(room)
 		}
 	}
@@ -320,6 +307,12 @@ func (h *Hub) handleBroadcast(event BroadcastEvent) {
 		if dataMap, ok := msg.Data.(map[string]interface{}); ok {
 			if base64Str, ok := dataMap["imageDataUrl"].(string); ok && strings.HasPrefix(base64Str, "data:image/") {
 				log.Println("[HUB] Nova imagem de mapa recebida. Iniciando upload para Cloud Storage...")
+				
+				var dbRoom *DBRoomState
+				if roomDoc, err := GetRoomFromDB(roomId); err == nil {
+					dbRoom = roomDoc
+				}
+
 				publicURL, err := UploadBase64Image(base64Str)
 				if err == nil {
 					// Replace the massive base64 payload with public link
@@ -329,6 +322,18 @@ func (h *Hub) handleBroadcast(event BroadcastEvent) {
 					// Update binary payload to broadcast public link instead of base64
 					if updatedPayload, err := json.Marshal(msg); err == nil {
 						event.payload = updatedPayload
+					}
+
+					// Enforce the 5-image GCS limit
+					if dbRoom != nil {
+						dbRoom.GCSImages = append(dbRoom.GCSImages, publicURL)
+						for len(dbRoom.GCSImages) > 5 {
+							oldestURL := dbRoom.GCSImages[0]
+							log.Printf("[HUB] Excedeu o limite de 5 imagens. Excluindo a mais antiga do GCS: %s", oldestURL)
+							_ = DeleteImageFromGCS(oldestURL)
+							dbRoom.GCSImages = dbRoom.GCSImages[1:]
+						}
+						_ = UpdateRoomSharedState(roomId, "gcsImages", dbRoom.GCSImages)
 					}
 				} else {
 					log.Printf("[HUB] Falha ao enviar para o Cloud Storage. Mantendo base64 inline: %v", err)

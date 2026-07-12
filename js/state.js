@@ -121,6 +121,7 @@ export const state = {
   currentCharacter: null,
   diceBox: null,
   currentUser: JSON.parse(localStorage.getItem("assimilação_mock_user")) || null,
+  activeMesaAccount: null,
   hasUnsavedCloudChanges: localStorage.getItem("assimilação_has_unsaved_changes") === "true",
   // Pilha de dados selecionada para rolagem
   selectedRoll: {
@@ -304,17 +305,22 @@ export function saveCurrentCharacterImmediate() {
 export function updateCharSelector() {
 }
 
-export function loadCharacter(charId) {
-  const char = state.characters.find(c => c.id === charId);
+export function loadCharacter(charIdOrObject) {
+  let char;
+  if (typeof charIdOrObject === "object" && charIdOrObject !== null) {
+    char = charIdOrObject;
+  } else {
+    char = state.characters.find(c => c.id === charIdOrObject);
+  }
   if (!char) {
-    logger.error(`Tentativa fracassada de carregar personagem inexistente com ID: ${charId}`);
+    logger.error(`Tentativa fracassada de carregar personagem inexistente com ID/Objeto: ${charIdOrObject}`);
     return;
   }
   if (char.ptsA === undefined) char.ptsA = 1;
   if (char.ptsB === undefined) char.ptsB = 0;
   if (char.ptsC === undefined) char.ptsC = 2;
   state.currentCharacter = char;
-  logger.info(`Carregando ficha da personagem: "${char.name}" (ID: ${charId})`);
+  logger.info(`Carregando ficha da personagem: "${char.name}" (ID: ${char.id})`);
   updateCharSelector();
   
   // Atualiza as Telas

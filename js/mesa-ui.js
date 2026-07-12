@@ -21,7 +21,13 @@ import {
   adicionarHistoria,
   removerHistoria,
   atualizarSessaoAtiva,
-  escutarCampanha
+  escutarCampanha,
+  criarVagaConta,
+  removerVagaConta,
+  vincularJogadorConta,
+  desvincularJogadorConta,
+  vincularFichaConta,
+  desvincularFichaConta
 } from "./campanha.js";
 
 let activeCampanha = null;
@@ -37,7 +43,6 @@ const mapPlaceholder = document.getElementById("table-map-placeholder");
 
 let peerManager = null;
 let roomCode = "";
-let broadcastInterval = null;
 let previousScreen = null;   // tela que estava ativa antes de ir para a mesa
 let pendingRolls = 0;        // rolagens recebidas fora da mesa
 let isOnTableScreen = false;
@@ -179,6 +184,84 @@ function _onCharSelect(selId, nameInputId) {
   }
 }
 
+export function openMesaLandingOptionsModal() {
+  const modalContainer = document.getElementById("modal-container");
+  const modalBody = document.getElementById("modal-body");
+  if (!modalContainer || !modalBody) return;
+
+  modalBody.innerHTML = `
+    <h3 class="modal-title" style="margin-bottom:16px;">Mesa de Jogo</h3>
+    <p style="margin-bottom:20px; color:var(--text-secondary);">Escolha como você deseja acessar a Mesa de Jogo:</p>
+    
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+      <button id="btn-choice-criar-mesa" class="btn btn-landing-primary" style="padding:14px; text-align:left; display:flex; align-items:center; gap:12px;">
+        <span style="font-size:1.4em;">👑</span>
+        <div>
+          <div style="font-weight:bold; color:var(--text-primary);">Criar Nova Mesa (Mestre)</div>
+          <div style="font-size:var(--font-size-xs); color:var(--text-muted); margin-top:2px;">Inicie uma mesa, gerencie fichas, notas e crônicas.</div>
+        </div>
+      </button>
+      
+      <button id="btn-choice-entrar-mesa" class="btn btn-landing-secondary" style="padding:14px; text-align:left; display:flex; align-items:center; gap:12px; border-color:var(--color-blue-glow); color:var(--text-primary);">
+        <span style="font-size:1.4em;">🎲</span>
+        <div>
+          <div style="font-weight:bold; color:var(--color-blue-glow);">Entrar em Mesa Existente (Jogador)</div>
+          <div style="font-size:var(--font-size-xs); color:var(--text-muted); margin-top:2px;">Se conecte com o código enviado pelo Mestre.</div>
+        </div>
+      </button>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end;">
+      <button id="btn-close-choice-mesa" class="btn btn-landing-secondary">Cancelar</button>
+    </div>
+  `;
+
+  modalContainer.classList.remove("hidden");
+
+  // Click handlers
+  modalBody.querySelector("#btn-choice-criar-mesa")?.addEventListener("click", async () => {
+    modalContainer.classList.add("hidden");
+    const name = prompt("Nome da Mesa:", "Minha Mesa");
+    if (!name) return;
+    const mestre = prompt("Seu Nome (Mestre):", "Mestre");
+    if (!mestre) return;
+
+    const { criarCampanha } = await import("./campanha.js");
+    const { showCampaignScreen } = await import("./mesa-ui.js");
+    const { renderCharactersList } = await import("./landing.js");
+    try {
+      const campaignData = await criarCampanha(name, mestre);
+      const raw = localStorage.getItem("assimilação_managed_campaigns");
+      const list = raw ? JSON.parse(raw) : [];
+      list.push({ code: campaignData.id, hostName: campaignData.mestreNome, name: campaignData.nome, createdAt: Date.now() });
+      localStorage.setItem("assimilação_managed_campaigns", JSON.stringify(list));
+      
+      renderCharactersList();
+      showCampaignScreen(campaignData);
+    } catch (err) {
+      alert("Erro ao criar mesa: " + err.message);
+    }
+  });
+
+  modalBody.querySelector("#btn-choice-entrar-mesa")?.addEventListener("click", async () => {
+    modalContainer.classList.add("hidden");
+    const code = prompt("Código da Mesa (Ex: ABCD12):");
+    if (!code) return;
+    const { entrarCampanha } = await import("./campanha.js");
+    const { showCampaignScreen } = await import("./mesa-ui.js");
+    try {
+      const campaignData = await entrarCampanha(code);
+      showCampaignScreen(campaignData);
+    } catch (err) {
+      alert("Erro ao entrar na mesa: " + err.message);
+    }
+  });
+
+  modalBody.querySelector("#btn-close-choice-mesa")?.addEventListener("click", () => {
+    modalContainer.classList.add("hidden");
+  });
+}
+
 export function openRoomModal() {
   _populateCharSelectors();
   _loadManagedRooms();
@@ -199,7 +282,7 @@ export function initMesaUI() {
   _createFloatingButton();
   _hoistDiceDrawer();
 
-  document.getElementById("btn-mesa-landing")?.addEventListener("click", openRoomModal);
+  document.getElementById("btn-mesa-landing")?.addEventListener("click", openMesaLandingOptionsModal);
   document.getElementById("btn-close-room-modal")?.addEventListener("click", closeRoomModal);
   document.getElementById("btn-cancel-room")?.addEventListener("click", closeRoomModal);
   roomModal?.addEventListener("click", (e) => {
@@ -326,7 +409,6 @@ export function initMesaUI() {
 
   document.getElementById("btn-leave-table")?.addEventListener("click", async () => {
     // "Sair" desconecta de verdade
-    if (broadcastInterval) { clearInterval(broadcastInterval); broadcastInterval = null; }
     if (peerManager) {
       await peerManager.leave();
       peerManager = null;
@@ -462,24 +544,46 @@ export function initMesaUI() {
 function handleMessage(data, fromId) {
   if (!data) return;
   switch (data.type) {
-    case "state":
+    case "state": {
+      logger.info(`[STATE] Recebido estado do jogador: ${data.playerId}`);
+      const isAlreadyOnline = document.getElementById("det-" + data.playerId) !== null;
       updatePlayerState(data.playerId, data.data);
+      if (!isAlreadyOnline && (data.playerId !== peerManager?.playerId)) {
+        // Re-renderizar a lista apenas para transicionar de Offline para Online
+        updatePlayerList(_lastPlayersList || []);
+        _applyCachedStates();
+      }
       break;
+    }
     case "master_update_player_state":
       if (data.data) {
         const targetPid = data.data.targetPlayerId;
         // 1. Render/cache state for this player
         updatePlayerState(targetPid, data.data);
 
-        // 2. If it is ME, modify our local character and save/refresh UI
+        // 2. If it is ME, modify our local character and save locally
         if (peerManager && peerManager.playerId === targetPid) {
           const char = state.currentCharacter;
           if (char) {
             if (data.data.saude?.dano) char.dano = data.data.saude.dano;
             if (data.data.det?.atual !== undefined) char.detPoints = data.data.det.atual;
             if (data.data.ass?.atual !== undefined) char.assPoints = data.data.ass.atual;
-            saveCurrentCharacter();
+            
+            // Persistir apenas localmente para evitar loop de escrita na nuvem
+            const idx = state.characters.findIndex(c => c.id === char.id);
+            if (idx !== -1) {
+              state.characters[idx] = char;
+              localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
+            }
+            
             _updateLocalPlayerState();
+            
+            // Atualizar tela de ficha se estiver aberta
+            if (!document.getElementById("sheet-screen")?.classList.contains("hidden")) {
+              import("./sheet.js").then(({ loadCharacter }) => {
+                loadCharacter(char);
+              });
+            }
           }
         }
       }
@@ -524,18 +628,31 @@ function handleMessage(data, fromId) {
         _renderExtraFichas();
       }
       break;
+    case "fichas_visibility":
+      if (data.data && Array.isArray(data.data.hiddenIds)) {
+        _hiddenFichaIds = new Set(data.data.hiddenIds);
+        _applyFichasVisibility();
+      }
+      break;
     case "_room_update":
+      logger.info(`[ROOM_UPDATE] Mensagem recebida: hostId=${data.hostId}, myPlayerId=${peerManager?.playerId}`);
       if (data.players) {
         const list = Object.entries(data.players).map(([id, p]) => ({ id, name: p.name }));
+        logger.info(`[ROOM_UPDATE] Todos os conectados: ${JSON.stringify(list)}`);
+        
         const knownIds = new Set(Object.keys(_playerStateCache));
         knownIds.add(peerManager?.playerId);
         const hasNewPlayer = list.some(p => !knownIds.has(p.id));
+        
         const filteredList = list.filter(p => p.id !== data.hostId);
+        logger.info(`[ROOM_UPDATE] Jogadores filtrados (sem host): ${JSON.stringify(filteredList)}`);
+        
         _lastPlayersList = filteredList;
         updatePlayerList(filteredList);
         _applyFichasVisibility();
         _updateLocalPlayerState();
         _applyCachedStates();
+        
         if (hasNewPlayer && peerManager) broadcastCharacterState();
         if (data.hostId) {
           const hostBadge = document.getElementById("table-host-badge");
@@ -559,6 +676,7 @@ export function broadcastCharacterState() {
     playerId: peerManager.playerId,
     data: {
       nome: char.name,
+      fichaId: state.activeMesaAccount?.fichaId || null,
       portrait: char.portrait || "",
       saude: {
         atual: Object.values(char.dano || {}).reduce((a, b) => a + b, 0),
@@ -627,21 +745,99 @@ function _renderHealthLevelsHTML(saude, isEditable = true) {
 }
 
 function updatePlayerList(players) {
-  if (!playerListEl) return;
+  const listEl = document.getElementById("table-player-list");
+  logger.info(`[updatePlayerList] Encontrado container DOM? ${!!listEl}, Recebeu jogadores para renderizar: ${JSON.stringify(players)}`);
+  if (!listEl) return;
 
-  playerListEl.innerHTML = players.map(p => {
-    const isMe = p.id === peerManager?.playerId && !!state.currentCharacter;
-    const isHidden = _hiddenFichaIds.has(p.id);
-    return `<div class="table-player-item ${isMe ? 'is-me' : ''} ${isHidden ? 'hidden-ficha' : ''}" data-player-id="${p.id}">
-      <div class="table-player-portrait" id="portrait-${p.id}"></div>
+  // Obter todas as fichas de personagens sincronizadas na mesa
+  const syncFichas = Object.values(activeCampanha?.fichas || {}).filter(f => f.tipo === "infectado");
+
+  // Mapear cada ficha para o estado de presença (online ou offline)
+  const listToRender = syncFichas.map(ficha => {
+    let onlinePlayerId = null;
+    let onlineState = null;
+    
+    // Buscar se existe conexão ativa no cache de estados com esse fichaId, validando se está ativo
+    for (const [pid, cached] of Object.entries(_playerStateCache)) {
+      if (cached && cached.fichaId === ficha.id) {
+        const isOnline = _lastPlayersList.some(p => p.id === pid) || (peerManager && peerManager.playerId === pid);
+        if (isOnline) {
+          onlinePlayerId = pid;
+          onlineState = cached;
+          break;
+        }
+      }
+    }
+
+    const isMe = state.activeMesaAccount && state.activeMesaAccount.fichaId === ficha.id;
+    if (isMe && peerManager) {
+      onlinePlayerId = peerManager.playerId;
+    }
+
+    return {
+      fichaId: ficha.id,
+      name: ficha.nome,
+      portrait: ficha.data?.portrait || ficha.data?.imagem || "",
+      isMe: isMe,
+      isOnline: !!onlinePlayerId,
+      playerId: onlinePlayerId || `offline-${ficha.id}`,
+      charData: isMe ? state.currentCharacter : (onlineState ? onlineState : null),
+      savedData: ficha.data
+    };
+  });
+
+  listEl.innerHTML = listToRender.map(p => {
+    const isHidden = _hiddenFichaIds.has(p.playerId);
+    const statusLabel = p.isMe ? " (Você)" : (p.isOnline ? " (Online)" : " (Offline)");
+    const opacityStyle = p.isOnline ? "" : "opacity: 0.55;";
+    
+    // Dados da ficha correspondente (usa tempo real se online, fallback para salvo em nuvem)
+    const char = p.isOnline ? (p.charData || p.savedData) : p.savedData;
+    const maxPts = _getHealthMaxPts(char);
+    const currentDet = char.detPoints || 0;
+    const maxDet = char.detNivel || 1;
+    const currentAss = char.assPoints || 0;
+    const maxAss = char.assNivel || 0;
+    
+    const danoMap = char.dano || {};
+    const totalDano = Object.values(danoMap).reduce((a, b) => a + (parseInt(b) || 0), 0);
+    const currentSaude = Math.max(0, maxPts - totalDano);
+
+    logger.info(`[updatePlayerList] Renderizando jogador sincronizado: id=${p.playerId}, name=${p.name}, isMe=${p.isMe}, isOnline=${p.isOnline}, isHidden=${isHidden}`);
+
+    return `<div class="table-player-item ${p.isMe ? 'is-me' : ''} ${isHidden ? 'hidden-ficha' : ''}" data-player-id="${p.playerId}" style="${opacityStyle}">
+      <div class="table-player-portrait" id="portrait-${p.playerId}">
+        ${p.portrait ? `<img src="${esc(p.portrait)}" class="table-mini-portrait" alt="${esc(p.name)}" style="width:100%; height:100%; object-fit:cover;">` : `<div class="table-mini-portrait-placeholder">${esc(p.name?.[0] || "?")}</div>`}
+      </div>
       <div class="table-player-stats">
-        <span class="table-player-name">${esc(p.name)} ${isMe ? '(Você)' : ''}</span>
-        <div class="stat-det" id="det-${p.id}">Det: --/--</div>
-        <div class="stat-ass" id="ass-${p.id}">Ass: --/--</div>
-        <div class="stat-saude" id="saude-${p.id}">Vida: --/--</div>
+        <span class="table-player-name">${esc(p.name)}${statusLabel}</span>
+        <div class="stat-det" id="det-${p.playerId}">Det: ${currentDet}/${maxDet}</div>
+        <div class="stat-ass" id="ass-${p.playerId}">Ass: ${currentAss}/${maxAss}</div>
+        <div class="stat-saude" id="saude-${p.playerId}">Vida: ${currentSaude}/${maxPts}</div>
       </div>
     </div>`;
   }).join("");
+
+  // Se for o Mestre, adicionar cursor pointer e evento de click apenas no retrato para abrir a ficha no VTT
+  if (peerManager?.isHost) {
+    listEl.querySelectorAll(".table-player-item").forEach(item => {
+      const portraitEl = item.querySelector(".table-player-portrait");
+      if (portraitEl) {
+        portraitEl.style.cursor = "pointer";
+        portraitEl.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const playerId = item.dataset.playerId;
+          const renderItem = listToRender.find(p => p.playerId === playerId);
+          if (renderItem) {
+            const matchingFicha = Object.values(activeCampanha?.fichas || {}).find(f => f.id === renderItem.fichaId);
+            if (matchingFicha) {
+              _openSharedFichaViewer(matchingFicha);
+            }
+          }
+        });
+      }
+    });
+  }
 
   _renderExtraFichas();
 }
@@ -729,6 +925,12 @@ function _applyCachedStates() {
 }
 
 function updatePlayerState(playerId, data) {
+  const isMe = (playerId === peerManager?.playerId);
+  if (isMe) {
+    _updateLocalPlayerState();
+    return;
+  }
+
   if (data) {
     _playerStateCache[playerId] = data;
   }
@@ -736,7 +938,6 @@ function updatePlayerState(playerId, data) {
   const saudeEl = document.getElementById("saude-" + playerId);
   const assEl = document.getElementById("ass-" + playerId);
   const portraitEl = document.getElementById("portrait-" + playerId);
-  const isMe = (playerId === peerManager?.playerId);
   const isHost = peerManager?.isHost;
   const isEditable = isHost && !isMe; // Master can edit other players, not themselves (which is handled locally)
 
@@ -834,6 +1035,37 @@ function updatePlayerState(playerId, data) {
 
 function _sendMasterUpdatePlayerState(playerId, data) {
   updatePlayerState(playerId, data);
+
+  // Sincronizar modificação diretamente no Firestore se formos o Mestre
+  if (peerManager?.isHost && activeCampanha) {
+    let fichaId = data.fichaId;
+    if (!fichaId && _playerStateCache[playerId]) {
+      fichaId = _playerStateCache[playerId].fichaId;
+    }
+    if (!fichaId) {
+      const onlinePlayer = _lastPlayersList.find(p => p.id === playerId);
+      if (onlinePlayer) {
+        const matching = Object.values(activeCampanha.fichas || {}).find(f => f.donoNome === onlinePlayer.name);
+        if (matching) fichaId = matching.id;
+      }
+    }
+    
+    if (fichaId) {
+      const matchingFicha = activeCampanha.fichas?.[fichaId];
+      if (matchingFicha) {
+        const updatedChar = { ...matchingFicha.data };
+        if (data.saude?.dano) updatedChar.dano = data.saude.dano;
+        if (data.det?.atual !== undefined) updatedChar.detPoints = data.det.atual;
+        if (data.ass?.atual !== undefined) updatedChar.assPoints = data.ass.atual;
+        
+        import("./campanha.js").then(({ compartilharFicha }) => {
+          compartilharFicha(activeCampanha.id, updatedChar, matchingFicha.donoId, matchingFicha.donoNome).catch(e => {
+            logger.error("[Mesa Sync] Erro ao salvar alteração do Mestre no Firestore:", e);
+          });
+        });
+      }
+    }
+  }
 
   if (peerManager && peerManager.isHost) {
     peerManager.broadcast({
@@ -956,11 +1188,6 @@ function showTableScreen() {
   _updateAddFichaButton();
   _updateConflitoButton();
   broadcastCharacterState();
-  if (broadcastInterval) clearInterval(broadcastInterval);
-  broadcastInterval = setInterval(() => {
-    if (!peerManager) { clearInterval(broadcastInterval); broadcastInterval = null; return; }
-    broadcastCharacterState();
-  }, 3000);
 }
 
 
@@ -1424,11 +1651,14 @@ function _sendChatMessage() {
   const text = textInput?.value.trim() || "";
   if (!text && !_pendingChatImg) return;
 
-  const playerName = peerManager
-    ? (document.getElementById("room-player-name")?.value ||
-       document.getElementById("room-player-name-join")?.value ||
-       "Eu")
-    : "Eu";
+  let playerName = "Jogador";
+  if (state.currentCharacter && state.currentCharacter.name) {
+    playerName = state.currentCharacter.name;
+  } else if (state.activeMesaAccount) {
+    playerName = state.activeMesaAccount.name || state.activeMesaAccount.ownerNome || "Jogador";
+  } else if (state.currentUser && state.currentUser.displayName) {
+    playerName = state.currentUser.displayName;
+  }
 
   const msg = {
     playerId: peerManager?.playerId || "local",
@@ -2511,7 +2741,9 @@ function _resetMesaAtivacao(idx) {
 
   const msg = `Ativação: ${act.titulo} - ${act.efeito}`;
   const pm = getPeerManager();
-  const playerName = pm ? (pm.isHost ? "Mestre" : "Jogador") : "Mestre";
+  const playerName = state.currentCharacter?.name || 
+                     state.activeMesaAccount?.name || 
+                     (pm?.isHost ? "Mestre" : "Jogador");
   const chatData = {
     text: msg,
     playerName,
@@ -2678,7 +2910,8 @@ function _applyFichasVisibility() {
   // Aplicar em Jogadores
   document.querySelectorAll("#table-player-list .table-player-item").forEach(item => {
     const playerId = item.dataset.playerId;
-    if (_hiddenFichaIds.has(playerId)) {
+    const isMe = (playerId === peerManager?.playerId);
+    if (!isMe && _hiddenFichaIds.has(playerId)) {
       item.classList.add("hidden-ficha");
     } else {
       item.classList.remove("hidden-ficha");
@@ -2716,11 +2949,65 @@ export function showCampaignScreen(campaignData) {
   activeCampanha = campaignData;
   state.activeCampaignId = campaignData.id;
 
+  // Inicialização de contas (retrocompatibilidade)
+  if (!activeCampanha.contas) {
+    activeCampanha.contas = {
+      "mestre": {
+        id: "mestre",
+        name: activeCampanha.mestreNome,
+        role: "mestre",
+        ownerId: activeCampanha.mestreId,
+        fichaId: null
+      }
+    };
+  }
+
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+  let linkedAccount = isMestre 
+    ? activeCampanha.contas["mestre"] 
+    : Object.values(activeCampanha.contas || {}).find(a => a.ownerId === state.currentUser?.uid);
+
+  state.activeMesaAccount = linkedAccount;
+
   // Sincronizar em tempo real com Firestore
   if (_campanhaUnsub) _campanhaUnsub();
   escutarCampanha(campaignData.id, (updatedMesa) => {
     activeCampanha = updatedMesa;
+
+    if (!activeCampanha.contas) {
+      activeCampanha.contas = {
+        "mestre": {
+          id: "mestre",
+          name: activeCampanha.mestreNome,
+          role: "mestre",
+          ownerId: activeCampanha.mestreId,
+          fichaId: null
+        }
+      };
+    }
+
+    // Sync active account
+    state.activeMesaAccount = isMestre 
+      ? activeCampanha.contas["mestre"] 
+      : Object.values(activeCampanha.contas || {}).find(a => a.ownerId === state.currentUser?.uid);
+
+    // Se a conta vinculada tem uma ficha, atualizar o estado local em tempo real
+    if (state.activeMesaAccount && state.activeMesaAccount.fichaId) {
+      const mesaFicha = activeCampanha.fichas?.[state.activeMesaAccount.fichaId];
+      if (mesaFicha) {
+        state.currentCharacter = mesaFicha.data;
+        if (!document.getElementById("sheet-screen")?.classList.contains("hidden")) {
+          loadCharacter(state.currentCharacter);
+        }
+      }
+    }
+
     _renderCampaignDashboard();
+    if (isOnTableScreen) {
+      updatePlayerList(_lastPlayersList || []);
+      _updateLocalPlayerState();
+      _applyCachedStates();
+    }
   }).then(unsub => {
     _campanhaUnsub = unsub;
   });
@@ -2731,6 +3018,23 @@ export function showCampaignScreen(campaignData) {
   document.getElementById("campaign-screen")?.classList.remove("hidden");
   
   _initCampaignListeners();
+
+  // Se o jogador não tem uma vaga selecionada, abrir modal de escolha
+  if (!state.activeMesaAccount) {
+    openSelectVagaModal(activeCampanha, async (contaId) => {
+      const pName = state.currentUser?.displayName || "Jogador";
+      await vincularJogadorConta(activeCampanha.id, contaId, state.currentUser?.uid, pName);
+    });
+  } else {
+    // Carregar ficha se já vinculada
+    if (state.activeMesaAccount.fichaId) {
+      const mesaFicha = activeCampanha.fichas?.[state.activeMesaAccount.fichaId];
+      if (mesaFicha) {
+        state.currentCharacter = mesaFicha.data;
+      }
+    }
+  }
+
   _renderCampaignDashboard();
 }
 
@@ -2741,8 +3045,61 @@ function hideCampaignScreen() {
   }
   activeCampanha = null;
   state.activeCampaignId = null;
+  state.activeMesaAccount = null;
+  state.currentCharacter = null;
   document.getElementById("campaign-screen")?.classList.add("hidden");
   document.getElementById("landing-screen")?.classList.remove("hidden");
+}
+
+export function openSelectVagaModal(mesaData, onSelect) {
+  const modalContainer = document.getElementById("modal-container");
+  const modalBody = document.getElementById("modal-body");
+  if (!modalContainer || !modalBody) return;
+
+  const contas = Object.values(mesaData.contas || {});
+  const vacantContas = contas.filter(c => c.role !== "mestre" && !c.ownerId);
+
+  let optionsHtml = "";
+  if (vacantContas.length === 0) {
+    optionsHtml = `<p style="color:var(--text-muted); text-align:center; margin: 16px 0;">Não há vagas/contas disponíveis nesta mesa no momento. Peça ao Mestre para criar uma vaga para você.</p>`;
+  } else {
+    optionsHtml = vacantContas.map(c => `
+      <div class="vaga-card" data-id="${c.id}" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all var(--transition-fast);">
+        <span style="font-weight: bold; color: var(--text-primary);">${esc(c.name)}</span>
+        <button class="btn btn-sm btn-landing-primary">Selecionar</button>
+      </div>
+    `).join("");
+  }
+
+  modalBody.innerHTML = `
+    <h3 class="modal-title" style="margin-bottom:16px;">Vagas da Mesa "${esc(mesaData.nome)}"</h3>
+    <p style="margin-bottom:16px; color:var(--text-secondary);">Selecione uma vaga disponível abaixo para entrar na mesa:</p>
+    <div class="vagas-list-container" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;">
+      ${optionsHtml}
+    </div>
+    <div style="display:flex; justify-content: flex-end; gap: 10px;">
+      <button id="btn-cancel-vaga" class="btn btn-landing-secondary">Voltar ao Início</button>
+    </div>
+  `;
+
+  modalContainer.classList.remove("hidden");
+
+  // Handlers
+  modalBody.querySelectorAll(".vaga-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const id = card.dataset.id;
+      modalContainer.classList.add("hidden");
+      onSelect(id);
+    });
+  });
+
+  const cancelBtn = modalBody.querySelector("#btn-cancel-vaga");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      modalContainer.classList.add("hidden");
+      hideCampaignScreen();
+    });
+  }
 }
 
 let _campaignListenersInitialized = false;
@@ -2838,6 +3195,11 @@ function _initCampaignListeners() {
     _handleSessionAction();
   });
 
+  // Botão Gerenciar Mesa (Mestre)
+  document.getElementById("btn-gerenciar-mesa")?.addEventListener("click", () => {
+    _openGerenciarMesaModal();
+  });
+
   // Fechar Visualizador de Ficha
   document.getElementById("btn-close-ficha-viewer")?.addEventListener("click", () => {
     document.getElementById("modal-ficha-viewer")?.classList.add("hidden");
@@ -2859,6 +3221,16 @@ function _renderCampaignDashboard() {
   document.getElementById("camp-code-display").textContent = "CÓDIGO: " + activeCampanha.id;
 
   const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+
+  // Mostrar botão Gerenciar Mesa apenas para o Mestre
+  const btnGerenciar = document.getElementById("btn-gerenciar-mesa");
+  if (btnGerenciar) {
+    if (isMestre) {
+      btnGerenciar.classList.remove("hidden");
+    } else {
+      btnGerenciar.classList.add("hidden");
+    }
+  }
   
   // Status da sessão e botão do cabeçalho
   const statusIndicator = document.getElementById("camp-session-status");
@@ -2911,48 +3283,129 @@ function _renderCampaignFichas() {
   const grid = document.getElementById("camp-fichas-grid");
   if (!grid) return;
 
-  const fichas = Object.values(activeCampanha.fichas || {});
-  if (fichas.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:32px; color:var(--text-muted);">Nenhuma ficha compartilhada nesta mesa ainda.</div>';
-    return;
+  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+  const myAccount = state.activeMesaAccount;
+
+  let html = "";
+
+  // 1. Mostrar status da própria conta (se for jogador)
+  if (!isMestre && myAccount) {
+    const fichaId = myAccount.fichaId;
+    if (fichaId && activeCampanha.fichas && activeCampanha.fichas[fichaId]) {
+      const myFicha = activeCampanha.fichas[fichaId];
+      const portrait = myFicha.data?.portrait || myFicha.data?.imagem || "";
+      const avatarHtml = portrait 
+        ? `<img src="${esc(portrait)}" alt="">`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`;
+
+      html += `
+        <div style="grid-column: 1/-1; background: rgba(0, 162, 255, 0.05); border: 1px solid rgba(0, 162, 255, 0.2); border-radius: 8px; padding: 16px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+          <h4 style="margin-bottom: 8px; color: var(--color-blue-glow); font-family: var(--font-heading);">Sua Conta nesta Mesa: <strong>${esc(myAccount.name)}</strong></h4>
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <div class="ficha-camp-avatar" style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: var(--bg-surface); display:flex; align-items:center; justify-content:center;">${avatarHtml}</div>
+            <div style="flex:1;">
+              <div style="font-weight: bold; font-size: 1.1em; color: var(--text-primary);">${esc(myFicha.nome)}</div>
+              <div style="color: var(--text-muted); font-size: var(--font-size-xs);">Ficha vinculada e salva na mesa. Sincronizada em tempo real.</div>
+            </div>
+            <button class="btn btn-sm btn-landing-secondary" id="btn-desvincular-minha-ficha" style="border-color: var(--color-rust); color: var(--color-rust-glow);">Desvincular Ficha</button>
+          </div>
+        </div>
+      `;
+    } else {
+      // Mostrar seletor para vincular ficha
+      html += `
+        <div style="grid-column: 1/-1; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center; box-shadow: var(--shadow-sm);">
+          <h4 style="margin-bottom: 8px; color: var(--color-rust-glow); font-weight: bold; font-family: var(--font-heading);">🧬 Conta "${esc(myAccount.name)}" sem Ficha Vinculada</h4>
+          <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: 16px;">
+            Escolha uma de suas fichas locais abaixo para usar e sincronizar com a mesa na nuvem:
+          </p>
+          <div style="display:flex; justify-content: center; gap: 10px; align-items: center; max-width: 450px; margin: 0 auto;">
+            <select id="vincular-ficha-select" class="camp-input" style="flex: 1;"></select>
+            <button id="btn-vincular-ficha-confirm" class="btn btn-landing-primary">Vincular Ficha</button>
+          </div>
+        </div>
+      `;
+    }
   }
 
-  const isMestre = activeCampanha.mestreId === state.currentUser?.uid;
+  // 2. Mostrar as fichas de todos na mesa (excluindo a própria se for jogador)
+  const fichas = Object.values(activeCampanha.fichas || {});
+  const otherFichas = fichas.filter(f => !myAccount || f.id !== myAccount.fichaId);
 
-  grid.innerHTML = fichas.map(item => {
-    const portrait = item.data?.portrait || item.data?.imagem || "";
-    const avatarHtml = portrait 
-      ? `<img src="${esc(portrait)}" alt="">`
-      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`;
+  let gridCardsHtml = "";
+  if (otherFichas.length === 0) {
+    gridCardsHtml = '<div style="grid-column: 1/-1; text-align:center; padding:32px; color:var(--text-muted);">Nenhum outro personagem vinculado a esta mesa ainda.</div>';
+  } else {
+    gridCardsHtml = otherFichas.map(item => {
+      const portrait = item.data?.portrait || item.data?.imagem || "";
+      const avatarHtml = portrait 
+        ? `<img src="${esc(portrait)}" alt="">`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`;
 
-    const isOwner = item.donoId === state.currentUser?.uid;
-    const canDelete = isMestre || isOwner;
-    const deleteBtn = canDelete 
-      ? `<div class="ficha-camp-actions">
-           <button class="btn-remove-ficha-camp" data-id="${esc(item.id)}" title="Remover da Mesa">✕</button>
-         </div>`
-      : "";
+      const isOwner = item.donoId === state.currentUser?.uid;
+      const canDelete = isMestre || isOwner;
+      const deleteBtn = canDelete 
+        ? `<div class="ficha-camp-actions">
+             <button class="btn-remove-ficha-camp" data-id="${esc(item.id)}" title="Remover da Mesa">✕</button>
+           </div>`
+        : "";
 
-    const typeLabels = {
-      infectado: "🧬 Infectado",
-      refugio: "🏕️ Refúgio",
-      regiao: "🗺️ Região",
-      conflito: "⚔️ Conflito",
-      local: "📍 Local"
-    };
+      const typeLabels = {
+        infectado: "🧬 Infectado",
+        refugio: "🏕️ Refúgio",
+        regiao: "🗺️ Região",
+        conflito: "⚔️ Conflito",
+        local: "📍 Local"
+      };
 
-    return `
-      <div class="ficha-camp-card" data-id="${esc(item.id)}">
-        <div class="ficha-camp-avatar">${avatarHtml}</div>
-        <div class="ficha-camp-name">${esc(item.nome)}</div>
-        <div class="ficha-camp-type">${esc(typeLabels[item.tipo] || item.tipo)}</div>
-        <div class="ficha-camp-owner">Dono: ${esc(item.donoNome)}</div>
-        ${deleteBtn}
-      </div>
-    `;
-  }).join("");
+      return `
+        <div class="ficha-camp-card" data-id="${esc(item.id)}">
+          <div class="ficha-camp-avatar">${avatarHtml}</div>
+          <div class="ficha-camp-name">${esc(item.nome)}</div>
+          <div class="ficha-camp-type">${esc(typeLabels[item.tipo] || item.tipo)}</div>
+          <div class="ficha-camp-owner">Dono: ${esc(item.donoNome)}</div>
+          ${deleteBtn}
+        </div>
+      `;
+    }).join("");
+  }
 
-  // Adicionar click listener nos cards para abrir o visualizador de ficha
+  grid.innerHTML = html + gridCardsHtml;
+
+  // 3. Bind listeners para a própria ficha vinculando dropdown
+  if (!isMestre && myAccount && !myAccount.fichaId) {
+    const select = document.getElementById("vincular-ficha-select");
+    if (select) {
+      select.innerHTML = '<option value="">-- Selecione uma Ficha --</option>';
+      (state.characters || []).forEach(char => {
+        const opt = document.createElement("option");
+        opt.value = char.id;
+        opt.textContent = char.name;
+        select.appendChild(opt);
+      });
+    }
+
+    document.getElementById("btn-vincular-ficha-confirm")?.addEventListener("click", async () => {
+      const charId = select?.value;
+      if (!charId) { alert("Selecione uma ficha!"); return; }
+      const char = state.characters.find(c => c.id === charId);
+      if (char) {
+        const { vincularFichaConta } = await import("./campanha.js");
+        await vincularFichaConta(activeCampanha.id, myAccount.id, char, state.currentUser?.uid, myAccount.name);
+        alert(`Ficha de "${char.name}" vinculada com sucesso!`);
+      }
+    });
+  }
+
+  // Bind listener para desvincular
+  document.getElementById("btn-desvincular-minha-ficha")?.addEventListener("click", async () => {
+    if (confirm("Deseja mesmo desvincular sua ficha desta mesa? Ela continuará no seu navegador, mas não estará mais salva na mesa.")) {
+      const { desvincularFichaConta } = await import("./campanha.js");
+      await desvincularFichaConta(activeCampanha.id, myAccount.id);
+    }
+  });
+
+  // Click nos cards para visualizar
   grid.querySelectorAll(".ficha-camp-card").forEach(card => {
     card.addEventListener("click", (e) => {
       if (e.target.closest(".btn-remove-ficha-camp")) return;
@@ -2964,13 +3417,126 @@ function _renderCampaignFichas() {
     });
   });
 
-  // Click listener para excluir
+  // Click nos cards para excluir
   grid.querySelectorAll(".btn-remove-ficha-camp").forEach(btn => {
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
       const id = btn.dataset.id;
       if (confirm("Deseja mesmo remover esta ficha da mesa?")) {
         await removerFichaCompartilhada(activeCampanha.id, id);
+      }
+    });
+  });
+}
+
+function _openGerenciarMesaModal() {
+  if (!activeCampanha) return;
+  const modalContainer = document.getElementById("modal-container");
+  const modalBody = document.getElementById("modal-body");
+  if (!modalContainer || !modalBody) return;
+
+  _renderGerenciarMesaModalContent(modalBody);
+  modalContainer.classList.remove("hidden");
+}
+
+function _renderGerenciarMesaModalContent(modalBody) {
+  const contas = Object.values(activeCampanha.contas || {}).filter(c => c.role !== "mestre");
+
+  let contasListHtml = "";
+  if (contas.length === 0) {
+    contasListHtml = `<p style="color:var(--text-muted); text-align:center; margin:10px 0;">Nenhuma vaga/conta de jogador criada.</p>`;
+  } else {
+    contasListHtml = contas.map(c => {
+      const vinculado = c.ownerId ? `${c.ownerName || "Jogador"} (UID: ${c.ownerId.slice(0, 6)})` : `<span style="color:var(--color-rust-glow); font-style: italic;">Vaga Aberta</span>`;
+      const ficha = c.fichaId ? (activeCampanha.fichas?.[c.fichaId]?.nome || "Ficha Vinculada") : "Nenhuma";
+      
+      const desvincularBtn = c.ownerId 
+        ? `<button class="btn btn-sm btn-landing-secondary btn-desvincular-conta" data-id="${c.id}" style="margin-right: 5px;">Desvincular</button>`
+        : "";
+
+      return `
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: var(--font-size-sm);">
+          <div>
+            <div style="font-weight: bold; color: var(--text-primary);">${esc(c.name)}</div>
+            <div style="color: var(--text-secondary); margin-top: 4px;">Jogador: ${vinculado}</div>
+            <div style="color: var(--text-secondary);">Ficha: ${esc(ficha)}</div>
+          </div>
+          <div>
+            ${desvincularBtn}
+            <button class="btn btn-sm btn-danger btn-excluir-conta" data-id="${c.id}">Excluir</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  modalBody.innerHTML = `
+    <h3 class="modal-title" style="margin-bottom:16px;">Gerenciar Mesa "${esc(activeCampanha.nome)}"</h3>
+    
+    <div style="margin-bottom:20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
+      <h4 style="color: var(--color-blue-glow); margin-bottom: 8px; font-family: var(--font-heading);">Criar Nova Vaga/Conta de Jogador</h4>
+      <div style="display:flex; gap:10px;">
+        <input type="text" id="nova-vaga-nome" class="camp-input" placeholder="Nome da vaga (Ex: Jogador 1, Carlos)" style="flex:1;">
+        <button id="btn-criar-vaga" class="btn">Criar</button>
+      </div>
+    </div>
+
+    <h4 style="color: var(--color-blue-glow); margin-bottom: 8px; font-family: var(--font-heading);">Contas / Vagas Cadastradas</h4>
+    <div class="contas-list-container" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;">
+      ${contasListHtml}
+    </div>
+
+    <div style="display:flex; justify-content: flex-end;">
+      <button id="btn-fechar-gerenciar" class="btn btn-landing-secondary">Fechar</button>
+    </div>
+  `;
+
+  // Bind Actions
+  const closeBtn = modalBody.querySelector("#btn-fechar-gerenciar");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      document.getElementById("modal-container").classList.add("hidden");
+    });
+  }
+
+  const criarBtn = modalBody.querySelector("#btn-criar-vaga");
+  if (criarBtn) {
+    criarBtn.addEventListener("click", async () => {
+      const nomeInput = modalBody.querySelector("#nova-vaga-nome");
+      const name = nomeInput.value.trim();
+      if (!name) { alert("Digite o nome da vaga/conta!"); return; }
+      
+      const { criarVagaConta } = await import("./campanha.js");
+      await criarVagaConta(activeCampanha.id, name);
+      nomeInput.value = "";
+      setTimeout(() => {
+        _renderGerenciarMesaModalContent(modalBody);
+      }, 500);
+    });
+  }
+
+  modalBody.querySelectorAll(".btn-desvincular-conta").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      if (confirm("Deseja mesmo desvincular o jogador desta vaga?")) {
+        const { desvincularJogadorConta } = await import("./campanha.js");
+        await desvincularJogadorConta(activeCampanha.id, id);
+        setTimeout(() => {
+          _renderGerenciarMesaModalContent(modalBody);
+        }, 500);
+      }
+    });
+  });
+
+  modalBody.querySelectorAll(".btn-excluir-conta").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      if (confirm("Deseja mesmo excluir esta vaga/conta? O jogador vinculado perderá o acesso e a ficha será desvinculada.")) {
+        const { removerVagaConta } = await import("./campanha.js");
+        await removerVagaConta(activeCampanha.id, id);
+        setTimeout(() => {
+          _renderGerenciarMesaModalContent(modalBody);
+        }, 500);
       }
     });
   });

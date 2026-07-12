@@ -38,10 +38,31 @@ async function ensureAuth() {
     const unsub = fb.onAuthStateChanged(fb.auth, (user) => {
       unsub();
       if (user) {
+        if (!state.currentUser) {
+          state.currentUser = {
+            uid: user.uid,
+            displayName: user.displayName || "Jogador"
+          };
+        } else {
+          state.currentUser.uid = user.uid;
+        }
+        localStorage.setItem("assimilação_mock_user", JSON.stringify(state.currentUser));
         resolve(user);
       } else {
         fb.signInAnonymously(fb.auth)
-          .then((cred) => resolve(cred.user))
+          .then((cred) => {
+            const u = cred.user;
+            if (!state.currentUser) {
+              state.currentUser = {
+                uid: u.uid,
+                displayName: u.displayName || "Jogador"
+              };
+            } else {
+              state.currentUser.uid = u.uid;
+            }
+            localStorage.setItem("assimilação_mock_user", JSON.stringify(state.currentUser));
+            resolve(u);
+          })
           .catch((err) => reject(new Error("Falha na autenticação: " + err.message)));
       }
     });
@@ -61,6 +82,15 @@ export async function criarCampanha(nomeCampanha, nomeMestre) {
     mestreNome: nomeMestre,
     createdAt: Date.now(),
     sessaoAtiva: false,
+    contas: {
+      "mestre": {
+        id: "mestre",
+        name: nomeMestre,
+        role: "mestre",
+        ownerId: user.uid,
+        fichaId: null
+      }
+    },
     fichas: {},
     notas: [],
     eventos: [],
@@ -68,7 +98,7 @@ export async function criarCampanha(nomeCampanha, nomeMestre) {
   };
 
   await fb.setDoc(fb.doc(fb.db, "rooms", code + "_camp"), mesaData);
-  logger.info(`Campanha criada com sucesso: ${nomeCampanha} (Código: ${code})`);
+  logger.info(`Mesa criada com sucesso: ${nomeCampanha} (Código: ${code})`);
   return mesaData;
 }
 
@@ -301,4 +331,130 @@ export async function buscarFichaCompartilhada(code) {
   }
   
   return docSnap.data();
+}
+
+export async function criarVagaConta(mesaId, nomeConta) {
+  const fb = await initFirebase();
+  const docRef = fb.doc(fb.db, "rooms", mesaId + "_camp");
+  const contaId = "conta_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+  
+  const payload = {
+    [`contas.${contaId}`]: {
+      id: contaId,
+      name: nomeConta,
+      role: "jogador",
+      ownerId: null,
+      fichaId: null
+    }
+  };
+  await fb.updateDoc(docRef, payload);
+  logger.info(`Vaga "${nomeConta}" criada na mesa ${mesaId}`);
+}
+
+export async function removerVagaConta(mesaId, contaId) {
+  const fb = await initFirebase();
+  const docRef = fb.doc(fb.db, "rooms", mesaId + "_camp");
+  const docSnap = await fb.getDoc(docRef);
+  if (!docSnap.exists()) return;
+  const mesaData = docSnap.data();
+  
+  if (mesaData.contas && mesaData.contas[contaId]) {
+    const updatedContas = { ...mesaData.contas };
+    const fichaId = updatedContas[contaId].fichaId;
+    delete updatedContas[contaId];
+    
+    const updates = { contas: updatedContas };
+    if (fichaId && mesaData.fichas && mesaData.fichas[fichaId]) {
+      const updatedFichas = { ...mesaData.fichas };
+      delete updatedFichas[fichaId];
+      updates.fichas = updatedFichas;
+    }
+    
+    await fb.updateDoc(docRef, updates);
+    logger.info(`Vaga ${contaId} removida da mesa ${mesaId}`);
+  }
+}
+
+export async function vincularJogadorConta(mesaId, contaId, userId, userName) {
+  const fb = await initFirebase();
+  const docRef = fb.doc(fb.db, "rooms", mesaId + "_camp");
+  
+  const payload = {
+    [`contas.${contaId}.ownerId`]: userId,
+    [`contas.${contaId}.ownerName`]: userName
+  };
+  await fb.updateDoc(docRef, payload);
+  logger.info(`Jogador ${userName} vinculado à vaga ${contaId} na mesa ${mesaId}`);
+}
+
+export async function desvincularJogadorConta(mesaId, contaId) {
+  const fb = await initFirebase();
+  const docRef = fb.doc(fb.db, "rooms", mesaId + "_camp");
+  const docSnap = await fb.getDoc(docRef);
+  if (!docSnap.exists()) return;
+  const mesaData = docSnap.data();
+  
+  if (mesaData.contas && mesaData.contas[contaId]) {
+    const fichaId = mesaData.contas[contaId].fichaId;
+    const updates = {
+      [`contas.${contaId}.ownerId`]: null,
+      [`contas.${contaId}.ownerName`]: null,
+      [`contas.${contaId}.fichaId`]: null
+    };
+    
+    if (fichaId && mesaData.fichas && mesaData.fichas[fichaId]) {
+      const updatedFichas = { ...mesaData.fichas };
+      delete updatedFichas[fichaId];
+      updates.fichas = updatedFichas;
+    }
+    
+    await fb.updateDoc(docRef, updates);
+    logger.info(`Jogador desvinculado da vaga ${contaId} na mesa ${mesaId}`);
+  }
+}
+
+export async function vincularFichaConta(mesaId, contaId, fichaObj, donoId, donoNome) {
+  const fb = await initFirebase();
+  const docRef = fb.doc(fb.db, "rooms", mesaId + "_camp");
+  
+  const cleanFicha = JSON.parse(JSON.stringify(fichaObj));
+  
+  const updates = {
+    [`contas.${contaId}.fichaId`]: fichaObj.id,
+    [`fichas.${fichaObj.id}`]: {
+      id: fichaObj.id,
+      nome: fichaObj.name || fichaObj.nome || "Sem nome",
+      tipo: fichaObj._sheetType || "infectado",
+      donoId: donoId,
+      donoNome: donoNome,
+      data: cleanFicha
+    }
+  };
+  
+  await fb.updateDoc(docRef, updates);
+  logger.info(`Ficha "${cleanFicha.name}" vinculada à vaga ${contaId} na mesa ${mesaId}`);
+}
+
+export async function desvincularFichaConta(mesaId, contaId) {
+  const fb = await initFirebase();
+  const docRef = fb.doc(fb.db, "rooms", mesaId + "_camp");
+  const docSnap = await fb.getDoc(docRef);
+  if (!docSnap.exists()) return;
+  const mesaData = docSnap.data();
+  
+  if (mesaData.contas && mesaData.contas[contaId]) {
+    const fichaId = mesaData.contas[contaId].fichaId;
+    const updates = {
+      [`contas.${contaId}.fichaId`]: null
+    };
+    
+    if (fichaId && mesaData.fichas && mesaData.fichas[fichaId]) {
+      const updatedFichas = { ...mesaData.fichas };
+      delete updatedFichas[fichaId];
+      updates.fichas = updatedFichas;
+    }
+    
+    await fb.updateDoc(docRef, updates);
+    logger.info(`Ficha desvinculada da vaga ${contaId} na mesa ${mesaId}`);
+  }
 }

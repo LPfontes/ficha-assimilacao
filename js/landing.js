@@ -135,8 +135,8 @@ function openSheetTypeModal() {
       </div>
       <div class="sheet-type-card" data-type="campanha" tabindex="0">
         <span class="type-emoji">📋</span>
-        <span class="type-label" style="color:var(--color-blue-glow);">Campanha</span>
-        <span class="type-desc">Ficha de fichas para organizar dados</span>
+        <span class="type-label" style="color:var(--color-blue-glow);">Mesa de Jogo</span>
+        <span class="type-desc">Lobby e diários compartilhados para narrar</span>
       </div>
     </div>
   `;
@@ -191,7 +191,7 @@ async function _createSheetByType(type) {
       break;
     }
     case "campanha": {
-      const name = prompt("Nome da Campanha:", "Minha Campanha");
+      const name = prompt("Nome da Mesa:", "Minha Mesa");
       if (!name) return;
       const mestre = prompt("Seu Nome (Mestre):", "Mestre");
       if (!mestre) return;
@@ -210,7 +210,7 @@ async function _createSheetByType(type) {
         renderCharactersList();
         showCampaignScreen(campaignData);
       } catch (err) {
-        alert("Erro ao criar campanha: " + err.message);
+        alert("Erro ao criar mesa: " + err.message);
       }
       break;
     }
@@ -253,7 +253,7 @@ export function renderCharactersList() {
     regiao:    `<span class="sheet-type-badge badge-regiao">🗺️ Região</span>`,
     conflito:  `<span class="sheet-type-badge badge-conflito">⚔️ Conflito</span>`,
     local:     `<span class="sheet-type-badge badge-local">📍 Local</span>`,
-    campanha:  `<span class="sheet-type-badge badge-campanha">📋 Campanha</span>`,
+    campanha:  `<span class="sheet-type-badge badge-campanha">📋 Mesa de Jogo</span>`,
   };
 
   const TYPE_SUB = {

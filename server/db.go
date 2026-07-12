@@ -33,6 +33,7 @@ type DBRoomState struct {
 	CurrentMusic interface{}             `bson:"currentMusic,omitempty"`
 	Players      map[string]DBPlayerInfo `bson:"players"`
 	ExtraFichas  interface{}             `bson:"extraFichas,omitempty"`
+	GCSImages    []string                `bson:"gcsImages,omitempty"`
 }
 
 // DBMessage represents a chat message or dice roll stored in MongoDB.
