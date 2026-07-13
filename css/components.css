@@ -850,7 +850,7 @@
   height: 100%;
   z-index: 10;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('../assets/fundo1.webp') no-repeat center center / cover;
   box-sizing: border-box;
@@ -1012,7 +1012,7 @@
   border: 2px solid var(--color-blue-dark);
   background: rgba(0, 0, 0, 0.3);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 

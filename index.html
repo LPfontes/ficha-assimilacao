@@ -846,79 +846,239 @@
       <div class="sheet-layout-grid">
         <div class="sheet-pages-column">
           <div class="sheet-redesign-container">
-            
-            <!-- COLUNA ESQUERDA: PERFIL, CABO DE GUERRA E SAÚDE -->
-            <div class="sheet-redesign-left">
-              
-              <!-- CARD DO PERFIL (Polaroid + Inputs) -->
-              <div class="profile-card card-glass">
-                <div class="portrait-wrapper">
-                  <div class="polaroid-frame" id="portrait-frame" title="Clique para alterar a foto do personagem">
-                    <img id="char-portrait-img" src="./assets/avatar.png" alt="Avatar do Personagem">
-                    <div class="portrait-overlay">
-                      <span>Alterar Foto</span>
-                    </div>
-                  </div>
-                  <input type="file" id="char-portrait-input" accept="image/*" style="display: none;">
-                  
-                  <div class="portrait-side-fields">
-                    <div class="profile-field">
-                      <label for="char-name">Nome</label>
-                      <input type="text" id="char-name" class="sheet-input-text" placeholder="Nome do Personagem">
-                    </div>
-                    <div class="profile-field">
-                      <label for="char-ocupacao">Ocupação</label>
-                      <input type="text" id="char-ocupacao" class="sheet-input-text" placeholder="Identidade + Especificidade">
-                    </div>
-                    <div class="profile-field">
-                      <label for="char-generation">Geração</label>
-                      <input type="text" id="char-generation" class="sheet-input-text" readonly>
-                    </div>
-                  </div>
+            <!-- COLUNA DIREITA: TABS -->
+            <div class="sheet-redesign-right">
+              <div class="sheet-redesign-tabs-container">
+                <div class="sheet-redesign-tabs-nav card-glass">
+                  <button class="sheet-tab-btn active" data-tab="tab-perfil">
+                    <span class="tab-btn-icon">👤</span> Perfil
+                  </button>
+                  <button class="sheet-tab-btn" data-tab="tab-mutacoes">
+                    <span class="tab-btn-icon">♦</span> Características
+                  </button>
+                  <button class="sheet-tab-btn" data-tab="tab-assimilacoes">
+                    <span class="tab-btn-icon">🧬</span> Assimilações
+                  </button>
+                  <button class="sheet-tab-btn" data-tab="tab-inventario">
+                    <span class="tab-btn-icon">▲</span> Inventário
+                  </button>
+                  <button class="sheet-tab-btn" data-tab="tab-anotacoes">
+                    <span class="tab-btn-icon">✏️</span> Anotações
+                  </button>
+                  <button class="sheet-tab-btn" data-tab="tab-homebrew">
+                    <span class="tab-btn-icon">⚙️</span> Homebrew
+                  </button>
                 </div>
                 
-                <div class="profile-fields-grid">
-                  <div class="profile-row">
-                    <div class="profile-field full-width">
-                      <label for="char-prop-p1">Propósitos Pessoais</label>
-                      <div class="input-stacked">
-                        <input type="text" id="char-prop-p1" class="sheet-input-text" placeholder="Propósito Pessoal 1">
-                        <input type="text" id="char-prop-p2" class="sheet-input-text" placeholder="Propósito Pessoal 2">
+                <div class="sheet-redesign-tabs-content card-glass">
+                  <!-- Aba 1: Perfil -->
+                  <div class="sheet-tab-panel active" id="tab-perfil">
+                    <div class="profile-card card-glass">
+                      <div class="portrait-wrapper">
+                        <div class="polaroid-frame" id="portrait-frame" title="Clique para alterar a foto do personagem">
+                          <img id="char-portrait-img" src="./assets/avatar.png" alt="Avatar do Personagem">
+                          <div class="portrait-overlay">
+                            <span>Alterar Foto</span>
+                          </div>
+                        </div>
+                        <input type="file" id="char-portrait-input" accept="image/*" style="display: none;">
+                        <div class="col-2">
+                          <div class="portrait-side-fields">
+                          <div class="profile-field">
+                            <label for="char-name">Nome</label>
+                            <input type="text" id="char-name" class="sheet-input-text" placeholder="Nome do Personagem">
+                          </div>
+                          <div class="profile-field">
+                            <label for="char-ocupacao">Ocupação</label>
+                            <input type="text" id="char-ocupacao" class="sheet-input-text" placeholder="Identidade + Especificidade">
+                          </div>
+                          <div class="profile-field">
+                            <label for="char-generation">Geração</label>
+                            <input type="text" id="char-generation" class="sheet-input-text">
+                          </div>
+                        </div>
+                         <div class="profile-fields-grid">
+                        <div class="profile-row">
+                          <div class="profile-field full-width">
+                            <label for="char-prop-p1">Propósitos Pessoais</label>
+                            <div class="input-stacked">
+                              <input type="text" id="char-prop-p1" class="sheet-input-text" placeholder="Propósito Pessoal 1">
+                              <input type="text" id="char-prop-p2" class="sheet-input-text" placeholder="Propósito Pessoal 2">
+                            </div>
+                            <label for="char-prop-col">Propósitos Coletivos</label>
+                            <div class="input-stacked">
+                              <input type="text" id="char-prop-col" class="sheet-input-text" placeholder="Propósito Coletivo 1">
+                              <input type="text" id="char-prop-col2" class="sheet-input-text" placeholder="Propósito Coletivo 2">
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="profile-row">
+                          <div class="profile-field full-width">
+                            <label for="char-evento">Evento Marcante</label>
+                            <input type="text" id="char-evento" class="sheet-input-text" placeholder="Referência do Passado">
+                          </div>
+                        </div>
+                      </div>
+                        </div>
+                        
+                      </div>
+                      
+                     
+                    </div>
+                    
+                    <div class="roll-chat-section" id="roll-chat">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                          <h3 style="margin: 0; padding: 0;">Chat de Rolagens</h3>
+                           <button class="btn btn-sm btn-danger" id="btn-clear-chat" title="Limpar Histórico de Rolagens">Limpar</button>
+                        </div>
+                        <div class="roll-chat-messages" id="roll-chat-messages">
+                          <div class="chat-placeholder">Nenhuma rolagem realizada nesta sessão.</div>
+                        </div>
+                    </div>
+                  </div>
+
+                  <!-- Aba 2: Características -->
+                  <div class="sheet-tab-panel" id="tab-mutacoes">
+                    <!-- Seção de Características Adquiridas -->
+                    <div class="sheet-section section-traits">
+                      <div class="sheet-section-header">
+                        <button id="btn-add-trait-sheet" class="btn btn-sm" style="padding: 8px 8px; font-weight: bold; font-size: 20px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
+                        <h3 class="section-title section-title-clean">CARACTERÍSTICAS</h3>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <div class="xp-counter" style="margin: 0; font-size: var(--font-size-md); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
+                            XP: 
+                            <button id="btn-dec-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Diminuir XP">-</button>
+                            <strong id="sheet-xp-value" style="font-size: var(--font-size-lg); vertical-align: middle;">0</strong>
+                            <button id="btn-inc-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Aumentar XP">+</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="traits-sheet-grid" id="traits-list-sheet">
+                        <!-- Lista de Características da Ficha -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Aba 3: Assimilações -->
+                  <div class="sheet-tab-panel" id="tab-assimilacoes">
+                    <div class="assimilation-buttons-container" style="display: flex; gap: 8px;">
+                          <button id="btn-assimilation-test-sheet" class="btn btn-sm" title="Realizar Teste de Assimilação">
+                            <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text" style="font-size: 11px;">Teste de Assimilação</span>
+                          </button>
+                          <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
+                            <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text" style="font-size: 11px;">Leitura de Tarot</span>
+                          </button>
+                          <button id="btn-open-assimilation-library" class="btn btn-sm" title="Biblioteca de Assimilações">
+                            <span class="btn-text" style="font-size: 11px;">📖 Biblioteca</span>
+                          </button>
+                        </div>
+                    <!-- Seção de Assimilações -->
+                    <div class="sheet-section section-assimilations">
+                      <div class="sheet-section-header" style="flex-wrap: wrap; justify-content: space-between;">
+                        <div>
+                          <h3 class="section-title section-title-clean" style="margin: 0;">ASSIMILAÇÕES (MUTAÇÕES)</h3>
+                          <div id="sheet-assimilation-points" class="assimilation-points-container"></div>
+                        </div>
+                        
+                      </div>
+                      <div class="mutations-sheet-list-single" id="mutations-list-sheet">
+                        <!-- Mutações inseridas pelo JS em uma única coluna -->
                       </div>
                     </div>
                   </div>
                   
-                  <div class="profile-row">
-                    <div class="profile-field full-width">
-                      <label for="char-prop-col">Propósitos Coletivos</label>
-                      <div class="input-stacked">
-                        <input type="text" id="char-prop-col" class="sheet-input-text" placeholder="Propósito Coletivo 1">
-                        <input type="text" id="char-prop-col2" class="sheet-input-text" placeholder="Propósito Coletivo 2">
+                  <!-- Aba 4: Inventário -->
+                  <div class="sheet-tab-panel" id="tab-inventario">
+                    <div class="inventory-block">
+                      <h3 class="section-title">INVENTÁRIO</h3>
+                      <p class="inventory-help" style="margin-bottom: 16px; font-size: var(--font-size-xs); color: var(--text-muted); line-height: 1.4;">
+                        Cada item ocupa um espaço (exceto pequenos objetos). Vestuário, cantil e mochila são automáticos.
+                      </p>
+                      
+                      <!-- Seção No Corpo -->
+                      <div class="inventory-section-wrapper" style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
+                          <h4 id="label-body-slots" style="font-family: var(--font-heading); color: var(--color-blue-glow); font-size: var(--font-size-sm); margin: 0;">
+                            No Corpo
+                          </h4>
+                          <div style="display: flex; gap: 8px;">
+                            <button id="btn-add-body-slot" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot no Corpo">
+                              + Slot
+                            </button>
+                            <button id="btn-add-item-body" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Item">
+                              + Item
+                            </button>
+                          </div>
+                        </div>
+                        <div id="inventory-body-list" class="inventory-grid" >
+                          <!-- JS renderizará 3 slots -->
+                        </div>
+                      </div>
+
+                      <!-- Seção Na Mochila -->
+                      <div class="inventory-section-wrapper">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
+                          <h4 id="label-backpack-slots" style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
+                            Na Mochila
+                          </h4>
+                          <button id="btn-add-backpack-slot" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; height: 22px; border-color: rgba(255,255,255,0.2); color: var(--text-secondary); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot na Mochila">
+                            + Slot
+                          </button>
+                        </div>
+                        <div id="inventory-backpack-list" class="inventory-grid">
+                          <!-- JS renderizará 6 slots -->
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div class="profile-row">
-                    <div class="profile-field full-width">
-                      <label for="char-evento">Evento Marcante</label>
-                      <input type="text" id="char-evento" class="sheet-input-text" placeholder="Referência do Passado">
+                  <!-- Aba 5: Anotações -->
+                  <div class="sheet-tab-panel" id="tab-anotacoes">
+                    <div class="notes-block">
+                      <h3 class="section-title">ANOTAÇÕES</h3>
+                      <textarea id="char-notes" class="notes-textarea" placeholder="Descreva eventos importantes, refúgios conhecidos, recursos coletados ou segredos de campanha..." style="min-height: 400px; width: 100%;"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Aba 6: Homebrew -->
+                  <div class="sheet-tab-panel" id="tab-homebrew">
+                    <div class="homebrew-block">
+                      <h3 class="section-title">HOMEBREW</h3>
+                      <p class="homebrew-help">Crie e gerencie conteúdos personalizados para suas campanhas.</p>
+
+                      <div class="homebrew-section">
+                        <div class="homebrew-section-header">
+                          <h4>Características Personalizadas</h4>
+                          <button id="btn-create-homebrew-trait" class="btn btn-sm btn-success">+ Criar</button>
+                        </div>
+                        <div id="homebrew-trait-list" class="homebrew-list"></div>
+                      </div>
+
+                      <div class="homebrew-section">
+                        <div class="homebrew-section-header">
+                          <h4>Mutações Personalizadas</h4>
+                          <button id="btn-create-homebrew-mutation" class="btn btn-sm btn-success">+ Criar</button>
+                        </div>
+                        <div id="homebrew-mutation-list" class="homebrew-list"></div>
+                      </div>
+
+                      <div class="homebrew-section">
+                        <div class="homebrew-section-header">
+                          <h4>Pacotes</h4>
+                        </div>
+                        <div class="homebrew-package-actions">
+                          <button id="btn-import-homebrew" class="btn btn-sm">📥 Importar Pacote</button>
+                          <input type="file" id="file-import-homebrew" accept=".json" style="display:none">
+                          <button id="btn-export-homebrew" class="btn btn-sm">📤 Exportar Pacote</button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              <div class="roll-chat-section" id="roll-chat">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <h3 style="margin: 0; padding: 0;">Chat de Rolagens</h3>
-                     <button class="btn btn-sm btn-danger" id="btn-clear-chat" title="Limpar Histórico de Rolagens">Limpar</button>
-                  </div>
-                  <div class="roll-chat-messages" id="roll-chat-messages">
-                    <div class="chat-placeholder">Nenhuma rolagem realizada nesta sessão.</div>
-                  </div>
               </div>
               
             </div>
-            
             <!-- COLUNA CENTRAL: CABO DE GUERRA E SAÚDE -->
             <div class="sheet-redesign-center">
               
@@ -1070,169 +1230,6 @@
               
             </div>
             
-            <!-- COLUNA DIREITA: TABS -->
-            <div class="sheet-redesign-right">
-              <div class="sheet-redesign-tabs-container">
-                <div class="sheet-redesign-tabs-nav card-glass">
-                  <button class="sheet-tab-btn active" data-tab="tab-mutacoes">
-                    <span class="tab-btn-icon">♦</span> Características
-                  </button>
-                  <button class="sheet-tab-btn" data-tab="tab-assimilacoes">
-                    <span class="tab-btn-icon">🧬</span> Assimilações
-                  </button>
-                  <button class="sheet-tab-btn" data-tab="tab-inventario">
-                    <span class="tab-btn-icon">▲</span> Inventário
-                  </button>
-                  <button class="sheet-tab-btn" data-tab="tab-anotacoes">
-                    <span class="tab-btn-icon">✏️</span> Anotações
-                  </button>
-                  <button class="sheet-tab-btn" data-tab="tab-homebrew">
-                    <span class="tab-btn-icon">⚙️</span> Homebrew
-                  </button>
-                </div>
-                
-                <div class="sheet-redesign-tabs-content card-glass">
-                  <!-- Aba 1: Características -->
-                  <div class="sheet-tab-panel active" id="tab-mutacoes">
-                    <!-- Seção de Características Adquiridas -->
-                    <div class="sheet-section section-traits">
-                      <div class="sheet-section-header">
-                        <button id="btn-add-trait-sheet" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
-                        <h3 class="section-title section-title-clean">CARACTERÍSTICAS</h3>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                          <div class="xp-counter" style="margin: 0; font-size: var(--font-size-md); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
-                            XP: 
-                            <button id="btn-dec-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Diminuir XP">-</button>
-                            <strong id="sheet-xp-value" style="font-size: var(--font-size-lg); vertical-align: middle;">0</strong>
-                            <button id="btn-inc-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Aumentar XP">+</button>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="traits-sheet-grid" id="traits-list-sheet">
-                        <!-- Lista de Características da Ficha -->
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Aba 2: Assimilações -->
-                  <div class="sheet-tab-panel" id="tab-assimilacoes">
-                    <div class="assimilation-buttons-container" style="display: flex; gap: 8px;">
-                          <button id="btn-assimilation-test-sheet" class="btn btn-sm" title="Realizar Teste de Assimilação">
-                            <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text" style="font-size: 11px;">Teste de Assimilação</span>
-                          </button>
-                          <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
-                            <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text" style="font-size: 11px;">Leitura de Tarot</span>
-                          </button>
-                          <button id="btn-open-assimilation-library" class="btn btn-sm" title="Biblioteca de Assimilações">
-                            <span class="btn-text" style="font-size: 11px;">📖 Biblioteca</span>
-                          </button>
-                        </div>
-                    <!-- Seção de Assimilações -->
-                    <div class="sheet-section section-assimilations">
-                      <div class="sheet-section-header" style="flex-wrap: wrap; justify-content: space-between;">
-                        <div>
-                          <h3 class="section-title section-title-clean" style="margin: 0;">ASSIMILAÇÕES (MUTAÇÕES)</h3>
-                          <div id="sheet-assimilation-points" class="assimilation-points-container"></div>
-                        </div>
-                        
-                      </div>
-                      <div class="mutations-sheet-list-single" id="mutations-list-sheet">
-                        <!-- Mutações inseridas pelo JS em uma única coluna -->
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Aba 3: Inventário -->
-                  <div class="sheet-tab-panel" id="tab-inventario">
-                    <div class="inventory-block">
-                      <h3 class="section-title">INVENTÁRIO</h3>
-                      <p class="inventory-help" style="margin-bottom: 16px; font-size: var(--font-size-xs); color: var(--text-muted); line-height: 1.4;">
-                        Cada item ocupa um espaço (exceto pequenos objetos). Vestuário, cantil e mochila são automáticos.
-                      </p>
-                      
-                      <!-- Seção No Corpo -->
-                      <div class="inventory-section-wrapper" style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
-                          <h4 id="label-body-slots" style="font-family: var(--font-heading); color: var(--color-blue-glow); font-size: var(--font-size-sm); margin: 0;">
-                            No Corpo
-                          </h4>
-                          <div style="display: flex; gap: 8px;">
-                            <button id="btn-add-body-slot" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot no Corpo">
-                              + Slot
-                            </button>
-                            <button id="btn-add-item-body" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Item">
-                              + Item
-                            </button>
-                          </div>
-                        </div>
-                        <div id="inventory-body-list" class="inventory-grid" >
-                          <!-- JS renderizará 3 slots -->
-                        </div>
-                      </div>
-
-                      <!-- Seção Na Mochila -->
-                      <div class="inventory-section-wrapper">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
-                          <h4 id="label-backpack-slots" style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
-                            Na Mochila
-                          </h4>
-                          <button id="btn-add-backpack-slot" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; height: 22px; border-color: rgba(255,255,255,0.2); color: var(--text-secondary); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot na Mochila">
-                            + Slot
-                          </button>
-                        </div>
-                        <div id="inventory-backpack-list" class="inventory-grid">
-                          <!-- JS renderizará 6 slots -->
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Aba 3: Anotações -->
-                  <div class="sheet-tab-panel" id="tab-anotacoes">
-                    <div class="notes-block">
-                      <h3 class="section-title">ANOTAÇÕES</h3>
-                      <textarea id="char-notes" class="notes-textarea" placeholder="Descreva eventos importantes, refúgios conhecidos, recursos coletados ou segredos de campanha..." style="min-height: 400px; width: 100%;"></textarea>
-                    </div>
-                  </div>
-
-                  <!-- Aba 4: Homebrew -->
-                  <div class="sheet-tab-panel" id="tab-homebrew">
-                    <div class="homebrew-block">
-                      <h3 class="section-title">HOMEBREW</h3>
-                      <p class="homebrew-help">Crie e gerencie conteúdos personalizados para suas campanhas.</p>
-
-                      <div class="homebrew-section">
-                        <div class="homebrew-section-header">
-                          <h4>Características Personalizadas</h4>
-                          <button id="btn-create-homebrew-trait" class="btn btn-sm btn-success">+ Criar</button>
-                        </div>
-                        <div id="homebrew-trait-list" class="homebrew-list"></div>
-                      </div>
-
-                      <div class="homebrew-section">
-                        <div class="homebrew-section-header">
-                          <h4>Mutações Personalizadas</h4>
-                          <button id="btn-create-homebrew-mutation" class="btn btn-sm btn-success">+ Criar</button>
-                        </div>
-                        <div id="homebrew-mutation-list" class="homebrew-list"></div>
-                      </div>
-
-                      <div class="homebrew-section">
-                        <div class="homebrew-section-header">
-                          <h4>Pacotes</h4>
-                        </div>
-                        <div class="homebrew-package-actions">
-                          <button id="btn-import-homebrew" class="btn btn-sm">📥 Importar Pacote</button>
-                          <input type="file" id="file-import-homebrew" accept=".json" style="display:none">
-                          <button id="btn-export-homebrew" class="btn btn-sm">📤 Exportar Pacote</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-            </div>
             
           </div>
         </div> <!-- Fim .sheet-pages-column -->

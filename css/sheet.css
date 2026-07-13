@@ -22,21 +22,11 @@
    ========================================== */
 .sheet-redesign-container {
   display: grid;
-  grid-template-columns: 0.6fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   height: 100%;
   min-height: 0;
   overflow: hidden;
-}
-
-/* COLUNA ESQUERDA: Perfil e Aptidões */
-.sheet-redesign-left {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-  padding-right: 6px;
-  height: 100%;
 }
 
 /* COLUNA CENTRAL: Cabo de Guerra e Saúde */
@@ -67,11 +57,11 @@
 .profile-card {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 20px 16px;
+  padding: 10px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 /* Moldura Polaroid do Retrato */
@@ -80,7 +70,7 @@
   display: flex;
   flex-direction: row;
   /* Coloca Polaroid e campos lado a lado */
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   width: 100%;
   gap: 16px;
@@ -88,16 +78,22 @@
 }
 
 .portrait-side-fields {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  flex: 1;
-  /* Ocupa o espaço restante */
 }
 
+.col-2 {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 20px;
+  
+}
 .polaroid-frame {
-  width: 160px;
-  height: 200px;
+  width: 200px;
+  height: 250px;
   background-color: #ffffff;
   padding: 10px 10px 28px 10px;
   /* Borda inferior mais larga clássica */
@@ -190,8 +186,8 @@
 /* Campos de Input do Perfil */
 .profile-fields-grid {
   width: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 0.5fr;
   gap: 10px;
 }
 
