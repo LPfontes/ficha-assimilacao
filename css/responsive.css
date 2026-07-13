@@ -778,6 +778,66 @@
     padding: 8px 10px !important;
     font-size: 11px !important;
   }
+
+  /* Região / Local / Refúgio screens */
+  .world-sheet-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .world-sheet-header .btn-danger {
+    align-self: flex-end !important;
+  }
+
+  .world-name-input {
+    font-size: 16px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  #regiao-screen .polaroid-frame,
+  #local-screen .polaroid-frame,
+  #refugio-screen .polaroid-frame {
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  #regiao-screen .world-sheet-body,
+  #local-screen .world-sheet-body {
+    grid-template-columns: 1fr !important;
+  }
+
+  .world-list-item {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .world-list-item .btn-remove-world-item {
+    align-self: flex-end !important;
+    font-size: 20px !important;
+    padding: 4px 8px !important;
+  }
+
+  .ref-panel {
+    gap: 12px !important;
+  }
+
+  .card-glass {
+    padding: 12px !important;
+  }
+
+  /* Local screen - itens inline row */
+  .item-inline-row {
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
+  .item-inline-row input,
+  .item-inline-row select {
+    width: 100% !important;
+    flex: none !important;
+  }
 }
 
 /* CELULARES PORTRAIT (Largura até 480px) */
@@ -881,6 +941,27 @@
   .card-glass {
     border-radius: 2px !important;
     box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  #regiao-screen .polaroid-frame,
+  #local-screen .polaroid-frame,
+  #refugio-screen .polaroid-frame {
+    width: 140px !important;
+    height: 140px !important;
+  }
+
+  .world-sheet-screen {
+    padding: 8px !important;
+  }
+
+  .world-list-item {
+    padding: 6px 8px !important;
+  }
+
+  .world-list-item input[type="text"],
+  .world-list-item textarea {
+    font-size: 13px !important;
+    padding: 4px 6px !important;
   }
 
   .btn-cabo-adjust {
