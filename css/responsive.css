@@ -61,7 +61,9 @@
     align-items: center !important;
     justify-content: space-between !important;
     padding: 12px 16px !important;
-    position: relative;
+    position: sticky !important;
+    top: 0;
+    z-index: 100;
   }
 
   .header-logo {
@@ -507,6 +509,275 @@
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
   }
+
+  /* --- Responsividade da Mesa de Jogo --- */
+  #table-toolbar {
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+  }
+
+  #table-toolbar .table-title {
+    font-size: 13px !important;
+    margin-right: 6px !important;
+  }
+
+  #table-toolbar .room-code-badge,
+  #table-toolbar #table-host-badge {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+  }
+
+  #table-toolbar .btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    height: 28px !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 1 auto !important;
+    min-width: fit-content !important;
+  }
+
+  #table-screen {
+    height: auto !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  #table-screen.hidden {
+    display: none !important;
+  }
+
+  #table-main-area {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 1. Mapa / Cena no topo */
+  #table-map-panel {
+    order: 1 !important;
+    width: 100% !important;
+    height: 350px !important;
+    flex: none !important;
+    overflow: hidden !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  #table-map-viewport {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #table-map-image {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+  }
+
+  /* 2. Jogadores abaixo */
+  #table-player-panel {
+    order: 2 !important;
+    width: 100% !important;
+    height: auto !important;
+    flex-shrink: 0 !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  #table-player-list {
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+  }
+
+  /* 3. Rolagens abaixo */
+  #table-roll-panel {
+    order: 3 !important;
+    display: flex !important;
+    width: 100% !important;
+    height: 300px !important;
+    flex-shrink: 0 !important;
+    border-left: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  #table-roll-feed-container {
+    height: 100% !important;
+  }
+
+  #table-roll-feed {
+    max-height: 250px !important;
+    overflow-y: auto !important;
+  }
+
+  /* 4. Chat abaixo */
+  #table-chat-panel {
+    order: 4 !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 400px !important;
+    top: auto !important;
+    right: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    pointer-events: all !important;
+    z-index: 10 !important;
+  }
+
+  #btn-toggle-chat,
+  #btn-close-chat {
+    display: none !important;
+  }
+
+  #table-chat-body {
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+    opacity: 1 !important;
+    border-left: none !important;
+  }
+
+  /* --- Responsividade da Tela de Campanha --- */
+  #campaign-screen {
+    padding: 12px 8px !important;
+    height: auto !important;
+    align-items: stretch !important;
+  }
+
+  .campaign-container {
+    height: auto !important;
+  }
+
+  .campaign-header-block {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px !important;
+    gap: 12px !important;
+  }
+
+  .campaign-header-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .campaign-header-actions .btn {
+    width: 100% !important;
+    padding: 10px 16px !important;
+    justify-content: center !important;
+  }
+
+  .campaign-nav-tabs {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+  }
+
+  .campaign-tab-btn {
+    flex: 0 0 auto !important;
+    padding: 12px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .campaign-tab-contents {
+    padding: 16px !important;
+  }
+
+  .fichas-section-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  #camp-fichas-actions-container {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  #camp-share-char-select,
+  #btn-camp-share-char {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .camp-form-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .camp-input {
+    width: 100% !important;
+  }
+
+  .event-card-camp {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .chronicle-input-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  #btn-camp-add-chronicle {
+    width: 100% !important;
+  }
+
+  /* Assimilação Points - Mobile */
+  .assimilation-points-container {
+    display: flex !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .ass-point-badge {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+  }
+
+  .ass-point-badge .badge-label {
+    margin-right: 4px !important;
+  }
+
+  .btn-point-adjust {
+    padding: 0 3px !important;
+    font-size: 11px !important;
+  }
+
+  /* Tabs Nav - scroll horizontal no mobile */
+  .sheet-redesign-tabs-nav.card-glass {
+    display: flex !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
+    padding: 4px 6px 0 6px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0 !important;
+  }
+
+  .sheet-redesign-tabs-nav.card-glass::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .sheet-tab-btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+  }
 }
 
 /* CELULARES PORTRAIT (Largura até 480px) */
@@ -578,6 +849,38 @@
   .health-level-row {
     align-items: center !important;
     text-align: center !important;
+  }
+
+  .assimilation-points-container {
+    gap: 4px !important;
+  }
+
+  .ass-point-badge {
+    padding: 1px 4px !important;
+    font-size: 10px !important;
+  }
+
+  .ass-point-badge .badge-label {
+    margin-right: 2px !important;
+  }
+
+  .btn-point-adjust {
+    padding: 0 2px !important;
+    font-size: 10px !important;
+  }
+
+  .sheet-redesign-tabs-nav.card-glass {
+    padding: 2px 4px 0 4px !important;
+  }
+
+  .sheet-tab-btn {
+    padding: 6px 8px !important;
+    font-size: 10px !important;
+  }
+
+  .card-glass {
+    border-radius: 2px !important;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.15) !important;
   }
 
   .btn-cabo-adjust {

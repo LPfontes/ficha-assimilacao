@@ -622,16 +622,6 @@
   padding: 2px 8px;
 }
 
-@media (max-width: 768px) {
-  #table-player-panel { width: 160px; }
-  #table-roll-panel   { width: 180px; }
-  #table-map-panel    { flex: 1; }
-}
-
-@media (max-width: 540px) {
-  #table-player-panel { width: 120px; }
-  #table-roll-panel   { display: none; }
-}
 
 
 /* ── Botão Flutuante (FAB) da Mesa ─────────────────────────────────────────── */
