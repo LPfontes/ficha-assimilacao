@@ -16,6 +16,7 @@
     overflow-y: visible !important;
     padding: 12px !important;
     z-index: 1;
+    position: static;
   }
 
   #sheet-screen,
