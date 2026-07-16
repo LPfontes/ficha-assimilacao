@@ -15,8 +15,10 @@
     height: auto !important;
     overflow-y: visible !important;
     padding: 12px !important;
-    z-index: 1;
-    position: static;
+  }
+
+  .screen {
+    height: auto !important;
   }
 
   #sheet-screen,

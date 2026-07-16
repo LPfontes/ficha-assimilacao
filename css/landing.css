@@ -10,12 +10,10 @@
 .landing-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(10, 8, 6, 0.55) 0%,
-    rgba(10, 8, 6, 0.35) 40%,
-    rgba(10, 8, 6, 0.70) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(10, 8, 6, 0.55) 0%,
+      rgba(10, 8, 6, 0.35) 40%,
+      rgba(10, 8, 6, 0.70) 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -44,7 +42,7 @@
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--text-primary);
-  text-shadow: 0 0 30px rgba(18, 93, 110, 0.6), 0 2px 8px rgba(0,0,0,0.8);
+  text-shadow: 0 0 30px rgba(18, 93, 110, 0.6), 0 2px 8px rgba(0, 0, 0, 0.8);
   margin-bottom: 8px;
 }
 
@@ -272,7 +270,7 @@
   background: rgba(10, 8, 6, 0.95);
   border: 1px solid rgba(18, 93, 110, 0.4);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   min-width: 160px;
   z-index: 100;
   overflow: hidden;
@@ -285,8 +283,15 @@
 }
 
 @keyframes dropdown-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .char-actions-dropdown button {
@@ -357,7 +362,7 @@
 
 .empty-sub {
   font-size: var(--font-size-sm);
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 /* ==========================================================
@@ -387,25 +392,27 @@
 
 .btn-landing-secondary {
   background-color: transparent;
-  border-color: rgba(255,255,255,0.2);
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
   color: var(--text-secondary);
   padding: 10px 22px;
   font-size: var(--font-size-sm);
 }
 
 .btn-landing-secondary:hover:not(:disabled) {
-  background-color: rgba(255,255,255,0.05);
+  background-color: rgba(255, 255, 255, 0.05);
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* ==================== Mobile Responsive Adjustments ==================== */
 @media (max-width: 600px) {
+
   /* Show mobile menu button */
   .btn-mobile-menu {
     display: block;
   }
+
   /* Header layout */
   .main-header {
     flex-direction: column;
@@ -413,6 +420,7 @@
     gap: 8px;
     padding: 8px 12px;
   }
+
   .header-controls {
     justify-content: space-between;
     flex-wrap: wrap;
@@ -421,32 +429,37 @@
 
   /* Landing content padding and max width */
   .landing-content {
-    padding: 16px 12px;
     max-width: 100%;
-    gap: 16px;
+    gap: 8px;
   }
+
   .landing-tabs {
     gap: 6px;
     padding: 6px;
     margin: 4px 0 10px 0;
   }
+
   .landing-tab {
     padding: 6px 10px;
     font-size: var(--font-size-xs);
     gap: 4px;
   }
+
   .landing-title {
     font-size: var(--font-size-xxl);
   }
+
   .characters-grid {
     flex-direction: column;
     align-items: center;
     gap: 12px;
   }
+
   .character-card {
     width: 120px;
     height: 140px;
   }
+
   .landing-footer-actions {
     flex-direction: column;
     width: 100%;
