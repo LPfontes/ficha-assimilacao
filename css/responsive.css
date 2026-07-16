@@ -14,11 +14,12 @@
   .main-content {
     height: auto !important;
     overflow-y: visible !important;
-    padding: 12px !important;
+    padding: 0 !important;
   }
 
   .screen {
     height: auto !important;
+    padding: 0 !important;
   }
 
   #sheet-screen,
@@ -185,7 +186,7 @@
   }
 
   .aptitudes-columns-container {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr 1fr!important;
     gap: 12px !important;
   }
 
@@ -475,11 +476,33 @@
   }
 
   .sheet-section-header {
-    flex-direction: column !important;
     gap: 8px !important;
     align-items: center !important;
     text-align: center !important;
   }
+
+  .portrait-wrapper {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .portrait-wrapper .polaroid-frame {
+    margin: 0 auto !important;
+  }
+
+  .portrait-side-fields {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .profile-fields-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
   .header-assimilations{
     flex-direction: column !important;
     gap: 8px !important;

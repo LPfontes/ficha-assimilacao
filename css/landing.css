@@ -431,6 +431,7 @@
   .landing-content {
     max-width: 100%;
     gap: 8px;
+    padding: 0;
   }
 
   .landing-tabs {
