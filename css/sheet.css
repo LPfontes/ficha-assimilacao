@@ -1407,3 +1407,83 @@
 .inv-category-desc strong {
   color: var(--color-gold-glow);
 }
+
+/* Contador de Pressão para Assimilações Inoportunas */
+.mutation-pressure-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: hsl(275, 90%, 75%);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  margin-left: 4px;
+  user-select: none;
+}
+
+.btn-press-dec,
+.btn-press-inc {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 0;
+  line-height: 1;
+  transition: var(--transition-fast);
+}
+
+.btn-press-dec:hover,
+.btn-press-inc:hover {
+  background: rgba(168, 85, 247, 0.4);
+  border-color: rgba(168, 85, 247, 0.6);
+  color: #fff;
+}
+
+/* Botões para gerenciar Atributos Homebrew na Ficha */
+.btn-add-hb-stat {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-heading);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  margin-top: 6px;
+  width: 100%;
+  text-align: center;
+}
+
+.btn-add-hb-stat:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  border-color: var(--color-gold-glow);
+}
+
+.btn-delete-hb-stat {
+  background: transparent;
+  border: none;
+  color: var(--color-danger, #ef4444);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+  line-height: 1;
+}
+
+.btn-delete-hb-stat:hover {
+  opacity: 1;
+}

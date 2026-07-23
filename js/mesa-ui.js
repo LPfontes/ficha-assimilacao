@@ -3764,16 +3764,31 @@ function _openSharedFichaViewer(fichaObj) {
     : '<div style="color:var(--text-muted); font-size:12px;">Nenhuma característica.</div>';
 
   // Renderizar mutações / assimilações
-  const mutations = char.mutations || [];
+  const mutations = char.mutações || char.mutations || [];
   const mutationsHtml = mutations.length > 0 
-    ? mutations.map(m => `<div class="lib-item-viewer"><div class="lib-item-title">${esc(m.name)} (Nível ${m.level || 1})</div><div class="lib-item-desc">${esc(m.desc)}</div></div>`).join("")
+    ? mutations.map(m => {
+        const pressInfo = m.pressaoAtual !== undefined ? ` • Pressão: ${m.pressaoAtual}` : "";
+        return `<div class="lib-item-viewer"><div class="lib-item-title">${esc(m.name)}${pressInfo}</div><div class="lib-item-desc">${esc(m.desc)}</div></div>`;
+      }).join("")
     : '<div style="color:var(--text-muted); font-size:12px;">Nenhuma mutação/assimilação.</div>';
 
   // Renderizar inventário
-  const slots = char.inventory || {};
+  const slots = char.inventory || char.inventario || [];
   const slotsHtml = Object.values(slots).length > 0
-    ? Object.values(slots).map(s => s.name ? `<div class="lib-item-viewer"><div class="lib-item-title">${esc(s.name)}</div><div class="lib-item-desc">Qtde: ${s.qty || 1} • Tipo: ${s.type || "Geral"}</div></div>` : "").join("")
+    ? Object.values(slots).map(s => s && s.name ? `<div class="lib-item-viewer"><div class="lib-item-title">${esc(s.name)}</div><div class="lib-item-desc">Qtde: ${s.qty || 1} • Tipo: ${s.type || "Geral"}</div></div>` : "").filter(Boolean).join("")
     : '<div style="color:var(--text-muted); font-size:12px;">Inventário vazio.</div>';
+
+  const instintosHtml = Object.entries(char.instintos || {}).map(([name, val]) =>
+    `<div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">${esc(name)}</span><span class="ficha-viewer-stat-value">${val}</span></div>`
+  ).join("");
+
+  const conhecimentosHtml = Object.entries(char.conhecimentos || {}).map(([name, val]) =>
+    `<div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">${esc(name)}</span><span class="ficha-viewer-stat-value">${val}</span></div>`
+  ).join("");
+
+  const praticasHtml = Object.entries(char.praticas || {}).map(([name, val]) =>
+    `<div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">${esc(name)}</span><span class="ficha-viewer-stat-value">${val}</span></div>`
+  ).join("");
 
   body.innerHTML = `
     <div class="ficha-viewer-grid">
@@ -3809,34 +3824,20 @@ function _openSharedFichaViewer(fichaObj) {
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Instintos)</div>
         <div class="ficha-viewer-aptitudes-grid">
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Influência</span><span class="ficha-viewer-stat-value">${char.instintos?.Influência || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Percepção</span><span class="ficha-viewer-stat-value">${char.instintos?.Percepção || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Potência</span><span class="ficha-viewer-stat-value">${char.instintos?.Potência || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Reação</span><span class="ficha-viewer-stat-value">${char.instintos?.Reação || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Resolução</span><span class="ficha-viewer-stat-value">${char.instintos?.Resolução || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Sagacidade</span><span class="ficha-viewer-stat-value">${char.instintos?.Sagacidade || 0}</span></div>
+          ${instintosHtml || '<div style="color:var(--text-muted); font-size:12px;">Nenhum instinto.</div>'}
         </div>
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Conhecimentos)</div>
         <div class="ficha-viewer-aptitudes-grid">
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Biologia</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Biologia || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Engenharia</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Engenharia || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Erudição</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Erudição || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Geografia</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Geografia || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Medicina</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Medicina || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Segurança</span><span class="ficha-viewer-stat-value">${char.conhecimentos?.Segurança || 0}</span></div>
+          ${conhecimentosHtml || '<div style="color:var(--text-muted); font-size:12px;">Nenhum conhecimento.</div>'}
         </div>
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Práticas)</div>
         <div class="ficha-viewer-aptitudes-grid">
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Armas</span><span class="ficha-viewer-stat-value">${char.praticas?.Armas || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Atletismo</span><span class="ficha-viewer-stat-value">${char.praticas?.Atletismo || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Expressão</span><span class="ficha-viewer-stat-value">${char.praticas?.Expressão || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Furtividade</span><span class="ficha-viewer-stat-value">${char.praticas?.Furtividade || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Manufaturas</span><span class="ficha-viewer-stat-value">${char.praticas?.Manufaturas || 0}</span></div>
-          <div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">Sobrevivência</span><span class="ficha-viewer-stat-value">${char.praticas?.Sobrevivência || 0}</span></div>
+          ${praticasHtml || '<div style="color:var(--text-muted); font-size:12px;">Nenhuma prática.</div>'}
         </div>
       </div>
+
       
       <!-- Coluna Direita: Características, Assimilações e Inventário -->
       <div class="ficha-viewer-block">

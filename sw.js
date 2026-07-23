@@ -1,4 +1,7 @@
+// Constantes de Cache e Verificação Semanal
 const CACHE_NAME = 'assimilacao-rpg-v2';
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000; // 1 semana em milissegundos (604.800.000 ms)
+
 const ASSETS = [
   './',
   './index.html',
@@ -65,6 +68,83 @@ const ASSETS = [
   './assets/avatar.png'
 ];
 
+
+// Auxiliares para ler/salvar o timestamp da última verificação do servidor
+async function getLastServerCheckTime() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const response = await cache.match('/__server_check_time__');
+    if (response) {
+      const data = await response.json();
+      return data.timestamp || 0;
+    }
+  } catch (err) {
+    console.warn('SW: Não foi possível obter o timestamp da última verificação.', err);
+  }
+  return 0;
+}
+
+async function setLastServerCheckTime(timestamp) {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const response = new Response(JSON.stringify({ timestamp }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    await cache.put('/__server_check_time__', response);
+  } catch (err) {
+    console.warn('SW: Não foi possível salvar o timestamp da última verificação.', err);
+  }
+}
+
+// Verifica a disponibilidade do servidor a cada 1 semana
+async function checkServerAvailability() {
+  const now = Date.now();
+  const lastCheck = await getLastServerCheckTime();
+
+  // Se ainda não passou 1 semana desde a última verificação, não executa
+  if (lastCheck > 0 && (now - lastCheck) < ONE_WEEK_MS) {
+    return;
+  }
+
+  try {
+    // Tenta acessar o servidor ignorando o cache
+    const response = await fetch(`${self.location.origin}/manifest.json?t=${now}`, {
+      method: 'GET',
+      cache: 'no-store'
+    });
+
+    if (response && response.ok) {
+      console.log('SW: Verificação semanal do servidor bem-sucedida (Resposta OK). Atualizando timestamp e recarregando aplicação...');
+      await setLastServerCheckTime(now);
+
+      // Notifica todos os clientes (janelas abertas) para recarregarem a aplicação
+      const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of clientsList) {
+        client.postMessage({ type: 'RELOAD_APP' });
+      }
+    } else {
+      console.warn('SW: Verificação semanal do servidor retornou erro/status não OK. Resetando o timeout (novo ciclo de 1 semana).');
+      await setLastServerCheckTime(now);
+    }
+  } catch (error) {
+    console.warn('SW: Erro de rede ao verificar o servidor. Resetando o timeout (novo ciclo de 1 semana).', error);
+    await setLastServerCheckTime(now);
+  }
+}
+
+let serverCheckInterval = null;
+function startWeeklyCheckTimer() {
+  if (serverCheckInterval) clearInterval(serverCheckInterval);
+
+  // Executa uma verificação ao iniciar
+  checkServerAvailability();
+
+  // Re-verifica periodicamente (a cada 1 hora) para checar se o intervalo de 1 semana expirou
+  serverCheckInterval = setInterval(() => {
+    checkServerAvailability();
+  }, 60 * 60 * 1000);
+}
+
 // Instala o service worker e armazena os recursos estáticos em cache
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -75,7 +155,7 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// Ativa e remove caches antigos
+// Ativa e remove caches antigos, iniciando o timer semanal
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -86,13 +166,25 @@ self.addEventListener('activate', (e) => {
           }
         })
       );
+    }).then(() => {
+      startWeeklyCheckTimer();
     })
   );
   self.clients.claim();
 });
 
+// Manipula mensagens enviadas do cliente para o Service Worker
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CHECK_SERVER_NOW') {
+    checkServerAvailability();
+  }
+});
+
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+
+  // Ignora requisições de checagem do servidor para evitar interceptação pelo cache
+  if (e.request.url.includes('/__server_check_time__')) return;
 
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
@@ -123,3 +215,4 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+

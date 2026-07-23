@@ -88,24 +88,26 @@ export function updateDiceDrawerUI() {
   el.diceQtyD12.textContent = state.selectedRoll.d12;
   
   if (el.rollSelectInstinto && state.currentCharacter) {
-    const instNames = ["Influência", "Percepção", "Potência", "Reação", "Resolução", "Sagacidade"];
+    const char = state.currentCharacter;
+    const instNames = Object.keys(char.instintos || {});
     const selected = state.selectedRoll.instinto;
     el.rollSelectInstinto.innerHTML = `<option value="">-- Nenhum --</option>` +
-      instNames.map(i => `<option value="${i}" ${i === selected ? 'selected' : ''}>${i} (${state.currentCharacter.instintos[i] || 0})</option>`).join("");
+      instNames.map(i => `<option value="${i}" ${i === selected ? 'selected' : ''}>${i} (${char.instintos[i] || 0})</option>`).join("");
   }
   if (el.rollSelectSkill && state.currentCharacter) {
-    const conhecimentos = ["Biologia", "Erudição", "Engenharia", "Geografia", "Medicina", "Segurança"];
-    const praticas = ["Armas", "Atletismo", "Expressão", "Furtividade", "Manufaturas", "Sobrevivência"];
-    const selected = state.selectedRoll.skill;
     const char = state.currentCharacter;
-    const opt = (name) => {
-      const val = char.conhecimentos?.[name] ?? char.praticas?.[name] ?? 0;
+    const conhecimentos = Object.keys(char.conhecimentos || {});
+    const praticas = Object.keys(char.praticas || {});
+    const selected = state.selectedRoll.skill;
+    const opt = (name, cat) => {
+      const val = char[cat]?.[name] ?? 0;
       return `<option value="${name}" ${name === selected ? 'selected' : ''}>${name} (${val})</option>`;
     };
     el.rollSelectSkill.innerHTML = `<option value="">-- Nenhum --</option>` +
-      `<optgroup label="Conhecimentos">${conhecimentos.map(opt).join("")}</optgroup>` +
-      `<optgroup label="Práticas">${praticas.map(opt).join("")}</optgroup>`;
+      `<optgroup label="Conhecimentos">${conhecimentos.map(n => opt(n, "conhecimentos")).join("")}</optgroup>` +
+      `<optgroup label="Práticas">${praticas.map(n => opt(n, "praticas")).join("")}</optgroup>`;
   }
+
   
   if (state.selectedRoll.instinto2) {
     const instText = `${state.selectedRoll.instinto} (${state.currentCharacter.instintos[state.selectedRoll.instinto] || 0})`;
@@ -580,13 +582,13 @@ export function initRolagemAssimiladaPanel() {
   const char = state.currentCharacter;
   if (!char) return;
 
-  const INSTINTOS = ["Influência", "Percepção", "Potência", "Reação", "Resolução", "Sagacidade"];
+  const instNames = Object.keys(char.instintos || {});
   const select1 = document.getElementById("inst-select-1");
   const select2 = document.getElementById("inst-select-2");
   
   if (!select1 || !select2) return;
 
-  const optionsHtml = INSTINTOS.map(i =>
+  const optionsHtml = instNames.map(i =>
     `<option value="${i}">${i} (${char.instintos[i] || 0})</option>`
   ).join("");
 
@@ -595,7 +597,7 @@ export function initRolagemAssimiladaPanel() {
 
   // Seleciona o instinto padrão se houver
   const preInstinto = state.selectedRoll.instinto;
-  if (preInstinto && INSTINTOS.includes(preInstinto)) {
+  if (preInstinto && instNames.includes(preInstinto)) {
     select1.value = preInstinto;
   }
 

@@ -1600,7 +1600,15 @@
           .then(reg => console.log('Service Worker registrado com sucesso:', reg.scope))
           .catch(err => console.error('Erro ao registrar Service Worker:', err));
       });
+
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'RELOAD_APP') {
+          console.log('Ordem do Service Worker recebida: Servidor verificado (Resposta OK). Recarregando aplicação...');
+          window.location.reload();
+        }
+      });
     }
   </script>
+
 </body>
 </html>

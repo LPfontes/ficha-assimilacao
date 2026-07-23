@@ -1,4 +1,5 @@
-import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, getCustomMutations, saveCustomTraits, saveCustomMutations } from "./state.js";
+import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, getCustomMutations, saveCustomTraits, saveCustomMutations, DEFAULT_INSTINCTS, DEFAULT_CONHECIMENTOS, DEFAULT_PRATICAS, getCustomInstincts, saveCustomInstincts, getCustomAptitudes, saveCustomAptitudes } from "./state.js";
+
 import { worldState, saveItemToDb } from "./world-state.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
@@ -19,11 +20,53 @@ export { ITEM_CATEGORIAS };
 
 let dragSourceIndex = -1;
 
+function addCustomInstinctPrompt() {
+  const char = state.currentCharacter;
+  if (!char) return;
+  const name = prompt("Nome do novo Instinto Customizado (Homebrew):")?.trim();
+  if (!name) return;
+  if (char.instintos && char.instintos[name] !== undefined) {
+    alert("Já existe um instinto com este nome nesta ficha!");
+    return;
+  }
+  if (!char.instintos) char.instintos = {};
+  char.instintos[name] = 1;
+  saveCurrentCharacter();
+  renderAptitudesSheet();
+}
+
+function addCustomAptitudePrompt(categoryKey) {
+  const char = state.currentCharacter;
+  if (!char) return;
+  const catLabel = categoryKey === "conhecimentos" ? "Conhecimento" : "Prática";
+  const name = prompt(`Nome do(a) novo(a) ${catLabel} Customizado(a) (Homebrew):`)?.trim();
+  if (!name) return;
+  if (char.conhecimentos?.[name] !== undefined || char.praticas?.[name] !== undefined) {
+    alert("Já existe uma aptidão com este nome nesta ficha!");
+    return;
+  }
+  if (!char[categoryKey]) char[categoryKey] = {};
+  char[categoryKey][name] = 0;
+  saveCurrentCharacter();
+  renderAptitudesSheet();
+}
+
+function removeCustomStat(categoryKey, name) {
+  const char = state.currentCharacter;
+  if (!char || !char[categoryKey]) return;
+  if (confirm(`Deseja remover o atributo customizado "${name}" desta ficha?`)) {
+    delete char[categoryKey][name];
+    saveCurrentCharacter();
+    renderAptitudesSheet();
+  }
+}
+
 export function renderAptitudesSheet() {
   const char = state.currentCharacter;
   if (!char) return;
 
   logger.debug("Renderizando aptidões na ficha...");
+
 
   // Helper para atualizar valores das aptidões quando clica na bolha
   const updateAptitudeValue = (type, categoryKey, name, newValue) => {
@@ -58,19 +101,29 @@ export function renderAptitudesSheet() {
 
   Object.keys(char.instintos).forEach(name => {
     const val = char.instintos[name];
+    const isCustom = !DEFAULT_INSTINCTS.includes(name);
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.instinto === name) row.classList.add("selected-for-roll");
 
     if (!instinctsLocked) {
       row.innerHTML = `
-        <span class="name">${name}</span>
+        <span class="name" style="display:flex; align-items:center; gap:4px;">
+          ${name}
+          ${isCustom ? `<button class="btn-delete-hb-stat" title="Remover Instinto Customizado">&times;</button>` : ''}
+        </span>
         <div style="display:flex; align-items:center; gap:6px;">
           <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
           <div class="value-bubbles"></div>
           <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
         </div>
       `;
+      if (isCustom) {
+        row.querySelector(".btn-delete-hb-stat").addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeCustomStat("instintos", name);
+        });
+      }
     } else {
       row.innerHTML = `
         <span class="name">${name}</span>
@@ -112,6 +165,17 @@ export function renderAptitudesSheet() {
     el.instinctsListSheet.appendChild(row);
   });
 
+  if (!instinctsLocked) {
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn-add-hb-stat";
+    addBtn.textContent = "+ Instinto HB";
+    addBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      addCustomInstinctPrompt();
+    });
+    el.instinctsListSheet.appendChild(addBtn);
+  }
+
   // Renders de Conhecimentos
   el.conhecimentosListSheet.innerHTML = "";
   const conhecimentosCard = el.conhecimentosListSheet.closest(".aptitude-column-card");
@@ -119,19 +183,29 @@ export function renderAptitudesSheet() {
 
   Object.keys(char.conhecimentos).forEach(name => {
     const val = char.conhecimentos[name];
+    const isCustom = !DEFAULT_CONHECIMENTOS.includes(name);
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
 
     if (!conhecimentosLocked) {
       row.innerHTML = `
-        <span class="name">${name}</span>
+        <span class="name" style="display:flex; align-items:center; gap:4px;">
+          ${name}
+          ${isCustom ? `<button class="btn-delete-hb-stat" title="Remover Conhecimento Customizado">&times;</button>` : ''}
+        </span>
         <div style="display:flex; align-items:center; gap:6px;">
           <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
           <div class="value-bubbles"></div>
           <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
         </div>
       `;
+      if (isCustom) {
+        row.querySelector(".btn-delete-hb-stat").addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeCustomStat("conhecimentos", name);
+        });
+      }
     } else {
       row.innerHTML = `
         <span class="name">${name}</span>
@@ -173,6 +247,17 @@ export function renderAptitudesSheet() {
     el.conhecimentosListSheet.appendChild(row);
   });
 
+  if (!conhecimentosLocked) {
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn-add-hb-stat";
+    addBtn.textContent = "+ Conhecimento HB";
+    addBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      addCustomAptitudePrompt("conhecimentos");
+    });
+    el.conhecimentosListSheet.appendChild(addBtn);
+  }
+
   // Renders de Práticas
   el.praticasListSheet.innerHTML = "";
   const praticasCard = el.praticasListSheet.closest(".aptitude-column-card");
@@ -180,19 +265,29 @@ export function renderAptitudesSheet() {
 
   Object.keys(char.praticas).forEach(name => {
     const val = char.praticas[name];
+    const isCustom = !DEFAULT_PRATICAS.includes(name);
     const row = document.createElement("div");
     row.className = "aptitude-item";
     if (state.selectedRoll.skill === name) row.classList.add("selected-for-roll");
 
     if (!praticasLocked) {
       row.innerHTML = `
-        <span class="name">${name}</span>
+        <span class="name" style="display:flex; align-items:center; gap:4px;">
+          ${name}
+          ${isCustom ? `<button class="btn-delete-hb-stat" title="Remover Prática Customizada">&times;</button>` : ''}
+        </span>
         <div style="display:flex; align-items:center; gap:6px;">
           <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
           <div class="value-bubbles"></div>
           <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
         </div>
       `;
+      if (isCustom) {
+        row.querySelector(".btn-delete-hb-stat").addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeCustomStat("praticas", name);
+        });
+      }
     } else {
       row.innerHTML = `
         <span class="name">${name}</span>
@@ -233,7 +328,19 @@ export function renderAptitudesSheet() {
 
     el.praticasListSheet.appendChild(row);
   });
+
+  if (!praticasLocked) {
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn-add-hb-stat";
+    addBtn.textContent = "+ Prática HB";
+    addBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      addCustomAptitudePrompt("praticas");
+    });
+    el.praticasListSheet.appendChild(addBtn);
+  }
 }
+
 
 
 export function renderHealthSheet() {
@@ -674,12 +781,35 @@ export function renderMutationsSheet() {
   char.mutações.forEach(mut => {
     const row = document.createElement("div");
     row.className = `mutation-sheet-item suit-${mut.suit}`;
+
+    const pressMatch = mut.cost ? mut.cost.toLowerCase().match(/(\d+)\s*press/) : null;
+    const parsedPress = pressMatch ? parseInt(pressMatch[1]) : (mut.cost && (mut.cost.toLowerCase().includes("press") || mut.cost.toLowerCase().includes("presão")) ? 1 : 0);
+    const isPressSuit = mut.suit === "inoportunas" || parsedPress > 0;
+    let maxPressao = parsedPress;
+    if (!maxPressao && mut.suit === "inoportunas") {
+      maxPressao = 6;
+    }
+
+    if (isPressSuit && maxPressao > 0) {
+      if (mut.pressaoAtual === undefined || mut.pressaoAtual === null) {
+        mut.pressaoAtual = maxPressao;
+      }
+    }
+
     row.innerHTML = `
       <div style="flex:1;">
         <div class="title" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <span style="font-weight: bold;">${mut.name}</span>
           <span class="mutation-badge suit-tag-${mut.suit}">${suitLabels[mut.suit] || mut.suit}</span>
           <span style="font-size:10px; color:var(--text-muted);">(${mut.cost})</span>
+          ${isPressSuit && maxPressao > 0 ? `
+            <div class="mutation-pressure-counter" title="Contador de Pressão (Investidas restantes)">
+              <span>Pressão:</span>
+              <button class="btn-press-dec">-</button>
+              <span class="val-pressao" style="font-weight:bold; min-width:14px; text-align:center;">${mut.pressaoAtual}</span> / ${maxPressao}
+              <button class="btn-press-inc">+</button>
+            </div>
+          ` : ""}
         </div>
         <div class="desc" style="margin-top: 4px;">${mut.desc}</div>
       </div>
@@ -687,6 +817,31 @@ export function renderMutationsSheet() {
         &times;
       </button>
     `;
+
+    if (isPressSuit && maxPressao > 0) {
+      const decBtn = row.querySelector(".btn-press-dec");
+      const incBtn = row.querySelector(".btn-press-inc");
+      if (decBtn) {
+        decBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (mut.pressaoAtual > 0) {
+            mut.pressaoAtual--;
+            saveCurrentCharacter();
+            renderMutationsSheet();
+          }
+        });
+      }
+      if (incBtn) {
+        incBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (mut.pressaoAtual < 99) {
+            mut.pressaoAtual++;
+            saveCurrentCharacter();
+            renderMutationsSheet();
+          }
+        });
+      }
+    }
 
     row.querySelector(".btn-remove-mutation").addEventListener("click", () => {
       if (confirm(`Remover mutação ${mut.name}?`)) {

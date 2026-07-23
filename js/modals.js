@@ -41,7 +41,8 @@ function parseCost(costStr) {
   return { a, b, c, singular };
 }
 
-import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations, updateCloudSyncBadge, updateCharSelector } from "./state.js";
+import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations, getCustomInstincts, saveCustomInstincts, getCustomAptitudes, saveCustomAptitudes, updateCloudSyncBadge, updateCharSelector } from "./state.js";
+
 import { worldState, saveItemToDb } from "./world-state.js";
 import { getFirebaseConfig } from "./config.js";
 import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet, renderSavedMacrosSheet } from "./sheet.js";
@@ -1904,12 +1905,7 @@ export function openCustomRollModal(macroToEdit = null) {
           <label id="label-instinto-1" for="macro-instinto" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Instinto (d6):</label>
           <select id="macro-instinto" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
             <option value="">-- Nenhum --</option>
-            <option value="Influência" ${macro.instinto === "Influência" ? "selected" : ""}>Influência</option>
-            <option value="Percepção" ${macro.instinto === "Percepção" ? "selected" : ""}>Percepção</option>
-            <option value="Potência" ${macro.instinto === "Potência" ? "selected" : ""}>Potência</option>
-            <option value="Reação" ${macro.instinto === "Reação" ? "selected" : ""}>Reação</option>
-            <option value="Resolução" ${macro.instinto === "Resolução" ? "selected" : ""}>Resolução</option>
-            <option value="Sagacidade" ${macro.instinto === "Sagacidade" ? "selected" : ""}>Sagacidade</option>
+            ${Object.keys(state.currentCharacter?.instintos || { Influência:1, Percepção:1, Potência:1, Reação:1, Resolução:1, Sagacidade:1 }).map(i => `<option value="${i}" ${macro.instinto === i ? "selected" : ""}>${i}</option>`).join("")}
           </select>
         </div>
         <div class="form-group" id="group-instinto-bonus" style="display:flex; flex-direction:column; gap:4px;">
@@ -1920,12 +1916,7 @@ export function openCustomRollModal(macroToEdit = null) {
           <label for="macro-instinto-2" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Instinto 2 (d12):</label>
           <select id="macro-instinto-2" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
             <option value="">-- Nenhum --</option>
-            <option value="Influência" ${macro.instinto2 === "Influência" ? "selected" : ""}>Influência</option>
-            <option value="Percepção" ${macro.instinto2 === "Percepção" ? "selected" : ""}>Percepção</option>
-            <option value="Potência" ${macro.instinto2 === "Potência" ? "selected" : ""}>Potência</option>
-            <option value="Reação" ${macro.instinto2 === "Reação" ? "selected" : ""}>Reação</option>
-            <option value="Resolução" ${macro.instinto2 === "Resolução" ? "selected" : ""}>Resolução</option>
-            <option value="Sagacidade" ${macro.instinto2 === "Sagacidade" ? "selected" : ""}>Sagacidade</option>
+            ${Object.keys(state.currentCharacter?.instintos || { Influência:1, Percepção:1, Potência:1, Reação:1, Resolução:1, Sagacidade:1 }).map(i => `<option value="${i}" ${macro.instinto2 === i ? "selected" : ""}>${i}</option>`).join("")}
           </select>
         </div>
       </div>
@@ -1936,22 +1927,13 @@ export function openCustomRollModal(macroToEdit = null) {
           <select id="macro-skill" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
             <option value="">-- Nenhum --</option>
             <optgroup label="Conhecimentos">
-              <option value="Biologia" ${macro.skill === "Biologia" ? "selected" : ""}>Biologia</option>
-              <option value="Erudição" ${macro.skill === "Erudição" ? "selected" : ""}>Erudição</option>
-              <option value="Engenharia" ${macro.skill === "Engenharia" ? "selected" : ""}>Engenharia</option>
-              <option value="Geografia" ${macro.skill === "Geografia" ? "selected" : ""}>Geografia</option>
-              <option value="Medicina" ${macro.skill === "Medicina" ? "selected" : ""}>Medicina</option>
-              <option value="Segurança" ${macro.skill === "Segurança" ? "selected" : ""}>Segurança</option>
+              ${Object.keys(state.currentCharacter?.conhecimentos || { Biologia:0, Erudição:0, Engenharia:0, Geografia:0, Medicina:0, Segurança:0 }).map(s => `<option value="${s}" ${macro.skill === s ? "selected" : ""}>${s}</option>`).join("")}
             </optgroup>
             <optgroup label="Práticas">
-              <option value="Armas" ${macro.skill === "Armas" ? "selected" : ""}>Armas</option>
-              <option value="Atletismo" ${macro.skill === "Atletismo" ? "selected" : ""}>Atletismo</option>
-              <option value="Expressão" ${macro.skill === "Expressão" ? "selected" : ""}>Expressão</option>
-              <option value="Furtividade" ${macro.skill === "Furtividade" ? "selected" : ""}>Furtividade</option>
-              <option value="Manufaturas" ${macro.skill === "Manufaturas" ? "selected" : ""}>Manufaturas</option>
-              <option value="Sobrevivência" ${macro.skill === "Sobrevivência" ? "selected" : ""}>Sobrevivência</option>
+              ${Object.keys(state.currentCharacter?.praticas || { Armas:0, Atletismo:0, Expressão:0, Furtividade:0, Manufaturas:0, Sobrevivência:0 }).map(s => `<option value="${s}" ${macro.skill === s ? "selected" : ""}>${s}</option>`).join("")}
             </optgroup>
           </select>
+
         </div>
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
           <label for="macro-skill-bonus" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Bônus Dados Skill (d10):</label>
@@ -2382,8 +2364,39 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
     } else if (activeTab === "homebrew") {
       const customTraits = getCustomTraits();
       const customMutations = getCustomMutations();
+      const customInstincts = getCustomInstincts();
+      const customAptitudes = getCustomAptitudes();
       
       html = `
+        <!-- Instintos Homebrew -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--text-primary); font-size:var(--font-size-sm);">Instintos Customizados (${customInstincts.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px; max-height:120px; overflow-y:auto; padding-right:4px;">
+          ${customInstincts.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhum instinto customizado.</p>` : 
+            customInstincts.map((inst, idx) => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${typeof inst === 'string' ? inst : inst.nome}</span>
+                <button class="btn btn-xs btn-danger btn-delete-custom-instinct" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+              </div>
+            `).join('')
+          }
+        </div>
+
+        <!-- Aptidões Homebrew -->
+        <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--text-primary); font-size:var(--font-size-sm);">Aptidões Customizadas (${customAptitudes.length})</h4>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px; max-height:120px; overflow-y:auto; padding-right:4px;">
+          ${customAptitudes.length === 0 ? `<p style="font-size:var(--font-size-xs); color:var(--text-secondary);">Nenhuma aptidão customizada.</p>` : 
+            customAptitudes.map((apt, idx) => `
+              <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
+                <div>
+                  <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${typeof apt === 'string' ? apt : (apt.nome || apt.name)}</span>
+                  <small style="font-size:10px; color:var(--text-secondary); margin-left:6px;">(${apt.categoria || "Geral"})</small>
+                </div>
+                <button class="btn btn-xs btn-danger btn-delete-custom-aptitude" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+              </div>
+            `).join('')
+          }
+        </div>
+
         <!-- Características Homebrew -->
         <h4 style="font-family:var(--font-heading); margin-bottom:8px; color:var(--text-primary); font-size:var(--font-size-sm);">Características Customizadas (${customTraits.length})</h4>
         <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px; max-height:150px; overflow-y:auto; padding-right:4px;">
@@ -2416,6 +2429,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
           }
         </div>
       `;
+
     } else if (activeTab === "nuvem") {
       if (!state.currentUser) {
         html = `
@@ -2713,6 +2727,34 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
         });
       });
 
+      el.modalBody.querySelectorAll(".btn-delete-custom-instinct").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          const instincts = getCustomInstincts();
+          const name = typeof instincts[idx] === 'string' ? instincts[idx] : instincts[idx]?.nome;
+          if (confirm(`Tem certeza de que deseja excluir o instinto customizado "${name}"?`)) {
+            instincts.splice(idx, 1);
+            saveCustomInstincts(instincts);
+            import("./sheet.js").then(({ renderHomebrewSheet }) => renderHomebrewSheet());
+            renderContent();
+          }
+        });
+      });
+
+      el.modalBody.querySelectorAll(".btn-delete-custom-aptitude").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          const aptitudes = getCustomAptitudes();
+          const name = typeof aptitudes[idx] === 'string' ? aptitudes[idx] : (aptitudes[idx]?.nome || aptitudes[idx]?.name);
+          if (confirm(`Tem certeza de que deseja excluir a aptidão customizada "${name}"?`)) {
+            aptitudes.splice(idx, 1);
+            saveCustomAptitudes(aptitudes);
+            import("./sheet.js").then(({ renderHomebrewSheet }) => renderHomebrewSheet());
+            renderContent();
+          }
+        });
+      });
+
       el.modalBody.querySelectorAll(".btn-delete-custom-mutation").forEach(btn => {
         btn.addEventListener("click", () => {
           const idx = parseInt(btn.getAttribute("data-idx"), 10);
@@ -2727,6 +2769,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
         });
       });
     }
+
 
     // Eventos da aba Nuvem
     if (activeTab === "nuvem") {

@@ -436,6 +436,10 @@ export function importCharacterFile(e) {
 // ==========================================
 // HOME BREW — DADOS PERSONALIZADOS
 // ==========================================
+export const DEFAULT_INSTINCTS = ["Influência", "Percepção", "Potência", "Reação", "Resolução", "Sagacidade"];
+export const DEFAULT_CONHECIMENTOS = ["Biologia", "Erudição", "Engenharia", "Geografia", "Medicina", "Segurança"];
+export const DEFAULT_PRATICAS = ["Armas", "Atletismo", "Expressão", "Furtividade", "Manufaturas", "Sobrevivência"];
+
 export function getCustomTraits() {
   try { return JSON.parse(localStorage.getItem("assimilação_homebrew_traits") || "[]"); }
   catch { return []; }
@@ -450,8 +454,23 @@ export function getCustomMutations() {
 export function saveCustomMutations(mutations) {
   localStorage.setItem("assimilação_homebrew_mutations", JSON.stringify(mutations));
 }
+export function getCustomInstincts() {
+  try { return JSON.parse(localStorage.getItem("assimilação_homebrew_instincts") || "[]"); }
+  catch { return []; }
+}
+export function saveCustomInstincts(instincts) {
+  localStorage.setItem("assimilação_homebrew_instincts", JSON.stringify(instincts));
+}
+export function getCustomAptitudes() {
+  try { return JSON.parse(localStorage.getItem("assimilação_homebrew_aptitudes") || "[]"); }
+  catch { return []; }
+}
+export function saveCustomAptitudes(aptitudes) {
+  localStorage.setItem("assimilação_homebrew_aptitudes", JSON.stringify(aptitudes));
+}
 
 // Persistir salvamentos pendentes ao fechar/recarregar a página
 window.addEventListener("beforeunload", () => {
   saveCurrentCharacterImmediate();
 });
+

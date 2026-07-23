@@ -90,7 +90,15 @@
             .then(reg => console.log('Service Worker do Dado registrado com sucesso:', reg.scope))
             .catch(err => console.error('Erro ao registrar Service Worker no Dado:', err));
         });
+
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'RELOAD_APP') {
+            console.log('Ordem do Service Worker recebida (Dado): Recarregando...');
+            window.location.reload();
+          }
+        });
       }
     </script>
+
 </body>
 </html>
