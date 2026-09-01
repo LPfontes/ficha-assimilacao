@@ -9,7 +9,7 @@ const githubPagesEnv = {
   FIREBASE_MESSAGING_SENDER_ID: "631521996104",
   FIREBASE_APP_ID: "1:631521996104:web:547f5bed92e2524732577d",
   GCS_BUCKET_NAME: "mesa_assimilacao",
-  WS_SERVER_URL: "wss://mesa-server-631521996104.southamerica-east1.run.app"
+  WS_SERVER_URL: "wss://ficha-assimilacao.onrender.com"
   
 };
 
