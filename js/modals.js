@@ -170,10 +170,23 @@ export function checkCharacterTraitPrerequisites(char, reqs) {
     }
     if (key === "val") continue;
 
-    if (char.instintos[key] !== undefined) {
+    if (key === "Assimilação" || key === "assimilacao" || key === "assNivel") {
+      const ass = char.assNivel !== undefined ? char.assNivel : 1;
+      if (ass < value) return false;
+      continue;
+    }
+    if (key === "Determinação" || key === "determinacao" || key === "detNivel") {
+      const det = char.detNivel !== undefined ? char.detNivel : 1;
+      if (det < value) return false;
+      continue;
+    }
+
+    if (char.instintos && char.instintos[key] !== undefined) {
       if (char.instintos[key] < value) return false;
     } else {
-      const val = char.conhecimentos[key] !== undefined ? char.conhecimentos[key] : (char.praticas[key] || 0);
+      const val = (char.conhecimentos && char.conhecimentos[key] !== undefined)
+        ? char.conhecimentos[key]
+        : ((char.praticas && char.praticas[key]) || 0);
       if (val < value) return false;
     }
   }

@@ -2,6 +2,16 @@ import { el, state, loadCharacter, loadCharactersFromStorage, updateCharSelector
 import { startWizard } from "./wizard.js";
 import { ICONS } from "../icons.js";
 import { logger } from "./logger.js";
+import {
+  loadFolders,
+  createFolder,
+  renameFolder,
+  deleteFolder,
+  toggleFolderCollapsed,
+  setAllFoldersCollapsed,
+  isUnassignedCollapsed,
+  setItemFolder
+} from "./folders.js";
 
 const landingScreen = document.getElementById("landing-screen");
 const charactersList = document.getElementById("characters-list");
@@ -10,6 +20,9 @@ const btnCreateFirstChar = document.getElementById("btn-create-first-char");
 const btnImportLanding = document.getElementById("btn-import-landing");
 const fileImportLanding = document.getElementById("file-import-landing");
 const btnEntrarCampanhaLanding = document.getElementById("btn-entrar-campanha-landing");
+const btnNewFolder = document.getElementById("btn-new-folder");
+const btnCollapseAllFolders = document.getElementById("btn-collapse-all-folders");
+const btnExpandAllFolders = document.getElementById("btn-expand-all-folders");
 
 let openDropdownId = null;
 let activeFilterTab = "all";
@@ -78,13 +91,28 @@ export function initLandingScreen() {
   document.addEventListener("characters-updated", () => {
     renderCharactersList();
   });
+
+  btnNewFolder?.addEventListener("click", () => {
+    openCreateFolderModal();
+  });
+
+  btnCollapseAllFolders?.addEventListener("click", () => {
+    setAllFoldersCollapsed(true);
+    renderCharactersList();
+  });
+
+  btnExpandAllFolders?.addEventListener("click", () => {
+    setAllFoldersCollapsed(false);
+    renderCharactersList();
+  });
 }
 
-function handleCreateClick() {
+function handleCreateClick(folderId = null) {
+  if (folderId) state.pendingFolderId = folderId;
   if (activeFilterTab === "all") {
-    openSheetTypeModal();
+    openSheetTypeModal(folderId);
   } else {
-    _createSheetByType(activeFilterTab);
+    _createSheetByType(activeFilterTab, folderId);
   }
 }
 
@@ -101,7 +129,7 @@ export function showLandingScreen(restore = true) {
   }
 }
 
-function openSheetTypeModal() {
+function openSheetTypeModal(folderId = null) {
   const modalContainer = el.modalContainer;
   const modalBody = el.modalBody;
 
@@ -147,7 +175,7 @@ function openSheetTypeModal() {
     const activate = () => {
       const type = card.dataset.type;
       modalContainer.classList.add("hidden");
-      _createSheetByType(type);
+      _createSheetByType(type, folderId);
     };
     card.addEventListener("click", activate);
     card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") activate(); });
@@ -160,7 +188,9 @@ function openSheetTypeModal() {
   }, { once: true });
 }
 
-async function _createSheetByType(type) {
+async function _createSheetByType(type, folderId = null) {
+  if (folderId) state.pendingFolderId = folderId;
+
   switch (type) {
     case "infectado":
       startWizard();
@@ -169,18 +199,33 @@ async function _createSheetByType(type) {
       const { startNewRefugio } = await import("./refugio.js");
       landingScreen.classList.add("hidden");
       startNewRefugio();
+      if (folderId && window._worldState?.currentRefugio) {
+        window._worldState.currentRefugio.folderId = folderId;
+        const ws = await import("./world-state.js");
+        ws.saveRefugio(window._worldState.currentRefugio);
+      }
       break;
     }
     case "regiao": {
       const { startNewRegiao } = await import("./regiao.js");
       landingScreen.classList.add("hidden");
       startNewRegiao();
+      if (folderId && window._worldState?.currentRegiao) {
+        window._worldState.currentRegiao.folderId = folderId;
+        const ws = await import("./world-state.js");
+        ws.saveRegiao(window._worldState.currentRegiao);
+      }
       break;
     }
     case "conflito": {
       const { startNewConflito } = await import("./conflito.js");
       landingScreen.classList.add("hidden");
       startNewConflito();
+      if (folderId && window._worldState?.currentConflito) {
+        window._worldState.currentConflito.folderId = folderId;
+        const ws = await import("./world-state.js");
+        ws.saveConflito(window._worldState.currentConflito);
+      }
       break;
     }
     case "local": {
@@ -188,6 +233,11 @@ async function _createSheetByType(type) {
       window._worldStateCharacters = state.characters;
       landingScreen.classList.add("hidden");
       startNewLocal();
+      if (folderId && window._worldState?.currentLocal) {
+        window._worldState.currentLocal.folderId = folderId;
+        const ws = await import("./world-state.js");
+        ws.saveLocal(window._worldState.currentLocal);
+      }
       break;
     }
     case "campanha": {
@@ -204,7 +254,7 @@ async function _createSheetByType(type) {
         // Registrar localmente no atalho
         const raw = localStorage.getItem("assimilação_managed_campaigns");
         const list = raw ? JSON.parse(raw) : [];
-        list.push({ code: campaignData.id, hostName: campaignData.mestreNome, name: campaignData.nome, createdAt: Date.now() });
+        list.push({ code: campaignData.id, hostName: campaignData.mestreNome, name: campaignData.nome, folderId: folderId || null, createdAt: Date.now() });
         localStorage.setItem("assimilação_managed_campaigns", JSON.stringify(list));
         
         renderCharactersList();
@@ -235,7 +285,7 @@ export function renderCharactersList() {
     ...(worldState.regioes   || []).map(r => ({ ...r, _sheetType: "regiao"   })),
     ...(worldState.conflitos || []).map(c => ({ ...c, _sheetType: "conflito" })),
     ...(worldState.locais    || []).map(l => ({ ...l, _sheetType: "local"    })),
-    ...campaigns.map(c => ({ id: c.code, name: c.name, hostName: c.hostName, createdAt: c.createdAt || Date.now(), _sheetType: "campanha" })),
+    ...campaigns.map(c => ({ id: c.code, name: c.name, hostName: c.hostName, folderId: c.folderId || null, createdAt: c.createdAt || Date.now(), _sheetType: "campanha" })),
   ].sort((a, b) => {
     const tsA = a._sheetType === "campanha" ? a.createdAt : _extractTimestamp(a.id);
     const tsB = b._sheetType === "campanha" ? b.createdAt : _extractTimestamp(b.id);
@@ -265,7 +315,7 @@ export function renderCharactersList() {
     campanha:  item => `Mestre: ${item.hostName || "Mestre"}`,
   };
 
-  let cardsHtml = filteredItems.map(item => {
+  const renderCardHtml = (item) => {
     const type = item._sheetType;
     const name = item.name || item.nome || "Sem nome";
     const subInfo = TYPE_SUB[type]?.(item) || "";
@@ -280,6 +330,11 @@ export function renderCharactersList() {
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
         </button>
         <div class="char-actions-dropdown" data-dropdown="${escapeHtml(item.id)}">
+          <button data-action="move-folder" data-id="${escapeHtml(item.id)}" data-type="${type}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            Mover p/ Pasta...
+          </button>
+          <div class="dropdown-divider"></div>
           <button data-action="share-code" data-id="${escapeHtml(item.id)}" data-type="${type}">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Código Nuvem
@@ -300,7 +355,7 @@ export function renderCharactersList() {
     `;
 
     return `
-      <article class="character-card square-card" data-char-id="${escapeHtml(item.id)}" data-sheet-type="${type}">
+      <article class="character-card square-card" draggable="true" data-char-id="${escapeHtml(item.id)}" data-sheet-type="${type}" data-folder-id="${escapeHtml(item.folderId || '')}">
         <div class="char-card-avatar">${avatarContent}</div>
         <div class="char-card-name">${escapeHtml(name)}</div>
         <div class="char-card-sub-info">
@@ -310,10 +365,10 @@ export function renderCharactersList() {
         ${actionsHtml}
       </article>
     `;
-  }).join("");
+  };
 
-  cardsHtml += `
-    <article class="character-card square-card create-card" id="btn-create-card">
+  const createCardHtml = (folderId = null) => `
+    <article class="character-card square-card create-card" ${folderId ? `data-create-folder-id="${escapeHtml(folderId)}"` : `id="btn-create-card"`} title="Criar nova ficha">
       <div class="char-card-avatar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="char-card-plus-svg">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -323,6 +378,101 @@ export function renderCharactersList() {
       <div class="char-card-name">Nova Ficha</div>
     </article>
   `;
+
+  const folders = loadFolders();
+  const btnCollapseAll = document.getElementById("btn-collapse-all-folders");
+  const btnExpandAll = document.getElementById("btn-expand-all-folders");
+
+  let contentHtml = "";
+
+  if (folders.length === 0) {
+    btnCollapseAll?.classList.add("hidden");
+    btnExpandAll?.classList.add("hidden");
+    contentHtml = filteredItems.map(renderCardHtml).join("") + createCardHtml(null);
+  } else {
+    btnCollapseAll?.classList.remove("hidden");
+    btnExpandAll?.classList.remove("hidden");
+
+    // Renderizar pastas criadas
+    folders.forEach(folder => {
+      const itemsInFolder = filteredItems.filter(item => item.folderId === folder.id);
+      const isCollapsed = Boolean(folder.collapsed);
+
+      let innerCards = itemsInFolder.map(renderCardHtml).join("");
+      if (itemsInFolder.length === 0) {
+        innerCards = `
+          <div class="folder-empty-dropzone" data-drop-folder-id="${escapeHtml(folder.id)}">
+            <span style="font-size:1.1rem;opacity:0.6;">📥</span>
+            <span>Pasta vazia. Arraste fichas para cá ou adicione abaixo.</span>
+          </div>
+        `;
+      }
+      innerCards += createCardHtml(folder.id);
+
+      contentHtml += `
+        <section class="folder-group ${isCollapsed ? 'is-collapsed' : ''}" data-folder-id="${escapeHtml(folder.id)}">
+          <header class="folder-group-header">
+            <div class="folder-info-btn" role="button" tabindex="0" data-action="toggle-folder" data-folder-id="${escapeHtml(folder.id)}">
+              <button class="folder-collapse-arrow" type="button" aria-label="Recolher ou expandir">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <span class="folder-icon">${folder.icon || '📁'}</span>
+              <h2 class="folder-title">${escapeHtml(folder.name)}</h2>
+              <span class="folder-counter">${itemsInFolder.length} ${itemsInFolder.length === 1 ? 'ficha' : 'fichas'}</span>
+            </div>
+            <div class="folder-actions">
+              <button class="btn-folder-header-action" type="button" data-action="create-in-folder" data-folder-id="${escapeHtml(folder.id)}" title="Criar nova ficha nesta pasta">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                + Ficha
+              </button>
+              <button class="btn-folder-header-action" type="button" data-action="rename-folder" data-folder-id="${escapeHtml(folder.id)}" title="Renomear pasta">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </button>
+              <button class="btn-folder-header-action btn-folder-danger" type="button" data-action="delete-folder" data-folder-id="${escapeHtml(folder.id)}" title="Excluir pasta (as fichas não serão apagadas)">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </header>
+          <div class="folder-cards-grid characters-grid" data-drop-folder-id="${escapeHtml(folder.id)}">
+            ${innerCards}
+          </div>
+        </section>
+      `;
+    });
+
+    // Seção Fichas Avulsas (Sem Pasta)
+    const unassignedItems = filteredItems.filter(item => !item.folderId || !folders.some(f => f.id === item.folderId));
+    const isUnassignedCol = isUnassignedCollapsed();
+
+    let unassignedCards = unassignedItems.map(renderCardHtml).join("");
+    if (unassignedItems.length === 0) {
+      unassignedCards = `
+        <div class="folder-empty-dropzone" data-drop-folder-id="__unassigned__">
+          <span style="font-size:1.1rem;opacity:0.6;">📥</span>
+          <span>Nenhuma ficha avulsa. Arraste fichas para cá se quiser tirá-las das pastas.</span>
+        </div>
+      `;
+    }
+    unassignedCards += createCardHtml(null);
+
+    contentHtml += `
+      <section class="folder-group unassigned-group ${isUnassignedCol ? 'is-collapsed' : ''}" data-folder-id="__unassigned__">
+        <header class="folder-group-header">
+          <div class="folder-info-btn" role="button" tabindex="0" data-action="toggle-folder" data-folder-id="__unassigned__">
+            <button class="folder-collapse-arrow" type="button" aria-label="Recolher ou expandir">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <span class="folder-icon">🗂️</span>
+            <h2 class="folder-title">Fichas Avulsas (Sem Pasta)</h2>
+            <span class="folder-counter">${unassignedItems.length} ${unassignedItems.length === 1 ? 'ficha' : 'fichas'}</span>
+          </div>
+        </header>
+        <div class="folder-cards-grid characters-grid" data-drop-folder-id="__unassigned__">
+          ${unassignedCards}
+        </div>
+      </section>
+    `;
+  }
 
   if (emptyState) {
     emptyState.classList.toggle("hidden", filteredItems.length > 0);
@@ -350,7 +500,7 @@ export function renderCharactersList() {
     }
   }
 
-  charactersList.innerHTML = cardsHtml;
+  charactersList.innerHTML = contentHtml;
   attachCardListeners();
 }
 
@@ -391,7 +541,14 @@ function attachCardListeners() {
   });
 
   const createCard = document.getElementById("btn-create-card");
-  if (createCard) createCard.addEventListener("click", handleCreateClick);
+  if (createCard) createCard.addEventListener("click", () => handleCreateClick());
+
+  document.querySelectorAll("[data-create-folder-id]").forEach(card => {
+    card.addEventListener("click", () => {
+      const folderId = card.dataset.createFolderId;
+      handleCreateClick(folderId);
+    });
+  });
 
   document.querySelectorAll("[data-action='menu']").forEach(btn => {
     btn.addEventListener("click", e => {
@@ -400,6 +557,17 @@ function attachCardListeners() {
       if (card?.dataset.charId) toggleDropdown(card.dataset.charId);
     });
   });
+
+  document.querySelectorAll("[data-action='move-folder']").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      closeDropdown();
+      const id = btn.dataset.id;
+      const type = btn.dataset.type;
+      openMoveToFolderModal(id, type);
+    });
+  });
+
   document.querySelectorAll("[data-action='share-code']").forEach(btn => {
     btn.addEventListener("click", async e => {
       e.stopPropagation();
@@ -457,6 +625,42 @@ function attachCardListeners() {
       }
     });
   });
+
+  // Ações das pastas (toggle, create, rename, delete)
+  document.querySelectorAll("[data-action='toggle-folder']").forEach(elBtn => {
+    elBtn.addEventListener("click", (e) => {
+      const folderId = elBtn.dataset.folderId;
+      if (!folderId) return;
+      toggleFolderCollapsed(folderId);
+      renderCharactersList();
+    });
+  });
+
+  document.querySelectorAll("[data-action='create-in-folder']").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const folderId = btn.dataset.folderId;
+      handleCreateClick(folderId);
+    });
+  });
+
+  document.querySelectorAll("[data-action='rename-folder']").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const folderId = btn.dataset.folderId;
+      openRenameFolderModal(folderId);
+    });
+  });
+
+  document.querySelectorAll("[data-action='delete-folder']").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const folderId = btn.dataset.folderId;
+      openDeleteFolderModal(folderId);
+    });
+  });
+
+  setupDragAndDrop();
 }
 
 async function _openWorldSheet(type, id) {
@@ -620,6 +824,9 @@ function importCharacterFromFile(e) {
       const charObj = JSON.parse(evt.target.result);
       if (!charObj.id || !charObj.name) { alert("Ficha inválida!"); return; }
       charObj.id = "char_" + Date.now();
+      if (!charObj.folderId && state.pendingFolderId) {
+        charObj.folderId = state.pendingFolderId;
+      }
       state.characters.push(charObj);
       localStorage.setItem("assimilação_rpg_characters", JSON.stringify(state.characters));
       loadCharactersFromStorage();
@@ -630,4 +837,308 @@ function importCharacterFromFile(e) {
     }
   };
   reader.readAsText(file);
+}
+
+// ==========================================================
+// MODAIS E CONTROLES DE PASTAS
+// ==========================================================
+
+function openCreateFolderModal(onCreated = null) {
+  const modalContainer = el.modalContainer;
+  const modalBody = el.modalBody;
+  let selectedIcon = "📁";
+  const icons = ["📁", "🏕️", "🧬", "⚔️", "🗺️", "📍", "📋", "💀", "🛡️", "📦", "☣️", "🔥", "⚙️", "🌲", "🏢"];
+
+  modalBody.innerHTML = `
+    <div class="folder-modal-content">
+      <h3 class="modal-title">Nova Pasta</h3>
+      <p style="color:var(--text-secondary);font-size:var(--font-size-sm);margin:0;">
+        Crie uma pasta para organizar suas fichas por campanha, grupo ou tema.
+      </p>
+      <div>
+        <label style="display:block;font-size:var(--font-size-xs);color:var(--text-muted);margin-bottom:6px;">Nome da Pasta</label>
+        <input type="text" id="folder-name-input" class="input-text" placeholder="Ex: Campanha Vale da Morte" style="width:100%;box-sizing:border-box;" autofocus />
+      </div>
+      <div>
+        <label style="display:block;font-size:var(--font-size-xs);color:var(--text-muted);margin-bottom:6px;">Ícone da Pasta</label>
+        <div class="folder-icons-selector">
+          ${icons.map(ic => `<button type="button" class="folder-icon-option ${ic === '📁' ? 'active' : ''}" data-icon="${ic}">${ic}</button>`).join("")}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button id="btn-cancel-folder" class="btn" style="padding:8px 18px;">Cancelar</button>
+        <button id="btn-confirm-create-folder" class="btn btn-primary" style="padding:8px 20px;">Criar Pasta</button>
+      </div>
+    </div>
+  `;
+
+  modalContainer.classList.remove("hidden");
+  const input = document.getElementById("folder-name-input");
+  input?.focus();
+
+  modalBody.querySelectorAll(".folder-icon-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      modalBody.querySelectorAll(".folder-icon-option").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedIcon = btn.dataset.icon;
+    });
+  });
+
+  const handleConfirm = () => {
+    const name = input?.value.trim();
+    if (!name) {
+      input?.focus();
+      return;
+    }
+    const newFolder = createFolder(name, selectedIcon);
+    modalContainer.classList.add("hidden");
+    renderCharactersList();
+    if (onCreated) onCreated(newFolder);
+  };
+
+  document.getElementById("btn-confirm-create-folder")?.addEventListener("click", handleConfirm);
+  document.getElementById("btn-cancel-folder")?.addEventListener("click", () => modalContainer.classList.add("hidden"));
+  input?.addEventListener("keydown", e => { if (e.key === "Enter") handleConfirm(); });
+
+  const closeBtn = modalContainer.querySelector(".modal-close");
+  if (closeBtn) closeBtn.addEventListener("click", () => modalContainer.classList.add("hidden"), { once: true });
+  modalContainer.addEventListener("click", e => {
+    if (e.target === modalContainer) modalContainer.classList.add("hidden");
+  }, { once: true });
+}
+
+function openRenameFolderModal(folderId) {
+  const folders = loadFolders();
+  const folder = folders.find(f => f.id === folderId);
+  if (!folder) return;
+
+  const modalContainer = el.modalContainer;
+  const modalBody = el.modalBody;
+  let selectedIcon = folder.icon || "📁";
+  const icons = ["📁", "🏕️", "🧬", "⚔️", "🗺️", "📍", "📋", "💀", "🛡️", "📦", "☣️", "🔥", "⚙️", "🌲", "🏢"];
+
+  modalBody.innerHTML = `
+    <div class="folder-modal-content">
+      <h3 class="modal-title">Renomear Pasta</h3>
+      <div>
+        <label style="display:block;font-size:var(--font-size-xs);color:var(--text-muted);margin-bottom:6px;">Nome da Pasta</label>
+        <input type="text" id="rename-folder-input" class="input-text" value="${escapeHtml(folder.name)}" style="width:100%;box-sizing:border-box;" autofocus />
+      </div>
+      <div>
+        <label style="display:block;font-size:var(--font-size-xs);color:var(--text-muted);margin-bottom:6px;">Ícone da Pasta</label>
+        <div class="folder-icons-selector">
+          ${icons.map(ic => `<button type="button" class="folder-icon-option ${ic === selectedIcon ? 'active' : ''}" data-icon="${ic}">${ic}</button>`).join("")}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button id="btn-cancel-rename" class="btn" style="padding:8px 18px;">Cancelar</button>
+        <button id="btn-confirm-rename" class="btn btn-primary" style="padding:8px 20px;">Salvar</button>
+      </div>
+    </div>
+  `;
+
+  modalContainer.classList.remove("hidden");
+  const input = document.getElementById("rename-folder-input");
+  input?.focus();
+  input?.select();
+
+  modalBody.querySelectorAll(".folder-icon-option").forEach(btn => {
+    btn.addEventListener("click", () => {
+      modalBody.querySelectorAll(".folder-icon-option").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedIcon = btn.dataset.icon;
+    });
+  });
+
+  const handleConfirm = () => {
+    const name = input?.value.trim();
+    if (!name) { input?.focus(); return; }
+    renameFolder(folderId, name, selectedIcon);
+    modalContainer.classList.add("hidden");
+    renderCharactersList();
+  };
+
+  document.getElementById("btn-confirm-rename")?.addEventListener("click", handleConfirm);
+  document.getElementById("btn-cancel-rename")?.addEventListener("click", () => modalContainer.classList.add("hidden"));
+  input?.addEventListener("keydown", e => { if (e.key === "Enter") handleConfirm(); });
+
+  const closeBtn = modalContainer.querySelector(".modal-close");
+  if (closeBtn) closeBtn.addEventListener("click", () => modalContainer.classList.add("hidden"), { once: true });
+  modalContainer.addEventListener("click", e => {
+    if (e.target === modalContainer) modalContainer.classList.add("hidden");
+  }, { once: true });
+}
+
+function openDeleteFolderModal(folderId) {
+  const folders = loadFolders();
+  const folder = folders.find(f => f.id === folderId);
+  if (!folder) return;
+
+  const modalContainer = el.modalContainer;
+  const modalBody = el.modalBody;
+
+  modalBody.innerHTML = `
+    <div class="landing-actions-menu">
+      <h3 class="menu-title">Excluir Pasta</h3>
+      <p style="color:var(--text-secondary);font-size:var(--font-size-sm);margin-bottom:14px;line-height:1.5;">
+        Tem certeza que deseja excluir a pasta <strong>${escapeHtml(folder.name)}</strong>?<br>
+        <span style="color:var(--color-blue-glow);font-size:var(--font-size-xs);margin-top:6px;display:block;">
+          ✓ As fichas dentro dela <strong>não serão apagadas</strong>. Elas serão movidas com segurança para "Sem Pasta".
+        </span>
+      </p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="btn-cancel-folder-del" class="btn" style="padding:10px 20px;">Cancelar</button>
+        <button id="btn-confirm-folder-del" class="btn btn-danger" style="padding:10px 20px;">${ICONS.trash} Excluir Pasta</button>
+      </div>
+    </div>
+  `;
+
+  modalContainer.classList.remove("hidden");
+  document.getElementById("btn-cancel-folder-del")?.addEventListener("click", () => modalContainer.classList.add("hidden"), { once: true });
+  document.getElementById("btn-confirm-folder-del")?.addEventListener("click", () => {
+    deleteFolder(folderId);
+    modalContainer.classList.add("hidden");
+    renderCharactersList();
+  }, { once: true });
+
+  const closeBtn = modalContainer.querySelector(".modal-close");
+  if (closeBtn) closeBtn.addEventListener("click", () => modalContainer.classList.add("hidden"), { once: true });
+  modalContainer.addEventListener("click", e => {
+    if (e.target === modalContainer) modalContainer.classList.add("hidden");
+  }, { once: true });
+}
+
+function openMoveToFolderModal(itemId, sheetType) {
+  const folders = loadFolders();
+  let currentItem = null;
+  if (sheetType === "infectado") {
+    currentItem = state.characters.find(c => c.id === itemId);
+  } else if (sheetType === "campanha") {
+    const raw = localStorage.getItem("assimilação_managed_campaigns");
+    const list = raw ? JSON.parse(raw) : [];
+    currentItem = list.find(c => c.code === itemId);
+  } else {
+    const { worldState } = _getWorldState();
+    const prop = sheetType === "refugio" ? "refugios" : sheetType === "regiao" ? "regioes" : sheetType === "conflito" ? "conflitos" : "locais";
+    currentItem = (worldState[prop] || []).find(i => i.id === itemId);
+  }
+
+  const currentName = currentItem ? (currentItem.name || currentItem.nome || "Ficha") : "Ficha";
+  const currentFolderId = currentItem?.folderId || null;
+
+  const modalContainer = el.modalContainer;
+  const modalBody = el.modalBody;
+
+  modalBody.innerHTML = `
+    <div class="folder-modal-content">
+      <h3 class="modal-title">Mover "${escapeHtml(currentName)}" para:</h3>
+      <div class="folder-select-list">
+        <div class="folder-select-item ${!currentFolderId ? 'is-current' : ''}" data-folder-id="__unassigned__">
+          <div class="folder-select-item-left">
+            <span class="folder-icon">🗂️</span>
+            <span class="folder-select-name">Sem Pasta (Ficha Avulsa)</span>
+          </div>
+          ${!currentFolderId ? '<span style="color:var(--color-blue-glow);font-size:12px;">✓ Atual</span>' : ''}
+        </div>
+        ${folders.map(f => `
+          <div class="folder-select-item ${f.id === currentFolderId ? 'is-current' : ''}" data-folder-id="${escapeHtml(f.id)}">
+            <div class="folder-select-item-left">
+              <span class="folder-icon">${f.icon || '📁'}</span>
+              <span class="folder-select-name">${escapeHtml(f.name)}</span>
+            </div>
+            ${f.id === currentFolderId ? '<span style="color:var(--color-blue-glow);font-size:12px;">✓ Atual</span>' : ''}
+          </div>
+        `).join("")}
+      </div>
+      <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:8px;">
+        <button id="btn-create-in-move" class="btn btn-folder-secondary" style="font-size:12px;">
+          + Criar Nova Pasta
+        </button>
+        <button id="btn-close-move" class="btn" style="padding:8px 18px;">Fechar</button>
+      </div>
+    </div>
+  `;
+
+  modalContainer.classList.remove("hidden");
+
+  modalBody.querySelectorAll(".folder-select-item").forEach(itemEl => {
+    itemEl.addEventListener("click", () => {
+      const targetFolderId = itemEl.dataset.folderId;
+      setItemFolder(itemId, sheetType, targetFolderId);
+      modalContainer.classList.add("hidden");
+      renderCharactersList();
+    });
+  });
+
+  document.getElementById("btn-create-in-move")?.addEventListener("click", () => {
+    modalContainer.classList.add("hidden");
+    openCreateFolderModal((newFolder) => {
+      setItemFolder(itemId, sheetType, newFolder.id);
+      renderCharactersList();
+    });
+  });
+
+  document.getElementById("btn-close-move")?.addEventListener("click", () => {
+    modalContainer.classList.add("hidden");
+  });
+
+  const closeBtn = modalContainer.querySelector(".modal-close");
+  if (closeBtn) closeBtn.addEventListener("click", () => modalContainer.classList.add("hidden"), { once: true });
+  modalContainer.addEventListener("click", e => {
+    if (e.target === modalContainer) modalContainer.classList.add("hidden");
+  }, { once: true });
+}
+
+function setupDragAndDrop() {
+  document.querySelectorAll(".character-card[draggable='true']").forEach(card => {
+    card.addEventListener("dragstart", (e) => {
+      const id = card.dataset.charId;
+      const type = card.dataset.sheetType;
+      if (!id) return;
+      card.classList.add("is-dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", JSON.stringify({ id, type }));
+      window._draggingSheet = { id, type };
+    });
+
+    card.addEventListener("dragend", () => {
+      card.classList.remove("is-dragging");
+      window._draggingSheet = null;
+      document.querySelectorAll(".drag-target-active").forEach(node => node.classList.remove("drag-target-active"));
+    });
+  });
+
+  document.querySelectorAll("[data-drop-folder-id]").forEach(dropTarget => {
+    dropTarget.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      const folderGroup = dropTarget.closest(".folder-group") || dropTarget;
+      folderGroup.classList.add("drag-target-active");
+    });
+
+    dropTarget.addEventListener("dragleave", (e) => {
+      if (!dropTarget.contains(e.relatedTarget)) {
+        const folderGroup = dropTarget.closest(".folder-group") || dropTarget;
+        folderGroup.classList.remove("drag-target-active");
+      }
+    });
+
+    dropTarget.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const folderGroup = dropTarget.closest(".folder-group") || dropTarget;
+      folderGroup.classList.remove("drag-target-active");
+
+      let data = window._draggingSheet;
+      try {
+        const raw = e.dataTransfer.getData("text/plain");
+        if (raw) data = JSON.parse(raw);
+      } catch (err) {}
+
+      if (!data || !data.id) return;
+
+      const targetFolderId = dropTarget.dataset.dropFolderId;
+      setItemFolder(data.id, data.type, targetFolderId);
+      renderCharactersList();
+    });
+  });
 }

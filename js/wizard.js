@@ -359,10 +359,18 @@ export function renderWizardTraits() {
       if (isOwned) {
         state.wizardData.caracteristicas = state.wizardData.caracteristicas.filter(id => id !== trait.id);
         state.wizardData.xp += trait.custo;
+        if (trait.id === "estagio_avancado") {
+          state.wizardData.assNivel = Math.max(1, (state.wizardData.assNivel || 1) - 1);
+          state.wizardData.detNivel = 10 - state.wizardData.assNivel;
+        }
       } else {
         if (state.wizardData.xp >= trait.custo) {
           state.wizardData.caracteristicas.push(trait.id);
           state.wizardData.xp -= trait.custo;
+          if (trait.id === "estagio_avancado") {
+            state.wizardData.assNivel = (state.wizardData.assNivel || 1) + 1;
+            state.wizardData.detNivel = 10 - state.wizardData.assNivel;
+          }
         } else {
           alert("Pontos de Experiência (XP) insuficientes!");
         }
@@ -394,6 +402,17 @@ export function checkWizardTraitPrerequisites(reqs) {
       continue;
     }
     if (key === "val") continue;
+
+    if (key === "Assimilação" || key === "assimilacao" || key === "assNivel") {
+      const ass = state.wizardData.assNivel !== undefined ? state.wizardData.assNivel : 1;
+      if (ass < value) return false;
+      continue;
+    }
+    if (key === "Determinação" || key === "determinacao" || key === "detNivel") {
+      const det = state.wizardData.detNivel !== undefined ? state.wizardData.detNivel : 1;
+      if (det < value) return false;
+      continue;
+    }
     
     if (state.wizardData.instintos[key] !== undefined) {
       if (state.wizardData.instintos[key] < value) return false;
@@ -524,6 +543,7 @@ export function wizardFinish() {
     assPoints: state.wizardData.assNivel,
     xp: state.wizardData.xp,
     caracteristicas: state.wizardData.caracteristicas,
+    folderId: state.pendingFolderId || null,
     mutações: [],
     notes: "",
     inventario: Array(9).fill(null).map((_, i) => {
@@ -561,6 +581,8 @@ export function wizardFinish() {
     })
   };
   
+  state.pendingFolderId = null;
+
   logger.info(`Wizard: Criação concluída. Salvando ficha para "${newChar.name}".`);
   
   state.characters.push(newChar);
