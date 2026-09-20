@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
+	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -65,8 +68,52 @@ func initMongoDB(uri string) error {
 	roomsColl = client.Database(dbName).Collection("rooms")
 	msgColl = client.Database(dbName).Collection("messages")
 
-	log.Println("[DB] Conexão com o MongoDB Atlas estabelecida com sucesso.")
+	// Create compound index on messages: { "roomId": 1, "timestamp": -1 }
+	msgIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "roomId", Value: 1},
+			{Key: "timestamp", Value: -1},
+		},
+		Options: options.Index().SetName("idx_room_timestamp"),
+	}
+	_, err = msgColl.Indexes().CreateOne(ctx, msgIndexModel)
+	if err != nil {
+		log.Printf("[DB] Aviso ao criar índice em messages: %v", err)
+	}
+
+	// Create index on rooms: { "createdAt": -1 }
+	roomIndexModel := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "createdAt", Value: -1},
+		},
+		Options: options.Index().SetName("idx_room_created_at"),
+	}
+	_, err = roomsColl.Indexes().CreateOne(ctx, roomIndexModel)
+	if err != nil {
+		log.Printf("[DB] Aviso ao criar índice em rooms: %v", err)
+	}
+
+	log.Println("[DB] Conexão com o MongoDB Atlas estabelecida com sucesso e índices verificados.")
 	return nil
+}
+
+// PingMongoDB checks if the MongoDB connection is alive.
+func PingMongoDB() error {
+	if mongoClient == nil {
+		return fmt.Errorf("cliente MongoDB não inicializado")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	return mongoClient.Ping(ctx, nil)
+}
+
+// DisconnectMongoDB closes the MongoDB connection gracefully.
+func DisconnectMongoDB(ctx context.Context) error {
+	if mongoClient == nil {
+		return nil
+	}
+	log.Println("[DB] Fechando conexões com o MongoDB...")
+	return mongoClient.Disconnect(ctx)
 }
 
 // GetRoomFromDB loads a room by ID from the database.
@@ -186,53 +233,80 @@ func GetMessagesFromDB(roomId string, limit int64) ([]DBMessage, error) {
 	return msgs, nil
 }
 
-// scanAndCleanGCSUrls recursively scans BSON structures to find and delete matching GCS files.
-func scanAndCleanGCSUrls(val interface{}) {
+// collectGCSUrls recursively scans BSON/JSON structures to find matching GCS image URLs.
+func collectGCSUrls(val interface{}, urls map[string]struct{}) {
 	switch v := val.(type) {
 	case string:
-		_ = DeleteImageFromGCS(v)
+		if strings.Contains(v, "storage.googleapis.com") {
+			urls[v] = struct{}{}
+		}
 	case bson.M:
 		for _, item := range v {
-			scanAndCleanGCSUrls(item)
+			collectGCSUrls(item, urls)
 		}
 	case map[string]interface{}:
 		for _, item := range v {
-			scanAndCleanGCSUrls(item)
+			collectGCSUrls(item, urls)
 		}
 	case bson.A:
 		for _, item := range v {
-			scanAndCleanGCSUrls(item)
+			collectGCSUrls(item, urls)
 		}
 	case []interface{}:
 		for _, item := range v {
-			scanAndCleanGCSUrls(item)
+			collectGCSUrls(item, urls)
 		}
 	}
 }
 
-// DeleteRoomAndMessagesFromDB queries the room and logs, cleans GCS assets, and deletes DB documents.
+// cleanGCSUrlsParallel deletes GCS objects concurrently with bounded concurrency.
+func cleanGCSUrlsParallel(urls map[string]struct{}) {
+	if len(urls) == 0 {
+		return
+	}
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 5) // at most 5 concurrent requests
+
+	for u := range urls {
+		wg.Add(1)
+		sem <- struct{}{}
+		go func(targetURL string) {
+			defer wg.Done()
+			defer func() { <-sem }()
+			_ = DeleteImageFromGCS(targetURL)
+		}(u)
+	}
+	wg.Wait()
+}
+
+// DeleteRoomAndMessagesFromDB queries the room and logs, cleans GCS assets in parallel, and deletes DB documents.
 func DeleteRoomAndMessagesFromDB(roomId string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	// 1. Scan and clean GCS images associated with the Room
+	gcsUrls := make(map[string]struct{})
+
+	// 1. Scan and collect GCS images associated with the Room
 	var room DBRoomState
 	err := roomsColl.FindOne(ctx, bson.M{"_id": roomId}).Decode(&room)
 	if err == nil {
 		if room.CurrentMap != "" {
-			_ = DeleteImageFromGCS(room.CurrentMap)
+			collectGCSUrls(room.CurrentMap, gcsUrls)
 		}
 		if room.CurrentScene != nil {
-			scanAndCleanGCSUrls(room.CurrentScene)
+			collectGCSUrls(room.CurrentScene, gcsUrls)
 		}
 		for _, player := range room.Players {
 			if player.CharacterState != nil {
-				scanAndCleanGCSUrls(player.CharacterState)
+				collectGCSUrls(player.CharacterState, gcsUrls)
 			}
+		}
+		for _, imgURL := range room.GCSImages {
+			collectGCSUrls(imgURL, gcsUrls)
 		}
 	}
 
-	// 2. Scan and clean GCS images inside the message logs
+	// 2. Scan and collect GCS images inside the message logs
 	cursor, err := msgColl.Find(ctx, bson.M{"roomId": roomId})
 	if err == nil {
 		defer cursor.Close(ctx)
@@ -240,13 +314,16 @@ func DeleteRoomAndMessagesFromDB(roomId string) error {
 		if err = cursor.All(ctx, &msgs); err == nil {
 			for _, msg := range msgs {
 				if msg.Data != nil {
-					scanAndCleanGCSUrls(msg.Data)
+					collectGCSUrls(msg.Data, gcsUrls)
 				}
 			}
 		}
 	}
 
-	// 3. Delete records from MongoDB collections
+	// 3. Clean GCS images in parallel
+	cleanGCSUrlsParallel(gcsUrls)
+
+	// 4. Delete records from MongoDB collections
 	_, err = roomsColl.DeleteOne(ctx, bson.M{"_id": roomId})
 	if err != nil {
 		log.Printf("[DB] Erro ao deletar sala %s do MongoDB: %v", roomId, err)

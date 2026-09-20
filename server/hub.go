@@ -1,13 +1,12 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"log"
-	"math/rand"
 	"strings"
 	"time"
-
-	"github.com/gorilla/websocket"
 )
 
 // BroadcastEvent carries the message payload and who sent it.
@@ -43,23 +42,26 @@ type Hub struct {
 
 func newHub() *Hub {
 	return &Hub{
-		broadcast:  make(chan BroadcastEvent),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
+		broadcast:  make(chan BroadcastEvent, 256),
+		register:   make(chan *Client, 64),
+		unregister: make(chan *Client, 64),
 		rooms:      make(map[string]*Room),
-		deleteRoom: make(chan string),
+		deleteRoom: make(chan string, 16),
 	}
 }
 
-// generateRoomCode produces a random 6-character room code.
+// generateRoomCode produces a cryptographically secure random 6-character room code.
 func generateRoomCode() string {
 	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-	rand.Seed(time.Now().UnixNano())
-	code := make([]byte, 6)
-	for i := range code {
-		code[i] = chars[rand.Intn(len(chars))]
+	bytes := make([]byte, 6)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback in the rare event crypto/rand fails
+		return fmt.Sprintf("%06X", time.Now().UnixNano()%0xFFFFFF)
 	}
-	return string(code)
+	for i := range bytes {
+		bytes[i] = chars[int(bytes[i])%len(chars)]
+	}
+	return string(bytes)
 }
 
 func (h *Hub) run() {
@@ -84,20 +86,19 @@ func (h *Hub) handleRegister(client *Client) {
 	roomId := client.roomId
 	if roomId == "" {
 		if client.isHost {
-			// Generate a new unique room code that doesn't exist in DB
+			// Generate a unique room code that doesn't exist in DB
 			for {
 				roomId = generateRoomCode()
 				_, err := GetRoomFromDB(roomId)
 				if err != nil {
 					// Error means it doesn't exist (mongo.ErrNoDocuments) or DB issue.
-					// We'll proceed with this generated roomId.
 					break
 				}
 			}
 			client.roomId = roomId
 		} else {
 			sendErrorMessage(client, "Código da sala é obrigatório para entrar.")
-			client.conn.Close()
+			client.safeClose()
 			return
 		}
 	}
@@ -111,7 +112,6 @@ func (h *Hub) handleRegister(client *Client) {
 		// Try to recover the room from MongoDB
 		dbRoom, err = GetRoomFromDB(roomId)
 		if err == nil && dbRoom != nil {
-			// Restore memory room instance
 			room = &Room{
 				ID:      roomId,
 				HostID:  dbRoom.HostID,
@@ -135,9 +135,11 @@ func (h *Hub) handleRegister(client *Client) {
 			dbRoom.Players[client.playerId] = DBPlayerInfo{
 				Name: client.playerName,
 			}
-			if err := SaveRoomToDB(dbRoom); err != nil {
-				log.Printf("[HUB] Falha ao registrar nova sala no MongoDB: %v", err)
-			}
+			go func(doc *DBRoomState) {
+				if err := SaveRoomToDB(doc); err != nil {
+					log.Printf("[HUB] Falha ao registrar nova sala no MongoDB: %v", err)
+				}
+			}(dbRoom)
 
 			// Initialize memory room instance
 			room = &Room{
@@ -149,34 +151,46 @@ func (h *Hub) handleRegister(client *Client) {
 			log.Printf("[HUB] Nova sala criada: %s pelo Mestre %s (%s)", roomId, client.playerName, client.playerId)
 		} else {
 			sendErrorMessage(client, "Sala não encontrada.")
-			client.conn.Close()
+			client.safeClose()
 			return
 		}
 	} else {
-		// The room existed. If the client connecting claims to be host, update the host ID.
+		// The room existed.
 		if client.isHost {
-			room.HostID = client.playerId
-			if err := UpdateRoomSharedState(roomId, "hostId", client.playerId); err != nil {
-				log.Printf("[HUB] Falha ao atualizar HostID no DB: %v", err)
+			// Security check: if the room already has an active connected host (different from this client),
+			// prevent hijacking the GM role!
+			if currentHost, active := room.Players[room.HostID]; active && currentHost.playerId != client.playerId {
+				log.Printf("[HUB] Tentativa de sobreposição de Mestre na sala %s por %s (%s). Mantendo Mestre ativo (%s).",
+					roomId, client.playerName, client.playerId, room.HostID)
+				client.isHost = false
+			} else {
+				room.HostID = client.playerId
+				go func(rId, hId string) {
+					if err := UpdateRoomSharedState(rId, "hostId", hId); err != nil {
+						log.Printf("[HUB] Falha ao atualizar HostID no DB: %v", err)
+					}
+				}(roomId, client.playerId)
+				log.Printf("[HUB] Mestre reassumiu a sala %s com o ID %s", roomId, client.playerId)
 			}
-			log.Printf("[HUB] Mestre reassumiu a sala %s com o ID %s", roomId, client.playerId)
 		}
 	}
 
-	// Enforce 6-player limit in memory
+	// Enforce 6-player limit in memory (excluding reconnecting players)
 	if !client.isHost && len(room.Players) >= 6 && room.Players[client.playerId] == nil {
 		sendErrorMessage(client, "Sala cheia (limite de 6 jogadores).")
-		client.conn.Close()
+		client.safeClose()
 		return
 	}
 
 	// Register player connection in memory
 	room.Players[client.playerId] = client
 
-	// Save or update player record in DB
-	if err := UpdatePlayerStateInDB(roomId, client.playerId, client.playerName, nil); err != nil {
-		log.Printf("[HUB] Falha ao salvar jogador no MongoDB: %v", err)
-	}
+	// Save or update player record in DB asynchronously
+	go func(rId, pId, pName string) {
+		if err := UpdatePlayerStateInDB(rId, pId, pName, nil); err != nil {
+			log.Printf("[HUB] Falha ao salvar jogador no MongoDB: %v", err)
+		}
+	}(roomId, client.playerId, client.playerName)
 
 	log.Printf("[HUB] Jogador %s (%s) conectou à sala %s", client.playerName, client.playerId, roomId)
 
@@ -185,66 +199,81 @@ func (h *Hub) handleRegister(client *Client) {
 
 	// Send current shared states (map, scene, music) from DB to this connecting player
 	if dbRoom == nil {
-		dbRoom, _ = GetRoomFromDB(roomId)
+		go func(targetClient *Client, rId string) {
+			rDoc, err := GetRoomFromDB(rId)
+			if err != nil || rDoc == nil {
+				return
+			}
+			h.sendInitialRoomState(targetClient, rDoc)
+		}(client, roomId)
+	} else {
+		h.sendInitialRoomState(client, dbRoom)
 	}
+}
 
-	if dbRoom != nil {
-		// Restore active map
-		if dbRoom.CurrentMap != "" {
-			mapMsg := WSMessage{
-				Type:     "map",
-				PlayerID: dbRoom.HostID,
-				Data:     map[string]interface{}{"imageDataUrl": dbRoom.CurrentMap},
-			}
-			payload, _ := json.Marshal(mapMsg)
-			client.send <- payload
+// sendInitialRoomState delivers cached maps, scene, music, extra sheets and recent history to a newly connected player.
+func (h *Hub) sendInitialRoomState(client *Client, dbRoom *DBRoomState) {
+	if dbRoom.CurrentMap != "" {
+		mapMsg := WSMessage{
+			Type:     "map",
+			PlayerID: dbRoom.HostID,
+			Data:     map[string]interface{}{"imageDataUrl": dbRoom.CurrentMap},
 		}
-		// Restore active scene
-		if dbRoom.CurrentScene != nil {
-			sceneMsg := WSMessage{
-				Type:     "scene",
-				PlayerID: dbRoom.HostID,
-				Data:     dbRoom.CurrentScene,
-			}
-			payload, _ := json.Marshal(sceneMsg)
-			client.send <- payload
-		}
-		// Restore active music
-		if dbRoom.CurrentMusic != nil {
-			musicMsg := WSMessage{
-				Type:     "music",
-				PlayerID: dbRoom.HostID,
-				Data:     dbRoom.CurrentMusic,
-			}
-			payload, _ := json.Marshal(musicMsg)
-			client.send <- payload
-		}
-		// Restore extra fichas
-		if dbRoom.ExtraFichas != nil {
-			extraMsg := WSMessage{
-				Type:     "extra_fichas",
-				PlayerID: dbRoom.HostID,
-				Data:     dbRoom.ExtraFichas,
-			}
-			payload, _ := json.Marshal(extraMsg)
-			client.send <- payload
+		if payload, err := json.Marshal(mapMsg); err == nil {
+			sendClientMessage(client, payload)
 		}
 	}
 
-	// Feed last 50 logged messages (chats and rolls) to the connecting player
-	history, err := GetMessagesFromDB(roomId, 50)
-	if err == nil && len(history) > 0 {
-		log.Printf("[HUB] Enviando %d mensagens de histórico para %s", len(history), client.playerId)
-		for _, dbMsg := range history {
-			historyMsg := WSMessage{
-				Type:     dbMsg.Type,
-				PlayerID: dbMsg.PlayerID,
-				Data:     dbMsg.Data,
-			}
-			payload, _ := json.Marshal(historyMsg)
-			client.send <- payload
+	if dbRoom.CurrentScene != nil {
+		sceneMsg := WSMessage{
+			Type:     "scene",
+			PlayerID: dbRoom.HostID,
+			Data:     dbRoom.CurrentScene,
+		}
+		if payload, err := json.Marshal(sceneMsg); err == nil {
+			sendClientMessage(client, payload)
 		}
 	}
+
+	if dbRoom.CurrentMusic != nil {
+		musicMsg := WSMessage{
+			Type:     "music",
+			PlayerID: dbRoom.HostID,
+			Data:     dbRoom.CurrentMusic,
+		}
+		if payload, err := json.Marshal(musicMsg); err == nil {
+			sendClientMessage(client, payload)
+		}
+	}
+
+	if dbRoom.ExtraFichas != nil {
+		extraMsg := WSMessage{
+			Type:     "extra_fichas",
+			PlayerID: dbRoom.HostID,
+			Data:     dbRoom.ExtraFichas,
+		}
+		if payload, err := json.Marshal(extraMsg); err == nil {
+			sendClientMessage(client, payload)
+		}
+	}
+
+	// Fetch message history asynchronously
+	go func(targetClient *Client, rId string) {
+		history, err := GetMessagesFromDB(rId, 50)
+		if err == nil && len(history) > 0 {
+			log.Printf("[HUB] Enviando %d mensagens de histórico para %s", len(history), targetClient.playerId)
+			for _, dbMsg := range history {
+				historyMsg := WSMessage{
+					Type:     dbMsg.Type,
+					PlayerID: dbMsg.PlayerID,
+					Data:     dbMsg.Data,
+				}
+				if payload, err := json.Marshal(historyMsg); err == nil {
+					sendClientMessage(targetClient, payload)
+				}
+			}
+		}
+	}(client, dbRoom.ID)
 }
 
 func (h *Hub) handleUnregister(client *Client) {
@@ -256,13 +285,15 @@ func (h *Hub) handleUnregister(client *Client) {
 
 	if activeClient, ok := room.Players[client.playerId]; ok && activeClient == client {
 		delete(room.Players, client.playerId)
-		close(client.send)
+		client.safeClose()
 		log.Printf("[HUB] Jogador %s (%s) desconectou da sala %s", client.playerName, client.playerId, roomId)
 
-		// Remove player connection record from MongoDB room document
-		if err := RemovePlayerFromDBRoom(roomId, client.playerId); err != nil {
-			log.Printf("[HUB] Falha ao atualizar saída do jogador no DB: %v", err)
-		}
+		// Remove player connection record from MongoDB room document asynchronously
+		go func(rId, pId string) {
+			if err := RemovePlayerFromDBRoom(rId, pId); err != nil {
+				log.Printf("[HUB] Falha ao atualizar saída do jogador no DB: %v", err)
+			}
+		}(roomId, client.playerId)
 
 		if len(room.Players) == 0 {
 			// Room is empty, garbage collect from memory (database remains intact!)
@@ -288,91 +319,48 @@ func (h *Hub) handleBroadcast(event BroadcastEvent) {
 		return
 	}
 
-	// Persist based on message type
+	// 1. Process asynchronous persistence based on message type
 	switch msg.Type {
 	case "chat", "roll":
-		// Log chat history and rolls
-		if err := SaveMessageToDB(roomId, msg.Type, event.sender.playerId, msg.Data); err != nil {
-			log.Printf("[HUB] Falha ao registrar log de chat/rolagem no DB: %v", err)
-		}
+		go func(rId, mType, pId string, data interface{}) {
+			if err := SaveMessageToDB(rId, mType, pId, data); err != nil {
+				log.Printf("[HUB] Falha ao registrar log de chat/rolagem no DB: %v", err)
+			}
+		}(roomId, msg.Type, event.sender.playerId, msg.Data)
 
 	case "state":
-		// Persist character sheet state
-		if err := UpdatePlayerStateInDB(roomId, event.sender.playerId, event.sender.playerName, msg.Data); err != nil {
-			log.Printf("[HUB] Falha ao salvar ficha de personagem no DB: %v", err)
-		}
-
-	case "map":
-		// Handle map image update and GCS upload
-		if dataMap, ok := msg.Data.(map[string]interface{}); ok {
-			if base64Str, ok := dataMap["imageDataUrl"].(string); ok && strings.HasPrefix(base64Str, "data:image/") {
-				log.Println("[HUB] Nova imagem de mapa recebida. Iniciando upload para Cloud Storage...")
-				
-				var dbRoom *DBRoomState
-				if roomDoc, err := GetRoomFromDB(roomId); err == nil {
-					dbRoom = roomDoc
-				}
-
-				publicURL, err := UploadBase64Image(base64Str)
-				if err == nil {
-					// Replace the massive base64 payload with public link
-					dataMap["imageDataUrl"] = publicURL
-					msg.Data = dataMap
-
-					// Update binary payload to broadcast public link instead of base64
-					if updatedPayload, err := json.Marshal(msg); err == nil {
-						event.payload = updatedPayload
-					}
-
-					// Enforce the 5-image GCS limit
-					if dbRoom != nil {
-						dbRoom.GCSImages = append(dbRoom.GCSImages, publicURL)
-						for len(dbRoom.GCSImages) > 5 {
-							oldestURL := dbRoom.GCSImages[0]
-							log.Printf("[HUB] Excedeu o limite de 5 imagens. Excluindo a mais antiga do GCS: %s", oldestURL)
-							_ = DeleteImageFromGCS(oldestURL)
-							dbRoom.GCSImages = dbRoom.GCSImages[1:]
-						}
-						_ = UpdateRoomSharedState(roomId, "gcsImages", dbRoom.GCSImages)
-					}
-				} else {
-					log.Printf("[HUB] Falha ao enviar para o Cloud Storage. Mantendo base64 inline: %v", err)
-				}
+		go func(rId, pId, pName string, data interface{}) {
+			if err := UpdatePlayerStateInDB(rId, pId, pName, data); err != nil {
+				log.Printf("[HUB] Falha ao salvar ficha de personagem no DB: %v", err)
 			}
-
-			// Update active map URL in DB room document
-			if finalURL, ok := dataMap["imageDataUrl"].(string); ok {
-				if err := UpdateRoomSharedState(roomId, "currentMap", finalURL); err != nil {
-					log.Printf("[HUB] Falha ao salvar mapa ativo no DB: %v", err)
-				}
-			}
-		}
+		}(roomId, event.sender.playerId, event.sender.playerName, msg.Data)
 
 	case "scene":
-		// Save scene state to room doc
-		if err := UpdateRoomSharedState(roomId, "currentScene", msg.Data); err != nil {
-			log.Printf("[HUB] Falha ao salvar cena ativa no DB: %v", err)
-		}
+		go func(rId string, data interface{}) {
+			if err := UpdateRoomSharedState(rId, "currentScene", data); err != nil {
+				log.Printf("[HUB] Falha ao salvar cena ativa no DB: %v", err)
+			}
+		}(roomId, msg.Data)
 
 	case "music":
-		// Save music state to room doc
-		if err := UpdateRoomSharedState(roomId, "currentMusic", msg.Data); err != nil {
-			log.Printf("[HUB] Falha ao salvar tocador no DB: %v", err)
-		}
+		go func(rId string, data interface{}) {
+			if err := UpdateRoomSharedState(rId, "currentMusic", data); err != nil {
+				log.Printf("[HUB] Falha ao salvar tocador no DB: %v", err)
+			}
+		}(roomId, msg.Data)
 
 	case "extra_fichas":
-		// Save extra sheets array to room doc
-		if err := UpdateRoomSharedState(roomId, "extraFichas", msg.Data); err != nil {
-			log.Printf("[HUB] Falha ao salvar extraFichas no DB: %v", err)
-		}
+		go func(rId string, data interface{}) {
+			if err := UpdateRoomSharedState(rId, "extraFichas", data); err != nil {
+				log.Printf("[HUB] Falha ao salvar extraFichas no DB: %v", err)
+			}
+		}(roomId, msg.Data)
 
 	case "master_update_player_state":
-		// Only allow the room master (HostID) to perform this update
 		if roomId != "" && event.sender.playerId == room.HostID {
 			if dataMap, ok := msg.Data.(map[string]interface{}); ok {
 				targetPid, ok1 := dataMap["targetPlayerId"].(string)
 				if ok1 {
-					// Prepare character state sub-document for DB update
 					charData := map[string]interface{}{
 						"nome":     dataMap["nome"],
 						"portrait": dataMap["portrait"],
@@ -380,32 +368,79 @@ func (h *Hub) handleBroadcast(event BroadcastEvent) {
 						"det":      dataMap["det"],
 						"ass":      dataMap["ass"],
 					}
-					// Update player's characterState inside the room document in MongoDB without modifying their name
-					if err := UpdatePlayerCharacterStateInDB(roomId, targetPid, charData); err != nil {
-						log.Printf("[HUB] Falha ao atualizar ficha do jogador %s via Mestre no DB: %v", targetPid, err)
-					}
+					go func(rId, tPid string, cData map[string]interface{}) {
+						if err := UpdatePlayerCharacterStateInDB(rId, tPid, cData); err != nil {
+							log.Printf("[HUB] Falha ao atualizar ficha do jogador %s via Mestre no DB: %v", tPid, err)
+						}
+					}(roomId, targetPid, charData)
 				}
+			}
+		}
+
+	case "map":
+		if dataMap, ok := msg.Data.(map[string]interface{}); ok {
+			base64Str, isB64 := dataMap["imageDataUrl"].(string)
+			if isB64 && strings.HasPrefix(base64Str, "data:image/") && IsStorageConfigured() {
+				// Upload asynchronously to GCS without blocking Hub
+				go h.handleAsyncMapUpload(roomId, event.sender.playerId, base64Str)
+			} else if finalURL, ok := dataMap["imageDataUrl"].(string); ok {
+				go func(rId, url string) {
+					if err := UpdateRoomSharedState(rId, "currentMap", url); err != nil {
+						log.Printf("[HUB] Falha ao salvar mapa ativo no DB: %v", err)
+					}
+				}(roomId, finalURL)
 			}
 		}
 	}
 
-	// Relay message payload to all other players in the room
+	// 2. Relay message payload immediately to all other players in the room
 	for _, client := range room.Players {
 		if client.playerId != event.sender.playerId {
-			select {
-			case client.send <- event.payload:
-			default:
-				close(client.send)
-				delete(room.Players, client.playerId)
-				go func(c *Client) {
-					c.conn.Close()
-				}(client)
-			}
+			sendClientMessage(client, event.payload)
 		}
 	}
 }
 
-// broadcastRoomUpdate builds and sends a _room_update payload.
+// handleAsyncMapUpload uploads a base64 map to Google Cloud Storage in the background,
+// updates MongoDB, and broadcasts the public URL to all players in the room.
+func (h *Hub) handleAsyncMapUpload(roomId string, senderPlayerId string, base64Str string) {
+	log.Printf("[HUB] Iniciando upload de imagem de mapa no GCS para a sala %s...", roomId)
+	publicURL, err := UploadBase64Image(base64Str)
+	if err != nil {
+		log.Printf("[HUB] Falha no upload para o Cloud Storage: %v", err)
+		return
+	}
+
+	// Enforce 5-image retention limit in DB
+	dbRoom, err := GetRoomFromDB(roomId)
+	if err == nil && dbRoom != nil {
+		dbRoom.GCSImages = append(dbRoom.GCSImages, publicURL)
+		for len(dbRoom.GCSImages) > 5 {
+			oldestURL := dbRoom.GCSImages[0]
+			log.Printf("[HUB] Limite de 5 imagens excedido. Excluindo a mais antiga: %s", oldestURL)
+			_ = DeleteImageFromGCS(oldestURL)
+			dbRoom.GCSImages = dbRoom.GCSImages[1:]
+		}
+		_ = UpdateRoomSharedState(roomId, "gcsImages", dbRoom.GCSImages)
+	}
+
+	_ = UpdateRoomSharedState(roomId, "currentMap", publicURL)
+
+	// Broadcast the public CDN URL to all room participants
+	mapMsg := WSMessage{
+		Type:     "map",
+		PlayerID: senderPlayerId,
+		Data:     map[string]interface{}{"imageDataUrl": publicURL},
+	}
+	if payload, err := json.Marshal(mapMsg); err == nil {
+		h.broadcast <- BroadcastEvent{
+			sender:  &Client{roomId: roomId, playerId: ""}, // Empty ID ensures all players receive the link
+			payload: payload,
+		}
+	}
+}
+
+// broadcastRoomUpdate builds and sends a _room_update payload to all players in the room.
 func (h *Hub) broadcastRoomUpdate(room *Room) {
 	playersInfo := make(map[string]RoomPlayerInfo)
 	for id, c := range room.Players {
@@ -430,26 +465,29 @@ func (h *Hub) broadcastRoomUpdate(room *Room) {
 	}
 
 	for _, client := range room.Players {
-		select {
-		case client.send <- payload:
-		default:
-			close(client.send)
-			delete(room.Players, client.playerId)
-			go func(c *Client) {
-				c.conn.Close()
-			}(client)
-		}
+		sendClientMessage(client, payload)
 	}
 }
 
-// sendErrorMessage sends a simple system/error message to a single client.
+// sendClientMessage attempts a non-blocking send to client.send. If the channel is full,
+// the client is deemed slow/stalled and disconnected safely.
+func sendClientMessage(client *Client, payload []byte) {
+	select {
+	case client.send <- payload:
+	default:
+		log.Printf("[HUB] Canal de envio lotado para o jogador %s (%s). Desconectando.", client.playerName, client.playerId)
+		client.safeClose()
+	}
+}
+
+// sendErrorMessage formats and sends a system/error message safely to a single client.
 func sendErrorMessage(client *Client, text string) {
 	errMsg := WSMessage{
 		Type: "error",
 		Data: text,
 	}
 	payload, _ := json.Marshal(errMsg)
-	_ = client.conn.WriteMessage(websocket.TextMessage, payload)
+	sendClientMessage(client, payload)
 }
 
 // handleDeleteRoom kicks all active clients in the room and deletes it from memory.
@@ -463,10 +501,7 @@ func (h *Hub) handleDeleteRoom(roomId string) {
 
 	for _, client := range room.Players {
 		sendErrorMessage(client, "Esta sala de jogo foi excluída permanentemente pelo Mestre.")
-		// Close the socket connection
-		go func(c *Client) {
-			c.conn.Close()
-		}(client)
+		client.safeClose()
 	}
 
 	delete(h.rooms, roomId)

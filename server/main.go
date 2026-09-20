@@ -2,10 +2,15 @@ package main
 
 import (
 	"bufio"
+	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 )
 
 // loadEnvFile reads environment variables from a .env file if it exists.
@@ -63,13 +68,15 @@ func main() {
 	hub := newHub()
 	go hub.run()
 
+	mux := http.NewServeMux()
+
 	// WebSocket handler
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
 
 	// Delete room handler
-	http.HandleFunc("/delete-room", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/delete-room", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Método não permitido. Utilize POST.", http.StatusMethodNotAllowed)
 			return
@@ -97,17 +104,68 @@ func main() {
 		_, _ = w.Write([]byte(`{"status":"success","message":"Sala e dados excluídos com sucesso"}`))
 	}))
 
-	// Basic healthcheck
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})
+	// Healthcheck endpoint with DB & Storage status
+	mux.HandleFunc("/health", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		dbStatus := "connected"
+		if err := PingMongoDB(); err != nil {
+			dbStatus = "error: " + err.Error()
+		}
 
-	log.Printf("[SERVER] Servidor rodando na porta %s", port)
-	err = http.ListenAndServe(":"+port, nil)
-	if err != nil {
-		log.Fatalf("[SERVER] Falha ao iniciar servidor: %v", err)
+		storageStatus := "disabled"
+		if IsStorageConfigured() {
+			storageStatus = "active"
+		}
+
+		status := "ok"
+		statusCode := http.StatusOK
+		if dbStatus != "connected" {
+			status = "degraded"
+			statusCode = http.StatusServiceUnavailable
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(statusCode)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"status":  status,
+			"db":      dbStatus,
+			"storage": storageStatus,
+			"time":    time.Now().Format(time.RFC3339),
+		})
+	}))
+
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
+
+	// Run server in background goroutine
+	go func() {
+		log.Printf("[SERVER] Servidor rodando na porta %s", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("[SERVER] Falha ao iniciar servidor: %v", err)
+		}
+	}()
+
+	// Graceful shutdown on SIGINT / SIGTERM
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
+
+	log.Println("[SERVER] Sinal de interrupção recebido. Iniciando encerramento gracioso...")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Printf("[SERVER] Erro ao encerrar servidor HTTP: %v", err)
+	}
+
+	if err := DisconnectMongoDB(shutdownCtx); err != nil {
+		log.Printf("[SERVER] Erro ao desconectar MongoDB: %v", err)
+	}
+
+	log.Println("[SERVER] Servidor finalizado com sucesso.")
 }
 
 // enableCORS wraps a handler function providing standard CORS support.

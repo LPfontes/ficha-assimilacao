@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -18,13 +19,13 @@ const (
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 
-	// Maximum message size allowed from peer.
-	maxMessageSize = 512 * 1024 // 512KB for maps and sync
+	// Maximum message size allowed from peer (10MB to accommodate HD maps and sync).
+	maxMessageSize = 10 * 1024 * 1024
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  4096,
+	WriteBufferSize: 4096,
 	CheckOrigin: func(r *http.Request) bool {
 		// Allow all origins for the game local/dev setup.
 		return true
@@ -41,11 +42,21 @@ type Client struct {
 	// Buffered channel of outbound messages.
 	send chan []byte
 
+	// Ensures send channel is closed only once.
+	closeOnce sync.Once
+
 	// Client info
 	roomId     string
 	playerId   string
 	playerName string
 	isHost     bool
+}
+
+// safeClose closes the send channel safely using sync.Once.
+func (c *Client) safeClose() {
+	c.closeOnce.Do(func() {
+		close(c.send)
+	})
 }
 
 // readPump pumps messages from the websocket connection to the hub.

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -17,6 +17,11 @@ var (
 	gcsClient  *storage.Client
 	bucketName string
 )
+
+// IsStorageConfigured reports whether Cloud Storage is initialized and active.
+func IsStorageConfigured() bool {
+	return gcsClient != nil && bucketName != ""
+}
 
 // initStorage initializes the Google Cloud Storage client.
 func initStorage() {
@@ -77,8 +82,8 @@ func UploadBase64Image(dataURL string) (string, error) {
 	}
 
 	// Hash the content to create a unique filename (prevents duplicates)
-	hash := md5.Sum(data)
-	filename := fmt.Sprintf("maps/%x.%s", hash, ext)
+	hash := sha256.Sum256(data)
+	filename := fmt.Sprintf("maps/%x.%s", hash[:16], ext)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
