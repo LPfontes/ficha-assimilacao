@@ -2630,12 +2630,10 @@ function _resetMesaAmeacaAtivacao(ameacaIdx, actIdx) {
   if (!ameaca.ativacoes || !ameaca.ativacoes[actIdx]) return;
   const act = ameaca.ativacoes[actIdx];
 
-  const lastRoll = c.rolagens && c.rolagens[c.rolagens.length - 1];
-  if (lastRoll) {
-    lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
-    lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
-    lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
-  }
+  // Deduct spent dice permanently on threat entity
+  ameaca.spentS = (ameaca.spentS || 0) + (act.investedS || 0);
+  ameaca.spentA = (ameaca.spentA || 0) + (act.investedA || 0);
+  ameaca.spentP = (ameaca.spentP || 0) + (act.investedP || 0);
 
   act.investedS = 0;
   act.investedA = 0;
@@ -2709,13 +2707,10 @@ function _resetMesaAtivacao(idx) {
   if (!c || !c.ativacoes || !c.ativacoes[idx]) return;
   const act = c.ativacoes[idx];
 
-  // Deduct spent dice from conflict's last roll
-  const lastRoll = c.rolagens && c.rolagens[c.rolagens.length - 1];
-  if (lastRoll) {
-    lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
-    lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
-    lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
-  }
+  // Deduct spent dice permanently on conflict entity
+  c.spentS = (c.spentS || 0) + (act.investedS || 0);
+  c.spentA = (c.spentA || 0) + (act.investedA || 0);
+  c.spentP = (c.spentP || 0) + (act.investedP || 0);
 
   act.investedS = 0;
   act.investedA = 0;

@@ -952,7 +952,7 @@ function _attachListeners(c) {
     if (!act) return;
 
     if (delta > 0) {
-      const avail = _getAvailableDice(c.rolagens, c.ativacoes);
+      const avail = _getAvailableDice(c.rolagens, c.ativacoes, c);
       if ((avail[type] || 0) <= 0) {
         return;
       }
@@ -1027,13 +1027,10 @@ function _attachListeners(c) {
     const act = c.ativacoes[idx];
     if (!act) return;
 
-    // Deduct spent dice from conflict's last roll
-    const lastRoll = c.rolagens && c.rolagens[c.rolagens.length - 1];
-    if (lastRoll) {
-      lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
-      lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
-      lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
-    }
+    // Deduct spent dice permanently on conflict entity
+    c.spentS = (c.spentS || 0) + (act.investedS || 0);
+    c.spentA = (c.spentA || 0) + (act.investedA || 0);
+    c.spentP = (c.spentP || 0) + (act.investedP || 0);
 
     act.investedS = 0;
     act.investedA = 0;
@@ -1112,6 +1109,12 @@ function _attachListeners(c) {
         act.snapshotA = 0;
         act.snapshotP = 0;
       });
+      c.manualBonusS = 0;
+      c.manualBonusA = 0;
+      c.manualBonusP = 0;
+      c.spentS = 0;
+      c.spentA = 0;
+      c.spentP = 0;
       saveConflito(c);
       renderConflitoSheet();
     }
@@ -1357,7 +1360,7 @@ function _attachListeners(c) {
     if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
 
     if (delta > 0) {
-      const avail = _getAvailableDice(a.rolagens, a.ativacoes);
+      const avail = _getAvailableDice(a.rolagens, a.ativacoes, a);
       if ((avail[type] || 0) <= 0) {
         return;
       }
@@ -1428,13 +1431,10 @@ function _attachListeners(c) {
     if (!a || !a.ativacoes || !a.ativacoes[actIdx]) return;
     const act = a.ativacoes[actIdx];
 
-    // Deduct spent dice from threat's last roll
-    const lastRoll = a.rolagens && a.rolagens[a.rolagens.length - 1];
-    if (lastRoll) {
-      lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) - (act.investedS || 0);
-      lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) - (act.investedA || 0);
-      lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) - (act.investedP || 0);
-    }
+    // Deduct spent dice permanently on threat entity
+    a.spentS = (a.spentS || 0) + (act.investedS || 0);
+    a.spentA = (a.spentA || 0) + (act.investedA || 0);
+    a.spentP = (a.spentP || 0) + (act.investedP || 0);
 
     act.investedS = 0;
     act.investedA = 0;
@@ -1676,21 +1676,19 @@ export function renderConflitoRollLog() {
   }).reverse().join("");
 }
 
-function _getAvailableDice(rolagens, activations) {
-  if (!rolagens || rolagens.length === 0) {
-    return { S: 0, A: 0, P: 0 };
-  }
+function _getAvailableDice(rolagens, activations, target = null) {
   let sucessos = 0;
   let adaptacoes = 0;
   let pressoes = 0;
 
-  rolagens.forEach(roll => {
+  (rolagens || []).forEach(roll => {
+    // Compatibilidade com bônus de rolagem legados
     sucessos += roll.bonusSuccesses || 0;
     adaptacoes += roll.bonusAdaptations || 0;
     pressoes += roll.bonusPressures || 0;
 
     (roll.keptDiceIndexes || []).forEach(idx => {
-      const die = roll.results[idx];
+      const die = roll.results && roll.results[idx];
       if (die && die.symbols) {
         die.symbols.forEach(sym => {
           if (sym === "A") sucessos++;
@@ -1700,6 +1698,12 @@ function _getAvailableDice(rolagens, activations) {
       }
     });
   });
+
+  if (target) {
+    sucessos += (target.manualBonusS || 0) - (target.spentS || 0);
+    adaptacoes += (target.manualBonusA || 0) - (target.spentA || 0);
+    pressoes += (target.manualBonusP || 0) - (target.spentP || 0);
+  }
 
   let investedS = 0;
   let investedA = 0;
@@ -1729,36 +1733,14 @@ function _adjustRollPool(type, delta, isThreat, threatIdx) {
     target = c;
   }
 
-  if (!target.rolagens) {
-    target.rolagens = [];
-  }
-  if (target.rolagens.length === 0) {
-    target.rolagens.push({
-      bonusSuccesses: 0,
-      bonusAdaptations: 0,
-      bonusPressures: 0,
-      keptDiceIndexes: [],
-      results: [],
-      formula: "Ajuste Manual",
-      timestamp: new Date().toLocaleTimeString()
-    });
-  }
-
-  const lastRoll = target.rolagens[target.rolagens.length - 1];
-  
   // Prevent available from going below 0
-  const avail = _getAvailableDice(target.rolagens, target.ativacoes);
+  const avail = _getAvailableDice(target.rolagens, target.ativacoes, target);
   if (delta < 0 && (avail[type] || 0) <= 0) {
     return;
   }
 
-  if (type === "S") {
-    lastRoll.bonusSuccesses = (lastRoll.bonusSuccesses || 0) + delta;
-  } else if (type === "A") {
-    lastRoll.bonusAdaptations = (lastRoll.bonusAdaptations || 0) + delta;
-  } else if (type === "P") {
-    lastRoll.bonusPressures = (lastRoll.bonusPressures || 0) + delta;
-  }
+  const key = `manualBonus${type}`;
+  target[key] = (target[key] || 0) + delta;
 
   saveConflito(c);
   renderConflitoLastRollCounter();
@@ -1768,10 +1750,10 @@ export function renderConflitoLastRollCounter() {
   const c = worldState.currentConflito;
   if (!c) return;
 
-  const updateContainer = (container, rolagens, activations, isThreat = false, threatIdx = null) => {
+  const updateContainer = (container, rolagens, activations, target, isThreat = false, threatIdx = null) => {
     if (!container) return;
     
-    const avail = _getAvailableDice(rolagens, activations);
+    const avail = _getAvailableDice(rolagens, activations, target);
 
     container.innerHTML = `
       <span class="last-roll-label">Disponível:</span>
@@ -1809,12 +1791,12 @@ export function renderConflitoLastRollCounter() {
   };
 
   const mainContainer = document.getElementById("conflito-last-roll-container");
-  updateContainer(mainContainer, c.rolagens, c.ativacoes, false, null);
+  updateContainer(mainContainer, c.rolagens, c.ativacoes, c, false, null);
   registerAdjustListeners(mainContainer);
 
   (c.ameacas || []).forEach((a, idx) => {
     const amContainer = document.getElementById(`conflito-last-roll-container-ameaca-${idx}`);
-    updateContainer(amContainer, a.rolagens, a.ativacoes, true, idx);
+    updateContainer(amContainer, a.rolagens, a.ativacoes, a, true, idx);
     registerAdjustListeners(amContainer);
   });
 }
@@ -1829,7 +1811,7 @@ document.addEventListener("roll-added", (e) => {
       if (a) {
         if (!a.rolagens) a.rolagens = [];
         a.rolagens.push(e.detail);
-        if (a.rolagens.length > 10) a.rolagens.shift();
+        if (a.rolagens.length > 50) a.rolagens.shift();
         a.ativacoes?.forEach(act => {
           act.snapshotS = act.investedS || 0;
           act.snapshotA = act.investedA || 0;
@@ -1840,7 +1822,7 @@ document.addEventListener("roll-added", (e) => {
     } else {
       if (!c.rolagens) c.rolagens = [];
       c.rolagens.push(e.detail);
-      if (c.rolagens.length > 10) c.rolagens.shift();
+      if (c.rolagens.length > 50) c.rolagens.shift();
 
       // Snapshot das ativações no momento em que a rolagem ocorre
       c.ativacoes.forEach(act => {
