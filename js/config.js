@@ -9,14 +9,13 @@ const githubPagesEnv = {
   FIREBASE_MESSAGING_SENDER_ID: "631521996104",
   FIREBASE_APP_ID: "1:631521996104:web:547f5bed92e2524732577d",
   GCS_BUCKET_NAME: "mesa_assimilacao",
-  WS_SERVER_URL: "wss://ficha-assimilacao.onrender.com"
-  
+  WS_SERVER_URL: "wss://assimilacao.vttserver.com.br"
 };
 
 // Auxiliar para carregar o arquivo .env via fetch em tempo de execução
 export async function loadEnv() {
   try {
-    const response = await fetch('./.env');
+    const response = await fetch('./.env', { cache: 'no-store' });
     if (!response.ok) {
       // Se der erro 404 (comum no GitHub Pages), retorna as variáveis diretas
       return githubPagesEnv;
