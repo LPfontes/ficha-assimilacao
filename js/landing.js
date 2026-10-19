@@ -360,7 +360,7 @@ export function renderCharactersList() {
         <div class="char-card-name">${escapeHtml(name)}</div>
         <div class="char-card-sub-info">
           ${TYPE_BADGES[type]}
-          ${subInfo ? `<div class="char-card-sub-info">${escapeHtml(subInfo)}</div>` : ""}
+          ${subInfo ? `<div class="char-card-sub-info" title="${escapeHtml(subInfo)}">${escapeHtml(subInfo)}</div>` : ""}
         </div>
         ${actionsHtml}
       </article>
