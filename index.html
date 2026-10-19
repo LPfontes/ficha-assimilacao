@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,21 +12,26 @@
   <!-- Fontes do Google: Outfit (Títulos/Militar/Industrial) e Inter (Legibilidade) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="css/landing.css">
   <link rel="stylesheet" href="css/world-sheets.css">
   <link rel="stylesheet" href="css/mesa.css">
   <link rel="stylesheet" href="css/campaign.css">
 </head>
+
 <body>
 
   <!-- Barra de Controle Principal (Superior) -->
   <header class="main-header">
     <div class="header-logo" style="display: flex; align-items: center;">
-      <button id="btn-home" type="button" style="background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center;">
-        <img src="assets/logotipoAssimilacao.webp" alt="Assimilação RPG Logo" style="height: 40px; width: auto; max-width: 100%; display:block;">
+      <button id="btn-home" type="button"
+        style="background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center;">
+        <img src="assets/logotipoAssimilacao.webp" alt="Assimilação RPG Logo"
+          style="height: 40px; width: auto; max-width: 100%; display:block;">
       </button>
     </div>
 
@@ -34,9 +40,9 @@
       <div class="player-body">
         <div class="player-track-art" id="player-track-art">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M16 12a4 4 0 01-8 0" stroke-width="2.5"/>
-            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M16 12a4 4 0 01-8 0" stroke-width="2.5" />
+            <circle cx="12" cy="12" r="2" fill="currentColor" />
           </svg>
         </div>
         <div class="player-info-group">
@@ -51,39 +57,48 @@
         </div>
         <div class="player-actions">
           <button class="player-btn player-btn-prev" id="player-btn-prev" title="Anterior">
-            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 5h1.5v10H5V5zm3 5l7-5v10l-7-5z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 5h1.5v10H5V5zm3 5l7-5v10l-7-5z" />
+            </svg>
           </button>
           <button class="player-btn player-btn-play" id="player-btn-play" title="Play/Pause">
             <svg viewBox="0 0 20 20" fill="currentColor">
-              <path id="player-play-icon" d="M6.5 4.5l9 5.5-9 5.5V4.5z"/>
+              <path id="player-play-icon" d="M6.5 4.5l9 5.5-9 5.5V4.5z" />
             </svg>
           </button>
           <button class="player-btn player-btn-next" id="player-btn-next" title="Próxima">
-            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.5 5H15v10h-1.5V5zm-7 5l7-5v10l-7-5z"/></svg>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M13.5 5H15v10h-1.5V5zm-7 5l7-5v10l-7-5z" />
+            </svg>
           </button>
         </div>
         <div class="player-volume-wrap">
           <button class="player-btn" id="player-btn-volume" title="Volume">
-            <svg id="player-volume-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-              <path d="M9 4L5 7.5H2v5h3l4 3.5V4z"/>
-              <path d="M15.5 5.5a7 7 0 010 9M13 8a3.5 3.5 0 010 4"/>
+            <svg id="player-volume-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round">
+              <path d="M9 4L5 7.5H2v5h3l4 3.5V4z" />
+              <path d="M15.5 5.5a7 7 0 010 9M13 8a3.5 3.5 0 010 4" />
             </svg>
           </button>
-          <input type="range" class="player-volume-slider" id="player-volume-slider" min="0" max="1" step="0.05" value="0.8">
+          <input type="range" class="player-volume-slider" id="player-volume-slider" min="0" max="1" step="0.05"
+            value="0.8">
         </div>
         <button class="player-btn player-btn-shuffle" id="player-btn-shuffle" title="Aleatório">
-          <svg id="player-shuffle-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:0.4;">
-            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+          <svg id="player-shuffle-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" style="opacity:0.4;">
+            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
           </svg>
         </button>
         <button class="player-btn player-btn-repeat" id="player-btn-repeat" title="Repetir">
-          <svg id="player-repeat-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:0.4;">
-            <path d="M4 4v5h5M20 20v-5h-5"/><path d="M16 4a8 8 0 014.24 3.76M8 20a8 8 0 01-4.24-3.76"/>
+          <svg id="player-repeat-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" style="opacity:0.4;">
+            <path d="M4 4v5h5M20 20v-5h-5" />
+            <path d="M16 4a8 8 0 014.24 3.76M8 20a8 8 0 01-4.24-3.76" />
           </svg>
         </button>
         <button class="player-btn player-btn-expand" id="player-btn-expand" title="Lista de faixas">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-            <polyline points="4 8 10 14 16 8"/>
+            <polyline points="4 8 10 14 16 8" />
           </svg>
         </button>
       </div>
@@ -94,16 +109,20 @@
       <span class="menu-bar"></span>
       <span class="menu-bar"></span>
     </button>
-    
-      <div class="header-controls">
-        <button id="btn-voltar-landing" class="btn hide-on-desktop" title="Voltar ao início" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow);">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          <span class="btn-text">Voltar</span>
-        </button>
-        
-        
 
-        <button id="btn-new-char" class="btn" title="Criar Nova Ficha">
+    <div class="header-controls">
+      <button id="btn-voltar-landing" class="btn hide-on-desktop" title="Voltar ao início"
+        style="border-color: var(--color-blue-glow); color: var(--color-blue-glow);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span class="btn-text">Voltar</span>
+      </button>
+
+
+
+      <button id="btn-new-char" class="btn" title="Criar Nova Ficha">
         <span class="btn-icon" data-icon="plus"></span> <span class="btn-text">Nova Ficha</span>
       </button>
       <button id="btn-import-json" class="btn import-json" title="Importar Ficha JSON">
@@ -122,12 +141,11 @@
       <button id="btn-open-tarot-again" class="btn hide-on-desktop" title="Refazer Leitura (Tarot)">
         <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text">Refazer Tarot</span>
       </button>
-      <button id="btn-delete-char" class="btn btn-danger" title="Apagar Personagem" disabled>
-        <span class="btn-icon" data-icon="trash"></span>
-      </button>
+
       <button id="btn-cloud-sync" class="btn" title="Sincronizar Nuvem" style="position: relative;">
         <span class="btn-icon" data-icon="cloud"></span>
-        <span id="cloud-sync-badge" style="display:none; position:absolute; top:-2px; right:-2px; width:8px; height:8px; background-color:var(--color-orange); border-radius:50%;"></span>
+        <span id="cloud-sync-badge"
+          style="display:none; position:absolute; top:-2px; right:-2px; width:8px; height:8px; background-color:var(--color-orange); border-radius:50%;"></span>
       </button>
       <button id="btn-manage-items" class="btn" title="Gerenciar Itens">
         <span class="btn-icon" data-icon="backpack"></span>
@@ -140,7 +158,7 @@
 
   <!-- Container Principal de Conteúdo -->
   <main class="main-content">
-    
+
     <!-- TELA 0: LANDING - Seleção de Personagens -->
     <section id="landing-screen" class="screen">
       <div class="landing-bg-overlay"></div>
@@ -155,25 +173,25 @@
         <!-- Abas de Filtro de Fichas -->
         <div class="landing-tabs" id="landing-tabs">
           <button class="landing-tab active" data-tab="all">
-            <span class="tab-emoji">📂</span> Todos
+             Todos
           </button>
           <button class="landing-tab" data-tab="infectado">
-            <span class="tab-emoji">🧬</span> Infectados
+             Infectados
           </button>
           <button class="landing-tab" data-tab="refugio">
-            <span class="tab-emoji">🏕️</span> Refúgios
+          Refúgios
           </button>
           <button class="landing-tab" data-tab="regiao">
-            <span class="tab-emoji">🗺️</span> Regiões
+          Regiões
           </button>
           <button class="landing-tab" data-tab="conflito">
-            <span class="tab-emoji">⚔️</span> Conflitos
+          Conflitos
           </button>
           <button class="landing-tab" data-tab="local">
-            <span class="tab-emoji">📍</span> Locais
+          Locais
           </button>
           <button class="landing-tab" data-tab="campanha">
-            <span class="tab-emoji">📋</span> Mesas de Jogo
+          Mesas de Jogo
           </button>
         </div>
 
@@ -185,16 +203,27 @@
             </span>
           </div>
           <div class="folder-bar-actions">
-            <button id="btn-collapse-all-folders" class="btn btn-folder-secondary hidden" title="Recolher todas as pastas">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 12 6 20 14"/></svg>
+            <button id="btn-collapse-all-folders" class="btn btn-folder-secondary hidden"
+              title="Recolher todas as pastas">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 14 12 6 20 14" />
+              </svg>
               Recolher
             </button>
-            <button id="btn-expand-all-folders" class="btn btn-folder-secondary hidden" title="Expandir todas as pastas">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 10 12 18 20 10"/></svg>
+            <button id="btn-expand-all-folders" class="btn btn-folder-secondary hidden"
+              title="Expandir todas as pastas">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 10 12 18 20 10" />
+              </svg>
               Expandir
             </button>
-            <button id="btn-new-folder" class="btn btn-new-folder-action" title="Criar nova pasta para organizar fichas">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+            <button id="btn-new-folder" class="btn btn-new-folder-action"
+              title="Criar nova pasta para organizar fichas">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                <line x1="12" y1="11" x2="12" y2="17" />
+                <line x1="9" y1="14" x2="15" y2="14" />
+              </svg>
               Nova Pasta
             </button>
           </div>
@@ -206,7 +235,8 @@
         <!-- Estado vazio (sem personagens) -->
         <div id="empty-state" class="landing-empty hidden">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="empty-icon">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <p class="empty-title">Nenhum infectado encontrado</p>
           <p class="empty-sub">Crie seu primeiro personagem para começar</p>
@@ -215,19 +245,33 @@
         <!-- Ações do rodapé -->
         <div class="landing-footer-actions">
           <button id="btn-create-first-char" class="btn btn-landing-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
             Nova Ficha
           </button>
           <button id="btn-import-landing" class="btn btn-landing-secondary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
             Importar Ficha
           </button>
-          <button id="btn-mesa-landing" class="btn btn-landing-secondary" style="border-color:var(--color-gold-glow); color:var(--color-gold-glow);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg>
+          <button id="btn-mesa-landing" class="btn btn-landing-secondary"
+            style="border-color:var(--color-gold-glow); color:var(--color-gold-glow);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M3 3h18v18H3z" />
+              <path d="M3 9h18M9 3v18" />
+            </svg>
             Mesa de Jogo
           </button>
-          <button id="btn-entrar-campanha-landing" class="btn btn-landing-secondary" style="border-color:var(--color-blue-glow); color:var(--color-blue-glow);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <button id="btn-entrar-campanha-landing" class="btn btn-landing-secondary"
+            style="border-color:var(--color-blue-glow); color:var(--color-blue-glow);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
             Entrar na Mesa
           </button>
           <input type="file" id="file-import-landing" accept=".json" style="display:none">
@@ -252,14 +296,16 @@
           </div>
           <div class="campaign-header-actions">
             <!-- Botão de gerenciar mesa (apenas mestre) -->
-            <button id="btn-gerenciar-mesa" class="btn btn-landing-secondary hidden" style="border-color:var(--color-blue-glow); color:var(--color-blue-glow);">
+            <button id="btn-gerenciar-mesa" class="btn btn-landing-secondary hidden"
+              style="border-color:var(--color-blue-glow); color:var(--color-blue-glow);">
               Gerenciar Mesa
             </button>
             <!-- Botão primário dinâmico: Iniciar Sessão (Mestre) ou Entrar na Sessão (Jogador) -->
             <button id="btn-camp-session-action" class="btn btn-landing-primary" style="padding: 12px 24px;">
               Entrar na Sessão
             </button>
-            <button id="btn-camp-leave" class="btn btn-landing-secondary" style="border-color:var(--color-rust); color:var(--color-rust-glow);">
+            <button id="btn-camp-leave" class="btn btn-landing-secondary"
+              style="border-color:var(--color-rust); color:var(--color-rust-glow);">
               Voltar ao Início
             </button>
           </div>
@@ -268,22 +314,22 @@
         <!-- Abas de Navegação -->
         <div class="campaign-nav-tabs">
           <button class="campaign-tab-btn active" data-tab="camp-tab-fichas">
-            <span>🧬</span> Fichas da Mesa
+          Fichas da Mesa
           </button>
           <button class="campaign-tab-btn" data-tab="camp-tab-notas">
-            <span>✏️</span> Notas
+          Notas
           </button>
           <button class="campaign-tab-btn" data-tab="camp-tab-eventos">
-            <span>⚔️</span> Eventos
+          Eventos
           </button>
           <button class="campaign-tab-btn" data-tab="camp-tab-historia">
-            <span>📖</span> Diário da Crônica
+          Diário da Crônica
           </button>
         </div>
 
         <!-- Conteúdo das Abas -->
         <div class="campaign-tab-contents">
-          
+
           <!-- Aba Fichas -->
           <div class="campaign-tab-panel active" id="camp-tab-fichas">
             <div class="fichas-section-header">
@@ -322,12 +368,15 @@
           <div class="campaign-tab-panel" id="camp-tab-eventos">
             <!-- Formulário apenas para o Mestre, mas visível se quisermos -->
             <div class="camp-form-inline gm-only-block" id="camp-event-form">
-              <h4 style="color:var(--color-blue-glow); font-family:var(--font-heading);">Agendar Novo Evento (Mestre)</h4>
+              <h4 style="color:var(--color-blue-glow); font-family:var(--font-heading);">Agendar Novo Evento (Mestre)
+              </h4>
               <div class="camp-form-row">
                 <input type="text" id="camp-event-title-input" class="camp-input" placeholder="Título do Evento">
-                <input type="text" id="camp-event-date-input" class="camp-input" placeholder="Quando (Ex: Dia 3, Rodada 2...)">
+                <input type="text" id="camp-event-date-input" class="camp-input"
+                  placeholder="Quando (Ex: Dia 3, Rodada 2...)">
               </div>
-              <textarea id="camp-event-desc-input" class="camp-textarea" placeholder="Descrição do Evento ou Ameaça..."></textarea>
+              <textarea id="camp-event-desc-input" class="camp-textarea"
+                placeholder="Descrição do Evento ou Ameaça..."></textarea>
               <div style="display:flex; justify-content:flex-end;">
                 <button id="btn-camp-add-event" class="btn btn-sm">Agendar Evento</button>
               </div>
@@ -344,7 +393,8 @@
                 <!-- Crônica injetada aqui -->
               </div>
               <div class="chronicle-input-row">
-                <input type="text" id="camp-chronicle-input" class="camp-input" placeholder="Adicionar nova entrada na história da crônica...">
+                <input type="text" id="camp-chronicle-input" class="camp-input"
+                  placeholder="Adicionar nova entrada na história da crônica...">
                 <button id="btn-camp-add-chronicle" class="btn btn-sm">Registrar</button>
               </div>
             </div>
@@ -363,13 +413,15 @@
         <button id="btn-open-roller-table" class="btn btn-sm table-roller-btn" title="Abrir Rolador de Dados">
           <span style="font-size:1.1em;">🎲</span> Lançar Dados
         </button>
-        <button id="btn-table-conflito" class="btn btn-sm table-conflito-btn hidden" title="Ativar / Gerenciar Conflito">
+        <button id="btn-table-conflito" class="btn btn-sm table-conflito-btn hidden"
+          title="Ativar / Gerenciar Conflito">
           ⚔️ Conflito
         </button>
         <button id="btn-table-cenas" class="btn btn-sm table-cenas-btn hidden" title="Gerenciar Cenas de Fundo">
           🖼️ Cenas
         </button>
-        <button class="btn btn-sm" id="btn-leave-table" style="border-color:var(--color-rust); color:var(--color-rust-glow);">Sair da Mesa</button>
+        <button class="btn btn-sm" id="btn-leave-table"
+          style="border-color:var(--color-rust); color:var(--color-rust-glow);">Sair da Mesa</button>
       </div>
 
       <!-- Painel de Conflito Ativo (banner abaixo da toolbar, só visível quando há conflito ativo) -->
@@ -398,8 +450,11 @@
           <button id="btn-tb-roll-conflito" class="btn btn-sm table-conflito-roll-btn" title="Rolar dados do conflito">
             🎲 Rolar Conflito
           </button>
-          <button id="btn-tb-ativacoes" class="btn btn-sm" title="Ativações do conflito" style="font-size:10px;">📋 Ativações</button>
-          <button id="btn-tb-end-conflito" class="btn btn-sm" title="Encerrar conflito ativo" style="border-color:var(--color-rust);color:var(--color-rust-glow);font-size:10px;">✕</button>
+          <button id="btn-tb-ativacoes" class="btn btn-sm" title="Ativações do conflito"
+            style="font-size: var(--font-size-xs);">📋
+            Ativações</button>
+          <button id="btn-tb-end-conflito" class="btn btn-sm" title="Encerrar conflito ativo"
+            style="border-color:var(--color-rust);color:var(--color-rust-glow);font-size: var(--font-size-xs);">✕</button>
         </div>
       </div>
 
@@ -437,7 +492,8 @@
             <div class="mesa-ativacoes-section">
               <div class="mesa-ativacoes-section-header">
                 <span class="mesa-section-label">Ativações</span>
-                <button id="btn-mesa-nova-ativacao-toggle" class="btn btn-sm" title="Nova ativação" style="font-size:10px;padding:2px 8px;">+ Nova</button>
+                <button id="btn-mesa-nova-ativacao-toggle" class="btn btn-sm" title="Nova ativação"
+                  style="font-size: var(--font-size-xs);padding:2px 8px;">+ Nova</button>
               </div>
 
               <!-- Mini formulário de nova ativação (colapsável) -->
@@ -478,10 +534,12 @@
                   </div>
                 </div>
                 <div class="mesa-form-group">
-                  <input type="text" id="mesa-nova-ativacao-titulo" placeholder="Título / Nome da Ação" class="mesa-form-input">
+                  <input type="text" id="mesa-nova-ativacao-titulo" placeholder="Título / Nome da Ação"
+                    class="mesa-form-input">
                 </div>
                 <div class="mesa-form-group">
-                  <textarea id="mesa-nova-ativacao-efeito" placeholder="Efeito / Descrição..." class="mesa-form-textarea" rows="2"></textarea>
+                  <textarea id="mesa-nova-ativacao-efeito" placeholder="Efeito / Descrição..."
+                    class="mesa-form-textarea" rows="2"></textarea>
                 </div>
                 <div class="mesa-form-actions">
                   <button id="btn-mesa-cancel-ativacao" class="btn btn-sm btn-secondary">Cancelar</button>
@@ -519,10 +577,13 @@
           <div id="table-player-panel-header">
             <span>Jogadores</span>
             <button id="btn-add-ficha" class="btn btn-sm hidden" title="Adicionar ficha extra">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+              </svg>
               Ficha
             </button>
-            <button id="btn-manage-fichas-visibility" class="btn btn-sm hidden" title="Gerenciar visibilidade das fichas" style="margin-left: 4px;">
+            <button id="btn-manage-fichas-visibility" class="btn btn-sm hidden"
+              title="Gerenciar visibilidade das fichas" style="margin-left: 4px;">
               👁️ Visibilidade
             </button>
           </div>
@@ -563,7 +624,9 @@
             <div id="table-roll-feed-header">
               <span>Rolagens: </span>
               <span id="table-roll-count">0</span>
-              <button id="btn-clear-roll-feed" class="btn btn-sm" style="margin-left:auto;font-size:9px;padding:2px 6px;" title="Limpar rolagens">Limpar</button>
+              <button id="btn-clear-roll-feed" class="btn btn-sm"
+                style="margin-left:auto;font-size: var(--font-size-xs);padding:2px 6px;"
+                title="Limpar rolagens">Limpar</button>
             </div>
             <div id="table-roll-feed"></div>
           </div>
@@ -574,7 +637,8 @@
           <!-- Botão de toggle -->
           <button id="btn-toggle-chat" title="Chat" aria-label="Abrir / Fechar Chat">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-              <path d="M20 2H4a2 2 0 00-2 2v13a2 2 0 002 2h3l3 3 3-3h5a2 2 0 002-2V4a2 2 0 00-2-2zm-9 10H7v-2h4v2zm6 0h-4v-2h4v2zm0-4H7V6h10v2z"/>
+              <path
+                d="M20 2H4a2 2 0 00-2 2v13a2 2 0 002 2h3l3 3 3-3h5a2 2 0 002-2V4a2 2 0 00-2-2zm-9 10H7v-2h4v2zm6 0h-4v-2h4v2zm0-4H7V6h10v2z" />
             </svg>
             <span id="chat-toggle-label">Chat</span>
             <span id="chat-unread-badge" class="chat-unread-badge hidden">0</span>
@@ -600,14 +664,15 @@
             <div id="table-chat-input-bar">
               <label for="table-chat-img-input" id="btn-chat-img-attach" title="Anexar imagem">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                  <path d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/>
+                  <path
+                    d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z" />
                 </svg>
               </label>
               <input type="file" id="table-chat-img-input" accept="image/*" style="display:none">
               <textarea id="table-chat-text-input" placeholder="Mensagem... (Enter para enviar)" rows="1"></textarea>
               <button id="btn-send-chat-msg" title="Enviar">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                 </svg>
               </button>
             </div>
@@ -638,7 +703,8 @@
             <button id="btn-close-cenas-modal" class="btn btn-sm">✕</button>
           </div>
           <div class="ficha-picker-search-row" style="display:flex;gap:8px;">
-            <label for="btn-cenas-upload" class="btn btn-sm" style="cursor:pointer;flex:1;text-align:center;">+ Upload de Imagem</label>
+            <label for="btn-cenas-upload" class="btn btn-sm" style="cursor:pointer;flex:1;text-align:center;">+ Upload
+              de Imagem</label>
             <input type="file" id="btn-cenas-upload" accept="image/*" style="display:none">
           </div>
           <div id="cenas-gallery-list" class="ficha-picker-list"></div>
@@ -653,7 +719,7 @@
             <button id="btn-close-fichas-visibility" class="btn btn-sm">✕</button>
           </div>
           <div class="ficha-picker-content" style="padding: 12px; max-height: 350px; overflow-y: auto;">
-            <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 12px;">
+            <p style="font-size: var(--font-size-md); color: var(--color-text-muted); margin-bottom: 12px;">
               Selecione as fichas que deseja **ocultar** para os participantes jogadores.
             </p>
             <div id="fichas-visibility-list" style="display:flex; flex-direction:column; gap:8px;"></div>
@@ -695,8 +761,10 @@
             <label for="wiz-generation">Geração:</label>
             <select id="wiz-generation">
               <option value="Pré-Colapso">Pré-Colapso (Viveu no mundo antigo, lembra-se da tecnologia)</option>
-              <option value="Durante o Colapso">Durante o Colapso (Nasceu em meio à queda, adaptado à transição)</option>
-              <option value="Pós-Colapso" selected>Pós-Colapso (Só conhece o mundo assimilado, tecnologia é lenda)</option>
+              <option value="Durante o Colapso">Durante o Colapso (Nasceu em meio à queda, adaptado à transição)
+              </option>
+              <option value="Pós-Colapso" selected>Pós-Colapso (Só conhece o mundo assimilado, tecnologia é lenda)
+              </option>
             </select>
           </div>
         </div>
@@ -711,7 +779,8 @@
           </div>
           <div class="form-group">
             <label for="wiz-evento">Evento Marcante (Frase de referência do passado):</label>
-            <input type="text" id="wiz-evento" placeholder="Ex: Sobrevivente da queda  Nível de Saúdeão Leopoldo, Abandonado pelos familiares...">
+            <input type="text" id="wiz-evento"
+              placeholder="Ex: Sobrevivente da queda  Nível de Saúdeão Leopoldo, Abandonado pelos familiares...">
           </div>
         </div>
 
@@ -740,7 +809,9 @@
         <!-- Passo 4: Instintos -->
         <div class="wizard-step" data-step="4">
           <h3>Passo 4: Instintos (Aptidões Inatas)</h3>
-          <p class="step-help">Todos os instintos iniciam com 1 ponto. Distribua <strong><span id="wiz-instinct-points">3</span> pontos adicionais</strong> (máximo de 3 pontos em qualquer instinto inicial).</p>
+          <p class="step-help">Todos os instintos iniciam com 1 ponto. Distribua <strong><span
+                id="wiz-instinct-points">3</span> pontos adicionais</strong> (máximo de 3 pontos em qualquer instinto
+            inicial).</p>
           <div class="instincts-grid">
             <!-- Instintos serão renderizados dinamicamente pelo JS -->
           </div>
@@ -749,8 +820,9 @@
         <!-- Passo 5: Conhecimentos e Práticas -->
         <div class="wizard-step" data-step="5">
           <h3>Passo 5: Conhecimentos & Práticas</h3>
-          <p class="step-help">Distribua <strong><span id="wiz-skill-points">7</span> pontos</strong> entre Conhecimentos e Práticas (máximo de 2 pontos iniciais em cada uma).</p>
-          
+          <p class="step-help">Distribua <strong><span id="wiz-skill-points">7</span> pontos</strong> entre
+            Conhecimentos e Práticas (máximo de 2 pontos iniciais em cada uma).</p>
+
           <div class="skills-wizard-container">
             <div class="skills-block-wiz">
               <h4>Conhecimentos (Intelectuais)</h4>
@@ -781,7 +853,8 @@
             </div>
           </div>
           <div class="alert-info-box">
-            A soma de Determinação e Assimilação sempre totaliza 10. Campanhas geralmente iniciam com Determinação 9 e Assimilação 1.
+            A soma de Determinação e Assimilação sempre totaliza 10. Campanhas geralmente iniciam com Determinação 9 e
+            Assimilação 1.
           </div>
         </div>
 
@@ -791,7 +864,8 @@
           <p class="step-help">Calculada com base na sua Potência e Resolução.</p>
           <div class="saude-wiz-preview">
             <div class="saude-formula">
-              <span>Saúde por Nível = 1 + Potência (<span id="wiz-pot-preview">1</span>) + Resolução (<span id="wiz-res-preview">1</span>) = </span>
+              <span>Saúde por Nível = 1 + Potência (<span id="wiz-pot-preview">1</span>) + Resolução (<span
+                  id="wiz-res-preview">1</span>) = </span>
               <strong id="wiz-health-per-level-val">3</strong> pontos
             </div>
             <div class="saude-preview-bars">
@@ -803,31 +877,30 @@
         <!-- Passo 8: Características (XP Inicial) -->
         <div class="wizard-step" data-step="8">
           <h3>Passo 8: Características (XP Inicial)</h3>
-          <p class="step-help">Você possui <strong><span id="wiz-xp-points">7</span> pontos de Experiência (XP)</strong> para comprar Características ou evoluir Aptidões (custo = dobro do nível desejado).</p>
-          
+          <p class="step-help">Você possui <strong><span id="wiz-xp-points">7</span> pontos de Experiência (XP)</strong>
+            para comprar Características ou evoluir Aptidões (custo = dobro do nível desejado).</p>
+
           <div class="xp-tabs-container">
             <div class="xp-tab-buttons">
               <button type="button" class="xp-tab-btn active" data-tab="tab-traits">Comprar Características</button>
               <button type="button" class="xp-tab-btn" data-tab="tab-skills-upgrade">Aprimorar Aptidões</button>
             </div>
-            
+
             <div class="xp-tab-content active" id="tab-traits">
-              <div class="traits-filter-bar">
-                <label for="wiz-traits-cost-filter">Filtrar Custo:</label>
-                <select id="wiz-traits-cost-filter">
-                  <option value="all">Todos os Custos</option>
-                  <option value="1">1 Ponto</option>
-                  <option value="2">2 Pontos</option>
-                  <option value="3">3 Pontos</option>
-                  <option value="4">4 Pontos</option>
-                  <option value="5">5 Pontos</option>
-                </select>
+              <div class="traits-cost-filter-bar" id="traits-cost-filter-bar">
+                <button type="button" class="traits-cost-tab active" data-cost="todos">Todas</button>
+                <button type="button" class="traits-cost-tab" data-cost="1">1 XP</button>
+                <button type="button" class="traits-cost-tab" data-cost="2">2 XP</button>
+                <button type="button" class="traits-cost-tab" data-cost="3">3 XP</button>
+                <button type="button" class="traits-cost-tab" data-cost="4">4 XP</button>
+                <button type="button" class="traits-cost-tab" data-cost="5">5 XP</button>
+                <button type="button" class="traits-cost-tab" data-cost="custom">Personalizadas</button>
               </div>
               <div class="traits-wizard-list" id="wiz-traits-list">
                 <!-- Características inseridas por JS -->
               </div>
             </div>
-            
+
             <div class="xp-tab-content" id="tab-skills-upgrade">
               <div class="skills-wizard-container">
                 <div class="skills-block-wiz">
@@ -855,7 +928,8 @@
 
       <!-- Navegação do Wizard -->
       <div class="wizard-footer" style="display: flex; justify-content: space-between;">
-        <button id="btn-wiz-cancel" class="btn" style="background: var(--bg-card); border-color: var(--color-rust); color: var(--color-rust-glow);">Cancelar</button>
+        <button id="btn-wiz-cancel" class="btn"
+          style="background: var(--bg-card); border-color: var(--color-rust); color: var(--color-rust-glow);">Cancelar</button>
         <div style="display: flex; gap: 8px;">
           <button id="btn-wiz-prev" class="btn" disabled>Anterior</button>
           <button id="btn-wiz-next" class="btn">Próximo</button>
@@ -874,31 +948,32 @@
               <div class="sheet-redesign-tabs-container">
                 <div class="sheet-redesign-tabs-nav card-glass">
                   <button class="sheet-tab-btn active" data-tab="tab-perfil">
-                    <span class="tab-btn-icon">👤</span> Perfil
+                  Perfil
                   </button>
                   <button class="sheet-tab-btn" data-tab="tab-mutacoes">
-                    <span class="tab-btn-icon">♦</span> Características
+                  Características
                   </button>
                   <button class="sheet-tab-btn" data-tab="tab-assimilacoes">
-                    <span class="tab-btn-icon">🧬</span> Assimilações
+                  Assimilações
                   </button>
                   <button class="sheet-tab-btn" data-tab="tab-inventario">
-                    <span class="tab-btn-icon">▲</span> Inventário
+                  nventário
                   </button>
                   <button class="sheet-tab-btn" data-tab="tab-anotacoes">
-                    <span class="tab-btn-icon">✏️</span> Anotações
+                  Anotações
                   </button>
                   <button class="sheet-tab-btn" data-tab="tab-homebrew">
-                    <span class="tab-btn-icon">⚙️</span> Homebrew
+                  Homebrew
                   </button>
                 </div>
-                
+
                 <div class="sheet-redesign-tabs-content card-glass">
                   <!-- Aba 1: Perfil -->
                   <div class="sheet-tab-panel active" id="tab-perfil">
                     <div class="profile-card card-glass">
                       <div class="portrait-wrapper">
-                        <div class="polaroid-frame" id="portrait-frame" title="Clique para alterar a foto do personagem">
+                        <div class="polaroid-frame" id="portrait-frame"
+                          title="Clique para alterar a foto do personagem">
                           <img id="char-portrait-img" src="./assets/avatar.png" alt="Avatar do Personagem">
                           <div class="portrait-overlay">
                             <span>Alterar Foto</span>
@@ -907,57 +982,66 @@
                         <input type="file" id="char-portrait-input" accept="image/*" style="display: none;">
                         <div class="col-2">
                           <div class="portrait-side-fields">
-                          <div class="profile-field">
-                            <label for="char-name">Nome</label>
-                            <input type="text" id="char-name" class="sheet-input-text" placeholder="Nome do Personagem">
-                          </div>
-                          <div class="profile-field">
-                            <label for="char-ocupacao">Ocupação</label>
-                            <input type="text" id="char-ocupacao" class="sheet-input-text" placeholder="Identidade + Especificidade">
-                          </div>
-                          <div class="profile-field">
-                            <label for="char-generation">Geração</label>
-                            <input type="text" id="char-generation" class="sheet-input-text">
-                          </div>
-                        </div>
-                         <div class="profile-fields-grid">
-                        <div class="profile-row">
-                          <div class="profile-field full-width">
-                            <label for="char-prop-p1">Propósitos Pessoais</label>
-                            <div class="input-stacked">
-                              <input type="text" id="char-prop-p1" class="sheet-input-text" placeholder="Propósito Pessoal 1">
-                              <input type="text" id="char-prop-p2" class="sheet-input-text" placeholder="Propósito Pessoal 2">
+                            <div class="profile-field">
+                              <label for="char-name">Nome</label>
+                              <input type="text" id="char-name" class="sheet-input-text"
+                                placeholder="Nome do Personagem">
                             </div>
-                            <label for="char-prop-col">Propósitos Coletivos</label>
-                            <div class="input-stacked">
-                              <input type="text" id="char-prop-col" class="sheet-input-text" placeholder="Propósito Coletivo 1">
-                              <input type="text" id="char-prop-col2" class="sheet-input-text" placeholder="Propósito Coletivo 2">
+                            <div class="profile-field">
+                              <label for="char-ocupacao">Ocupação</label>
+                              <input type="text" id="char-ocupacao" class="sheet-input-text"
+                                placeholder="Identidade + Especificidade">
+                            </div>
+                            <div class="profile-field">
+                              <label for="char-generation">Geração</label>
+                              <input type="text" id="char-generation" class="sheet-input-text">
                             </div>
                           </div>
-                        </div>
-                        
-                        <div class="profile-row">
-                          <div class="profile-field full-width">
-                            <label for="char-evento">Evento Marcante</label>
-                            <input type="text" id="char-evento" class="sheet-input-text" placeholder="Referência do Passado">
+                          <div class="profile-fields-grid">
+                            <div class="profile-row">
+                              <div class="profile-field full-width">
+                                <label for="char-prop-p1">Propósitos Pessoais</label>
+                                <div class="input-stacked">
+                                  <input type="text" id="char-prop-p1" class="sheet-input-text"
+                                    placeholder="Propósito Pessoal 1">
+                                  <input type="text" id="char-prop-p2" class="sheet-input-text"
+                                    placeholder="Propósito Pessoal 2">
+                                </div>
+                                <label for="char-prop-col">Propósitos Coletivos</label>
+                                <div class="input-stacked">
+                                  <input type="text" id="char-prop-col" class="sheet-input-text"
+                                    placeholder="Propósito Coletivo 1">
+                                  <input type="text" id="char-prop-col2" class="sheet-input-text"
+                                    placeholder="Propósito Coletivo 2">
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="profile-row">
+                              <div class="profile-field full-width">
+                                <label for="char-evento">Evento Marcante</label>
+                                <input type="text" id="char-evento" class="sheet-input-text"
+                                  placeholder="Referência do Passado">
+                              </div>
+                            </div>
                           </div>
                         </div>
+
                       </div>
-                        </div>
-                        
-                      </div>
-                      
-                     
+
+
                     </div>
-                    
+
                     <div class="roll-chat-section" id="roll-chat">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                          <h3 style="margin: 0; padding: 0;">Chat de Rolagens</h3>
-                           <button class="btn btn-sm btn-danger" id="btn-clear-chat" title="Limpar Histórico de Rolagens">Limpar</button>
-                        </div>
-                        <div class="roll-chat-messages" id="roll-chat-messages">
-                          <div class="chat-placeholder">Nenhuma rolagem realizada nesta sessão.</div>
-                        </div>
+                      <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h3 style="margin: 0; padding: 0;">Chat de Rolagens</h3>
+                        <button class="btn btn-sm btn-danger" id="btn-clear-chat"
+                          title="Limpar Histórico de Rolagens">Limpar</button>
+                      </div>
+                      <div class="roll-chat-messages" id="roll-chat-messages">
+                        <div class="chat-placeholder">Nenhuma rolagem realizada nesta sessão.</div>
+                      </div>
                     </div>
                   </div>
 
@@ -966,14 +1050,22 @@
                     <!-- Seção de Características Adquiridas -->
                     <div class="sheet-section section-traits">
                       <div class="sheet-section-header">
-                        <button id="btn-add-trait-sheet" class="btn btn-sm" style="padding: 8px 8px; font-weight: bold; font-size: 20px; line-height: 1; border-radius: 4px;" title="Adicionar Característica (XP)">+</button>
+                        <button id="btn-add-trait-sheet" class="btn btn-sm"
+                          style="padding: 8px 8px; font-weight: bold; font-size: var(--font-size-md); line-height: 1; border-radius: 4px;"
+                          title="Adicionar Característica (XP)">+</button>
                         <h3 class="section-title section-title-clean">CARACTERÍSTICAS</h3>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                          <div class="xp-counter" style="margin: 0; font-size: var(--font-size-md); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
-                            XP: 
-                            <button id="btn-dec-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Diminuir XP">-</button>
-                            <strong id="sheet-xp-value" style="font-size: var(--font-size-lg); vertical-align: middle;">0</strong>
-                            <button id="btn-inc-xp" class="btn btn-sm" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;" title="Aumentar XP">+</button>
+                          <div class="xp-counter"
+                            style="margin: 0; font-size: var(--font-size-md); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
+                            XP:
+                            <button id="btn-dec-xp" class="btn btn-sm"
+                              style="padding: 2px 8px; font-weight: bold; font-size: var(--font-size-md); line-height: 1; border-radius: 4px;"
+                              title="Diminuir XP">-</button>
+                            <strong id="sheet-xp-value"
+                              style="font-size: var(--font-size-lg); vertical-align: middle;">0</strong>
+                            <button id="btn-inc-xp" class="btn btn-sm"
+                              style="padding: 2px 8px; font-weight: bold; font-size: var(--font-size-md); line-height: 1; border-radius: 4px;"
+                              title="Aumentar XP">+</button>
                           </div>
                         </div>
                       </div>
@@ -986,66 +1078,79 @@
                   <!-- Aba 3: Assimilações -->
                   <div class="sheet-tab-panel" id="tab-assimilacoes">
                     <div class="assimilation-buttons-container" style="display: flex; gap: 8px;">
-                          <button id="btn-assimilation-test-sheet" class="btn btn-sm" title="Realizar Teste de Assimilação">
-                            <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text" style="font-size: 11px;">Teste de Assimilação</span>
-                          </button>
-                          <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
-                            <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text" style="font-size: 11px;">Leitura de Tarot</span>
-                          </button>
-                          <button id="btn-open-assimilation-library" class="btn btn-sm" title="Biblioteca de Assimilações">
-                            <span class="btn-text" style="font-size: 11px;">📖 Biblioteca</span>
-                          </button>
-                        </div>
+                      <button id="btn-assimilation-test-sheet" class="btn btn-sm" title="Realizar Teste de Assimilação">
+                        <span class="btn-icon" data-icon="assimilation_point"></span> <span class="btn-text"
+                          style="font-size: var(--font-size-md);">Teste de Assimilação</span>
+                      </button>
+                      <button id="btn-open-tarot-again-sheet" class="btn btn-sm" title="Refazer Leitura (Tarot)">
+                        <span class="btn-icon" data-icon="ouros"></span> <span class="btn-text"
+                          style="font-size: var(--font-size-md);">Leitura de Tarot</span>
+                      </button>
+                      <button id="btn-open-assimilation-library" class="btn btn-sm" title="Biblioteca de Assimilações">
+                        <span class="btn-text" style="font-size: var(--font-size-md);">📖 Biblioteca</span>
+                      </button>
+                    </div>
                     <!-- Seção de Assimilações -->
                     <div class="sheet-section section-assimilations">
                       <div class="sheet-section-header" style="flex-wrap: wrap; justify-content: space-between;">
-                        <div>
-                          <h3 class="section-title section-title-clean" style="margin: 0;">ASSIMILAÇÕES (MUTAÇÕES)</h3>
+                        <div class="assimilations-header-group">
+                          <h3 class="section-title section-title-clean">ASSIMILAÇÕES (MUTAÇÕES)</h3>
                           <div id="sheet-assimilation-points" class="assimilation-points-container"></div>
                         </div>
-                        
+
                       </div>
                       <div class="mutations-sheet-list-single" id="mutations-list-sheet">
                         <!-- Mutações inseridas pelo JS em uma única coluna -->
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Aba 4: Inventário -->
                   <div class="sheet-tab-panel" id="tab-inventario">
                     <div class="inventory-block">
                       <h3 class="section-title">INVENTÁRIO</h3>
-                      <p class="inventory-help" style="margin-bottom: 16px; font-size: var(--font-size-xs); color: var(--text-muted); line-height: 1.4;">
-                        Cada item ocupa um espaço (exceto pequenos objetos). Vestuário, cantil e mochila são automáticos.
+                      <p class="inventory-help">
+                        Cada item ocupa um espaço (exceto pequenos objetos). Vestuário, cantil e mochila são
+                        automáticos.
                       </p>
-                      
+
                       <!-- Seção No Corpo -->
                       <div class="inventory-section-wrapper" style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
-                          <h4 id="label-body-slots" style="font-family: var(--font-heading); color: var(--color-blue-glow); font-size: var(--font-size-sm); margin: 0;">
+                        <div
+                          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
+                          <h4 id="label-body-slots"
+                            style="font-family: var(--font-heading); color: var(--color-blue-glow); font-size: var(--font-size-sm); margin: 0;">
                             No Corpo
                           </h4>
                           <div style="display: flex; gap: 8px;">
-                            <button id="btn-add-body-slot" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot no Corpo">
+                            <button id="btn-add-body-slot" class="btn btn-sm"
+                              style="padding: 2px 10px; font-size: var(--font-size-md); height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;"
+                              title="Adicionar Slot no Corpo">
                               + Slot
                             </button>
-                            <button id="btn-add-item-body" class="btn btn-sm" style="padding: 2px 10px; font-size: 11px; height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Item">
+                            <button id="btn-add-item-body" class="btn btn-sm"
+                              style="padding: 2px 10px; font-size: var(--font-size-md); height: 24px; color: var(--color-blue-glow); background: rgba(0,0,0,0.3); border-radius: 4px;"
+                              title="Adicionar Item">
                               + Item
                             </button>
                           </div>
                         </div>
-                        <div id="inventory-body-list" class="inventory-grid" >
+                        <div id="inventory-body-list" class="inventory-grid">
                           <!-- JS renderizará 3 slots -->
                         </div>
                       </div>
 
                       <!-- Seção Na Mochila -->
                       <div class="inventory-section-wrapper">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
-                          <h4 id="label-backpack-slots" style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
+                        <div
+                          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; gap: 8px;">
+                          <h4 id="label-backpack-slots"
+                            style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
                             Na Mochila
                           </h4>
-                          <button id="btn-add-backpack-slot" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px; height: 22px; border-color: rgba(255,255,255,0.2); color: var(--text-secondary); background: rgba(0,0,0,0.3); border-radius: 4px;" title="Adicionar Slot na Mochila">
+                          <button id="btn-add-backpack-slot" class="btn btn-sm"
+                            style="padding: 2px 8px; font-size: var(--font-size-md); height: 22px; border-color: rgba(255,255,255,0.2); color: var(--text-secondary); background: rgba(0,0,0,0.3); border-radius: 4px;"
+                            title="Adicionar Slot na Mochila">
                             + Slot
                           </button>
                         </div>
@@ -1055,12 +1160,14 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Aba 5: Anotações -->
                   <div class="sheet-tab-panel" id="tab-anotacoes">
                     <div class="notes-block">
                       <h3 class="section-title">ANOTAÇÕES</h3>
-                      <textarea id="char-notes" class="notes-textarea" placeholder="Descreva eventos importantes, refúgios conhecidos, recursos coletados ou segredos de campanha..." style="min-height: 400px; width: 100%;"></textarea>
+                      <textarea id="char-notes" class="notes-textarea"
+                        placeholder="Descreva eventos importantes, refúgios conhecidos, recursos coletados ou segredos de campanha..."
+                        style="min-height: 400px; width: 100%;"></textarea>
                     </div>
                   </div>
 
@@ -1100,100 +1207,120 @@
                   </div>
                 </div>
               </div>
-              
+
             </div>
             <!-- COLUNA CENTRAL: CABO DE GUERRA E SAÚDE -->
             <div class="sheet-redesign-center">
-              
+
               <!-- CABO E SAÚDE (MESMA LINHA) -->
               <div class="status-cards-row">
-                
+
                 <!-- CARD CABO DE GUERRA -->
                 <div class="cabo-guerra-card card-glass" style="margin-bottom: 0;">
-                  <h3 class="status-header" style="background: linear-gradient(to right, var(--color-rust-glow) 30%, var(--color-blue-glow) 70%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">CABO DE GUERRA</h3>
-                  
+                  <h3 class="status-header"
+                    style="background: linear-gradient(to right, var(--color-rust-glow) 30%, var(--color-blue-glow) 70%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;">
+                    CABO DE GUERRA</h3>
+
                   <div class="cabo-guerra-display">
                     <!-- Coluna Determinação -->
                     <div class="cabo-side det-side">
                       <span class="cabo-label">DETERMINAÇÃO</span>
                       <div class="cabo-level-container">
-                        <button id="btn-dec-det" class="btn-cabo-adjust" title="Diminuir Nível de Determinação">-</button>
+                        <button id="btn-dec-det" class="btn-cabo-adjust"
+                          title="Diminuir Nível de Determinação">-</button>
                         <span id="sheet-det-level" class="cabo-level"></span>
-                        <button id="btn-inc-det" class="btn-cabo-adjust" title="Aumentar Nível de Determinação">+</button>
+                        <button id="btn-inc-det" class="btn-cabo-adjust"
+                          title="Aumentar Nível de Determinação">+</button>
                       </div>
                       <div id="sheet-det-points" class="cabo-points-tracker">
                         <!-- JS renderiza símbolos -->
                       </div>
-                      <div class="cabo-math-container" style="margin-top: 8px; width: 100%; display: flex; justify-content: center;">
-                        <input type="text" id="input-det-math" class="sheet-input-text cabo-math-input" placeholder="± Determinação" style="width: 100px; text-align: center; font-size: 11px; padding: 4px; height: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
+                      <div class="cabo-math-container"
+                        style="margin-top: 8px; width: 100%; display: flex; justify-content: center;">
+                        <input type="text" id="input-det-math" class="sheet-input-text cabo-math-input"
+                          placeholder="± Determinação"
+                          style="width: 100px; text-align: center; font-size: var(--font-size-md); padding: 4px; height: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
                       </div>
                     </div>
-                    
+
                     <!-- Coluna Assimilação -->
                     <div class="cabo-side ass-side">
                       <span class="cabo-label">ASSIMILAÇÃO</span>
                       <div class="cabo-level-container">
-                        <button id="btn-dec-ass" class="btn-cabo-adjust" title="Diminuir Nível de Assimilação">-</button>
+                        <button id="btn-dec-ass" class="btn-cabo-adjust"
+                          title="Diminuir Nível de Assimilação">-</button>
                         <span id="sheet-ass-level" class="cabo-level"></span>
-                        <button id="btn-inc-ass" class="btn-cabo-adjust" title="Aumentar Nível de Assimilação">+</button>
+                        <button id="btn-inc-ass" class="btn-cabo-adjust"
+                          title="Aumentar Nível de Assimilação">+</button>
                       </div>
                       <div id="sheet-ass-points" class="cabo-points-tracker">
                         <!-- JS renderiza símbolos -->
                       </div>
-                      <div class="cabo-math-container" style="margin-top: 8px; width: 100%; display: flex; justify-content: center;">
-                        <input type="text" id="input-ass-math" class="sheet-input-text cabo-math-input" placeholder="± Assimilação" style="width: 100px; text-align: center; font-size: 11px; padding: 4px; height: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
+                      <div class="cabo-math-container"
+                        style="margin-top: 8px; width: 100%; display: flex; justify-content: center;">
+                        <input type="text" id="input-ass-math" class="sheet-input-text cabo-math-input"
+                          placeholder="± Assimilação"
+                          style="width: 100px; text-align: center; font-size: var(--font-size-md); padding: 4px; height: auto; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
                       </div>
                     </div>
                   </div>
-                  
 
-                  
+
+
                   <!-- Estado Suscetível Warning -->
                   <div class="suscetivel-alert hidden" id="suscetivel-alert">
                     <div><strong>ESTADO SUSCETÍVEL!</strong><br>Seus pontos de Determinação zeraram.</div>
                     <button id="btn-avanco-assimilacao" class="btn btn-danger btn-sm">
-                       <span class="btn-text" style="font-size: 11px;">Avanço da Assimilação</span>
+                      <span class="btn-text" style="font-size: var(--font-size-md);">Avanço da Assimilação</span>
                     </button>
-                    
+
                   </div>
-                  
+
                   <!-- Assimilação 10 Warning -->
-                  <div class="suscetivel-alert hidden" id="assimilacao-total-alert" style="background: rgba(141,36,40,0.3); border-color: #8d2428;">
-                    <div><strong>ASSIMILAÇÃO TOTAL!</strong> O parasita assumiu o controle completo. A personagem agora é uma criatura.</div>
+                  <div class="suscetivel-alert hidden" id="assimilacao-total-alert"
+                    style="background: rgba(141,36,40,0.3); border-color: #8d2428;">
+                    <div><strong>ASSIMILAÇÃO TOTAL!</strong> O parasita assumiu o controle completo. A personagem agora
+                      é uma criatura.</div>
                   </div>
                 </div>
-              
-              
-              <!-- CARD SAÚDE -->
-              <div class="saude-card card-glass locked" id="saude-card-container" style="margin-bottom: 0;">
-                <h3 class="status-header" style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
-                    <span class="header-icon" data-icon="saude"></span> SAÚDE
-                    <span class="health-formula-info">(1 + Potência + Resolução)</span>
+
+
+                <!-- CARD SAÚDE -->
+                <div class="saude-card card-glass locked" id="saude-card-container" style="margin-bottom: 0;">
+                  <h3 class="status-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <span class="header-icon" data-icon="saude"></span> SAÚDE
+                      <span class="health-formula-info">(1 + Potência + Resolução)</span>
+                    </div>
+                    <button class="btn-lock-toggle-saude" title="Desbloquear Edição"
+                      style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
+                      <span data-icon="lock" style="width:16px; height:16px; display:inline-block;"></span>
+                    </button>
+                  </h3>
+                  <div class="saude-edit-controls"
+                    style="display: none; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 6px;">
+                    <span style="font-size: var(--font-size-md); color: var(--text-secondary);">Modificador de Vida
+                      Max:</span>
+                    <button id="btn-saude-mod-dec" class="btn btn-sm" style="padding: 2px 8px;">-</button>
+                    <strong id="val-saude-mod"
+                      style="font-size: var(--font-size-md); min-width: 20px; text-align: center;">0</strong>
+                    <button id="btn-saude-mod-inc" class="btn btn-sm" style="padding: 2px 8px;">+</button>
                   </div>
-                  <button class="btn-lock-toggle-saude" title="Desbloquear Edição" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
-                    <span data-icon="lock" style="width:16px; height:16px; display:inline-block;"></span>
-                  </button>
-                </h3>
-                <div class="saude-edit-controls" style="display: none; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 6px;">
-                  <span style="font-size: 12px; color: var(--text-secondary);">Modificador de Vida Max:</span>
-                   <button id="btn-saude-mod-dec" class="btn btn-sm" style="padding: 2px 8px;">-</button>
-                  <strong id="val-saude-mod" style="font-size: 14px; min-width: 20px; text-align: center;">0</strong>
-                  <button id="btn-saude-mod-inc" class="btn btn-sm" style="padding: 2px 8px;">+</button>
-                </div>
-                <div class="health-levels-container" id="health-levels-sheet">
-                  <!-- JS renderiza dinamicamente as gotas de saúde -->
+                  <div class="health-levels-container" id="health-levels-sheet">
+                    <!-- JS renderiza dinamicamente as gotas de saúde -->
+                  </div>
                 </div>
               </div>
-              </div>
-              
+
               <!-- APTIDÕES (TRÊS COLUNAS PARALELAS) -->
               <div class="aptitudes-columns-container">
                 <!-- INSTINTOS -->
                 <div class="aptitude-column-card card-glass locked">
-                  <h3 class="aptitude-column-header instintos-header" style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 class="aptitude-column-header instintos-header"
+                    style="display: flex; justify-content: space-between; align-items: center;">
                     <span>INSTINTOS</span>
-                    <button class="btn-lock-toggle" title="Desbloquear Edição" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
+                    <button class="btn-lock-toggle" title="Desbloquear Edição"
+                      style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
                       <span data-icon="lock" style="width:16px; height:16px; display:inline-block;"></span>
                     </button>
                   </h3>
@@ -1201,11 +1328,13 @@
                     <!-- JS insere instintos -->
                   </div>
                 </div>
-                 <!-- CONHECIMENTOS -->
+                <!-- CONHECIMENTOS -->
                 <div class="aptitude-column-card card-glass locked">
-                  <h3 class="aptitude-column-header conhecimentos-header" style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 class="aptitude-column-header conhecimentos-header"
+                    style="display: flex; justify-content: space-between; align-items: center;">
                     <span>CONHECIMENTOS</span>
-                    <button class="btn-lock-toggle" title="Desbloquear Edição" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
+                    <button class="btn-lock-toggle" title="Desbloquear Edição"
+                      style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
                       <span data-icon="lock" style="width:16px; height:16px; display:inline-block;"></span>
                     </button>
                   </h3>
@@ -1215,9 +1344,11 @@
                 </div>
                 <!-- PRÁTICAS -->
                 <div class="aptitude-column-card card-glass locked">
-                  <h3 class="aptitude-column-header praticas-header" style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 class="aptitude-column-header praticas-header"
+                    style="display: flex; justify-content: space-between; align-items: center;">
                     <span>PRÁTICAS</span>
-                    <button class="btn-lock-toggle" title="Desbloquear Edição" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
+                    <button class="btn-lock-toggle" title="Desbloquear Edição"
+                      style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px;">
                       <span data-icon="lock" style="width:16px; height:16px; display:inline-block;"></span>
                     </button>
                   </h3>
@@ -1226,13 +1357,16 @@
                   </div>
                 </div>
               </div>
-              
+
               <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
-                 <button id="btn-upgrade-aptitudes" class="btn" title="Gastar XP para evoluir Aptidões" style="border-color: var(--color-bronze); color: var(--color-bronze); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
+                <button id="btn-upgrade-aptitudes" class="btn" title="Gastar XP para evoluir Aptidões"
+                  style="border-color: var(--color-bronze); color: var(--color-bronze); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
                   <span class="btn-text">Evoluir Aptidões (XP)</span>
                 </button>
-                 <button id="btn-open-roller" class="btn" title="Abrir Rolador de Dados" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
-                  <span style="font-size: 1.2em; vertical-align: middle; margin-right: 4px;">🎲</span><span class="btn-text"> Lançar Dados</span>
+                <button id="btn-open-roller" class="btn" title="Abrir Rolador de Dados"
+                  style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-size: var(--font-size-sm); padding: 8px 16px; font-family: var(--font-heading); font-weight: bold; background: rgba(0,0,0,0.4); box-shadow: 2px 2px 0px rgba(0,0,0,0.5);">
+                  <span style="font-size: 1.2em; vertical-align: middle; margin-right: 4px;">🎲</span><span
+                    class="btn-text"> Lançar Dados</span>
                 </button>
               </div>
 
@@ -1240,272 +1374,346 @@
               <div class="custom-rolls-card card-glass" id="custom-rolls-container" style="margin-top: 16px;">
                 <h3 class="status-header" style="display: flex; justify-content: space-between; align-items: center;">
                   <div>
-                    <span class="header-icon" style="font-size: 1.1em; vertical-align: middle; margin-right: 4px;">🎲</span> ROLAGENS PERSONALIZADAS
+                    <span class="header-icon"
+                      style="font-size: 1.1em; vertical-align: middle; margin-right: 4px;">🎲</span> ROLAGENS
+                    PERSONALIZADAS
                   </div>
                   <div style="display: flex; gap: 6px;">
-                    <button id="btn-add-custom-roll" class="btn btn-sm" title="Criar Nova Rolagem" style="padding: 2px 8px; font-weight: bold; font-size: 14px; line-height: 1; border-radius: 4px;">+</button>
+                    <button id="btn-add-custom-roll" class="btn btn-sm" title="Criar Nova Rolagem"
+                      style="padding: 2px 8px; font-weight: bold; font-size: var(--font-size-md); line-height: 1; border-radius: 4px;">+</button>
                   </div>
                 </h3>
-                <div class="custom-rolls-list" id="custom-rolls-list-sheet" style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                <div class="custom-rolls-list" id="custom-rolls-list-sheet"
+                  style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
                   <!-- JS renderiza dinamicamente as rolagens salvas -->
                 </div>
               </div>
-              
+
             </div>
-            
-            
+
+
           </div>
         </div> <!-- Fim .sheet-pages-column -->
 
-<div id="dice-drawer" class="modal-overlay hidden">
-  <div class="modal-content card-glass" style="max-width: 900px;">
-    <button id="btn-close-drawer" class="modal-close">&times;</button>
-    
-    <div class="drawer-content">
-      <h2 class="modal-title">🎲 Painel de Rolagem</h2>
-      
-      <!-- Tabs de Navegação -->
-      <div class="roller-tabs-nav" style="display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">
-        <button id="tab-roller-normal" class="btn" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Normal</button>
-        <button id="tab-roller-assimilada" class="btn" style="flex: 1; padding: 6px 12px; font-size: var(--font-size-sm);">Rolagem Assimilada (Instinto)</button>
-      </div>
+        <div id="dice-drawer" class="modal-overlay hidden">
+          <div class="modal-content card-glass dice-roller-modal">
+            <button id="btn-close-drawer" class="modal-close">&times;</button>
 
-      <!-- Conteúdo do Painel Normal -->
-      <div id="panel-roller-normal">
-        <div class="grid-2-col-d">
-          <div class="drawer-col-1">
-            <div class="dice-skills-selection">
-              <h4>Selecionar Aptidões</h4>
-              <div class="grid-2-col">
-                <div class="form-group" style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;">
-                <label for="roll-select-instinto" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Instinto (d6/d12):</label>
-                <select id="roll-select-instinto" style="width: 100%; font-size: var(--font-size-sm); padding: 6px 10px;">
-                  <option value="">-- Nenhum --</option>
-                  <option value="Influência">Influência</option>
-                  <option value="Percepção">Percepção</option>
-                  <option value="Potência">Potência</option>
-                  <option value="Reação">Reação</option>
-                  <option value="Resolução">Resolução</option>
-                  <option value="Sagacidade">Sagacidade</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
-                <label for="roll-select-skill" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Conhecimento / Prática (d10):</label>
-                <select id="roll-select-skill" style="width: 100%; font-size: var(--font-size-sm); padding: 6px 10px;">
-                  <option value="">-- Nenhum --</option>
-                  <optgroup label="Conhecimentos">
-                    <option value="Biologia">Biologia</option>
-                    <option value="Erudição">Erudição</option>
-                    <option value="Engenharia">Engenharia</option>
-                    <option value="Geografia">Geografia</option>
-                    <option value="Medicina">Medicina</option>
-                    <option value="Segurança">Segurança</option>
-                  </optgroup>
-                  <optgroup label="Práticas">
-                    <option value="Armas">Armas</option>
-                    <option value="Atletismo">Atletismo</option>
-                    <option value="Expressão">Expressão</option>
-                    <option value="Furtividade">Furtividade</option>
-                    <option value="Manufaturas">Manufaturas</option>
-                    <option value="Sobrevivência">Sobrevivência</option>
-                  </optgroup>
-                </select>
-              </div>
-              </div>
-              
-            </div>
-            
-            <div class="roll-modifiers-section">
-              <h4>Modificadores Para Manter +1 Dado</h4>
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:var(--font-size-sm);color:var(--text-secondary);">
-                <span>Total que pode manter: <strong id="max-keep-count">1</strong></span>
-              </div>
-              <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px;">
-                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Empenho (Gasta 1 de Determinação)</span>
-                  <label class="theme-switch">
-                    <input type="checkbox" id="mod-empenho">
-                    <span class="slider"></span>
-                  </label>
-                </div>
-                
-                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Ocupação (Origem - 1x/sessão)</span>
-                  <label class="theme-switch">
-                    <input type="checkbox" id="mod-origem-ocupacao">
-                    <span class="slider"></span>
-                  </label>
-                </div>
+            <div class="drawer-content">
+              <h2 class="modal-title">🎲 Painel de Rolagem</h2>
 
-                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Evento Marcante (Origem - 1x/sessão)</span>
-                  <label class="theme-switch">
-                    <input type="checkbox" id="mod-origem-evento">
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                  <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Dados Bônus para Manter</span>
-                  <input type="number" id="mod-bonus-keep" min="0" max="10" value="0" style="width:60px;padding:4px 6px;text-align:center;font-size:var(--font-size-sm);">
-                </div>
+              <!-- Tabs de Navegação -->
+              <div class="roller-tabs-nav">
+                <button id="tab-roller-normal" class="btn">Rolagem Normal</button>
+                <button id="tab-roller-assimilada" class="btn">Rolagem Assimilada (Instinto)</button>
               </div>
-            </div>
-          </div>
 
-          <div class="drawer-col-2">
-            <div class="dice-selector-section">
-              <h4>Montar Pilha de Dados</h4>
-              
-              <div class="dice-selector-row">
-                <div class="dice-select-control">
-                  <img src="assets/d6/3-4(D6).webp" class="dice-tag tag-d6" alt="d6">
-                  <label>Instintos</label>
-                  <div class="number-input">
-                    <button class="num-minus">-</button>
-                    <span id="dice-qty-d6" class="dice-qty-span">0</span>
-                    <button class="num-plus">+</button>
+              <!-- Conteúdo do Painel Normal -->
+              <div id="panel-roller-normal">
+                <div class="grid-2-col-d">
+                  <div class="drawer-col-1">
+                    <div class="dice-skills-selection">
+                      <h4>Selecionar Aptidões</h4>
+                      <div class="grid-2-col">
+                        <div class="form-group"
+                          style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;">
+                          <label for="roll-select-instinto"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Instinto
+                            (d6/d12):</label>
+                          <select id="roll-select-instinto"
+                            style="width: 100%; font-size: var(--font-size-sm); padding: 6px 10px;">
+                            <option value="">-- Nenhum --</option>
+                            <option value="Influência">Influência</option>
+                            <option value="Percepção">Percepção</option>
+                            <option value="Potência">Potência</option>
+                            <option value="Reação">Reação</option>
+                            <option value="Resolução">Resolução</option>
+                            <option value="Sagacidade">Sagacidade</option>
+                          </select>
+                        </div>
+                        <div class="form-group"
+                          style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+                          <label for="roll-select-skill"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Conhecimento / Prática
+                            (d10):</label>
+                          <select id="roll-select-skill"
+                            style="width: 100%; font-size: var(--font-size-sm); padding: 6px 10px;">
+                            <option value="">-- Nenhum --</option>
+                            <optgroup label="Conhecimentos">
+                              <option value="Biologia">Biologia</option>
+                              <option value="Erudição">Erudição</option>
+                              <option value="Engenharia">Engenharia</option>
+                              <option value="Geografia">Geografia</option>
+                              <option value="Medicina">Medicina</option>
+                              <option value="Segurança">Segurança</option>
+                            </optgroup>
+                            <optgroup label="Práticas">
+                              <option value="Armas">Armas</option>
+                              <option value="Atletismo">Atletismo</option>
+                              <option value="Expressão">Expressão</option>
+                              <option value="Furtividade">Furtividade</option>
+                              <option value="Manufaturas">Manufaturas</option>
+                              <option value="Sobrevivência">Sobrevivência</option>
+                            </optgroup>
+                          </select>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    <div class="roll-modifiers-section">
+                      <h4>Modificadores Para Manter +1 Dado</h4>
+                      <div
+                        style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:var(--font-size-sm);color:var(--text-secondary);">
+                        <span>Total que pode manter: <strong id="max-keep-count">1</strong></span>
+                      </div>
+                      <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Empenho (Gasta 1 de
+                            Determinação)</span>
+                          <label class="theme-switch">
+                            <input type="checkbox" id="mod-empenho">
+                            <span class="slider"></span>
+                          </label>
+                        </div>
+
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Ocupação
+                            (Origem - 1x/sessão)</span>
+                          <label class="theme-switch">
+                            <input type="checkbox" id="mod-origem-ocupacao">
+                            <span class="slider"></span>
+                          </label>
+                        </div>
+
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Evento Marcante
+                            (Origem - 1x/sessão)</span>
+                          <label class="theme-switch">
+                            <input type="checkbox" id="mod-origem-evento">
+                            <span class="slider"></span>
+                          </label>
+                        </div>
+
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Dados Bônus para
+                            Manter</span>
+                          <input type="number" id="mod-bonus-keep" min="0" max="10" value="0"
+                            style="width:60px;padding:4px 6px;text-align:center;font-size:var(--font-size-sm);">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="drawer-col-2">
+                    <div class="dice-selector-section">
+                      <h4>Montar Pilha de Dados</h4>
+
+                      <div class="dice-selector-row">
+                        <div class="dice-select-control">
+                          <img src="assets/d6/3-4(D6).webp" class="dice-tag tag-d6" alt="d6">
+                          <label>Instintos</label>
+                          <div class="number-input">
+                            <button class="num-minus">-</button>
+                            <span id="dice-qty-d6" class="dice-qty-span">0</span>
+                            <button class="num-plus">+</button>
+                          </div>
+                        </div>
+
+                        <div class="dice-select-control">
+                          <img src="assets/d10/6(D10).webp" class="dice-tag tag-d10" alt="d10">
+                          <label>Aptidões</label>
+                          <div class="number-input">
+                            <button class="num-minus">-</button>
+                            <span id="dice-qty-d10" class="dice-qty-span">0</span>
+                            <button class="num-plus">+</button>
+                          </div>
+                        </div>
+
+                        <div class="dice-select-control">
+                          <img src="assets/d12/11(D12).webp" class="dice-tag tag-d12" alt="d12">
+                          <label>Assimilados</label>
+                          <div class="number-input">
+                            <button class="num-minus">-</button>
+                            <span id="dice-qty-d12" class="dice-qty-span">0</span>
+                            <button class="num-plus">+</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="selected-aptitudes-label" id="current-roll-label">
+                        Nenhuma aptidão selecionada na ficha
+                      </div>
+
+                      <div class="custom-roll-row" style="margin-top: 10px; display: flex; gap: 8px;">
+                        <input type="text" id="dice-custom-formula" placeholder="Outros dados (Ex: 1d20+2d8)"
+                          style="flex: 1; padding: 6px 10px; font-size: var(--font-size-sm);">
+                        <button id="btn-roll-custom" class="btn btn-sm"
+                          style="font-size: var(--font-size-xs);">Rolar</button>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+                <div>
+
+                  <div class="roll-action-section" style="display: flex; gap: 8px;">
+                    <button id="btn-roll-action" class="btn btn-success btn-large"
+                      style="flex: 1; justify-content: center;">ROLAR DADOS</button>
+                    <button type="button" class="btn btn-large btn-close-roller-panel"
+                      style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
+                  </div>
+
+                  <div class="normal-results hidden" id="normal-panel-results"
+                    style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
+                    <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado (Toque nos dados para
+                      selecionar quais manter)</h4>
+                    <div class="results-dice-grid" id="normal-panel-dice-container"
+                      style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    <div class="roll-summary-inline" id="normal-panel-summary"
+                      style="margin-top:8px; display: flex; gap: 16px;"></div>
+                    <div class="roll-narrative" id="normal-panel-narrative"
+                      style="margin-top:8px; font-size: var(--font-size-xs); line-height: 1.4; border-left: 2px solid var(--color-rust); padding-left: 6px;">
+                    </div>
+                    <button id="btn-send-normal-to-mesa" class="btn btn-sm"
+                      style="margin-top:8px; padding:4px 12px; font-size:var(--font-size-xs);"
+                      title="Enviar resultado para a Mesa">📨 Enviar para Mesa</button>
                   </div>
                 </div>
-                
-                <div class="dice-select-control">
-                  <img src="assets/d10/6(D10).webp" class="dice-tag tag-d10" alt="d10">
-                  <label>Aptidões</label>
-                  <div class="number-input">
-                    <button class="num-minus">-</button>
-                    <span id="dice-qty-d10" class="dice-qty-span">0</span>
-                    <button class="num-plus">+</button>
+              </div>
+
+              <!-- Conteúdo do Painel Assimilado -->
+              <div id="panel-roller-assimilada" class="hidden">
+                <div class="instinto-panel-content" style="display: flex; flex-direction: column; padding: 12px 0;">
+                  <p class="instinto-modal-desc"
+                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: 8px;">
+                    Deixe os instintos guiarem você. Invoque a força do parasita.<br> Os d6 tornam-se d12 e você deve
+                    manter no mínimo 2 dados.
+                  </p>
+
+                  <div id="instinto-custo-display" style="margin-bottom: 8px;">
+                    <!-- Renderizado dinamicamente via JS -->
+                  </div>
+                  <div class="instinto-panel-content-flex">
+                    <div class="instinto-selectors" style="display: flex; flex-direction: column; gap: 12px;">
+                      <div class="instinto-selectors">
+                        <div class="instinto-selector-group"
+                          style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                          <label style="font-size: var(--font-size-sm); font-weight: bold; ">1º Instinto</label>
+                          <select id="inst-select-1" class="instinto-select"
+                            style="width: 100%; padding: 6px 10px;"></select>
+                          <span class="instinto-dice-count" id="inst-count-1"
+                            style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+                        </div>
+                        <div class="instinto-divider"
+                          style="font-size: var(--font-size-lg); font-weight: bold; color: var(--text-muted);">+</div>
+                        <div class="instinto-selector-group"
+                          style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                          <label style="font-size: var(--font-size-sm); font-weight: bold; ">2º Instinto</label>
+                          <select id="inst-select-2" class="instinto-select"
+                            style="width: 100%; padding: 6px 10px;"></select>
+                          <span class="instinto-dice-count" id="inst-count-2"
+                            style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
+                        </div>
+                      </div>
+
+                      <div class="instinto-pool-preview"
+                        style="font-size: var(--font-size-md); font-family: var(--font-heading); font-weight: bold; text-align: center;">
+                        Pilha de Rolagem: <strong id="instinto-pool-label">—</strong> <br> Manter: <strong
+                          id="instinto-keep-label">2</strong>
+                      </div>
+                    </div>
+
+
+                    <div class="roll-modifiers-section" style="margin-bottom: 12px; padding: 0 4px;">
+                      <h4
+                        style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: 8px;">
+                        Modificadores Para Manter +1 Dado</h4>
+                      <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Empenho (Gasta 1 de
+                            Determinação)</span>
+                          <label class="theme-switch">
+                            <input type="checkbox" id="mod-empenho-ass">
+                            <span class="slider"></span>
+                          </label>
+                        </div>
+
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Ocupação
+                            (Origem - 1x/sessão)</span>
+                          <label class="theme-switch">
+                            <input type="checkbox" id="mod-origem-ocupacao-ass">
+                            <span class="slider"></span>
+                          </label>
+                        </div>
+
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Evento Marcante
+                            (Origem - 1x/sessão)</span>
+                          <label class="theme-switch">
+                            <input type="checkbox" id="mod-origem-evento-ass">
+                            <span class="slider"></span>
+                          </label>
+                        </div>
+
+                        <div class="modifier-row"
+                          style="display: flex; align-items: center; justify-content: space-between;">
+                          <span class="modifier-label"
+                            style="font-size: var(--font-size-sm); color: var(--text-secondary);">Dados Bônus para
+                            Manter</span>
+                          <input type="number" id="mod-bonus-keep-ass" min="0" max="10" value="0"
+                            style="width:60px;padding:4px 6px;text-align:center;font-size:var(--font-size-sm);">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="instinto-restricao"
+                    style="font-size: var(--font-size-md); color: var(--color-rust-glow); background: rgba(141,36,40,0.1); border: 1px solid rgba(141,36,40,0.2); padding: 8px 12px; border-radius: var(--radius-sm);">
+                    ⚠️ <strong>Restrição:</strong> Sem ajuda de aliados. Adaptações não cancelam Pressões em Ações
+                    Simples.
+                  </div>
+
+                  <div class="roll-action-section" style="display: flex; gap: 8px;">
+                    <button class="btn btn-success btn-large" id="btn-panel-agir-instinto"
+                      style="flex: 1; justify-content: center;">REALIZAR ROLAGEM ASSIMILADA</button>
+                    <button type="button" class="btn btn-large btn-close-roller-panel"
+                      style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
+                  </div>
+
+                  <div class="instinto-results hidden" id="instinto-panel-results"
+                    style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
+                    <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado (Toque nos dados para
+                      selecionar quais manter)</h4>
+                    <div class="results-dice-grid" id="instinto-panel-dice-container"
+                      style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                    <div class="roll-summary-inline" id="instinto-panel-summary"
+                      style="margin-top:8px; display: flex; gap: 16px;"></div>
+                    <button id="btn-send-instinto-to-mesa" class="btn btn-sm"
+                      style="margin-top:8px; padding:4px 12px; font-size:var(--font-size-xs);"
+                      title="Enviar resultado para a Mesa">📨 Enviar para Mesa</button>
                   </div>
                 </div>
-
-                <div class="dice-select-control">
-                  <img src="assets/d12/11(D12).webp" class="dice-tag tag-d12" alt="d12">
-                  <label>Assimilados</label>
-                  <div class="number-input">
-                    <button class="num-minus">-</button>
-                    <span id="dice-qty-d12" class="dice-qty-span">0</span>
-                    <button class="num-plus">+</button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="selected-aptitudes-label" id="current-roll-label">
-                Nenhuma aptidão selecionada na ficha
-              </div>
-
-              <div class="custom-roll-row" style="margin-top: 10px; display: flex; gap: 8px;">
-                <input type="text" id="dice-custom-formula" placeholder="Outros dados (Ex: 1d20+2d8)" style="flex: 1; padding: 6px 10px; font-size: var(--font-size-sm);">
-                <button id="btn-roll-custom" class="btn btn-sm" style="font-size: var(--font-size-xs);">Rolar</button>
               </div>
             </div>
-            
-          </div>
-          
-        </div>
-        <div>
-
-          <div class="roll-action-section" style="display: flex; gap: 8px;">
-            <button id="btn-roll-action" class="btn btn-success btn-large" style="flex: 1; justify-content: center;">ROLAR DADOS</button>
-            <button type="button" class="btn btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
-          </div>
-          
-          <div class="normal-results hidden" id="normal-panel-results" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
-            <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado (Toque nos dados para selecionar quais manter)</h4>
-            <div class="results-dice-grid" id="normal-panel-dice-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
-            <div class="roll-summary-inline" id="normal-panel-summary" style="margin-top:8px; display: flex; gap: 16px;"></div>
-            <div class="roll-narrative" id="normal-panel-narrative" style="margin-top:8px; font-size: var(--font-size-xs); line-height: 1.4; border-left: 2px solid var(--color-rust); padding-left: 6px;"></div>
-            <button id="btn-send-normal-to-mesa" class="btn btn-sm" style="margin-top:8px; padding:4px 12px; font-size:var(--font-size-xs);" title="Enviar resultado para a Mesa">📨 Enviar para Mesa</button>
           </div>
         </div>
-      </div>
-
-      <!-- Conteúdo do Painel Assimilado -->
-      <div id="panel-roller-assimilada" class="hidden">
-        <div class="instinto-panel-content" style="display: flex; flex-direction: column; padding: 12px 0;">
-          <p class="instinto-modal-desc" style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-bottom: 8px;">
-            Deixe os instintos guiarem você. Invoque a força do parasita.<br> Os d6 tornam-se d12 e você deve manter no mínimo 2 dados.
-          </p>
-          
-          <div id="instinto-custo-display" style="margin-bottom: 8px;">
-            <!-- Renderizado dinamicamente via JS -->
-          </div>
-          <div class="instinto-panel-content-flex">
-            <div class="instinto-selectors" style="display: flex; flex-direction: column; gap: 12px;">
-              <div class="instinto-selectors">
-              <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: var(--font-size-sm); font-weight: bold; ">1º Instinto</label>
-                <select id="inst-select-1" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
-                <span class="instinto-dice-count" id="inst-count-1" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
-              </div>
-              <div class="instinto-divider" style="font-size: var(--font-size-lg); font-weight: bold; color: var(--text-muted);">+</div>
-              <div class="instinto-selector-group" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: var(--font-size-sm); font-weight: bold; ">2º Instinto</label>
-                <select id="inst-select-2" class="instinto-select" style="width: 100%; padding: 6px 10px;"></select>
-                <span class="instinto-dice-count" id="inst-count-2" style="font-size: var(--font-size-xs); color: var(--text-muted);">d12 × 0</span>
-              </div>
-            </div>
-            
-            <div class="instinto-pool-preview" style="font-size: var(--font-size-md); font-family: var(--font-heading); font-weight: bold; text-align: center;">
-              Pilha de Rolagem: <strong id="instinto-pool-label" >—</strong> <br> Manter: <strong id="instinto-keep-label">2</strong>
-            </div>
-          </div>
-          
-          
-          <div class="roll-modifiers-section" style="margin-bottom: 12px; padding: 0 4px;">
-            <h4 style="font-family: var(--font-heading); color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: 8px;">Modificadores Para Manter +1 Dado</h4>
-            <div class="modifiers-list" style="display: flex; flex-direction: column; gap: 8px;">
-              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Empenho (Gasta 1 de Determinação)</span>
-                <label class="theme-switch">
-                  <input type="checkbox" id="mod-empenho-ass">
-                  <span class="slider"></span>
-                </label>
-              </div>
-              
-              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Ocupação (Origem - 1x/sessão)</span>
-                <label class="theme-switch">
-                  <input type="checkbox" id="mod-origem-ocupacao-ass">
-                  <span class="slider"></span>
-                </label>
-              </div>
-
-              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Ativar Evento Marcante (Origem - 1x/sessão)</span>
-                <label class="theme-switch">
-                  <input type="checkbox" id="mod-origem-evento-ass">
-                  <span class="slider"></span>
-                </label>
-              </div>
-
-              <div class="modifier-row" style="display: flex; align-items: center; justify-content: space-between;">
-                <span class="modifier-label" style="font-size: var(--font-size-sm); color: var(--text-secondary);">Dados Bônus para Manter</span>
-                <input type="number" id="mod-bonus-keep-ass" min="0" max="10" value="0" style="width:60px;padding:4px 6px;text-align:center;font-size:var(--font-size-sm);">
-              </div>
-            </div>
-          </div>
-          </div>
-
-          <div class="instinto-restricao" style="font-size: var(--font-size-md); color: var(--color-rust-glow); background: rgba(141,36,40,0.1); border: 1px solid rgba(141,36,40,0.2); padding: 8px 12px; border-radius: var(--radius-sm);">
-            ⚠️ <strong>Restrição:</strong> Sem ajuda de aliados. Adaptações não cancelam Pressões em Ações Simples.
-          </div>
-          
-          <div class="roll-action-section" style="display: flex; gap: 8px;">
-            <button class="btn btn-success btn-large" id="btn-panel-agir-instinto" style="flex: 1; justify-content: center;">REALIZAR ROLAGEM ASSIMILADA</button>
-            <button type="button" class="btn btn-large btn-close-roller-panel" style="flex: 1; justify-content: center;">FECHAR PAINEL</button>
-          </div>
-          
-          <div class="instinto-results hidden" id="instinto-panel-results" style="margin-top: 16px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: var(--radius-md);">
-            <h4 style="margin-bottom:8px; color:var(--color-blue-glow);">Resultado (Toque nos dados para selecionar quais manter)</h4>
-            <div class="results-dice-grid" id="instinto-panel-dice-container" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
-            <div class="roll-summary-inline" id="instinto-panel-summary" style="margin-top:8px; display: flex; gap: 16px;"></div>
-            <button id="btn-send-instinto-to-mesa" class="btn btn-sm" style="margin-top:8px; padding:4px 12px; font-size:var(--font-size-xs);" title="Enviar resultado para a Mesa">📨 Enviar para Mesa</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
       </div>
     </section>
@@ -1523,7 +1731,7 @@
     <section id="local-screen" class="screen hidden"></section>
 
   </main>
-   <!-- MODAIS FLUTUANTES (Seleção de Mutações, Compra de Características, Confirmação) -->
+  <!-- MODAIS FLUTUANTES (Seleção de Mutações, Compra de Características, Confirmação) -->
   <div id="modal-container" class="modal-overlay hidden">
     <!-- Modal genérico inserido via JS -->
     <div class="modal-content card-glass">
@@ -1547,31 +1755,39 @@
             <div class="room-tab" data-room-tab="salas">Minhas Salas</div>
           </div>
           <div class="room-tab-content" id="room-tab-criar">
-            <label class="ws-label">Ficha do Personagem <small style="color:var(--text-muted);font-weight:normal;">(opcional)</small></label>
+            <label class="ws-label">Ficha do Personagem <small
+                style="color:var(--text-muted);font-weight:normal;">(opcional)</small></label>
             <select id="room-char-select" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
               <option value="">-- Nenhuma (apenas Mestre) --</option>
             </select>
             <label class="ws-label" style="margin-top:8px;">Seu Nome</label>
-            <input type="text" id="room-player-name" placeholder="Seu nome na mesa" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
-            <button type="button" class="btn btn-sm btn-primary" id="btn-create-room" style="width:100%; margin-top:8px;">Criar Sala</button>
+            <input type="text" id="room-player-name" placeholder="Seu nome na mesa" class="conflito-form-input"
+              style="width:100%; box-sizing:border-box;">
+            <button type="button" class="btn btn-sm btn-primary" id="btn-create-room"
+              style="width:100%; margin-top:8px;">Criar Sala</button>
           </div>
           <div class="room-tab-content hidden" id="room-tab-entrar">
             <label class="ws-label">Código da Sala</label>
-            <input type="text" id="room-code-input" placeholder="Ex: ABC123" class="conflito-form-input" style="width:100%; box-sizing:border-box; text-transform:uppercase;" maxlength="6">
+            <input type="text" id="room-code-input" placeholder="Ex: ABC123" class="conflito-form-input"
+              style="width:100%; box-sizing:border-box; text-transform:uppercase;" maxlength="6">
             <label class="ws-label" style="margin-top:8px;">Ficha do Personagem</label>
             <select id="room-char-select-join" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
               <option value="">-- Selecione uma ficha (obrigatório) --</option>
             </select>
             <label class="ws-label" style="margin-top:8px;">Seu Nome</label>
-            <input type="text" id="room-player-name-join" placeholder="Seu nome na mesa" class="conflito-form-input" style="width:100%; box-sizing:border-box;">
-            <button type="button" class="btn btn-sm btn-primary" id="btn-join-room" style="width:100%; margin-top:8px;">Entrar na Sala</button>
+            <input type="text" id="room-player-name-join" placeholder="Seu nome na mesa" class="conflito-form-input"
+              style="width:100%; box-sizing:border-box;">
+            <button type="button" class="btn btn-sm btn-primary" id="btn-join-room"
+              style="width:100%; margin-top:8px;">Entrar na Sala</button>
           </div>
           <div class="room-tab-content hidden" id="room-tab-salas">
             <div id="managed-rooms-list" class="managed-rooms-list"></div>
           </div>
         </div>
         <div id="room-step-waiting" class="room-step hidden">
-          <p style="font-size:13px; color:var(--text-secondary); text-align:center;">Compartilhe o código abaixo com os jogadores:</p>
+          <p style="font-size: var(--font-size-xs); color:var(--text-secondary); text-align:center;">Compartilhe o
+            código abaixo com os
+            jogadores:</p>
           <div class="room-code-display" id="room-code-display">------</div>
           <div style="display:flex; gap:8px;">
             <button type="button" class="btn btn-sm" id="btn-copy-room-code" style="flex:1;">Copiar Código</button>
@@ -1634,4 +1850,5 @@
   </script>
 
 </body>
+
 </html>

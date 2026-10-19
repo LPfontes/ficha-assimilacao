@@ -308,7 +308,7 @@ export function renderWizardHealth() {
     }
     
     bar.innerHTML = `
-      <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold;">
+      <div style="display:flex; justify-content:space-between; font-size: var(--font-size-xs); font-weight:bold;">
         <span>${lvl}</span>
         <span style="color:#00ff66">${pLevel} pts</span>
       </div>
@@ -318,17 +318,35 @@ export function renderWizardHealth() {
   });
 }
 
+let _wizardTraitsCostFilter = "todos";
+
+export function setWizardTraitsCostFilter(cost) {
+  _wizardTraitsCostFilter = cost;
+  renderWizardTraits();
+}
+
 export function renderWizardTraits() {
   document.getElementById("wiz-xp-points").textContent = state.wizardData.xp;
   
   const container = document.getElementById("wiz-traits-list");
   container.innerHTML = "";
   
-  const filterCost = document.getElementById("wiz-traits-cost-filter").value;
+  // Atualiza estado ativo dos botões de filtro
+  const filterBar = document.getElementById("traits-cost-filter-bar");
+  if (filterBar) {
+    filterBar.querySelectorAll(".traits-cost-tab").forEach(tab => {
+      if (tab.dataset.cost === _wizardTraitsCostFilter) {
+        tab.classList.add("active");
+      } else {
+        tab.classList.remove("active");
+      }
+    });
+  }
   
   CARACTERISTICAS.forEach(trait => {
     if (trait.id === "estagio_avancado" && state.wizardData.step !== 8) return; 
-    if (filterCost !== "all" && trait.custo !== parseInt(filterCost)) return;
+    if (_wizardTraitsCostFilter === "custom") return;
+    if (_wizardTraitsCostFilter !== "todos" && trait.custo !== parseInt(_wizardTraitsCostFilter)) return;
     
     const isOwned = state.wizardData.caracteristicas.includes(trait.id);
     const meetsReqs = checkWizardTraitPrerequisites(trait.requisitos);
@@ -342,7 +360,7 @@ export function renderWizardTraits() {
         <div class="name-row">
           <span class="name">${trait.nome}</span>
           <span class="tag-cost">${trait.custo} XP</span>
-          ${isOwned ? '<span style="color:#00ff66; font-size:14px; font-weight:bold;">Adquirido</span>' : ''}
+          ${isOwned ? '<span style="color:#00ff66; font-size: var(--font-size-xs); font-weight:bold;">Adquirido</span>' : ''}
         </div>
         <div class="req">Requisito: ${trait.requisitoText}</div>
         <div class="desc">${trait.descricao}</div>
@@ -380,6 +398,67 @@ export function renderWizardTraits() {
     
     container.appendChild(card);
   });
+
+  // Custom traits no Wizard
+  const customTraits = getCustomTraits();
+  const filteredCustom = customTraits.filter(trait => {
+    if (_wizardTraitsCostFilter === "custom") return true;
+    if (_wizardTraitsCostFilter === "todos") return true;
+    return String(trait.custo) === String(_wizardTraitsCostFilter);
+  });
+
+  if (filteredCustom.length > 0) {
+    if (_wizardTraitsCostFilter === "todos") {
+      const sep = document.createElement("div");
+      sep.style.cssText = "grid-column:1/-1; border-top:1px solid rgba(255,255,255,0.08); margin:8px 0 4px 0; padding-top:8px; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;";
+      sep.textContent = "⚙️ Personalizadas";
+      container.appendChild(sep);
+    }
+    filteredCustom.forEach(trait => {
+      const isOwned = state.wizardData.caracteristicas.includes(trait.id);
+      const card = document.createElement("div");
+      card.className = `trait-wiz-item ${isOwned ? 'owned' : ''}`;
+      card.innerHTML = `
+        <div class="info">
+          <div class="name-row">
+            <span class="name">${trait.nome}</span>
+            <span class="tag-cost">${trait.custo} XP</span>
+            ${isOwned ? '<span style="color:#00ff66; font-size: var(--font-size-xs); font-weight:bold;">Adquirido</span>' : ''}
+            <span style="color:#a855f7; font-size:10px; margin-left:4px;">⚙️</span>
+          </div>
+          <div class="req">${trait.requisitoText ? 'Requisito: ' + trait.requisitoText : ''}</div>
+          <div class="desc">${trait.descricao}</div>
+        </div>
+        <div class="action">
+          <button class="btn ${isOwned ? 'btn-danger' : ''} btn-sm wiz-buy-trait-btn" data-id="${trait.id}">
+            ${isOwned ? 'Remover' : 'Adquirir'}
+          </button>
+        </div>
+      `;
+      card.querySelector(".wiz-buy-trait-btn").addEventListener("click", () => {
+        if (isOwned) {
+          state.wizardData.caracteristicas = state.wizardData.caracteristicas.filter(id => id !== trait.id);
+          state.wizardData.xp += trait.custo;
+        } else {
+          if (state.wizardData.xp >= trait.custo) {
+            state.wizardData.caracteristicas.push(trait.id);
+            state.wizardData.xp -= trait.custo;
+          } else {
+            alert("Pontos de Experiência (XP) insuficientes!");
+          }
+        }
+        renderWizardTraits();
+      });
+      container.appendChild(card);
+    });
+  }
+
+  if (container.children.length === 0) {
+    const emptyMsg = document.createElement("div");
+    emptyMsg.style.cssText = "text-align:center; padding:24px; color:var(--text-muted); font-size:var(--font-size-sm);";
+    emptyMsg.textContent = "Nenhuma característica encontrada para este filtro.";
+    container.appendChild(emptyMsg);
+  }
   
   renderWizardSkillUpgrades();
 }

@@ -8,157 +8,170 @@ export const ASSIMILACOES = {
       {
         carta: "Ás de Copas",
         nome: "Assimilação Sensitiva",
+        descricao: "O(a) Infectado(a) desenvolve uma percepção intuitiva para criaturas assimiladas e eventos futuros, navegando pelas tensões do ambiente usando o sexto sentido.",
         mutações: [
-          { cost: "1 sucesso", name: "Sensibilidade", desc: "Gasta 1 Ponto de Determinação para sentir a presença de criaturas assimiladas em até 30m pela cena." },
-          { cost: "2 sucessos", name: "Consciência", desc: "Mantenha um dado adicional em qualquer teste que inclua Percepção." },
-          { cost: "3 sucessos", name: "Discernimento", desc: "Adicione uma ADAPTAÇÃO a um dado mantido que já possua uma ADAPTAÇÃO nos testes de Ação." },
-          { cost: "4 sucessos", name: "Presciência", req: 3, desc: "3+ Ponto de Assimilação: No início da sessão, rola 2 dados Ponto de Determinação substitui por rolagens da mesa posteriormente." },
-          { cost: "5 sucessos", name: "Complicar", req: 5, desc: "5+ Ponto de Assimilação: Gasta 1 Ponto de Determinação para fazer alguém rolar novamente um dado." },
-          { cost: "6 sucessos", name: "Vidência", req: 7, desc: "7+ Ponto de Assimilação: Prevê Crises, permitindo ao Assimilador adiar seu efeito por até 24h para contra-medidas." }
+          { cost: "1 sucesso", name: "Sensibilidade", desc: "Gasta um Ponto de Determinação para sentir a presença de criaturas assimiladas em até 30 metros pelo restante da cena." },
+          { cost: "2 sucessos", name: "Consciência", desc: "Mantenha um dado adicional sempre que o(a) Infectado(a) realizar um teste que inclua Percepção." },
+          { cost: "3 sucessos", name: "Discernimento", desc: "Adicione Adaptação à face de um dado mantido que já tenha pelo menos Adaptação em testes de Ação do(a) Infectado(a)." },
+          { cost: "4 sucessos", name: "Presciência", req: 3, desc: "3+ Nível de Assimilação: No começo da sessão, o(a) jogador(a) rola dois dados do tipo que escolher, anotando o resultado para substituí-los por quaisquer dados do mesmo tipo rolados posteriormente por qualquer pessoa ao longo da sessão de jogo, incluindo o(a) Assimilador(a), uma vez cada dado." },
+          { cost: "5 sucessos", name: "Complicar", req: 5, desc: "5+ Nível de Assimilação: Sempre que alguém realizar um teste na presença do(a) Infectado(a), você pode gastar um Ponto de Determinação para escolher um dado para ser rolado novamente, substituindo o resultado anterior." },
+          { cost: "6 sucessos", name: "Vidência", req: 7, desc: "7+ Nível de Assimilação: O(a) Infectado(a) consegue prever Crises (pág. 106). No momento em que seria ativada, o(a) Assimilador(a) adia o seu efeito em até 24 horas, dando oportunidade para o(a) Infectado(a) adotar contramedidas efetivas que possam cancelá-la antes que aconteça." }
         ]
       },
       {
         carta: "2 de Copas",
         nome: "Assimilação Reativa",
+        descricao: "Os reflexos do(a) Infectado(a) se tornam cada vez mais precisos, reagindo de forma instintiva e assertiva a perigos ou situações inusitadas.",
         mutações: [
-          { cost: "1 sucesso", name: "Ligeiro", desc: "Recebe +1 ponto em Reação (pode ultrapassar o limite máximo)." },
-          { cost: "2 sucessos", name: "Rápido", desc: "Sempre que realizar teste com Reação, pode gastar 1 Ponto de Determinação para adicionar +1 SUCESSO." },
-          { cost: "3 sucessos", name: "Preciso", desc: "Sempre que realizar teste com Reação, anula as PRESSÃO do resultado." },
-          { cost: "4 sucessos", name: "Alígero", req: 3, desc: "3+ Ponto de Assimilação: Sempre que realizar teste com Reação, substitui as ADAPTAÇÃO por SUCESSO." },
-          { cost: "5 sucessos", name: "Hábil", req: 5, desc: "5+ Ponto de Assimilação: +1 SUCESSO em testes de Reação (acumula com Rápido)." },
-          { cost: "6 sucessos", name: "Celeridade", req: 7, desc: "7+ Ponto de Assimilação: Substitui todos os d6 por d10 (ou 6 por 1) na pilha de Reação." }
+          { cost: "1 sucesso", name: "Ligeiro", desc: "Recebe um ponto em Reação – pode ultrapassar o limite máximo." },
+          { cost: "2 sucessos", name: "Rápido", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Reação, você pode usar um Ponto de Assimilação para adicionar Sucesso ao resultado." },
+          { cost: "3 sucessos", name: "Preciso", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Reação, anule Pressão no resultado." },
+          { cost: "4 sucessos", name: "Alígero", req: 3, desc: "3+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Reação, substitua qualquer quantidade de Adaptação por Sucesso no resultado." },
+          { cost: "5 sucessos", name: "Hábil", req: 5, desc: "5+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Reação, você adiciona um Sucesso ao resultado. Pode ser ativado em conjunto com Rápido, acumulando os efeitos." },
+          { cost: "6 sucessos", name: "Celeridade", req: 7, desc: "7+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Reação, substitua todos os d6 por d10 na pilha de dados." }
         ]
       },
       {
         carta: "3 de Copas",
         nome: "Assimilação Sensorial",
+        descricao: "Os sentidos do(a) Infectado(a) atingem níveis extraordinários, captando detalhes com precisão.",
         mutações: [
-          { cost: "1 sucesso", name: "Perceptivo", desc: "Recebe +1 ponto em Percepção (pode ultrapassar o limite máximo)." },
-          { cost: "2 sucessos", name: "Alerta", desc: "Sempre que realizar teste com Percepção, pode usar 1 Ponto de Determinação para adicionar +1 SUCESSO." },
-          { cost: "3 sucessos", name: "Detalhista", desc: "Sempre que realizar teste com Percepção, anula as PRESSÃO do resultado." },
-          { cost: "4 sucessos", name: "Meticuloso", req: 3, desc: "3+ Ponto de Assimilação: Sempre que realizar teste com Percepção, substitui as ADAPTAÇÃO por SUCESSO." },
-          { cost: "5 sucessos", name: "Arguto", req: 5, desc: "5+ Ponto de Assimilação: +1 SUCESSO em testes de Percepção (acumula com Alerta)." },
-          { cost: "6 sucessos", name: "Intuitivo", req: 7, desc: "7+ Ponto de Assimilação: Substitui todos os d6 por d10 (ou 6 por 1) na pilha de Percepção." }
+          { cost: "1 sucesso", name: "Perceptivo", desc: "Recebe um ponto em Percepção – pode ultrapassar o limite máximo." },
+          { cost: "2 sucessos", name: "Alerta", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Percepção, você pode usar um Ponto de Assimilação para adicionar Sucesso ao resultado." },
+          { cost: "3 sucessos", name: "Detalhista", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Percepção, anule Pressão no resultado." },
+          { cost: "4 sucessos", name: "Meticuloso", req: 3, desc: "3+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Percepção, substitua qualquer quantidade de Adaptação por Sucesso no resultado." },
+          { cost: "5 sucessos", name: "Arguto", req: 5, desc: "5+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Percepção, você adiciona Sucesso ao resultado. Pode ser ativado com Alerta, acumulando os efeitos." },
+          { cost: "6 sucessos", name: "Intuitivo", req: 7, desc: "7+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Percepção, substitua todos os d6 por d10 na pilha de dados." }
         ]
       },
       {
         carta: "4 de Copas",
         nome: "Assimilação Vigorosa",
+        descricao: "A resiliência física e mental do(a) Infectado(a) é reforçada. Corpo e mente são capazes de resistir a pressões e traumas.",
         mutações: [
           { cost: "1 sucesso", name: "Resoluto", desc: "Recebe um ponto em Resolução – pode ultrapassar o limite máximo." },
-          { cost: "2 sucessos", name: "Resistente", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, você pode usar um Ponto de Determinação para adicionar SUCESSO ao resultado." },
-          { cost: "3 sucessos", name: "Firme", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, anule 1 PRESSÃO no resultado." },
-          { cost: "4 sucessos", name: "Vigoroso", req: 3, desc: "3+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, você pode substituir qualquer quantidade de ADAPTAÇÃO no resultado por SUCESSO." },
-          { cost: "5 sucessos", name: "Persistente", req: 5, desc: "5+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, adicione SUCESSO ao resultado. Pode ser ativado em conjunto com Resistente, acumulando os efeitos." },
-          { cost: "6 sucessos", name: "Inabalável", req: 7, desc: "7+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, substitua todos os 6 por 1 na pilha de dados." }
+          { cost: "2 sucessos", name: "Resistente", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, você pode usar um Ponto de Assimilação para adicionar Sucesso ao resultado." },
+          { cost: "3 sucessos", name: "Firme", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, anule Pressão no resultado." },
+          { cost: "4 sucessos", name: "Vigoroso", req: 3, desc: "3+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, você pode substituir qualquer número de Adaptação no resultado por Sucesso." },
+          { cost: "5 sucessos", name: "Persistente", req: 5, desc: "5+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, adicione Sucesso ao resultado. Pode ser ativado em conjunto com Resistente, acumulando os efeitos." },
+          { cost: "6 sucessos", name: "Inabalável", req: 7, desc: "7+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Resolução, substitua todos os d6 por d10 na pilha de dados." }
         ]
       },
       {
         carta: "5 de Copas",
         nome: "Assimilação Persuasiva",
+        descricao: "O carisma e a influência do(a) Infectado(a) se ampliam de forma sensível, facilitando a comunicação e o convencimento, além de ampliar seu magnetismo e sua autoridade.",
         mutações: [
           { cost: "1 sucesso", name: "Influente", desc: "Recebe um ponto em Influência – pode ultrapassar o limite máximo." },
-          { cost: "2 sucessos", name: "Persuasivo", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, você pode usar um Ponto de Determinação para adicionar +1 SUCESSO ao resultado." },
-          { cost: "3 sucessos", name: "Convincente", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, anule 1 PRESSÃO no resultado." },
-          { cost: "4 sucessos", name: "Magnético", req: 3, desc: "3+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, você pode substituir qualquer quantidade de ADAPTAÇÃO no resultado por SUCESSO." },
-          { cost: "5 sucessos", name: "Carismático", req: 5, desc: "5+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, adicione +1 SUCESSO ao resultado. Pode ser ativado com Persuasivo, acumulando os efeitos." },
-          { cost: "6 sucessos", name: "Majestoso", req: 7, desc: "7+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, substitua todos os 6 por 1 na pilha de dados." }
+          { cost: "2 sucessos", name: "Persuasivo", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, você pode usar um Ponto de Assimilação para adicionar Sucesso ao resultado." },
+          { cost: "3 sucessos", name: "Convincente", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, anule Pressão no resultado." },
+          { cost: "4 sucessos", name: "Magnético", req: 3, desc: "3+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, você pode substituir qualquer número de Adaptação no resultado por Sucesso." },
+          { cost: "5 sucessos", name: "Carismático", req: 5, desc: "5+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, adicione Sucesso ao resultado. Pode ser ativado com Persuasivo, acumulando os efeitos." },
+          { cost: "6 sucessos", name: "Majestoso", req: 7, desc: "7+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, substitua todos os d6 por d10 na pilha de dados." }
         ]
       },
       {
         carta: "6 de Copas",
         nome: "Assimilação Brutal",
+        descricao: "A capacidade do(a) Infectado(a) em empregar força bruta e gerar aceleração é aumentada, alcançando proeza física sobre-humana.",
         mutações: [
           { cost: "1 sucesso", name: "Forte", desc: "Recebe um ponto em Potência – pode ultrapassar o limite máximo." },
-          { cost: "2 sucessos", name: "Robusto", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, você pode usar um Ponto de Determinação para adicionar SUCESSO ao resultado." },
-          { cost: "3 sucessos", name: "Pujante", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, anule PRESSÃO no resultado." },
-          { cost: "4 sucessos", name: "Potente", req: 3, desc: "3+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, você pode substituir qualquer quantidade de ADAPTAÇÃO no resultado por SUCESSO." },
-          { cost: "5 sucessos", name: "Agressivo", req: 5, desc: "5+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, adicione SUCESSO ao resultado. Pode ser ativado em conjunto com Robusto, acumulando os efeitos." },
-          { cost: "6 sucessos", name: "Devastador", req: 7, desc: "7+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, substitua todos os 6 por 1 na pilha de dados." }
+          { cost: "2 sucessos", name: "Robusto", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, você pode usar um Ponto de Assimilação para adicionar Sucesso ao resultado." },
+          { cost: "3 sucessos", name: "Pujante", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, anule Pressão no resultado." },
+          { cost: "4 sucessos", name: "Potente", req: 3, desc: "3+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, você pode substituir qualquer número de Adaptação no resultado por Sucesso." },
+          { cost: "5 sucessos", name: "Agressivo", req: 5, desc: "5+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, adicione Sucesso ao resultado. Pode ser ativado em conjunto com Robusto, acumulando os efeitos." },
+          { cost: "6 sucessos", name: "Devastador", req: 7, desc: "7+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Potência, substitua todos os d6 por d10 na pilha de dados." }
         ]
       },
       {
         carta: "7 de Copas",
         nome: "Assimilação Perspicaz",
+        descricao: "O raciocínio e a cognição do(a) Infectado(a) são aprimorados, despertando sua genialidade, revelando conexões ocultas, padrões complexos e soluções brilhantes.",
         mutações: [
           { cost: "1 sucesso", name: "Sagaz", desc: "Recebe um ponto em Sagacidade – pode ultrapassar o limite máximo." },
-          { cost: "2 sucessos", name: "Mente Assimilada", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, você pode usar um Ponto de Determinação para adicionar SUCESSO ao resultado." },
-          { cost: "3 sucessos", name: "Perfeccionista", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, anule PRESSÃO no resultado." },
-          { cost: "4 sucessos", name: "Solerte", req: 3, desc: "3+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, você pode substituir qualquer quantidade de ADAPTAÇÃO no resultado por SUCESSO." },
-          { cost: "5 sucessos", name: "Potência Mental", req: 5, desc: "5+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, adicione SUCESSO ao resultado. Pode ser ativado em conjunto com Mente Assimilada, acumulando os efeitos." },
-          { cost: "6 sucessos", name: "Genialidade", req: 7, desc: "7+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, substitua todos os 6 por 1 na pilha de dados." }
+          { cost: "2 sucessos", name: "Mente Assimilada", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, você pode usar um Ponto de Assimilação para adicionar Sucesso ao resultado." },
+          { cost: "3 sucessos", name: "Perfeccionista", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, anule Pressão no resultado." },
+          { cost: "4 sucessos", name: "Solerte", req: 3, desc: "3+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, você pode substituir qualquer número de Adaptação no resultado por Sucesso." },
+          { cost: "5 sucessos", name: "Potência Mental", req: 5, desc: "5+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, adicione Sucesso ao resultado. Pode ser ativado em conjunto com Mente Assimilada, acumulando os efeitos." },
+          { cost: "6 sucessos", name: "Genialidade", req: 7, desc: "7+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste que inclua Sagacidade, substitua todos os d6 por d10 na pilha de dados." }
         ]
       },
       {
         carta: "8 de Copas",
         nome: "Assimilação Regenerativa",
+        descricao: "A capacidade regenerativa do corpo do(a) Infectado(a) é ampliada além dos limites humanos.",
         mutações: [
-          { cost: "1 sucesso", name: "Resistente", desc: "Ignora a penalidade  Nível de Saúde 4 (Laceração)." },
-          { cost: "2 sucessos", name: "Resiliente", desc: "Pode se Regenerar sem ajuda médica mesmo quando reduzido  Nível de Saúde 2 (Debilitação) no Tempo de Recuperação de uma semana." },
-          { cost: "3 sucessos", name: "Vigoroso", desc: "Recebe um ponto de vida adicional em cada Nível de Gravidade." },
-          { cost: "4 sucessos", name: "Restauração", req: 3, desc: "3+ Ponto de Assimilação: Ao concluir uma Recuperação, dobre os pontos de vida Regenerados." },
-          { cost: "5 sucessos", name: "Recuperação", req: 5, desc: "5+ Ponto de Assimilação: Regenera uma quantidade de pontos de vida igual à soma de Resolução Ponto de Determinação Potência após cada cena." },
-          { cost: "6 sucessos", name: "Reintegração", req: 7, desc: "7+ Ponto de Assimilação: É capaz de se regenerar completamente em apenas um dia desde que não perca seu último ponto de vida, incluindo partes perdidas do corpo Ponto de Determinação sequelas ou cicatrizes." }
+          { cost: "1 sucesso", name: "Resistente", desc: "Ignora a penalidade do Nível de Saúde 4 (Laceração)." },
+          { cost: "2 sucessos", name: "Resiliente", desc: "Pode se Regenerar sem ajuda médica mesmo quando reduzido ao Nível de Saúde 2 (Debilitação) no Tempo de Recuperação de uma semana." },
+          { cost: "3 sucessos", name: "Vigoroso", desc: "Recebe um Ponto de Saúde adicional em cada Nível de Saúde." },
+          { cost: "4 sucessos", name: "Restauração", req: 3, desc: "3+ Nível de Assimilação: Ao concluir uma Recuperação, dobre os Pontos de Saúde Regenerados." },
+          { cost: "5 sucessos", name: "Recuperação", req: 5, desc: "5+ Nível de Assimilação: Regenera uma quantidade de Pontos de Saúde igual à soma de Resolução e Potência após cada cena." },
+          { cost: "6 sucessos", name: "Reintegração", req: 7, desc: "7+ Nível de Assimilação: É capaz de se Regenerar completamente em apenas um dia desde que não perca seu último Ponto de Saúde, incluindo partes perdidas do corpo e sequelas ou cicatrizes." }
         ]
       },
       {
         carta: "9 de Copas",
         nome: "Assimilação Silvestre",
+        descricao: "A conexão do(a) Infectado(a) com a natureza se aprofunda, concedendo habilidades extraordinárias que podem curar, comandar animais ou até modificar ambientes vivos.",
         mutações: [
           { cost: "1 sucesso", name: "Sintonia Natural", desc: "Recebe um ponto em Biologia – pode ultrapassar o limite máximo." },
           { cost: "2 sucessos", name: "Cura Verde", desc: "Pode gastar um Ponto de Determinação para reavivar toda vegetação morta ou severamente danificada que esteja a até cinco metros, restaurando seu estado saudável original." },
-          { cost: "3 sucessos", name: "Fotossíntese", desc: "Realiza fotossíntese completa que o torna esverdeado. Não precisa consumir alimentos. Basta o consumo habitual de água, contato direto com o solo Ponto de Determinação exposição à luz solar por duas horas diárias." },
-          { cost: "4 sucessos", name: "Animalismo", req: 3, desc: "3+ Ponto de Assimilação: Sempre que o(a) Infectado(a) realizar um teste para influenciar o comportamento de animais, adicione 2 SUCESSOS ao resultado." },
-          { cost: "5 sucessos", name: "Refúgio Natural", req: 5, desc: "5+ Ponto de Assimilação: Estabelece um Refúgio Vivo em áreas naturais que equivale a um Refúgio de Nível 4 Ponto de Determinação se fortalece com a presença contínua do(a) Infectado(a)." },
-          { cost: "6 sucessos", name: "Gênese", req: 7, desc: "7+ Ponto de Assimilação: Gaste todos seus Ponto de Determinação para flora e fauna locais crescerem violentamente em raio de 1km por Ponto de Determinação gasto, obedecendo à sua vontade." }
+          { cost: "3 sucessos", name: "Fotossíntese", desc: "Realiza fotossíntese completa que o torna esverdeado. Não precisa consumir alimentos. Basta o consumo habitual de água, contato direto com o solo e exposição à luz solar por duas horas diárias." },
+          { cost: "4 sucessos", name: "Animalismo", req: 3, desc: "3+ Nível de Assimilação: Sempre que o(a) Infectado(a) realizar um teste para influenciar o comportamento de animais, adicione dois Sucessos ao resultado." },
+          { cost: "5 sucessos", name: "Refúgio Natural", req: 5, desc: "5+ Nível de Assimilação: Estabelece um Refúgio Vivo em áreas naturais que equivale a um Refúgio de Nível 4 (pág. 110) e se fortalece com a presença contínua do(a) Infectado(a). Plantas e animais adaptam o ambiente para conforto, proteção e recuperação. Leve em consideração a Região em que se encontra ao investir os pontos de Refúgio." },
+          { cost: "6 sucessos", name: "Gênese", req: 7, desc: "7+ Nível de Assimilação: Gaste todos seus Pontos de Assimilação para fazer com que a flora e fauna locais cresçam violentamente em um raio de um quilômetro por ponto gasto. Enquanto durar a cena, as plantas e animais se movem e obedecem à vontade do(a) Infectado(a). Qualquer teste da flora ou fauna rola 2 dados para cada Ponto de Assimilação gasto na ativação e mantém dois dados." }
         ]
       },
       {
         carta: "10 de Copas",
         nome: "Assimilação Opressora",
+        descricao: "A presença do(a) Infectado(a) deixa seus rivais acuados, hesitantes e mais suscetíveis à dominância.",
         mutações: [
-          { cost: "1 sucesso", name: "Aproveitador", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, adicione ADAPTAÇÃO ao resultado se o alvo estiver em posição de inferioridade ou dúvida." },
-          { cost: "2 sucessos", name: "Sugestão", desc: "Gaste um Ponto de Determinação para forçar um alvo hesitante a seguir uma sugestão simples, sem colocá-lo em risco." },
+          { cost: "1 sucesso", name: "Aproveitador", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Influência, adicione Adaptação ao resultado se o alvo estiver em posição de inferioridade ou dúvida." },
+          { cost: "2 sucessos", name: "Sugestão", desc: "Gaste um Ponto de Assimilação para forçar um alvo hesitante a seguir uma sugestão simples, sem colocá-lo em risco e sem machucar pessoas importantes para ele." },
           { cost: "3 sucessos", name: "Condicionamento", desc: "Após um teste bem-sucedido que inclua Influência, o(a) Infectado(a) pode repetir a mesma frase ou comando para outro alvo da cena repetindo o resultado sem rolar novo teste." },
-          { cost: "4 sucessos", name: "Imposição", req: 3, desc: "3+ Ponto de Assimilação: Mantenha um dado adicional em testes que incluam Influência em locais pacíficos." },
-          { cost: "5 sucessos", name: "Mesmerizar", req: 5, desc: "5+ Ponto de Assimilação: Ao obter 2 SUCESSOS ou mais em um teste que inclua Influência, pode impor uma condição narrativa ao alvo até o fim da cena." },
-          { cost: "6 sucessos", name: "Dominância", req: 7, desc: "7+ Ponto de Assimilação: Adiciona seus pontos de Expressão à Defesa de seu Refúgio." }
+          { cost: "4 sucessos", name: "Imposição", req: 3, desc: "3+ Nível de Assimilação: Mantenha um dado adicional em testes que incluam Influência em locais pacíficos." },
+          { cost: "5 sucessos", name: "Mesmerizar", req: 5, desc: "5+ Nível de Assimilação: Ao obter dois Sucessos ou mais em um teste que inclua Influência, pode impor uma condição narrativa ao alvo até o fim da cena – como intimidação, obediência, silêncio, vergonha ou outra condição que interfira no comportamento." },
+          { cost: "6 sucessos", name: "Dominância", req: 7, desc: "7+ Nível de Assimilação: Adiciona seus pontos de Expressão à Defesa de seu Refúgio." }
         ]
       },
       {
         carta: "Valete de Copas",
         nome: "Assimilação Esguia",
+        descricao: "A motricidade do(a) Infectado(a) é adaptada para interagir de forma mais eficiente com o ambiente à sua volta, auxiliando a ocultação.",
         mutações: [
-          { cost: "1 sucesso", name: "Infiltrador", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Furtividade em ambiente urbano ou construído, adicione um SUCESSO ao resultado." },
-          { cost: "2 sucessos", name: "Pulso Sombrio", desc: "Gaste um Ponto de Determinação para anular o resultado em um teste que inclua Furtividade. Role novamente Ponto de Determinação mantenha o novo resultado uma vez por teste." },
+          { cost: "1 sucesso", name: "Infiltrador", desc: "Sempre que o(a) Infectado(a) realizar um teste que inclua Furtividade em ambiente urbano ou construído, adicione Sucesso ao resultado." },
+          { cost: "2 sucessos", name: "Pulso Sombrio", desc: "Gaste um Ponto de Assimilação para anular o resultado em um teste que inclua Furtividade. Role novamente e mantenha o novo resultado uma vez por teste." },
           { cost: "3 sucessos", name: "Esguio", desc: "Após executar Ação de Fuga do Conflito, se o(a) Infectado(a) não for o único alvo viável de uma ativação de Ameaça, outro alvo deve ser escolhido." },
-          { cost: "4 sucessos", name: "Subterfúgio", req: 3, desc: "3+ Ponto de Assimilação: O(a) Infectado(a) só precisa de um SUCESSO para ter êxito em qualquer teste que inclua Furtividade fora de Conflito." },
-          { cost: "5 sucessos", name: "Auxílio das Sombras", req: 5, desc: "5+ Ponto de Assimilação: O(a) Infectado(a) adiciona ADAPTAÇÃO à face de cada dado de Furtividade mantido." },
-          { cost: "6 sucessos", name: "Ofuscação", req: 7, desc: "7+ Ponto de Assimilação: O(a) Infectado(a) adiciona SUCESSO à face de todos os dados em testes que incluam Furtividade." }
+          { cost: "4 sucessos", name: "Subterfúgio", req: 3, desc: "3+ Nível de Assimilação: O(a) Infectado(a) só precisa de Sucesso para ter êxito em qualquer teste que inclua Furtividade fora de Conflito." },
+          { cost: "5 sucessos", name: "Auxílio das Sombras", req: 5, desc: "5+ Nível de Assimilação: O(a) Infectado(a) adiciona Adaptação à face de cada dado de Furtividade mantido — dados mantidos de outras Aptidões na mesma rolagem não recebem este benefício." },
+          { cost: "6 sucessos", name: "Ofuscação", req: 7, desc: "7+ Nível de Assimilação: O(a) Infectado(a) adiciona Sucesso à face de todos os dados em testes que incluam Furtividade." }
         ]
       },
       {
         carta: "Dama de Copas",
         nome: "Assimilação Indomável",
+        descricao: "A perseverança do(a) Infectado(a) supera os seus limites, permitindo que continue lutando mesmo nas condições mais adversas.",
         mutações: [
-          { cost: "1 sucesso", name: "Fôlego Raro", desc: "Adiciona SUCESSO ao resultado em testes que incluam Atletismo com esforço contínuo – resistência, natação, escalada, etc." },
-          { cost: "2 sucessos", name: "Perseverança", desc: "Gaste um Ponto de Determinação para manter clareza e força de vontade ao entrar no Estado Suscetível, permitindo usar Determinação do nível seguinte." },
+          { cost: "1 sucesso", name: "Fôlego Raro", desc: "Adiciona Sucesso ao resultado em testes que incluam Atletismo com esforço contínuo – resistência, natação, escalada, etc." },
+          { cost: "2 sucessos", name: "Perseverança", desc: "Gaste um Ponto de Assimilação para manter clareza e força de vontade até o fim da cena ao entrar no Estado Suscetível (pág. 59), permitindo ao(à) Infectado(a) continuar usando Ponto de Determinação, mesmo que com isso reduza o Nível de Determinação e tenha que usar os pontos do Nível seguinte." },
           { cost: "3 sucessos", name: "Disposição", desc: "Sempre que realizar um teste que inclua Atletismo, mantenha um dado adicional." },
-          { cost: "4 sucessos", name: "Obstinação", req: 3, desc: "3+ Ponto de Assimilação: Ao obter 2 ou mais em um teste de Atletismo, restaura um Ponto de Determinação no fim da cena." },
-          { cost: "5 sucessos", name: "Irredutível", req: 5, desc: "5+ Ponto de Assimilação: Gaste dois Ponto de Determinação para ignorar qualquer penalidade decorrente da redução do atributo físico na rodada." },
-          { cost: "6 sucessos", name: "Intrépido", req: 7, desc: "7+ Ponto de Assimilação: O(a) Infectado(a) é imune a qualquer efeito que geraria penalidades externas ou o impediria de agir normalmente." }
+          { cost: "4 sucessos", name: "Obstinação", req: 3, desc: "3+ Nível de Assimilação: Ao obter dois Sucessos ou mais em um teste de Atletismo, Restaura um Ponto de Determinação no fim da cena. Máximo de um ponto por cena." },
+          { cost: "5 sucessos", name: "Irredutível", req: 5, desc: "5+ Nível de Assimilação: Gaste dois Pontos de Determinação para ignorar qualquer penalidade decorrente da redução do Nível de Saúde na rodada." },
+          { cost: "6 sucessos", name: "Intrépido", req: 7, desc: "7+ Nível de Assimilação: O(a) Infectado(a) é imune a qualquer efeito que geraria penalidades externas ou o impediria de agir normalmente." }
         ]
       },
       {
         carta: "Rei de Copas",
         nome: "Assimilação Primordial",
+        descricao: "O DNA do(a) Infectado(a) integra a mais pura essência da Assimilação, permitindo-o interagir com a própria força evolutiva e com a Assimilação presente nos seres à sua volta.",
         mutações: [
-          { cost: "1 sucesso", name: "Primal", desc: "O primeiro Ponto de Determinação utilizado pelo(a) Infectado(a) em cada cena de Conflito é gratuito." },
-          { cost: "2 sucessos", name: "Supressor", desc: "Gaste um Ponto de Determinação para anular PRESSÃO no resultado de qualquer teste do(a) Infectado(a) em Conflito." },
-          { cost: "3 sucessos", name: "Subjugar", desc: "Em cenas de Conflito, quando investe pontos em Neutralizar Ameaça, se o(a) Infectado(a) tem maior Ponto de Determinação que o alvo, aumente em dois SUCESSOS o resultado." },
-          { cost: "4 sucessos", name: "Proeza", req: 3, desc: "3+ Ponto de Assimilação: Gasta dois Ponto de Determinação para substituir o nível no Instinto selecionado para o teste pelo seu Ponto de Determinação para definir a pilha de dados rolados." },
-          { cost: "5 sucessos", name: "Sinergia", req: 5, desc: "5+ Ponto de Assimilação: Consegue pagar custos de Ponto de Determinação utilizados por aliados." },
-          { cost: "6 sucessos", name: "Poder Inesgotável", req: 7, desc: "7+ Ponto de Assimilação: Não gasta Ponto de Determinação para as próprias ativações." }
+          { cost: "1 sucesso", name: "Primal", desc: "O primeiro Ponto de Assimilação utilizado pelo(a) Infectado(a) em cada cena de Conflito é gratuito." },
+          { cost: "2 sucessos", name: "Supressor", desc: "Gaste um Ponto de Assimilação para anular Pressão no resultado de qualquer teste do(a) Infectado(a) em Conflito." },
+          { cost: "3 sucessos", name: "Subjugar", desc: "Em cenas de Conflito, quando investe pontos em Neutralizar Ameaça, se o(a) Infectado(a) tem maior Nível de Assimilação que o alvo, aumente em dois Sucessos o resultado." },
+          { cost: "4 sucessos", name: "Proeza", req: 3, desc: "3+ Nível de Assimilação: Gasta dois Pontos de Assimilação para substituir o nível no Instinto selecionado para o teste pelo seu Nível de Assimilação para definir a pilha de dados rolados." },
+          { cost: "5 sucessos", name: "Sinergia", req: 5, desc: "5+ Nível de Assimilação: Consegue pagar custos de Ponto de Assimilação utilizados por aliados." },
+          { cost: "6 sucessos", name: "Poder Inesgotável", req: 7, desc: "7+ Nível de Assimilação: Não gasta Ponto de Assimilação para as próprias ativações, incluindo para Agir por Instinto." }
         ]
       }
     ]
@@ -172,157 +185,170 @@ export const ASSIMILACOES = {
       {
         carta: "Ás de Ouros",
         nome: "Assimilação Anatômica",
+        descricao: "O(a) Infectado(a) sofre transformações físicas profundas, moldando seu corpo para combate e deslocamento, porém distorce a alimentação e a motricidade fina.",
         mutações: [
-          { cost: "1 adptação", name: "Presas Aumentadas", desc: "Gasta um Ponto de Determinação para usar a característica Letal ao morder. Depois de ingerir carne crua, ignora o custo pelas próximas 4 horas." },
-          { cost: "2 adptações", name: "Nadadeiras", desc: "Gasta Ponto de Assimilação para se deslocar debaixo d'água na velocidade normal. Perde um nível em Furtividade (mínimo 0)." },
+          { cost: "1 adptação", name: "Presas Aumentadas", desc: "Gasta um Ponto de Determinação para usar a característica Letal (pág. 98) ao morder. Depois de ingerir carne crua, ignora o custo pelas próximas 4 horas." },
+          { cost: "2 adptações", name: "Nadadeiras", desc: "Gasta um Ponto de Assimilação para se deslocar debaixo d´água na velocidade normal. Perde um nível em Furtividade (mínimo 0)." },
           { cost: "3 adptações", name: "Guelras", desc: "Guelras funcionais se formam nas laterais do pescoço, permitindo respirar debaixo d’água, porém consome o dobro de água." },
-          { cost: "4 adptações", name: "Braços Alongados", req: 3, desc: "3+ Ponto de Assimilação: Os braços se alongam. Quando investe em Neutralizar Ameaça, o alvo perde PRESSÃO no turno seguinte. Perde um nível em Manufaturas (mínimo 0)." },
-          { cost: "5 adptações", name: "Poder de carga", req: 5, desc: "5+ Ponto de Assimilação: Permite carregar o triplo da carga normal e dobra os pontos investidos em Neutralização de Ameaça. Perde permanentemente todos os níveis em Manufaturas." },
-          { cost: "6 adptações", name: "Alado", req: 7, desc: "7+ Ponto de Assimilação: Asas de queratina permitem voo pleno. Ações de Fuga recebem 2 SUCESSOS adicionais. Impede o uso de coletes, mochilas ou vestimentas nos ombros/tórax." }
+          { cost: "4 adptações", name: "Braços Alongados", req: 3, desc: "3+ Nível de Assimilação: Os braços do(a) Infectado(a) se alongam, aumentando seu alcance. Quando investe pontos em Neutralizar Ameaça, o alvo perde Pressão no resultado do turno seguinte. Perde um nível em Manufaturas (mínimo 0)." },
+          { cost: "5 adptações", name: "Poder de Carga", req: 5, desc: "5+ Nível de Assimilação: O tronco e os membros permitem carregar o triplo da carga normal e dobra os pontos investidos em Neutralização de Ameaça. Perde permanentemente todos os níveis em Manufaturas." },
+          { cost: "6 adptações", name: "Alado", req: 7, desc: "7+ Nível de Assimilação: Desenvolve asas de queratina orgânica capazes de voo pleno. Ações de Fuga recebem dois Sucessos adicionais. A estrutura das asas impede o uso de coletes, mochilas ou vestimentas que cubram os ombros ou o tórax." }
         ]
       },
       {
         carta: "2 de Ouros",
         nome: "Assimilação Cutânea",
+        descricao: "A pele do(a) Infectado(a) ganha novas capacidades, auxiliando ao mesmo tempo que dificulta sua interação com o ambiente.",
         mutações: [
-          { cost: "1 adptação", name: "Pele Aderente", desc: "Transpira substâncias adesivas. Pode se mover por paredes/tetos sem testes de Atletismo. Resultados em testes de Fuga correndo são reduzidos em um SUCESSO." },
-          { cost: "2 adptações", name: "Pele Ajustável", desc: "Mantenha um dado a mais em Furtividade em baixa luz. Sofre penalidade de um SUCESSO em testes de Expressão sob luz direta." },
-          { cost: "3 adptações", name: "Sentir Vibrações", desc: "Epiderme altamente sensível. Adicione +1 SUCESSO em testes de Percepção tátil. Estímulos inesperados reduzem em um SUCESSO testes de Reação." },
-          { cost: "4 adptações", name: "Cheiro Nocivo", req: 3, desc: "3+ Ponto de Assimilação: Libera compostos que geram +1 PRESSÃO a seres vivos pelo restante da cena. Provoca redução de um SUCESSO em testes sociais do Infectado por 2 cenas." },
-          { cost: "5 adptações", name: "Mudar Corpo", req: 5, desc: "5+ Ponto de Assimilação: Gaste Ponto de Assimilação para adicionar 2 SUCESSOS em um teste de Furtividade, disfarce ou atuação. Roupas no tronco anulam o efeito." },
-          { cost: "6 adptações", name: "Sentir o Ar", req: 7, desc: "7+ Ponto de Assimilação: Detecta sinais elétricos, calor e vibrações em raio de 3km. A pele queima sob sol direto, levando à perda de 3 pontos de vida por hora." }
+          { cost: "1 adptação", name: "Pele Aderente", desc: "A pele do(a) Infectado(a) passa a transpirar com substâncias adesivas e mutáveis. Pode aderir a superfícies verticais e se mover por paredes ou tetos sem testes que incluam Atletismo. Contudo, resultados em testes de Fuga correndo são reduzidos em um Sucesso." },
+          { cost: "2 adptações", name: "Pele Ajustável", desc: "A pele se ajusta à iluminação do ambiente, tornando o(a) Infectado(a) mais difícil de perceber em áreas escuras ou em sombras. Mantenha um dado a mais em testes que incluam Furtividade em baixa luz. Sofre penalidade de um Sucesso em testes que incluam Expressão sob luz direta." },
+          { cost: "3 adptações", name: "Sentir Vibrações", desc: "A epiderme se torna altamente sensível, permitindo detectar vibrações e pressões em superfícies. Adicione Sucesso em testes que incluam Percepção tátil. Estímulos inesperados causam reações abruptas, reduzindo em um Sucesso testes que incluam Reação." },
+          { cost: "4 adptações", name: "Cheiro Nocivo", req: 3, desc: "3+ Nível de Assimilação: Pelo custo de um Ponto de Assimilação, a pele do(a) Infectado(a) libera compostos químicos que geram uma Pressão a seres vivos pelo restante da cena, aumentando em Pressão o custo de ativações ou anulando Sucesso em testes, conforme o caso. O odor liberado provoca uma redução de um Sucesso em testes sociais do(a) Infectado(a) e do atacante afetado por 2 cenas, contando a cena em que foi usado." },
+          { cost: "5 adptações", name: "Mudar Corpo", req: 5, desc: "5+ Nível de Assimilação: O(a) Infectado(a) pode controlar pequenas alterações de cor, calor ou textura em sua pele. Gaste um Ponto de Assimilação para adicionar dois Sucessos em um teste que inclua Furtividade, disfarce ou atuação corporal por cena. Roupas que cobrem o tronco anulam o efeito." },
+          { cost: "6 adptações", name: "Sentir o Ar", req: 7, desc: "7+ Nível de Assimilação: A pele se torna um sistema de absorção sensorial completo. O(a) Infectado(a) detecta sinais elétricos, variações de temperatura e vibrações em um raio de 3 quilômetros. Pode ignorar testes que incluam Percepção em situações em que a informação seja tátil, auditiva ou sísmica. A pele queima sob sol direto, levando à perda de três Pontos de Saúde por hora exposta sem proteção." }
         ]
       },
       {
         carta: "3 de Ouros",
         nome: "Assimilação Camaleônica",
+        descricao: "O(a) Infectado(a) desenvolve camuflagem natural, se ajusta ao ambiente e aos outros, mas adquire sensibilidades e tem algumas percepções afetadas.",
         mutações: [
-          { cost: "1 adptação", name: "Camaleônico", desc: "Pigmentação se funde ao ambiente. Adicione um SUCESSO em Furtividade ao se manter imóvel. Perde um Ponto de Determinação se sofrer queimadura de sol." },
-          { cost: "2 adptações", name: "Mudar o Rosto", desc: "Altera parcialmente o formato do rosto. Mantém 1 dado adicional em testes de disfarce. Sofre -1 SUCESSO em Percepção auditiva." },
-          { cost: "1 sucesso e 2 adptações", name: "Camuflagem", desc: "Reage reflexivamente a padrões visuais para se ocultar. Os dados de Furtividade são substituídos por 2." },
-          { cost: "2 adptações e 2 pressões", name: "Visão Periférica", req: 3, desc: "3+ Ponto de Assimilação: Olhos saltam aumentando visão. +1 em Percepção (pode ultrapassar o limite). Sofre penalidade de 1 ADAPTAÇÃO em testes de pontaria." },
-          { cost: "2 adptações e 1 pressão", name: "Malemolência", req: 5, desc: "5+ Ponto de Assimilação: Adiciona 2 SUCESSOS em interações sociais. Se tentar esconder informações, sofre penalidade de PRESSÃO adicional." },
-          { cost: "2 sucessos e 4 adptações", name: "Invisibilidade", req: 7, desc: "7+ Ponto de Assimilação: Gasta Ponto de Assimilação para ficar completamente invisível pelo restante da cena. Não pode voltar a ficar visível antes do fim da cena." }
+          { cost: "1 adptação", name: "Camaleônico", desc: "A pigmentação da pele do(a) Infectado(a) pode se fundir ao ambiente. Adicione Sucesso em testes que incluam Furtividade ao se manter imóvel. Perde um Ponto de Determinação sempre que sofre queimaduras de sol, mesmo que suaves." },
+          { cost: "2 adptações", name: "Mudar o Rosto", desc: "O(a) Infectado(a) pode tensionar músculos e deslocar cartilagens menores para alterar parcialmente o formato do rosto. Mantém 1 dado adicional em testes para se disfarçar. Contudo, sofre penalidade de um Sucesso em testes que incluam Percepção quando o sentido testado for audição." },
+          { cost: "1 sucesso e 2 adptações", name: "Camuflagem", desc: "O corpo do(a) Infectado(a) passa a reagir reflexivamente a padrões visuais externos para se ocultar. Os dados de Furtividade são substituídos por d10." },
+          { cost: "2 adptações e 2 pressões", name: "Visão Periférica", req: 3, desc: "3+ Nível de Assimilação: Os olhos do(a) Infectado(a) saltam levemente para fora das órbitas aumentando a visão periférica e podem se virar em direções distintas. Recebe um ponto em Percepção que pode ultrapassar o limite máximo e reduz a visão de profundidade, sofrendo uma penalidade de Adaptação em testes de pontaria que incluam Atletismo ou Armas." },
+          { cost: "4 adptações e 1 pressão", name: "Malemolência", req: 5, desc: "5+ Nível de Assimilação: O corpo do(a) Infectado(a) passa a reagir a alterações emocionais, adaptando sua aparência inconscientemente ao seu humor no momento. O(a) Infectado(a) adiciona dois Sucessos em interações sociais, exceto quando está tentando esconder informações, situação em que sofre penalidade de Pressão adicional." },
+          { cost: "2 sucessos e 4 adptações", name: "Invisibilidade", req: 7, desc: "7+ Nível de Assimilação: O(a) Infectado(a) consegue gastar um Ponto de Assimilação para ficar completamente invisível pelo restante da cena. O(a) Infectado(a) não pode voltar a ficar visível antes disso mesmo que deseje." }
         ]
       },
       {
         carta: "4 de Ouros",
         nome: "Assimilação Escamosa",
+        descricao: "Escamas cobrem o corpo do(a) Infectado(a), fortalecendo sua resistência mas atrapalhando a maneira que reage aos seus arredores.",
         mutações: [
-          { cost: "1 adptação", name: "Escamoso", desc: "Reduz em 1 o dano cortante sofrido. Perde um SUCESSO em testes de Expressão com pessoas não Assimiladas que desconhecem mutações." },
-          { cost: "2 adptações", name: "Escalador", desc: "Anda/escala superfícies ásperas mantendo um dado adicional em Atletismo. Perde um SUCESSO em Furtividade em ambientes urbanos." },
-          { cost: "2 adptações e 1 pressão", name: "Escorregadio", desc: "Mantém um dado adicional para manter estabilidade. Troca de pele mensalmente, sofrendo dano dobrado por 24 horas após a troca." },
-          { cost: "3 adptações e 1 pressão", name: "Escamas Reativas", req: 3, desc: "3+ Ponto de Assimilação: Escamas retaliam ao toque, causando 1 de dano a agressores ou adiciona um SUCESSO para Neutralizar Ameaça. Adiciona +1 PRESSÃO a contatos táteis de afeto." },
-          { cost: "1 sucesso e 4 adptações", name: "Evasão Natural", req: 5, desc: "5+ Ponto de Assimilação: Se alvejado, causa duas PRESSÕES ao atacante, aumentando em duas PRESSÕES o custo de suas ativações ou anulando 2 SUCESSOS." },
-          { cost: "2 sucessos e 4 adptações", name: "Imunidade ao Calor", req: 7, desc: "7+ Ponto de Assimilação: Imune a dano térmico, mas se torna reluzente sob luz artificial, sofrendo penalidade de 2 SUCESSOS em Furtividade." }
+          { cost: "1 adptação", name: "Escamoso", desc: "Escamas reduzem em um o dano cortante sofrido. Perde Sucesso em testes que incluam Expressão com pessoas não Assimiladas que desconhecem Assimilações." },
+          { cost: "2 adptações", name: "Escalador", desc: "Escamas surgem nas mãos e pés. Anda ou escala superfícies ásperas, mantendo um dado adicional em testes que incluam Atletismo. Perde Sucesso em testes de Furtividade em ambientes urbanos." },
+          { cost: "2 adptações e 1 pressão", name: "Escorregadio", desc: "As escamas se deslocam e se adaptam melhorando a locomoção em superfícies instáveis ou escorregadias. Ao tentar manter estabilidade mantém um dado adicional. Troca de pele a cada mês, sofrendo dano dobrado por 24 horas após a troca." },
+          { cost: "3 adptações e 1 pressão", name: "Escamas Reativas", req: 3, desc: "3+ Nível de Assimilação: As escamas se endurecem e podem retaliar ao toque, causando 1 de dano em quem o atacar ou adiciona Sucesso para Neutralização da Ameaça, conforme o caso. O toque se torna áspero, adicionando Pressão a manifestações táteis de afeto." },
+          { cost: "1 sucesso e 4 adptações", name: "Evasão Natural", req: 5, desc: "5+ Nível de Assimilação: O corpo se adapta para reagir a ataques e deslocamento. Se alvejado, o(a) Infectado(a) causa duas Pressões ao atacante, aumentando em duas Pressões o custo de suas ativações ou anulando dois Sucessos do resultado, conforme o caso." },
+          { cost: "2 sucessos e 4 adptações", name: "Imunidade ao Calor", req: 7, desc: "7+ Nível de Assimilação: As escamas se aprimoram e são capazes de absorver calor ou luminosidade. O(a) Infectado(a) é imune a qualquer dano térmico (fogo, calor, abrasão...), mas se torna reluzente sob iluminação artificial, sofre uma penalidade de dois Sucessos em testes de Furtividade nesse contexto." }
         ]
       },
       {
         carta: "5 de Ouros",
         nome: "Assimilação Óssea",
+        descricao: "Mutações no sistema ósseo do(a) Infectado(a), alterando sua estrutura e composição para exceder os limites do ser humano comum, porém a peculiaridade de sua anatomia traz novos desafios.",
         mutações: [
-          { cost: "1 adptação", name: "Ossos Reativos", desc: "Espículos ósseos brotam da pele. Causa 1 de dano a agressores corpo a corpo. Penalidade de um SUCESSO em Expressão se expostos." },
-          { cost: "2 adptações", name: "Maleabilidade", desc: "Articulações hipermóveis. Mantenha um dado adicional em Furtividade. Penalidade de um SUCESSO em Atletismo de postura/equilíbrio." },
-          { cost: "1 sucesso e 2 adptações", name: "Lâminas Ósseas", desc: "Lâminas nos antebraços/joelhos. Adiciona um SUCESSO a ataques corpo a corpo. Adiciona PRESSÃO a testes de Medicina/Biologia em si mesmo." },
-          { cost: "3 adptações e 1 pressão", name: "Presas de Mamute", req: 3, desc: "3+ Ponto de Assimilação: Em Conflito, adiciona +1 SUCESSO e reduz 1 ADAPTAÇÃO no resultado de testes para Neutralizar Ameaça." },
-          { cost: "2 sucessos e 3 adptações", name: "Exoesqueleto", req: 5, desc: "5+ Ponto de Assimilação: Por 3 Pontos de Determinação, projeta ossos como armadura até o fim da cena, ignorando dano cortante/perfurante (incluindo balas de médio calibre). Fica sem falar." },
-          { cost: "2 sucessos e 4 adptações", name: "Gigante", req: 7, desc: "7+ Ponto de Assimilação: Por 4 Pontos de Determinação, dobra de tamanho. Testes físicos mantêm 2 dados adicionais, mas adiciona +1 PRESSÃO em Furtividade e Percepção." }
+          { cost: "1 adptação", name: "Ossos Reativos", desc: "Espículos ósseos brotam da pele. Sempre que sofre dano de um golpe corpo a corpo, causa um ponto de dano ao agressor. Contudo, sofre uma penalidade de Sucesso em testes que incluam Expressão com as protuberâncias expostas." },
+          { cost: "2 adptações", name: "Maleabilidade", desc: "As articulações do(a) Infectado(a) se tornam hipermóveis, capazes de se dobrarem em ângulos incomuns. Mantenha um dado adicional em testes que incluam Furtividade. Contudo, sofre penalidade de Sucesso em testes que incluam Atletismo que envolvam postura ou equilíbrio." },
+          { cost: "1 sucesso e 2 adptações", name: "Lâminas Ósseas", desc: "O corpo projeta lâminas ósseas nos antebraços ou joelhos. Adiciona Sucesso em testes de ataque corpo a corpo com Armas ou Atletismo. Contudo, adiciona Pressão ao resultado de testes com Medicina ou Biologia usados no corpo do(a) Infectado(a)." },
+          { cost: "3 adptações e 1 pressão", name: "Presas de Mamute", req: 3, desc: "3+ Nível de Assimilação: O(a) Infectado(a) cria presas de mamute. Em Conflito adiciona Sucesso e reduz uma Adaptação no resultado de testes para Neutralizar Ameaça." },
+          { cost: "2 sucessos e 3 adptações", name: "Exoesqueleto", req: 5, desc: "5+ Nível de Assimilação: Por três Pontos de Assimilação o(a) Infectado(a) pode, até o final da cena, estender e projetar seus ossos para fora do corpo, fazendo a função de exoesqueleto. Fontes de dano cortante ou perfurante (incluindo balas de armas de fogo de até médio calibre) são ignoradas nesse tempo, período em que o(a) Infectado(a) não pode mover sua mandíbula, impossibilitado de falar." },
+          { cost: "2 sucessos e 4 adptações", name: "Gigante", req: 7, desc: "7+ Nível de Assimilação: Por quatro Pontos de Assimilação, o(a) Infectado(a) pode dobrar de tamanho, ganhando força e agilidade sobre-humanas até o fim da cena. Todas os testes físicos do(a) Infectado(a) mantém dois dados adicionais, mas adiciona Pressão a todos os testes com Furtividade e/ou Percepção durante o efeito." }
         ]
       },
       {
         carta: "6 de Ouros",
         nome: "Assimilação Gastrointestinal",
+        descricao: "O sistema digestivo do(a) Infectado(a) pode consumir ampla variedade de nutrientes, mas exclui a dieta humana, o prazer na alimentação e pode gerar desconfortos.",
         mutações: [
-          { cost: "1 adptação", name: "Saliva Ácida", desc: "Consome qualquer matéria orgânica. Odor de ácidos gera penalidade de 1 ADAPTAÇÃO em testes de Influência." },
-          { cost: "2 adptações", name: "Ruminante", desc: "Estômago segmentado permite armazenar comida por uma semana, mas precisa ruminar após cada refeição." },
-          { cost: "3 adptações", name: "Estômago Restaurador", desc: "Regenera um ponto de vida por refeição completa, mas não come comida processada." },
-          { cost: "4 adptações", name: "Jato Ácido", req: 3, desc: "3+ Ponto de Assimilação: Gasta um Ponto de Determinação e um SUCESSO para expelir ácido, impondo 1 PRESSÃO ao alvo (aumenta custos em PRESSÃO ou reduz resultados). Saliva ácida queima ao toque." },
-          { cost: "5 adptações", name: "Imunidade à Intoxicação", req: 5, desc: "5+ Ponto de Assimilação: Não sofre intoxicação ou envenenamento, mas refeições não restauram Determinação." },
-          { cost: "6 adptações", name: "Glutão", req: 7, desc: "7+ Ponto de Assimilação: Come qualquer coisa mastigável. Ficar um dia sem comer causa desconforto e perda de 1 Ponto de Determinação por hora." }
+          { cost: "1 adptação", name: "Saliva Ácida", desc: "O sistema digestivo do(a) Infectado(a) pode consumir qualquer matéria orgânica. O odor de seus ácidos estomacais causa desconforto, gerando uma penalidade de Adaptação em testes que incluam Influência." },
+          { cost: "2 adptações", name: "Ruminante", desc: "Estômago segmentado permite ao(à) Infectado(a) armazenar alimento para até uma semana, mas precisa ruminar após cada refeição." },
+          { cost: "3 adptações", name: "Estômago Restaurador", desc: "Regenera um Ponto de Saúde por refeição completa, mas não consegue comer comida processada." },
+          { cost: "4 adptações", name: "Jato Ácido", req: 3, desc: "3+ Nível de Assimilação: O(a) Infectado(a) pode gastar um Ponto de Assimilação e um Sucesso de seu resultado em Ação para expelir ácido digestivo em um alvo, causando uma Pressão, aumentando em Pressão o custo de suas ativações ou reduzindo em Sucesso os resultados obtidos em testes, conforme o caso. Este efeito dura uma rodada por Nível de Assimilação do(a) Infectado(a). A saliva do(a) Infectado(a) é ácida e causa queimaduras, mesmo quando não há intenção." },
+          { cost: "5 adptações", name: "Imunidade à Intoxicação", req: 5, desc: "5+ Nível de Assimilação: O(a) Infectado(a) não sofre nenhum tipo de intoxicação ou envenenamento, porém não sente prazer em refeições, mesmo que especiais – o(a) Infectado(a) não Restaura Determinação comendo algo raro ou que goste muito, como para outros personagens." },
+          { cost: "6 adptações", name: "Glutão", req: 7, desc: "7+ Nível de Assimilação: O(a) Infectado(a) pode se alimentar de qualquer coisa que consiga mastigar e engolir. Se ficar um dia inteiro sem comer sofre grave desconforto estomacal e perde um Ponto de Determinação por hora." }
         ]
       },
       {
         carta: "7 de Ouros",
         nome: "Assimilação Respiratória",
+        descricao: "Aprimora o controle respiratório permitindo que o(a) Infectado(a) sobreviva em ambientes hostis, mas perturba a comunicação e amplifica reações sensoriais.",
         mutações: [
-          { cost: "1 adptação", name: "Pulmão Grosso", desc: "Respira fumaça/detritos sem penalidades. Adiciona +1 PRESSÃO em Furtividade por respiração ruidosa." },
-          { cost: "1 sucesso e 1 adptação", name: "Fôlego Estendido", desc: "Prende a respiração por 5 minutos. Odores fortes causam perda de 1 Ponto de Determinação." },
-          { cost: "2 adptações e 1 pressão", name: "Sopro Poderoso", desc: "Gasta Ponto de Assimilação para expirar forte, empurrando Ameaças e dando +2 SUCESSOS para Fuga. Fala estrondosa reduz 1 ADAPTAÇÃO em testes sociais com Furtividade." },
-          { cost: "4 adptações", name: "Fôlego Inumano", req: 3, desc: "3+ Ponto de Assimilação: Com inspiração profunda, pode Agir por Instinto sem custo de Assimilação. Sofre penalidade de um dado mantido em Conhecimentos." },
-          { cost: "5 adptações", name: "Fôlego Reparador", req: 5, desc: "5+ Ponto de Assimilação: Ao perder Determinação, pode perder um Ponto de Assimilação no lugar (apenas para perdas, não usos ativos)." },
-          { cost: "2 sucessos e 4 adptações", name: "Fôlego Infinito", req: 7, desc: "7+ Ponto de Assimilação: Sobrevive sem ar indefinidamente. Dobra o efeito de venenos ou intoxicação por vias aéreas." }
+          { cost: "1 adptação", name: "Pulmão Grosso", desc: "Respira ar rarefeito, fumaça ou detritos sem penalidades, mas adiciona Pressão em testes que incluam Furtividade, pois sua respiração é ruidosa." },
+          { cost: "1 sucesso e 1 adptação", name: "Fôlego Estendido", desc: "Prende a respiração por até 5 minutos sem realizar testes. Odores fortes ou ataques ao olfato resultam em perda de um Ponto de Determinação." },
+          { cost: "2 adptações e 1 pressão", name: "Sopro Poderoso", desc: "Gasta um Ponto de Assimilação para expirar com grande pressão torácica. Empurra três metros ou cobre de poeira uma Ameaça, mesmo sem causar dano, adicionando dois Sucessos para Fuga no Conflito. Sempre fala de forma estrondosa, reduz Adaptação de seus testes sociais com Furtividade que envolvam a voz, como sussurrar ou falar discretamente." },
+          { cost: "4 adptações", name: "Fôlego Inumano", req: 3, desc: "3+ Nível de Assimilação: Com uma inspiração profunda aumenta sua tolerância ao estresse físico. Pode Agir por Instinto sem custo de Assimilação. Sofre penalidade de um dado mantido em testes que envolvam Conhecimentos até o final da cena." },
+          { cost: "5 adptações", name: "Fôlego Reparador", req: 5, desc: "5+ Nível de Assimilação: O controle respiratório restaura o equilíbrio psicológico. Ao perder Ponto de Determinação pode perder Ponto de Assimilação no lugar – se aplica apenas para perda, não para usos ativos de Determinação." },
+          { cost: "2 sucessos e 4 adptações", name: "Fôlego Infinito", req: 7, desc: "7+ Nível de Assimilação: Pulmões do(a) Infectado(a) evoluem. O(a) Infectado(a) sobrevive sem ar por tempo indefinido. Dobra qualquer efeito de veneno ou intoxicação por vias aéreas." }
         ]
       },
       {
         carta: "8 de Ouros",
         nome: "Assimilação Termorreguladora",
+        descricao: "O corpo do(a) Infectado(a) regula calor com precisão letal, alterando o ambiente ao redor, mas exige cautela com toques, desgastes e equilíbrio térmico.",
         mutações: [
-          { cost: "1 adptação", name: "Resistência Térmica", desc: "Imune a frio/calor moderados. Sudorese ácida constante. Contato físico faz aliados adicionarem +1 PRESSÃO a testes até o fim da cena." },
-          { cost: "2 adptações", name: "Conduzir Calor", desc: "Absorve calor, impedindo hipotermia de aliados. Regeneração de vida reduzida pela metade sem fontes de calor." },
-          { cost: "1 sucesso e 2 adptações", name: "Gerar Calor", desc: "Gasta Ponto de Assimilação para aumentar temperatura, penalizando presentes em um SUCESSO em Resolução/Potência ou adiciona PRESSÃO a Ativações de Ameaça." },
-          { cost: "1 sucesso e 3 adptações", name: "Sangue Quente", req: 3, desc: "3+ Ponto de Assimilação: Gasta Ponto de Assimilação para manter 2 dados adicionais em Reação, mas perde um Ponto de Determinação em ações físicas na cena." },
-          { cost: "1 sucesso e 4 adptações", name: "Exala Vapor", req: 5, desc: "5+ Ponto de Assimilação: Emite vapor, ofuscando visão (ataques na área sofrem duas PRESSÕES, aumentando custos em 2 PRESSÕES ou perdendo 2 SUCESSOS)." },
-          { cost: "6 adptações", name: "Esquentar/Esfriar Região", req: 7, desc: "7+ Ponto de Assimilação: Gastando todos os e, altera temperatura de uma região em 3°C por ponto investido." }
+          { cost: "1 adptação", name: "Resistência Térmica", desc: "Temperatura corporal controlada. Frio ou calor moderados não o afetam, mas sua sudorese é constante e ácida, provocando irritação em quem o toca. Contato físico prolongado com outra personagem (ex: imobilizações, transporte ou socorro) o faz adicionar Pressão em todo teste até o fim da cena (não cumulativo)." },
+          { cost: "2 adptações", name: "Conduzir Calor", desc: "O(a) Infectado(a) absorve parte do calor do ambiente. Aquece objetos ou pessoas ao toque, impede hipotermia de personagens ou reduz a temperatura de alimentos. Sua Regeneração de Pontos de Saúde é reduzida pela metade sem fontes de calor para absorver." },
+          { cost: "1 sucesso e 2 adptações", name: "Gerar Calor", desc: "Libera pulsos de calor. Gastar um Ponto de Assimilação aumenta a temperatura ambiente, penalizando em Sucesso por fatiga todos os presentes na cena nos testes que incluam Resolução ou Potência. Ou aumentam em Pressão o custo das Ativações de Ameaça." },
+          { cost: "1 sucesso e 3 adptações", name: "Sangue Quente", req: 3, desc: "3+ Nível de Assimilação: O sangue aquece e acelera a circulação, melhorando reflexos. Gastar um Ponto de Assimilação permite manter dois dados adicionais em testes que incluam Reação. Isso sobrecarrega o corpo fazendo-o perder um Ponto de Determinação em ações físicas até o fim da cena." },
+          { cost: "1 sucesso e 4 adptações", name: "Exala Vapor", req: 5, desc: "5+ Nível de Assimilação: O(a) Infectado(a) emite vapor constante, ofuscando a visão dos adversários. Ataques de longo alcance que mirem alvos na área sofrem duas Pressões, aumentando em duas Pressões o custo de ativações ou perdendo dois Sucessos dos resultados, conforme o caso. Ataques de longo alcance a partir da área afetada também sofrem duas Pressões." },
+          { cost: "6 adptações", name: "Esquentar/Esfriar Região", req: 7, desc: "7+ Nível de Assimilação: O controle e conversão de temperatura atingem seu ápice. Gastando todos os Pontos de Assimilação, pode-se alterar a temperatura de toda uma Região. Cada Ponto de Assimilação investido dessa maneira altera a temperatura em 3 graus Celsius (3°C) para mais ou para menos." }
         ]
       },
       {
         carta: "9 de Ouros",
         nome: "Assimilação Neural",
+        descricao: "O(a) Infectado(a) gera sinapses hiperativas que decifram padrões e ameaças com precisão inumana, à custa do descanso, do afeto e da criatividade espontânea.",
         mutações: [
-          { cost: "1 adptação", name: "Pulso Mental", desc: "Gasta Ponto de Assimilação para repetir teste de Conhecimentos. Sobrecarga causa insônia: só restaura Determinação em ambiente totalmente isolado." },
-          { cost: "2 adptações", name: "Prever Dano", desc: "Reduz dano sofrido em 1 ponto em ataques repetidos. Perde um Ponto de Determinação se estímulos visuais/sonoros simultâneos ocorrerem." },
-          { cost: "1 sucesso e 2 adptações", name: "Prever Ameaça", desc: "Gasta Ponto de Assimilação em Reação/Sagacidade para agir antes da Ameaça; SUCESSOS/Adaptações anulam PRESSÕES/resultados da Ameaça." },
-          { cost: "4 adptações", name: "Sintonia Mental", req: 3, desc: "3+ Ponto de Assimilação: Gasta Ponto de Assimilação para dar ADAPTAÇÃO a aliado fora de Conflito. Gera penalidade de 1 PRESSÃO em Influência/Expressão do Infectado." },
-          { cost: "1 sucesso e 4 adptações", name: "Visão Mental", req: 5, desc: "5+ Ponto de Assimilação: Ao obter 2 SUCESSOS em Conhecimento, ganha informação vital sobre o tema. Recebe +1 PRESSÃO adicional em rolagens criativas/improvisadas." },
-          { cost: "2 sucessos e 4 adptações", name: "Visão Verdadeira", req: 7, desc: "7+ Ponto de Assimilação: Pede informação oculta ao Assimilador sem testes, gastando Pontos de Assimilação. Precisão aumenta com e gasto." }
+          { cost: "1 adptação", name: "Pulso Mental", desc: "A resposta cognitiva do(a) Infectado(a) se aprimora. Ao gastar um Ponto de Assimilação pode repetir um teste que inclua Conhecimentos, mantendo o segundo resultado. Contudo, a sobrecarga sensorial causa insônia — sua Recuperação não Restaura Determinação se não estiver em ambiente isolado, silencioso e escuro por um descanso de ao menos 6 horas." },
+          { cost: "2 adptações", name: "Prever Dano", desc: "Reflexos involuntários que o fazem prever padrões repetitivos. Ao ser alvejado por um segundo efeito danoso, reduz o dano sofrido em um ponto. Perde um Ponto de Determinação se estímulos visuais ou sonoros simultâneos estão em cena." },
+          { cost: "1 sucesso e 2 adptações", name: "Prever Ameaça", desc: "O cérebro está tão acelerado que antecipa e atrapalha uma Ameaça durante o Conflito. Em seu turno, gaste um Ponto de Assimilação e escolha Reação ou Sagacidade como o Instinto da rolagem. Role seu teste e reserve os resultados: cada Sucesso pode anular Pressão e cada Adaptação pode anular outra no resultado da Ameaça. Sua Ação se resolve antes da Ameaça com os pontos restantes, se houver." },
+          { cost: "4 adptações", name: "Sintonia Mental", req: 3, desc: "3+ Nível de Assimilação: Prevê possíveis falhas em Ações de outros Infectados. Gastar um Ponto de Assimilação adiciona Adaptação ao resultado do teste de um aliado fora de Conflito dando-lhe conselhos. As previsões tornam a convivência difícil, gerando penalidade de Pressão nos testes que incluam Influência ou Expressão." },
+          { cost: "1 sucesso e 4 adptações", name: "Visão Mental", req: 5, desc: "5+ Nível de Assimilação: Ao obter dois Sucessos ou mais em um teste de Conhecimento, permite adquirir uma informação vital sobre o tema em questão. Essa informação é confiável e válida por toda a campanha. A lógica reduz a plasticidade dos pensamentos — recebe Pressão adicional em rolagens criativas ou improvisadas." },
+          { cost: "2 sucessos e 4 adptações", name: "Visão Verdadeira", req: 7, desc: "7+ Nível de Assimilação: O cérebro alcança hiperconectividade dando acesso a informações do ambiente e dos próprios instintos. Permite pedir uma informação oculta ao(à) Assimilador(a) por cena gastando Pontos de Assimilação e não precisa de testes. Profundidade, precisão e relevância da informação da Aventura aumentam a cada ponto gasto." }
         ]
       },
       {
         carta: "10 de Ouros",
         nome: "Assimilação Cardiovascular",
+        descricao: "O(a) Infectado(a) consegue controlar seu coração ao extremo, melhorando sua resposta a crises, porém pode passar por instabilidades ao longo do dia.",
         mutações: [
-          { cost: "1 adptação", name: "Sangue Frio", desc: "Imune a penalidades por tensão, medo ou risco. Penalidade de ADAPTAÇÃO em testes de Manufaturas pela sensibilidade reduzida." },
-          { cost: "2 adptações", name: "Transe", desc: "Restaura o dobro de Determinação em Recuperações se estiver com vida completa." },
-          { cost: "1 sucesso e 2 adptações", name: "Sangue Furioso", desc: "Gasta Ponto de Assimilação para manter 2 dados adicionais em Potência/Atletismo, mas perde 1 ponto de vida no fim da rodada." },
-          { cost: "4 adptações", name: "Fingir Morte", req: 3, desc: "3+ Ponto de Assimilação: Quase para o coração por 5 minutos. Dieta pobre em ferro piora penalidades de vida como se fosse um nível inferior." },
-          { cost: "4 adptações e 1 pressão", name: "Sangue Regenerativo", req: 5, desc: "5+ Ponto de Assimilação: Gasta um Ponto de Determinação para manter dado adicional e regenerar um ponto de vida. Não pode anular PRESSÕES nesse teste." },
-          { cost: "2 sucessos e 4 adptações", name: "Sangue Potente", req: 7, desc: "7+ Ponto de Assimilação: Gasta todos os e para manter um dado adicional por ponto gasto em ações físicas pelo restante da cena." }
+          { cost: "1 adptação", name: "Sangue Frio", desc: "A circulação se adapta a situações de risco extremo. Não sofre penalidades em situações de tensão, medo ou risco. Sofre penalidade de Adaptação em testes que incluam Manufaturas pela sensibilidade reduzida." },
+          { cost: "2 adptações", name: "Transe", desc: "A circulação controlada permite Restaurar o dobro da quantidade normal de Pontos de Determinação em toda Recuperação em que o(a) Infectado(a) tiver sua Saúde completa." },
+          { cost: "1 sucesso e 2 adptações", name: "Sangue Furioso", desc: "O sangue retece os músculos com força explosiva. Gaste um Ponto de Assimilação para manter dois dados adicionais em testes que incluam Potência ou Atletismo. Perde um Ponto de Saúde no fim da rodada." },
+          { cost: "4 adptações", name: "Fingir Morte", req: 3, desc: "3+ Nível de Assimilação: Reduz o fluxo sanguíneo quase parando o coração por até 5 minutos. Uma dieta pobre em ferro considera as penalidades de Nível de Saúde como um Nível inferior." },
+          { cost: "4 adptações e 1 pressão", name: "Sangue Regenerativo", req: 5, desc: "5+ Nível de Assimilação: O fluxo sanguíneo direcionado permite regeneração localizada. Ao gastar um Ponto de Determinação mantém um dado adicional e Regenera um Ponto de Saúde. Quando o fizer, o(a) Infectado(a) não pode anular Pressão em seus resultados de nenhuma forma." },
+          { cost: "2 sucessos e 4 adptações", name: "Sangue Potente", req: 7, desc: "7+ Nível de Assimilação: O sistema cardiovascular entra em estado de hiperfluxo. Gaste todos os Pontos de Assimilação para manter um dado adicional por ponto gasto em Ações físicas pelo restante da cena." }
         ]
       },
       {
         carta: "Valete de Ouros",
         nome: "Assimilação Fitomórfica",
+        descricao: "Fusão com o mundo vegetal transforma o corpo do(a) Infectado(a) em raiz, escudo e fonte de cura, desde que jamais perca o contato com o solo.",
         mutações: [
-          { cost: "1 adptação", name: "Sintonia Verde", desc: "Sente vida vegetal num raio de 30m gastando Ponto de Assimilação, desde que descalço no solo." },
-          { cost: "2 adptações", name: "Casca Grossa", desc: "+1 em Resolução (pode ultrapassar o limite). Sofre dano de queimadura dobrado." },
-          { cost: "3 adptações", name: "Fotorreceptores", desc: "Pelos viram folhas e faz fotossíntese. Não precisa comer, apenas água, solo e 2h de sol diárias (ou perde um Ponto de Determinação)." },
-          { cost: "4 adptações", name: "Raízes", req: 3, desc: "3+ Ponto de Assimilação: Cria raízes ao repousar para extrair água. Dormir sem contato direto com o solo impede restaurar Determinação." },
-          { cost: "5 adptações", name: "Curar o Solo", req: 5, desc: "5+ Ponto de Assimilação: Reduz um nível de vida completo para nutrir um bioma. Vislumbrar sua degradação causa perda de 1 Ponto de Determinação." },
-          { cost: "6 adptações", name: "Cura Comunal", req: 7, desc: "7+ Ponto de Assimilação: Gasta  Pontos de Assimilação para fazer o solo regenerar 1 ponto de vida por rodada a aliados na cena." }
+          { cost: "1 adptação", name: "Sintonia Verde", desc: "O(a) Infectado(a) sente a vida vegetal ao seu redor. Ao gastar um Ponto de Assimilação sente a presença, tipo e condição de plantas num raio de 30 metros, desde que esteja descalço ou com os pés nus no solo." },
+          { cost: "2 adptações", name: "Casca Grossa", desc: "Casca vegetal se forma sobre a epiderme, aumentando em um a Resolução (pode ultrapassar o limite máximo). Sofre dano dobrado de queimadura (incluindo fogo, calor extremo, frio extremo ou ácido)." },
+          { cost: "3 adptações", name: "Fotorreceptores", desc: "Pelos corporais se tornam folhas e passa a realizar fotossíntese. Não precisa consumir alimentos. Basta o consumo habitual de água, contato direto com o solo e exposição à luz solar por duas horas diárias. Perde um Ponto de Determinação ao final do dia se não fizer." },
+          { cost: "4 adptações", name: "Raízes", req: 3, desc: "3+ Nível de Assimilação: Ao repousar, de seu corpo nascem finas raízes por onde se extrai água e nutrientes do solo mantendo estabilidade mesmo em terrenos difíceis. Dormir sem contato direto com o solo impede de Restaurar Determinação." },
+          { cost: "5 adptações", name: "Curar o Solo", req: 5, desc: "5+ Nível de Assimilação: Reduza um Nível de Saúde completo para nutrir um bioma local, regenerando parte da flora: remove contaminações e restaura o solo criando conexão permanente e um vínculo emocional com o local. Testemunhar a degradação de um bioma conectado causa perda de um Ponto de Determinação." },
+          { cost: "6 adptações", name: "Cura Comunal", req: 7, desc: "7+ Nível de Assimilação: O corpo assume propriedades vegetais. Gaste dois Pontos de Assimilação para converter o terreno num raio de 20 metros em um ambiente regenerativo. Aliados que tocarem o solo Regeneram um Ponto de Saúde por rodada durante a cena. Mortos nesse ambiente fazem suas raízes se espalharem criando nova vegetação local com o dobro da biodiversidade original — uma marca permanente de sua existência." }
         ]
       },
       {
         carta: "Dama de Ouros",
         nome: "Assimilação Quimiorreceptora",
+        descricao: "O olfato do(a) Infectado(a) evolui, possibilitando que leia rastros, mentiras e histórias químicas, mas torna o mundo um tormento sensorial.",
         mutações: [
-          { cost: "1 adptação", name: "Faro Apurado", desc: "Identifica compostos químicos e feromônios. Odores intensos por 5 minutos causam desconforto e perda de 1 Ponto de Determinação." },
-          { cost: "2 adptações", name: "Farejar Toxinas", desc: "Detecta toxinas antes de tocá-las/ingeri-las. Impede comer pratos temperados/com cheiro sob pena de não restaurar Determinação." },
-          { cost: "1 sucesso e 2 adptações", name: "Farejar Rastros", desc: "Adiciona 2 SUCESSOS em testes de Furtividade/Sobrevivência/Engenharia analisando locais alterados. Percepção sofre penalidade de ADAPTAÇÃO." },
-          { cost: "3 adptações e 1 pressão", name: "Farejar Sentimentos", req: 3, desc: "3+ Ponto de Assimilação: Gasta 1 Ponto de Assimilação para detectar emoções/mentiras. Adiciona Percepção a Expressão/Influência. Penalidade de +1 PRESSÃO se tiver mais de 5 pessoas." },
-          { cost: "5 adptações", name: "Secreções", req: 5, desc: "5+ Ponto de Assimilação: CUTÂNEA. Marca trilha ou alvo por 24h. Seguir o odor penaliza em -2 SUCESSOS testes de Furtividade contra farejadores." },
-          { cost: "4 adptações e 2 pressões", name: "Farejar Psicometria", req: 7, desc: "7+ Ponto de Assimilação: Gaste 3 Pontos de Assimilação para ler o estado químico de área/objeto/cadáver, revelando fatos biológicos ocultos. Penalidade de 2 Adaptações em Resolução." }
+          { cost: "1 adptação", name: "Faro Apurado", desc: "O olfato sofre mutações e se expandem por receptores epidérmicos. Identifica substâncias químicas simples e percebe odores em níveis residuais, incluindo feromônios, álcool ou putrefação. Essa sensibilidade causa desconforto e perda de um Ponto de Determinação se passar mais de 5 minutos exposto a odores intensos." },
+          { cost: "2 adptações", name: "Farejar Toxinas", desc: "O organismo distingue compostos orgânicos detectando agentes tóxicos ou contaminantes antes de ingeri-los, tocá-los ou inalá-los. Essa sensibilidade impede o consumo de comidas com cheiro acentuado, inclusive preparos bem temperados. Ingerir esses alimentos nas últimas 12 horas impede a Restauração de Determinação." },
+          { cost: "1 sucesso e 2 adptações", name: "Farejar Rastros", desc: "Analisa rastros e identifica marcadores químicos residuais. Ao testar Furtividade, Sobrevivência ou Engenharia, adicione dois Sucessos ao analisar um local onde algo foi movido. Testes que incluam Percepção sofrem penalidade de Adaptação em novos ambientes, pois essas informações novas reduzem a atenção em outras coisas." },
+          { cost: "3 adptações e 1 pressão", name: "Farejar Sentimentos", req: 3, desc: "3+ Nível de Assimilação: Detecta alterações hormonais, percebendo medo, desejo, repulsa, hesitação ou mentira baseado em alterações químicas. Gasta um Ponto de Assimilação para detectar nuances ou intenções emocionais do alvo. Adicione seus dados de Percepção a testes que incluam Expressão ou Influência com este alvo. Sofre penalidade de Pressão em testes do mesmo tipo se realizados com mais de 5 pessoas no ambiente pela mistura de odores." },
+          { cost: "5 adptações", name: "Secreções", req: 5, desc: "5+ Nível de Assimilação: Desenvolve secreções cutâneas. Pode “marcar” uma trilha, objeto ou personagem para seguir o odor pelas próximas 24h, mesmo sem linha de visão e a longas distâncias que pode ser notado por criaturas com faro apurado, penalizando em dois Sucessos testes que incluam Furtividade contra essas criaturas." },
+          { cost: "4 adptações e 2 pressões", name: "Farejar Psicometria", req: 7, desc: "7+ Nível de Assimilação: O sistema quimiorreceptor se integra completamente com sua função cognitiva. Gaste três Pontos de Assimilação para “ler” o estado químico de qualquer área, estrutura, objeto ou cadáver, recebe uma revelação precisa do(a) Assimilador(a) sobre o passado do alvo — inclusive fatores biológicos ocultos, não revelados em testes convencionais. Essa conexão e a percepção que tudo se degrada gera penalidade de duas Adaptações em testes que incluam Resolução." }
         ]
       },
       {
         carta: "Rei de Ouros",
         nome: "Assimilação Metabólica",
+        descricao: "Um metabolismo fora de controle gera força, cura e resistência, mas cobra energia constante e consome o corpo do(a) Infectado(a) de dentro para fora.",
         mutações: [
-          { cost: "1 adptação", name: "Metabolismo Acelerado", desc: "Ao regenerar pontos de vida, recupera um ponto adicional. Precisa do triplo de calorias diárias ou perde 1 ponto de vida por dia." },
-          { cost: "1 adptação e 1 pressão", name: "Metabolismo Afiado", desc: "Mantém dado adicional em Reação/Potência/Resolução física. Penalidade de PRESSÃO em Conhecimentos." },
-          { cost: "1 sucesso e 2 adptações", name: "Metabolismo Regenerativo", desc: "Gaste dois Ponto de Determinação para regenerar 4 pontos de vida. Sofre penalidade de um SUCESSO em testes físicos na cena (não em Conflito)." },
-          { cost: "2 adptações e 2 pressões", name: "Imunidade Metabólica", req: 3, desc: "3+ Ponto de Assimilação: Imune a hipóxia/intoxicação leve. Sem ingestão diária de eletrólitos sofre penalidade cumulativa de ADAPTAÇÃO por dia." },
-          { cost: "5 adptações", name: "Metabolismo Eficiente", req: 5, desc: "5+ Ponto de Assimilação: Gaste  Pontos de Assimilação para manter 2 dados adicionais em teste físico. Perde 1 ponto de vida para cada PRESSÃO mantida." },
-          { cost: "6 adptações", name: "Metabolizar Instintos", req: 7, desc: "7+ Ponto de Assimilação: Gaste todos os e para elevar Potência/Reação/Resolução ao seu nível de Assimilação. Sofre dano de 1 ponto de vida por rodada." }
+          { cost: "1 adptação", name: "Metabolismo Acelerado", desc: "O metabolismo opera de forma acelerada. Ao Regenerar Pontos de Saúde, Regenera um ponto adicional. Precisa consumir o triplo de calorias diárias ou perde um Ponto de Saúde por dia." },
+          { cost: "1 adptação e 1 pressão", name: "Metabolismo Afiado", desc: "Converte gordura e músculos em energia. Mantém um dado adicional em Ações de Reação, Potência ou Resolução física. Penalidade de Pressão adicional em testes que envolvam Conhecimentos." },
+          { cost: "1 sucesso e 2 adptações", name: "Metabolismo Regenerativo", desc: "Gaste dois Pontos de Determinação para acelerar a Recuperação. Regenera quatro Pontos de Saúde e sofre penalidade de um Sucesso em testes físicos até o final da cena. Pode ser ativada uma vez por cena e não funciona em Conflito." },
+          { cost: "2 adptações e 2 pressões", name: "Imunidade Metabólica", req: 3, desc: "3+ Nível de Assimilação: Resiste a condições extremas (hipóxia, envenenamento leve, temperaturas), tornando-o imune a elas. Necessidade permanente de ingestão de sais e eletrólitos, não consumi-los diariamente gera uma penalidade cumulativa de Adaptação por dia em todos os testes." },
+          { cost: "5 adptações", name: "Metabolismo Eficiente", req: 5, desc: "5+ Nível de Assimilação: Induz breves surtos hormonais que o tornam mais eficiente. Gaste dois Pontos de Assimilação para manter dois dados adicionais em teste físico. Após a Ação, perde um Ponto de Saúde para cada Pressão mantida no resultado." },
+          { cost: "6 adptações", name: "Metabolizar Instintos", req: 7, desc: "7+ Nível de Assimilação: Atinge domínio total sobre sua fisiologia. Gaste todos os Pontos de Assimilação e distribua da maneira que preferir entre Potência, Reação e/ou Resolução. O nível desses Instintos não pode ultrapassar seu Nível de Assimilação. Sofre dano de um Ponto de Saúde por rodada até que desative o efeito." }
         ]
       }
     ]
@@ -348,145 +374,157 @@ export const ASSIMILACOES = {
       {
         carta: "2 de Espadas",
         nome: "Assimilação Neuropática",
+        descricao: "Nervos disparam sinais confusos. Dor fantasma, tremores e reflexos tardios tornam o corpo do(a) Infectado(a) uma marionete de si mesmo.",
         mutações: [
-          { cost: "1 pressão", name: "Debilidade", desc: "Sempre que realizar testes que incluam Atletismo, sofre -1 SUCESSO no resultado." },
-          { cost: "2 pressões", name: "Inabilidade", desc: "Sempre que realizar testes de Manufaturas/Erudição/Expressão, sofre -1 ADAPTAÇÃO." },
-          { cost: "3 pressões", name: "Tremores", desc: "Tremores sob estresse. Perde um Ponto de Determinação adicional por PRESSÃO mantida em qualquer teste." },
-          { cost: "4 pressões", name: "Desorientação", desc: "Testes de Percepção ou Sobrevivência envolvendo distância ou direção sofrem penalidade de 2 SUCESSOS." },
-          { cost: "5 pressões", name: "Fragilidade", desc: "Amplifica dor física. Perde um Ponto de Determinação ao sofrer dano físico (dois se o dano reduzir a vida)." },
-          { cost: "6 pressões", name: "Inaptidão", desc: "Em Conflitos, todas as ações do Infectado sofrem -1 SUCESSO e 1 ADAPTAÇÃO." }
+          { cost: "1 pressão", name: "Debilidade", desc: "A Assimilação danifica o equilíbrio elétrico dos neurônios motores do(a) Infectado(a). Sempre que realizar testes que incluam Atletismo, sofre uma penalidade de Sucesso no resultado." },
+          { cost: "2 pressões", name: "Inabilidade", desc: "A degeneração nervosa reduz a adaptabilidade do controle motor fino. Sempre que o(a) Infectado(a) realizar testes que incluam Manufaturas, Erudição ou Expressão, sofre uma penalidade de Adaptação no resultado." },
+          { cost: "3 pressões", name: "Tremores", desc: "A instabilidade neuromuscular gera tremores involuntários sob estresse. Perde um Ponto de Determinação adicional por Pressão mantida em qualquer teste." },
+          { cost: "4 pressões", name: "Desorientação", desc: "A neuropatia afeta o senso de orientação espacial. Sempre que o(a) Infectado(a) realizar testes que incluam Percepção ou Sobrevivência envolvendo distância ou direção, sofre uma penalidade de dois Sucessos." },
+          { cost: "5 pressões", name: "Fragilidade", desc: "A progressão da falha neural compromete a resistência corporal, amplificando a percepção da dor. Sempre que o(a) Infectado(a) sofrer dano físico direto, perde um Ponto de Determinação. Caso o dano reduza seu Nível de Saúde, perde dois Pontos de Determinação." },
+          { cost: "6 pressões", name: "Inaptidão", desc: "A falência nervosa atinge estágio crítico. Durante Conflitos, todas as Ações do(a) Infectado(a) sofrem penalidade de Sucesso e Adaptação." }
         ]
       },
       {
         carta: "3 de Espadas",
         nome: "Assimilação Devoradora",
+        descricao: "O metabolismo exige alimento constante; se negado, devora as reservas internas, corroendo a carne, a paciência e o foco do(a) Infectado(a).",
         mutações: [
-          { cost: "1 pressão", name: "Coeficiente Calórico", desc: "Se passar mais de 4 horas sem comer, sofre -1 SUCESSO em todos os testes." },
-          { cost: "2 pressões", name: "Ignorância", desc: "Se estiver sem comer por 2 horas, sofre -1 SUCESSO em testes de Conhecimentos." },
-          { cost: "3 pressões", name: "Desarticulação", desc: "Falta de comida gera -1 PRESSÃO em testes de Influência." },
-          { cost: "4 pressões", name: "Apetite Corrosivo", desc: "Perde 1 ponto de vida se passar 6h sem ingerir comida orgânica. -1 por hora após isso." },
-          { cost: "5 pressões", name: "Apetite Vacilante", desc: "Ficar 24h sem comer zera todos os seus pontos de Determinação, tornando-o Suscetível." },
-          { cost: "6 pressões", name: "Ânsia Terrível", desc: "Fome extrema tira o controle. Ações sem ser para comer usam Resolução e custam 1 Ponto de Determinação por nível de mutação." }
+          { cost: "1 pressão", name: "Coeficiente Calórico", desc: "A Assimilação altera o metabolismo do(a) Infectado(a), exigindo constante ingestão de matéria orgânica. Sempre que passar mais de quatro horas sem comer, sofre uma penalidade de Sucesso em todos os testes até saciar a fome." },
+          { cost: "2 pressões", name: "Ignorância", desc: "A necessidade alimentar afeta a cognição. Se estiver há mais de duas horas sem comer, o(a) Infectado(a) sofre uma penalidade de Sucesso sempre que realizar testes que incluam Conhecimentos." },
+          { cost: "3 pressões", name: "Desarticulação", desc: "O instinto predatório se intensifica. Se estiver há mais de duas horas sem comer, o(a) Infectado(a) sofre uma penalidade de Pressão adicional em qualquer teste que inclua Influência." },
+          { cost: "4 pressões", name: "Apetite Corrosivo", desc: "A degradação física avança. O(a) Infectado(a) perde um Ponto de Saúde se passar mais de seis horas sem ingerir porção maior que cem gramas de alimento orgânico. Perde um ponto adicional a cada hora sem se alimentar depois das seis primeiras." },
+          { cost: "5 pressões", name: "Apetite Vacilante", desc: "A assimilação do sistema digestivo atinge estágio crítico de ineficiência no consumo alimentar. Se o(a) Infectado(a) ficar um dia inteiro (24 horas) sem comer, perde todos os seus Pontos de Determinação, se tornando Suscetível." },
+          { cost: "6 pressões", name: "Ânsia Terrível", desc: "O controle sobre o apetite enfraquece. Caso não tenha se alimentado por duas cenas inteiras, o(a) Infectado(a) perde o controle para a fome desde o início da terceira cena. Se isso acontecer, qualquer Ação que o(a) Infectado(a) tentar que não vise exclusivamente a ingestão de matéria orgânica será rolada com Resolução como o Instinto selecionado. O(a) Infectado(a) perde um Ponto de Determinação para cada Nível de Assimilação sempre que o fizer. Após saciar a fome o(a) Infectado(a) volta para o controle do(a) jogador(a) e precisa lidar com as consequências de seus atos." }
         ]
       },
       {
         carta: "4 de Espadas",
         nome: "Assimilação Secretora",
+        descricao: "Glândulas hiperativas liberam fluidos e odores; funcionam como defesa instintiva, mas denunciam a presença do(a) Infectado(a) e afastam seus aliados.",
         mutações: [
-          { cost: "1 pressão", name: "Mau Odor", desc: "Secreta substância de odor forte. Testes de Expressão em locais fechados sofrem -1 SUCESSO." },
-          { cost: "2 pressões", name: "Inchaço Debilitante", desc: "Dificulta manuseio delicado. Testes de Manufaturas/Armas para armas de fogo sofrem -1 SUCESSO." },
-          { cost: "3 pressões", name: "Escorregadio", desc: "Secreção escorregadia compromete equilíbrio. Testes de Atletismo em locais instáveis sofrem -1 SUCESSO." },
-          { cost: "4 pressões", name: "Fragilidade Térmica", desc: "Dobra as penalidades térmicas ambientais por calor ou frio intensos." },
-          { cost: "5 pressões", name: "Inflamável", desc: "Contato com fogo causa 1 de dano por ponto de Assimilação restante, zerando os pontos mas limpando a secreção." },
-          { cost: "6 pressões", name: "Bufotoxina", desc: "Secreção altamente tóxica. Toques causam 1 de dano. Dormir no mesmo cômodo de outros exige testes." }
+          { cost: "1 pressão", name: "Mal Odor", desc: "O corpo do(a) Infectado(a) passa a secretar constantemente uma substância pegajosa e de odor forte, mesmo em repouso. Sempre que o(a) Infectado(a) realizar testes que incluam Expressão em ambientes fechados ou com pouca ventilação, sofre uma penalidade de Sucesso." },
+          { cost: "2 pressões", name: "Inchaço Debilitante", desc: "A pele do(a) Infectado(a) acumula gordura e umidade, tornando difícil o manuseio de objetos delicados. Sempre que realizar testes que incluam Manufaturas ou Armas para manipular armas de fogo, sofre penalidade de Sucesso." },
+          { cost: "3 pressões", name: "Escorregadio", desc: "A secreção constante forma um filme escorregadio em sua pele, comprometendo equilíbrio e tração. Sempre que realizar testes que incluam Atletismo em superfícies instáveis ou escorregadias, sofre uma penalidade de Sucesso." },
+          { cost: "4 pressões", name: "Fragilidade Térmica", desc: "A presença da secreção interfere na regulação térmica. Sempre que o(a) Infectado(a) estiver em ambientes extremos (calor ou frio intensos), dobre a penalidade aplicada." },
+          { cost: "5 pressões", name: "Inflamável", desc: "A secreção do corpo do(a) Infectado(a) se torna inflamável, fazendo com que qualquer contato com fogo cause um ponto de dano à Saúde para cada Ponto de Assimilação restante do(a) Infectado(a) e zerando esses pontos, deixando-o livre da secreção pelo restante da cena." },
+          { cost: "6 pressões", name: "Bufotoxina", desc: "A secreção de seu corpo é tóxica. Qualquer toque causa 1 de dano. Dormir no mesmo cômodo fechado que o(a) Infectado(a) exige de qualquer outra personagem um teste de Resolução com Medicina que tenha pelo menos dois Sucessos ou perde um Nível de Saúde completo." }
         ]
       },
       {
         carta: "5 de Espadas",
         nome: "Assimilação Calcificante",
+        descricao: "Placas endurecidas formam ossos rígidos; roubam mobilidade, impondo rigidez crescente, atrapalhando a agilidade do(a) Infectado(a).",
         mutações: [
-          { cost: "1 pressão", name: "Endurecido", desc: "Endurece ligamentos. Testes de Furtividade ou Atletismo de leveza/equilíbrio sofrem -1 ADAPTAÇÃO." },
-          { cost: "2 pressões", name: "Descoordenado", desc: "Ações físicas complexas sucessivas sofrem -1 SUCESSO por ação adicional." },
-          { cost: "3 pressões", name: "Hesitante", desc: "Coluna rígida limita movimento. Cancele metade dos SUCESSOS mantidos em testes para Fuga." },
-          { cost: "4 pressões", name: "Travado", desc: "Articulações travam. PRESSÕES mantidas em Potência/Reação aumentam os SUCESSOS necessários para Fuga." },
-          { cost: "5 pressões", name: "Combalido", desc: "Testes físicos substituem os rolagens críticas de 1 por falhas de 6." },
-          { cost: "6 pressões", name: "Condrocalcinose", desc: "Calcificação severa. Sofre penalidade de 3 PRESSÕES em todos os testes físicos." }
+          { cost: "1 pressão", name: "Endurecido", desc: "A Assimilação endurece ligamentos e tendões de forma irregular. Sempre que o(a) Infectado(a) realizar testes que incluam Furtividade ou Atletismo em ações que exijam leveza ou equilíbrio, sofre uma penalidade de Adaptação." },
+          { cost: "2 pressões", name: "Descoordenado", desc: "Pequenas formações ósseas irregulares se acumulam em articulações e regiões móveis. Sempre que o(a) Infectado(a) realizar qualquer Ação com múltiplos movimentos corporais sucessivos – saltar e correr, atacar e se mover, levantar e atirar (...) – sofre penalidade de Sucesso por ação adicional, além dos custos normais da Ação." },
+          { cost: "3 pressões", name: "Hesitante", desc: "A calcificação avança para a coluna, limitando movimentação. Sempre que o(a) Infectado(a) realizar testes para Fuga, cancele metade dos Sucessos mantidos, arredondando para cima." },
+          { cost: "4 pressões", name: "Travado", desc: "A progressão da Assimilação causa episódios de travamento articular. A cada Pressão mantida em testes de Potência ou Reação em Conflito, aumente no mesmo valor a quantidade de Sucessos necessários para a Fuga do(a) Infectado(a)." },
+          { cost: "5 pressões", name: "Combalido", desc: "As articulações do(a) Infectado(a) se tornaram tão rígidas que todos seus testes físicos substituem os d10 que seriam rolados por d6." },
+          { cost: "6 pressões", name: "Condrocalcinose", desc: "A calcificação atinge grau tão severo que o(a) Infectado(a) sofre uma penalidade de três Pressões adicionais em todos os testes físicos." }
         ]
       },
       {
         carta: "6 de Espadas",
         nome: "Assimilação Fotossensível",
+        descricao: "Luz e claridade tornam-se agressivas. Pele e olhos ardem, empurrando o(a) Infectado(a) para sombras e isolamento.",
         mutações: [
-          { cost: "1 pressão", name: "Visão Sensível", desc: "Luz intensa gera -1 ADAPTAÇÃO em testes que incluam Percepção." },
-          { cost: "2 pressões", name: "Pele de Vampiro", desc: "Luz solar direta causa perda de 1 Ponto de Determinação e 1 ponto de vida a cada 30 minutos." },
-          { cost: "3 pressões", name: "Enxaqueca", desc: "Luz constante gera enxaqueca. Passar a cena sob luz impede restaurar Determinação." },
-          { cost: "4 pressões", name: "Pupilas Sensíveis", desc: "Transição rápido de iluminação gera penalidade de 2 SUCESSOS nas primeiras rodadas." },
-          { cost: "5 pressões", name: "Visão Curta", desc: "Redução de contraste gera -1 SUCESSO em ataques de longo alcance." },
-          { cost: "6 pressões", name: "Visão Noturna", desc: "Só enxerga no escuro total. Qualquer luz ofusca, impondo penalidade de 2 SUCESSOS em Percepção." }
+          { cost: "1 pressão", name: "Visão Sensível", desc: "A Assimilação altera a pigmentação e sensibilidade dos olhos do(a) Infectado(a), tornando-os incapazes de se adaptar bem à claridade. Sempre que o(a) Infectado(a) estiver exposto à luz intensa, sofre penalidade de Adaptação em testes que incluam Percepção." },
+          { cost: "2 pressões", name: "Pele de Vampiro", desc: "A sensibilidade começa a reagir negativamente à radiação solar. Sempre que o(a) Infectado(a) passar mais de trinta minutos sob luz solar direta, perde um Ponto de Determinação e um Ponto de Saúde." },
+          { cost: "3 pressões", name: "Enxaqueca", desc: "A fotossensibilidade provoca enxaquecas severas. Sempre que o(a) Infectado(a) passar uma cena inteira em local iluminado, não Restaura Determinação em sua próxima Recuperação." },
+          { cost: "4 pressões", name: "Visão Sensível", desc: "As pupilas do(a) Infectado(a) não conseguem mais se adaptar rapidamente. Sempre que sair de um ambiente escuro para um iluminado ou vice-versa, sofre uma penalidade de dois Sucessos em todos os testes nas primeiras rodadas." },
+          { cost: "5 pressões", name: "Visão Curta", desc: "A Assimilação afeta a percepção de contraste e profundidade. O(a) Infectado(a) sofre penalidade permanente de Sucesso em todos os testes de ataque de longo alcance." },
+          { cost: "6 pressões", name: "Visão Noturna", desc: "O(a) Infectado(a) só é capaz de enxergar na ausência total de luz. Qualquer luz é capaz de ofuscá-lo, forçando-o a fazer qualquer teste com o Instinto de Percepção e impondo penalidade de dois Sucessos ao resultado." }
         ]
       },
       {
         carta: "7 de Espadas",
         nome: "Assimilação Litodérmica",
+        descricao: "A pele se transforma em uma mistura metálica, enfraquecendo sua resistência, atrapalhando suas interações e, em última instância, afetando até mesmo o sangue do(a) Infectado(a).",
         mutações: [
-          { cost: "1 pressão", name: "Afasta Animais", desc: "Odor ferroso mineral. Qualquer teste de interação com animais sofre -1 SUCESSO." },
-          { cost: "2 pressões", name: "Ossos Frágeis", desc: "Formações minerais nos ossos reduzem amortecimento. Todo dano de impacto sofrido aumenta em 1." },
-          { cost: "3 pressões", name: "Eletrossensível", desc: "Danos elétricos são dobrados. Danos por calor ou queimaduras causam perda extra de 1 Ponto de Determinação." },
-          { cost: "4 pressões", name: "Carapaça Disforme", desc: "Impedimento de usar armaduras rígidas/coletes. Dormir sem superfície macia impede recuperação." },
-          { cost: "5 pressões", name: "Muco Oxidante", desc: "Muco oxida metais. Contato por uma cena reduz Qualidade de itens metálicos." },
-          { cost: "6 pressões", name: "Fígado Estragado", desc: "Sangria semanal obrigatória ou cirrose causa perda de vida até transplante de fígado (teste Medicina 5 SUCESSOS)." }
+          { cost: "1 pressão", name: "Afasta Animais", desc: "A infecção mineral se intensifica, alterando a bioquímica superficial da pele do(a) Infectado(a). Um odor ferroso passa a exalar de seu corpo, provocando reações defensivas nos animais ao redor. Qualquer teste que envolva interação com animais sofre uma penalidade de Sucesso." },
+          { cost: "2 pressões", name: "Ossos Frágeis", desc: "Cristais minerais começam a se formar nos ossos do(a) Infectado(a), criando saliências visíveis em partes do corpo. Essas formações comprometem a flexibilidade e a capacidade de absorção de impactos da pele, fazendo com que todo dano de impacto contra o(a) Infectado(a) seja aumentado em um ponto." },
+          { cost: "3 pressões", name: "Eletrossensível", desc: "As estruturas cristalinas tornam-se um condutor elétrico e comprometem o funcionamento das glândulas sudoríparas, dificultando a regulação térmica. Sempre que o(a) Infectado(a) sofrer dano elétrico, o valor do dano é dobrado. Sempre que sofrer dano por calor ou queimadura, perde também um Ponto de Determinação." },
+          { cost: "4 pressões", name: "Carapaça Disforme", desc: "As formações minerais atravessam a derme, provocando dor contínua e extrema sensibilidade ao contato rígido. O(a) Infectado(a) não pode usar peças de vestuário estruturadas ou armaduras rígidas — como coletes, trajes de contenção ou qualquer equipamento similar. Além disso, caso não durma sobre uma superfície macia, sua próxima Recuperação não terá efeito." },
+          { cost: "5 pressões", name: "Muco Oxidante", desc: "O corpo do(a) Infectado(a) passa a liberar resíduos oxidados pelas formações minerais, secretando um muco que enferruja qualquer equipamento ou artefato metálico em contato com o corpo do(a) Infectado(a) por uma cena completa, reduzindo um nível de Qualidade. Adicionalmente, sempre que estiver segurando um equipamento metálico que não seja um Artefato e gastar um Ponto de Assimilação, qualquer Pressão mantida no resultado reduz um nível de Qualidade do equipamento." },
+          { cost: "6 pressões", name: "Fígado Estragado", desc: "A infecção mineral é Assimilada ao sangue, sobrecarregando o fígado. O(a) Infectado(a) precisa fazer tratamento semanal com sangria ou desenvolverá cirrose hepática. Caso desenvolva a doença o(a) Infectado(a) perde um Nível de Saúde por semana até que faça um transplante de fígado que exige tratamento cirúrgico com o teste de Medicina de pelo menos cinco Sucessos." }
         ]
       },
       {
         carta: "8 de Espadas",
         nome: "Assimilação Entorpecida",
+        descricao: "Os sentidos se arrastam, amortecidos. Proteção contra a dor que embota a reação do(a) Infectado(a) e distorce sua orientação.",
         mutações: [
-          { cost: "1 pressão", name: "Agorafobia", desc: "Percepção distorcida em locais abertos. Testes de Percepção em áreas externas sofrem -1 SUCESSO." },
-          { cost: "2 pressões", name: "Sensibilidade Auditiva", desc: "Sons intensos causam vertigem e perda de 1 Ponto de Determinação." },
-          { cost: "3 pressões", name: "Sentidos Sobrecarregados", desc: "Estímulos sensoriais múltiplos intensos causam -1 SUCESSO em todas as ações." },
-          { cost: "4 pressões", name: "Desorientação Aguda", desc: "Penalidade de 1 PRESSÃO adicional ao resultado de testes de Percepção ou Reação." },
-          { cost: "5 pressões", name: "Devaneios", desc: "Alucinações induzidas pelo Narrador reduzem em 2 SUCESSOS o resultado do teste." },
-          { cost: "6 pressões", name: "Dessensibilização Aguda", desc: "Perda de 85% dos sentidos (Percepção na ficha vira 0). Testes sem outra aptidão aliada falham automaticamente." }
+          { cost: "1 pressão", name: "Agorafobia", desc: "A Assimilação afeta as conexões entre os nervos ópticos e o cérebro. O(a) Infectado(a) sofre percepção distorcida de movimento e contraste em ambientes amplos ou abertos. Sempre que realizar testes que incluam Percepção em áreas externas ou grandes espaços, sofre penalidade de Sucesso." },
+          { cost: "2 pressões", name: "Sensibilidade Auditiva", desc: "A audição do(a) Infectado(a) se torna aguda e sensível. Qualquer som repentino ou alto pode provocar vertigem ou desorientação. Sempre que estiver exposto a ruídos intensos (explosões, sirenes, gritos), perde um Ponto de Determinação." },
+          { cost: "3 pressões", name: "Sentidos Sobrecarregados", desc: "Os sentidos do(a) Infectado(a) se sobrecarregam ao mesmo tempo. Se sofrer simultaneamente exposição a múltiplos estímulos sensoriais intensos, sofre uma penalidade de Sucesso em todas as Ações." },
+          { cost: "4 pressões", name: "Desorientação Aguda", desc: "O desgaste nos sentidos faz com que o(a) Infectado(a) sofra uma penalidade de Pressão adicional ao resultado de testes que incluam Percepção ou Reação." },
+          { cost: "5 pressões", name: "Devaneios", desc: "O cérebro passa a gerar alucinações táteis, visuais e sonoras espontâneas. Uma vez por sessão de jogo, em momentos de grande tensão, o(a) Assimilador(a) pode introduzir um estímulo falso, dificultando a Ação do(a) Infectado(a), com isso reduzindo em dois Sucessos o resultado do teste. O(a) Assimilador(a) deve descrever a cena com as ilusões da alucinação e em seguida o que de fato aconteceu." },
+          { cost: "6 pressões", name: "Dessensibilização Aguda", desc: "O(a) Infectado(a) perde 85% de todos os sentidos, perdendo todos os níveis em Percepção na Ficha de Infectados, ficando com zero. Esses níveis não podem ser comprados novamente e só retornam se forem anuladas todas as Pressões dessa mutação através de Clareza de Propósito. Toda rolagem que inclua Percepção só será feita se houver outra Aptidão selecionada fornecendo dados para a rolagem, do contrário é falha automática." }
         ]
       },
       {
         carta: "9 de Espadas",
         nome: "Assimilação Aberrante",
+        descricao: "Tecidos e órgãos redundantes surgem sem harmonia. Aumentam o consumo e reduzem a eficiência da fisiologia do(a) Infectado(a).",
         mutações: [
-          { cost: "1 pressão", name: "Anomorfia", desc: "Desenvolve tecidos redundantes. Reduz em 1 ponto um Instinto base de valor inicial 2+." },
-          { cost: "2 pressões", name: "Pernas Disformes", desc: "Perda de mobilidade em pernas. Em conflito, remova o primeiro SUCESSO investido em Fuga." },
-          { cost: "3 pressões", name: "Hipersensibilidade", desc: "Sensibilidade extrema ao toque. Ser tocado ou sofrer dano físico custa 1 Ponto de Determinação." },
-          { cost: "4 pressões", name: "Recuperação Debilitada", desc: "Órgãos redundantes drenam energia. Recuperações restauram apenas metade da vida e Determinação." },
-          { cost: "5 pressões", name: "Descoordenação", desc: "Partes operam de forma autônoma. Ao obter 2 SUCESSOS em testes, um deles vira PRESSÃO." },
-          { cost: "6 pressões", name: "Aberração", desc: "Aparência e voz completamente retorcidas e deformadas, podendo alterar membros." }
+          { cost: "1 pressão", name: "Anomorfia", desc: "O corpo do(a) Infectado(a) desenvolve órgãos e tecidos desnecessários em uma busca desesperada por evolução. A má formação afeta um de seus Instintos à escolha do(a) jogador(a), reduzindo em um ponto o Instinto escolhido na Ficha de Infectados. Escolha um Instinto no qual tenha pelo menos dois pontos." },
+          { cost: "2 pressões", name: "Pernas Disformes", desc: "Má formação nas pernas causa perda de mobilidade. Em cada Conflito, remova o primeiro Sucesso que investir em Fuga." },
+          { cost: "3 pressões", name: "Hipersensibilidade", desc: "A Assimilação afeta as terminações nervosas, tornando-as hipersensíveis ao toque. Sempre que o(a) Infectado(a) for tocado firmemente ou sofrer dano, perde um Ponto de Determinação." },
+          { cost: "4 pressões", name: "Recuperação Debilitada", desc: "Os órgãos redundantes drenam recursos fisiológicos. Sempre que o(a) Infectado(a) ativar uma Recuperação, restaura apenas metade dos Pontos de Saúde e Pontos de Determinação, arredondado para cima." },
+          { cost: "5 pressões", name: "Descoordenação", desc: "Certas partes do corpo começam a operar de forma autônoma e não coordenada com o resto do organismo. Sempre que o(a) Infectado(a) obtiver dois Sucessos ou mais em um teste, um dos Sucessos se transformará em Pressão, representando um espasmo, bloqueio ou conflito interno." },
+          { cost: "6 pressões", name: "Aberração", desc: "O corpo do(a) Infectado(a) se torna completamente irreconhecível, mudando completamente a aparência e a voz do(a) Infectado(a) para um aspecto de aberração retorcida e mal formada, podendo afetar até mesmo o número de membros, à escolha do(a) Assimilador(a)." }
         ]
       },
       {
         carta: "10 de Espadas",
         nome: "Assimilação Hipersensível",
+        descricao: "O mundo é áspero e invasivo, especialmente ao(à) Infectado(a) que sofre de hipersensibilidade. Dor ou ruídos intensos podem ser particularmente agressivos.",
         mutações: [
-          { cost: "1 pressão", name: "Vulnerabilidade a Dor", desc: "Qualquer dano sofrido impõe -1 SUCESSO no próximo teste físico." },
-          { cost: "2 pressões", name: "Vulnerabilidade Emocional", desc: "Críticas ou escárnios geram -1 ADAPTAÇÃO em todos os testes na cena." },
-          { cost: "3 pressões", name: "Dor Degradante", desc: "Limiar de dor reduzido. Sofrer dano por combate ou queda causa perda de 1 Ponto de Determinação." },
-          { cost: "4 pressões", name: "Sensibilidade Radical", desc: "Estímulos ambientais geram penalidade de 2 SUCESSOS em Conhecimentos ou Expressão." },
-          { cost: "5 pressões", name: "Recuperação Sensível", desc: "Recuperações perdem metade da eficácia sem repouso em local escuro, silencioso e ameno." },
-          { cost: "6 pressões", name: "Sensibilidade Extrema", desc: "Multiplicidade de estímulos causa perda imediata de Determinação/vida e limita testes a 1 dado." }
+          { cost: "1 pressão", name: "Vulnerabilidade a Dor", desc: "O sistema nervoso do(a) Infectado(a) se torna excessivamente responsivo a estímulos externos. Sempre que sofrer dano físico, mesmo que mínimo, o(a) Infectado(a) sofre também uma penalidade de Sucesso no próximo teste que incluir Potência, Reação ou Resolução." },
+          { cost: "2 pressões", name: "Vulnerabilidade Emocional", desc: "A sensibilidade se expande para o campo emocional. Sempre que o(a) Infectado(a) receber uma crítica, provocação ou escárnio (mesmo que narrativamente leve), sofre uma penalidade de Adaptação em todos os testes pelo restante da cena." },
+          { cost: "3 pressões", name: "Dor Degradante", desc: "O limiar de dor do(a) Infectado(a) se reduz drasticamente. Toda vez que sofrer dano físico por ataque corpo a corpo ou queda, perde um Ponto de Determinação." },
+          { cost: "4 pressões", name: "Sensibilidade Radical", desc: "Estímulos ambientais se tornam insuportáveis. Em cenas com barulho intenso, temperatura extrema ou iluminação incômoda, o(a) Infectado(a) sofre uma penalidade de dois Sucessos em todos os testes com Conhecimentos ou Expressão." },
+          { cost: "5 pressões", name: "Recuperação Sensível", desc: "A hipersensibilidade nervosa impede o descanso reparador. Recuperações perdem 50% de eficácia caso o repouso não aconteça em ambiente controlado (ruídos reduzidos, luz baixa e temperatura amena). Essa limitação se acumula com outras penalidades de Recuperação." },
+          { cost: "6 pressões", name: "Sensibilidade Extrema", desc: "O sistema nervoso entra em colapso ao ser exposto a múltiplos estímulos simultâneos. Sempre que houver três ou mais fontes de estímulo (danos, ruídos, cheiros, calor...), o(a) Infectado(a) perde imediatamente um Ponto de Saúde e um Ponto de Determinação e não pode manter mais do que um dado em qualquer teste feito até o fim da cena." }
         ]
       },
       {
         carta: "Valete de Espadas",
         nome: "Assimilação Mioclônica",
+        descricao: "Espasmos e tiques rompem o controle. Movimentos erráticos minam a sutileza e inviabilizam a precisão do(a) Infectado(a).",
         mutações: [
-          { cost: "1 pressão", name: "Espasmos Involuntários", desc: "Obter PRESSÕES em testes pode fazer o Narrador introduzir espasmos físicos na narrativa." },
-          { cost: "2 pressões", name: "Aflição Grave", desc: "Conflito gera -1 SUCESSO em qualquer ação fina de controle corporal." },
-          { cost: "3 pressões", name: "Movimentos Involuntários", desc: "A cada cena, um membro sofre espasmos, gerando 1 PRESSÃO em ações com ele." },
-          { cost: "4 pressões", name: "Barulhos Involuntários", desc: "Calma gera ruídos involuntários do Infectado, impossibilitando surpresas ou camuflagem." },
-          { cost: "5 pressões", name: "Agitação Constante", desc: "Incapaz de ficar imóvel por mais de um minuto. Repousar estático drena 1 Ponto de Determinação por minuto." },
-          { cost: "6 pressões", name: "Debilidade Extrema", desc: "Testes físicos sofrem -1 SUCESSO e 1 PRESSÃO. Descarta maior face de SUCESSO obtido." }
+          { cost: "1 pressão", name: "Espasmos Involuntários", desc: "O corpo do(a) Infectado(a) responde com movimentos bruscos a estímulos banais. Sempre que o(a) jogador(a) obtiver qualquer Pressão em uma rolagem, o(a) Assimilador(a) pode narrar um pequeno espasmo ou reação involuntária, como um susto, chute leve ou se virar bruscamente." },
+          { cost: "2 pressões", name: "Aflição Grave", desc: "Os impulsos se intensificam em situações de tensão. Sempre que o(a) Infectado(a) estiver em uma Cena de Conflito, sofre uma penalidade de Sucesso em qualquer Ação que requeira controle corporal — incluindo recarga de armas, furtividade ou evitar armadilhas." },
+          { cost: "3 pressões", name: "Movimentos Involuntários", desc: "A Assimilação gera impulsos sem relação com o ambiente. Ao entrar em uma nova cena, o(a) Assimilador(a) deve escolher aleatoriamente um dos membros do corpo (braço, perna, pescoço etc.), que será afetado por movimentos involuntários. Durante essa cena, o(a) Infectado(a) sofre penalidade de Pressão em qualquer ação que dependa daquele membro." },
+          { cost: "4 pressões", name: "Barulhos Involuntários", desc: "O corpo passa a responder a não-estímulos. Em qualquer situação de calma ou silêncio absoluto, o(a) Infectado(a) é compelido a emitir sons involuntários (como estalar a língua, ranger os dentes, bater os dedos ou emitir ruídos com a garganta), o que anula automaticamente qualquer tentativa de surpresa, camuflagem ou emboscada." },
+          { cost: "5 pressões", name: "Agitação Constante", desc: "A Assimilação interfere na rotina motora. O(a) Infectado(a) não consegue permanecer imóvel por mais de um minuto, mesmo que queira. Sempre que for necessário repousar ou aguardar em posição, ele perde um Ponto de Determinação por minuto." },
+          { cost: "6 pressões", name: "Debilidade Extrema", desc: "A compulsão se torna debilitante. Em qualquer teste físico, o(a) Infectado(a) sofre penalidade de Sucesso, além de Pressão adicional. Além disso, deve descartar imediatamente a face de dado com maior número de Sucessos após cada rolagem." }
         ]
       },
       {
         carta: "Dama de Espadas",
         nome: "Assimilação Disfásica",
+        descricao: "A fala se rompe em falhas e sons truncados. Pensamento rápido, mas voz irregular, distante da comunicação habitual.",
         mutações: [
-          { cost: "1 pressão", name: "Desvio de Fala", desc: "PRESSÕES em comunicação verbal resultam em gagueira, lapsos ou erros que comprometem a cena." },
-          { cost: "2 pressões", name: "Fala Debilitada", desc: "Testes de Expressão/Influência em falas complexas sofrem penalidade de um SUCESSO." },
-          { cost: "3 pressões", name: "Memória Debilitada", desc: "Incapaz de relatar instruções com mais de uma frase sem truncá-las e alterá-las." },
-          { cost: "4 pressões", name: "Fala Simplificada", desc: "Não pronuncia termos técnicos/nomes. Testes de conhecimentos verbais sofrem penalidade de 2 SUCESSOS." },
-          { cost: "5 pressões", name: "Letra Ilegível", desc: "Linguagem escrita ininteligível a menos que acompanhada de teste social (2 SUCESSOS)." },
-          { cost: "6 pressões", name: "Fala Incompreensível", desc: "Perda total da fala em tensão. Apenas sílabas soltas. Testes verbais sofrem penalidade de 2 PRESSÕES." }
+          { cost: "1 pressão", name: "Desvio de Fala", desc: "O(a) Infectado(a) passa a sofrer lapsos de linguagem em momentos de tensão. Sempre que rolar qualquer Pressão em uma ação que envolva comunicação verbal, o(a) Assimilador(a) pode narrar um erro de fala — troca de palavras, gagueira ou silêncio repentino — que compromete a ação ou exige retratação." },
+          { cost: "2 pressões", name: "Fala Debilitada", desc: "A Assimilação desorganiza o acesso à linguagem em situações sociais. Sempre que o(a) Infectado(a) realizar testes que incluam Expressão ou Influência em diálogo com personagens do(a) Assimilador(a), sofre uma penalidade de Sucesso se tentar formular frases complexas ou expor argumentos longos." },
+          { cost: "3 pressões", name: "Memória Debilitada", desc: "O distúrbio afeta a memória verbal. O(a) Infectado(a) não consegue repetir corretamente instruções ou relatos com mais de uma frase. Sempre que tentar transmitir informação recebida ou repassar mensagens, o conteúdo é truncado, invertido ou alterado. O(a) Assimilador(a) decide como a informação chega ao destino." },
+          { cost: "4 pressões", name: "Fala Simplificada", desc: "A Assimilação afeta a articulação vocal. O(a) Infectado(a) não consegue pronunciar corretamente palavras que envolvam nomes próprios, números ou conceitos técnicos. Em testes envolvendo Engenharia, Medicina ou qualquer Conhecimento, sofre penalidade de dois Sucessos se a comunicação verbal estiver envolvida." },
+          { cost: "5 pressões", name: "Letra Ilegível", desc: "O distúrbio se alastra para a linguagem escrita. Toda vez que o(a) Infectado(a) tentar se comunicar por escrito, símbolos se confundem, letras se embaralham, e a mensagem não é compreendida — exceto se for entregue pessoalmente junto a um teste de Influência ou Expressão com, no mínimo, dois Sucessos." },
+          { cost: "6 pressões", name: "Fala Incompreensível", desc: "O colapso da linguagem é completo. O(a) Infectado(a) perde a capacidade de produzir fala compreensível durante as cenas de Conflito ou mesmo em situação de narrativa fluida que envolvam grande tensão. Se limita a emitir sons desconexos, sílabas soltas ou palavras trocadas. Todas as ações que dependam de comunicação verbal devem ser substituídas por mímica, desenhos ou sofrer penalidade de duas Pressões adicionais. A fala normal retorna apenas fora de cena ou com ajuda externa, como outro(a) Infectado(a) de intérprete através de um teste bem-sucedido de Influência." }
         ]
       },
       {
         carta: "Rei de Espadas",
         nome: "Assimilação Terminal",
+        descricao: "A vitalidade se esgota lentamente. Capacidades desaparecem enquanto a Assimilação toma o corpo do(a) Infectado(a) por completo.",
         mutações: [
-          { cost: "1 pressão", name: "Pressão Estendida", desc: "Penalidades de PRESSÃO duram por mais uma cena após o término de sua causa original." },
-          { cost: "2 pressões", name: "Recuperação Sofrida", desc: "Regenerar qualquer quantidade de vida causa 1 ponto de dano direto imediatamente antes." },
-          { cost: "3 pressões", name: "Pressão por Fracasso", desc: "Falhar em testes (sem manter SUCESSOS) gera +1 PRESSÃO no teste seguinte (cumulativo)." },
-          { cost: "4 pressões", name: "Aptidões Arruinadas", desc: "Uma aptidão aleatória na cena é tratada como nível 0 (não fornece dados)." },
-          { cost: "5 pressões", name: "Determinação Hesitante", desc: "Gastar Determinação força descarte de SUCESSO/ADAPTAÇÃO à escolha do Narrador." },
-          { cost: "6 pressões", name: "Inaptidão Extrema", desc: "Todos os testes sofrem +2 PRESSÕES. Reduz permanentemente em 1 uma aptidão base." }
+          { cost: "1 pressão", name: "Pressão Estendida", desc: "O corpo do(a) Infectado(a) começa a exibir falhas de funcionamento. Sempre que sofrer uma penalidade por Pressão, essa penalidade persiste por uma cena adicional, mesmo que a causa original tenha desaparecido." },
+          { cost: "2 pressões", name: "Recuperação Sofrida", desc: "A recuperação do organismo se torna ineficaz. Sempre que Regenerar qualquer quantidade de Saúde, o(a) Infectado(a) sofre 1 ponto de dano direto antes da Recuperação." },
+          { cost: "3 pressões", name: "Pressão por Fracasso", desc: "A Assimilação desregula respostas motoras e cognitivas. Sempre que o(a) Infectado(a) falhar em um teste (não mantiver qualquer Sucesso), sofre penalidade de Pressão no próximo teste — acumula se persistir falhando." },
+          { cost: "4 pressões", name: "Aptidões Arruinadas", desc: "Aptidões começam a se desintegrar. No início de cada cena, o(a) Assimilador(a) escolhe aleatoriamente uma Aptidão do(a) Infectado(a) (Instinto, Conhecimento ou Prática). Todas as rolagens envolvendo essa Aptidão são tratadas como se não tivesse nenhum nível até o final da cena." },
+          { cost: "5 pressões", name: "Determinação Hesitante", desc: "O corpo perde consistência nas respostas. Sempre que o(a) Infectado(a) usar um Ponto de Determinação para manter dados adicionais, ele deve descartar automaticamente Sucesso ou Adaptação do resultado, escolhido pelo(a) Assimilador(a)." },
+          { cost: "6 pressões", name: "Inaptidão Extrema", desc: "O colapso corporal é inevitável. Todos os testes do(a) Infectado(a) sofrem penalidade de duas Pressões e ele perde permanentemente um ponto de uma Aptidão base (à escolha do(a) Assimilador(a)). Esta perda permanece até que esta mutação seja anulada. Uma Aptidão pode ser reduzida a 0 desta forma, impossibilitando qualquer teste associado a ela." }
         ]
       }
     ]
@@ -500,118 +538,131 @@ export const ASSIMILACOES = {
       {
         carta: "Ás de Paus",
         nome: "Assimilação do Bosque",
+        descricao: "Tecidos lenhosos e raízes internas permitem ao(à) Infectado(a) regenerar-se em meio a árvores, mas longe de vegetação seu corpo definha, exigindo contato com solo fértil.",
         mutações: [
-          { cost: "1 adptação e 1 sucesso", name: "Embaúba", desc: "A cada hora imóvel com os pés ou mãos em contato direto com vegetação viva ou solo úmido, entra em estado de simbiose e Regenera um ponto de vida. Dobra todo dano sofrido nesse período. Sofrer dano interrompe o efeito." },
-          { cost: "1 sucesso e 1 pressão", name: "Eucalyptus", desc: "Se for reduzido aos Níveis de Saúde 1 ou 2, o(a) Infectado(a) pode optar por permanecer imóvel por 6 horas em contato com solo fértil para habilitar sua Recuperação como se estivesse no Nível de Saúde 3. Se for interrompido durante o processo, qualquer teste de Medicina para viabilizar a Recuperação receberá uma PRESSÃO adicional no resultado." },
-          { cost: "1 adptação e 1 pressão", name: "Araucária", desc: "Se passar mais de 24 horas sem contato direto com vegetação viva ou solo fértil, o(a) Infectado(a) tem -1 SUCESSO em todo teste que inclua Sobrevivência até restabelecer esse contato por pelo menos 1 hora." }
+          { cost: "1 adptação e 1 sucesso", name: "Embaúba", desc: "A cada hora imóvel com os pés ou mãos em contato direto com vegetação viva ou solo úmido, entra em estado de simbiose e Regenera um Ponto de Saúde. Dobra todo dano sofrido nesse período. Sofrer dano interrompe o efeito." },
+          { cost: "1 sucesso e 1 pressão", name: "Eucalyptus", desc: "Se for reduzido aos Níveis de Saúde 1 ou 2, o(a) Infectado(a) pode optar por permanecer imóvel por 6 horas em contato com solo fértil para habilitar sua Recuperação como se estivesse no Nível de Saúde 3. Se for interrompido durante o processo, qualquer teste de Medicina para viabilizar a Recuperação receberá Pressão adicional no resultado." },
+          { cost: "1 adptação e 1 pressão", name: "Araucária", desc: "Se passar mais de 24 horas sem contato direto com vegetação viva ou solo fértil, o(a) Infectado(a) sofre uma penalidade de Sucesso em todo teste que inclua Sobrevivência até restabelecer esse contato por pelo menos 1 hora." }
         ]
       },
       {
         carta: "2 de Paus",
         nome: "Assimilação da Campina",
+        descricao: "O corpo do(a) Infectado(a) se adapta ao campo aberto: postura baixa, movimentos ágeis e percepção aguçada pelo vento e vibrações do solo, garantindo vigilância constante em áreas planas.",
         mutações: [
-          { cost: "1 adptação e 1 sucesso", name: "Alecrim", desc: "Durante o dia, enquanto estiver exposto à luz solar direta por pelo menos 1 hora, pode gastar  Ponto de Determinação para dispensar a necessidade de alimentação e água por 24 horas. Esse efeito não se acumula e é anulado por ambientes sem luz natural (interiores, subsolo ou neblina densa)." },
-          { cost: "1 sucesso e 1 pressão", name: "Cágado", desc: "A epiderme do(a) Infectado(a) se torna parcialmente transparente para otimizar a absorção solar. Enquanto exposto ao sol, Recupera Ponto de Saúde por cena automaticamente. Contudo, sofre um 1d10 de dano adicional em ataques baseados em calor ou luz intensa (como fogo, laser ou clarões bioluminescentes)." },
-          { cost: "1 adptação e 1 pressão", name: "Maria-da-campina", desc: "A pele fotossintética do(a) Infectado(a) não tolera bem a ausência de luz natural. A cada dia passado sem exposição direta ao sol (ou fonte equivalente), sofre -1 SUCESSO em testes de Resolução até que a exposição seja restabelecida por ao menos 1 hora." }
+          { cost: "1 adptação e 1 sucesso", name: "Alecrim", desc: "Durante o dia, enquanto estiver exposto à luz solar direta por pelo menos 1 hora, pode gastar um Ponto de Determinação para dispensar a necessidade de alimentação e água por 24 horas. Esse efeito não se acumula e é anulado por ambientes sem luz natural (interiores, subsolo ou neblina densa)." },
+          { cost: "1 sucesso e 1 pressão", name: "Cágado", desc: "A epiderme do(a) Infectado(a) se torna parcialmente transparente para otimizar a absorção solar. Enquanto exposto ao sol, Recupera um Ponto de Saúde por cena automaticamente. Contudo, sofre um d10 de dano adicional de ataques baseados em calor ou luz intensa (como fogo, laser ou clarões bioluminescentes)." },
+          { cost: "1 adptação e 1 pressão", name: "Maria-da-campina", desc: "A pele fotossintética do(a) Infectado(a) não tolera bem a ausência de luz natural. A cada dia passado sem exposição direta ao sol (ou fonte equivalente), sofre uma penalidade de Sucesso em testes de Resolução até que a exposição seja restabelecida por ao menos 1 hora." }
         ]
       },
       {
         carta: "3 de Paus",
         nome: "Assimilação do Cerrado",
+        descricao: "Casca grossa protege o(a) Infectado(a) contra lesões e aridez. O organismo armazena água em reservas internas e consegue se recuperar após longos períodos de calor intenso e seca.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Tatu-canastra", desc: "Enquanto estiver sob sol forte ou clima seco, você recebe um ponto de dano a menos de ataques físicos. Esse bônus se perde se estiver em clima úmido, submerso ou sob chuva intensa." },
-          { cost: "1 sucesso e 1 pressão", name: "Mandacaru", desc: "Sempre que sofrer dois ou mais pontos de dano em um mesmo ataque, a camada externa de sua carapaça se fragmenta em estilhaços, ferindo quem estiver em alcance corpo a corpo. O atacante sofre um ponto de dano direto, mas você também sofre -1 SUCESSO em testes de Reação até a carapaça regenerar (o que só ocorre após o fim da cena)." },
-          { cost: "1 adptação e 1 pressão", name: "Lobo-guará", desc: "Sua anatomia reage mal à umidade. Sempre que entrar em contato prolongado com água (chuva intensa, submersão, clima encharcado), sofre -1 SUCESSO em testes que incluam Potência ou Furtividade até se secar completamente." }
+          { cost: "1 sucesso e 1 pressão", name: "Mandacaru", desc: "Sempre que sofrer dois ou mais pontos de dano em um mesmo ataque, a camada externa de sua carapaça se fragmenta em estilhaços, ferindo quem estiver em alcance corpo a corpo. O atacante sofre um ponto de dano direto, mas você também sofre uma penalidade de Sucesso em testes de Reação até a carapaça regenerar (o que só ocorre após o fim da cena)." },
+          { cost: "1 adptação e 1 pressão", name: "Lobo-guará", desc: "Sua anatomia reage mal à umidade. Sempre que entrar em contato prolongado com água (chuva intensa, submersão, clima encharcado), sofre uma penalidade de Sucesso em testes que incluam Potência ou Furtividade até se secar completamente." }
         ]
       },
       {
         carta: "4 de Paus",
         nome: "Assimilação da Colina",
+        descricao: "Músculos e tendões do(a) Infectado(a) se avolumam para ganhar força. A resistência se prolonga em terrenos inclinados e o corpo aprende a economizar energia durante subidas íngremes.",
         mutações: [
-          { cost: "1 adptação e 1 sucesso", name: "Caxinguelê", desc: "Ignora penalidades por terreno inclinado, escorregadio ou irregular durante deslocamentos e escaladas. Sempre que investir um SUCESSO em Fuga, adicione um SUCESSO. Além disso, não pode ser derrubado ou desequilibrado por meios físicos, a menos que o ataque cause dano." },
-          { cost: "1 sucesso e 1 pressão", name: "Porco-do-mato", desc: "Recebe +1 SUCESSO em testes que incluam Atletismo ao correr, saltar ou escalar, mas sofre +1 PRESSÃO em testes que incluam Furtividade devido à rigidez dos movimentos." },
-          { cost: "1 adptação e 1 pressão", name: "Jabuti-piranga", desc: "Em ambientes planos ou excessivamente nivelados (ambientes urbanos, corredores, pisos industriais), sofre -1 SUCESSO em testes que incluam Reação até deixar o local ou se adaptar por uma cena inteira." }
+          { cost: "1 adptação e 1 sucesso", name: "Caxinguelê", desc: "Ignora penalidades por terreno inclinado, escorregadio ou irregular durante deslocamentos e escaladas. Sempre que investir Sucesso em Fuga, adicione Sucesso. Além disso, não pode ser derrubado ou desequilibrado por meios físicos, a menos que o ataque cause dano." },
+          { cost: "1 sucesso e 1 pressão", name: "Porco-do-mato", desc: "Recebe Sucesso adicional em testes que incluam Atletismo ao correr, saltar ou escalar, mas sofre a penalidade de Pressão adicional em testes que incluam Furtividade devido à rigidez dos movimentos." },
+          { cost: "1 adptação e 1 pressão", name: "Jabuti-piranga", desc: "Em ambientes planos ou excessivamente nivelados (ambientes urbanos, corredores, pisos industriais), sofre menos Sucesso em testes que incluam Reação até deixar o local ou se adaptar por uma cena inteira." }
         ]
       },
       {
         carta: "5 de Paus",
         nome: "Assimilação Desértica",
+        descricao: "Suor e metabolismo se adaptam à baixa umidade e a temperaturas extremas. O(a) Infectado(a) consome quantidades reduzidas de água e desenvolve outras maneiras de se proteger.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Suculenta", desc: "Pode permanecer até 5 dias sem consumir água sem sofrer penalidades." },
-          { cost: "1 sucesso e 1 pressão", name: "Diabo-espinhoso", desc: "O corpo libera secreções que irritam olhos e mucosas. Agressores corpo a corpo sofrem 1 de dano ou 1 SUCESSO adicional em neutralização da Ameaça. Toda PRESSÃO mantida pelo resto da cena causa 1 de dano a um aliado próximo." },
-          { cost: "1 adptação e 1 pressão", name: "Esquilo Terrestre", desc: "Passa a cavar buracos para dormir em segurança, perde  Ponto de Determinação se não dormir em uma toca." }
+          { cost: "1 sucesso e 1 pressão", name: "Diabo-espinhoso", desc: "O corpo libera secreções que irritam olhos e mucosas. Agressores corpo a corpo sofrem 1 de dano ou Sucesso adicional em neutralização da Ameaça. Toda Pressão mantida pelo resto da cena causa 1 de dano a um aliado próximo." },
+          { cost: "1 adptação e 1 pressão", name: "Esquilo Terrestre", desc: "Passa a cavar buracos para dormir em segurança, perde um Ponto de Determinação se não dormir em uma toca." }
         ]
       },
       {
         carta: "6 de Paus",
         nome: "Assimilação Florestal",
+        descricao: "O corpo do(a) Infectado(a) aprimora seu equilíbrio e sua capacidade de se esgueirar em terrenos densos. Visão e audição se adaptam à penumbra e a movimentação entre árvores é quase imperceptível aos predadores.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Morcego-narigudo", desc: "Passa a ignorar penalidades por baixa luminosidade natural, incluindo crepúsculo, sombra densa ou penumbra. Esse efeito não se aplica à escuridão total nem à ausência de luz artificial." },
-          { cost: "1 sucesso e 1 pressão", name: "Sucuri", desc: "Os sons são absorvidos pela pele. Recebe uma PRESSÃO adicional em testes que incluem Furtividade ao se mover em vegetação densa, mas tem 1 PRESSÃO em testes que incluem Expressão, pois a vocalização do(a) Infectado(a) se torna abafada e pouco audível." },
-          { cost: "1 adptação e 1 pressão", name: "Rato-do-mato", desc: "Ao sair abruptamente de ambiente sombreado para um muito iluminado, sofre penalidades de 1 SUCESSO em testes que incluem Percepção por 1 cena, devido à saturação do nervo óptico." }
+          { cost: "1 sucesso e 1 pressão", name: "Sucuri", desc: "Os sons são absorvidos pela pele. Recebe Adaptação adicional em testes que incluem Furtividade ao se mover em vegetação densa, mas sofre Pressão em testes que incluem Expressão, pois a vocalização do(a) Infectado(a) se torna abafada e pouco audível." },
+          { cost: "1 adptação e 1 pressão", name: "Rato-do-mato", desc: "Ao sair abruptamente de ambiente sombreado para um muito iluminado, sofre uma penalidade de Sucesso em testes que incluem Percepção por 1 cena, devido à saturação do nervo óptico." }
         ]
       },
       {
         carta: "7 de Paus",
         nome: "Assimilação do Manguezal",
+        descricao: "Poros filtram sal e membros se adaptam ao lodo. O(a) Infectado(a) respira e se move em áreas encharcadas, resistindo a infecções típicas de ambientes lamacentos.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Mangue-vermelho", desc: "Pode consumir água salobra ou salina sem qualquer prejuízo." },
           { cost: "1 sucesso e 1 pressão", name: "Caramujo-do-mangue", desc: "Consegue respirar parcialmente pela pele em ambientes alagadiços, permanecendo submerso por até 10 minutos. No entanto, a pele do(a) Infectado(a) torna-se vulnerável, sofrendo um ponto de dano adicional contra ataques físicos." },
-          { cost: "1 adptação e 1 pressão", name: "Sururu", desc: "Ao passar mais de 6 horas em ambientes secos (ambiente urbano, cerrado, alta montanha), a pele começa a rachar. Sofre penalidades de 1 SUCESSO em testes que incluam Reação até ser reidratado por imersão ou umidade ambiental." }
+          { cost: "1 adptação e 1 pressão", name: "Sururu", desc: "Ao passar mais de 6 horas em ambientes secos (ambiente urbano, cerrado, alta montanha), a pele começa a rachar. Sofre uma penalidade de Sucesso em testes que incluam Reação até ser reidratado por imersão ou umidade ambiental." }
         ]
       },
       {
         carta: "8 de Paus",
         nome: "Assimilação Marinha",
+        descricao: "Pulmões e músculos se adaptam à pressão e correntes marinhas. O(a) Infectado(a) nada com eficiência e tolera longas imersões, explorando o oceano sem risco de colapso.",
         mutações: [
-          { cost: "1 adptação e 1 sucesso", name: "Toninha", desc: "Você se move duas vezes mais rápido na água do que um humano comum, e não precisa testar Atletismo para nadar, exceto em tempestades ou redemoinhos. Dobre todos os SUCESSOS investidos em Fuga nadando." },
-          { cost: "1 sucesso e 1 pressão", name: "Biguá", desc: "Tem 1 SUCESSO adicional em testes que incluem Atletismo na água ou areia fofa, e tem 1 PRESSÃO em testes que incluem Manufaturas, pois a motricidade fina dos dedos foi comprometida." },
-          { cost: "1 adptação e 1 pressão", name: "Tartaruga-aruanã", desc: "Sempre que estiver correndo ou saltando em pisos rígidos (metal, concreto, pedra), sofre 1 PRESSÃO em testes que incluem Potência, devido ao formato instável das extremidades." }
+          { cost: "1 adptação e 1 sucesso", name: "Toninha", desc: "Você se move duas vezes mais rápido na água do que um humano comum, e não precisa testar Atletismo para nadar, exceto em tempestades ou redemoinhos. Dobre todos os Sucessos investidos em Fuga nadando." },
+          { cost: "1 sucesso e 1 pressão", name: "Biguá", desc: "Tem Sucesso adicional em testes que incluem Atletismo na água ou areia fofa, e adiciona Pressão em testes que incluem Manufaturas, pois a motricidade fina dos dedos foi comprometida." },
+          { cost: "1 adptação e 1 pressão", name: "Tartaruga-aruanã", desc: "Sempre que estiver correndo ou saltando em pisos rígidos (metal, concreto, pedra), sofre Pressão em testes que incluem Potência, devido ao formato instável das extremidades." }
         ]
       },
       {
         carta: "9 de Paus",
         nome: "Assimilação da Montanha",
+        descricao: "O sangue engrossa e a circulação se ajusta. O(a) Infectado(a) suporta ar rarefeito e frio intenso, mantendo energia e estabilidade mesmo em grandes altitudes.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Urubu-Rei", desc: "Não sofre qualquer penalidade por altitudes elevadas ou ar rarefeito, mesmo acima de 3000m. Pode manter esforço físico moderado por mais tempo sem fadiga." },
-          { cost: "1 sucesso e 1 pressão", name: "Calango-bandeira", desc: "Pode prender a respiração por até 10 minutos mesmo em movimento, mas em climas quentes e secos perde 1 ADAPTAÇÃO em testes de Influência ou Expressão, devido à rouquidão." },
+          { cost: "1 sucesso e 1 pressão", name: "Calango-bandeira", desc: "Pode prender a respiração por até 10 minutos mesmo em movimento, mas em climas quentes e secos perde Adaptação em testes de Influência ou Expressão, devido à rouquidão." },
           { cost: "1 adptação e 1 pressão", name: "Tucanuçu", desc: "Ao passar mais de 1 hora em ambientes abafados ou com alta umidade, tem a Sagacidade reduzida em um (mínimo 0), como se estivesse em constante mal-estar leve." }
         ]
       },
       {
         carta: "10 de Paus",
         nome: "Assimilação do Pântano",
+        descricao: "Pele e pulmões toleram gases e microrganismos da água estagnada. O(a) Infectado(a) detecta movimentos sutis no brejo, usando o terreno alagado como proteção natural.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Guaiamu", desc: "Ignora penalidades de movimento em terrenos encharcados ou instáveis. Pode atravessar até 2 metros de profundidade de água ou lama sem necessidade de teste." },
-          { cost: "1 sucesso e 1 pressão", name: "Garça-azul", desc: "Possui 1 SUCESSO adicional em testes que incluem Furtividade ao caminhar sobre lama ou folhas alagadas, pois seus passos não fazem barulho. Contudo, sofre +1 PRESSÃO em testes que incluam Reação em ambientes fechados, onde o alongamento das pernas prejudica o equilíbrio." },
+          { cost: "1 sucesso e 1 pressão", name: "Garça-azul", desc: "Possui Sucesso adicional em testes que incluem Furtividade ao caminhar sobre lama ou folhas alagadas, pois seus passos não fazem barulho. Contudo, sofre Pressão adicional em testes que incluam Reação em ambientes fechados, onde o alongamento das pernas prejudica o equilíbrio." },
           { cost: "1 adptação e 1 pressão", name: "Sapo-cururu", desc: "Se for derrubado ou sofrer queda, deve fazer um teste de Potência ou irá sofrer um ponto de dano adicional de todos os ataques até o fim da cena, por instabilidade nas articulações." }
         ]
       },
       {
         carta: "Valete de Paus",
         nome: "Assimilação da Caatinga",
+        descricao: "O organismo do(a) Infectado(a) aprende a reduzir funções em longos períodos secos, desperta com chuvas ocasionais e protege-se de predadores com pele espessa e pontiaguda.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Rola-bosta", desc: "Reduz em um ponto todo dano cortante ou perfurante sofrido por fontes naturais (espinhos, facas, garras). Esse efeito não se aplica a armas de fogo ou ataques energéticos." },
           { cost: "1 sucesso e 1 pressão", name: "Asa-branca", desc: "A pele do(a) Infectado(a) o protege contra insolação e exposição solar extrema por até 2 cenas, mesmo sem abrigo ou água. Tem Influência reduzida em um (mínimo 0), devido à aparência enrijecida e aspecto vítreo." },
-          { cost: "1 adptação e 1 pressão", name: "Teiú", desc: "Em ambientes úmidos ou com pouca circulação de ar, acumula calor corporal, sofrendo 1 SUCESSO em testes que incluem Reação após 2 horas." }
+          { cost: "1 adptação e 1 pressão", name: "Teiú", desc: "Em ambientes úmidos ou com pouca circulação de ar, acumula calor corporal, sofrendo uma penalidade de Sucesso em testes que incluem Reação após 2 horas." }
         ]
       },
       {
         carta: "Dama de Paus",
         nome: "Assimilação Subterrânea",
+        descricao: "Visão perde relevância entre os sentidos. Pele e ouvido detectam vibrações e correntes de ar em túneis. O(a) Infectado(a) se orienta no escuro e resiste a confinamento e baixa oxigenação.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Tatu-canastra", desc: "Detecta movimentos ou presenças num raio de 10 metros se estiver tocando o chão com as mãos ou pés descalços, mesmo na escuridão. Não identifica outros detalhes, somente a intensidade e a distância." },
-          { cost: "1 sucesso e 1 pressão", name: "Coruja-buraqueira", desc: "Recebe +1 SUCESSO em testes que incluem Percepção para identificar sons abafados ou ecos subterrâneos, mas +1 PRESSÃO em testes que incluem Reação relacionados a ruídos altos repentinos (tiros, explosões), por conta do sistema auditivo hipersensível." },
+          { cost: "1 sucesso e 1 pressão", name: "Coruja-buraqueira", desc: "Recebe Sucesso adicional em testes que incluem Percepção para identificar sons abafados ou ecos subterrâneos, mas sofre Pressão adicional em testes que incluem Reação relacionados a ruídos altos repentinos (tiros, explosões), por conta do sistema auditivo hipersensível." },
           { cost: "1 adptação e 1 pressão", name: "Morcego-de-cauda-livre", desc: "Ambientes com múltiplos sons sobrepostos (máquinas, motores, grandes multidões) te sobrecarregam. Tem a Sagacidade reduzida em um (mínimo 0) nesses locais até que se isole." }
         ]
       },
       {
         carta: "Rei de Paus",
         nome: "Assimilação da Tundra",
+        descricao: "O metabolismo do(a) Infectado(a) regula calor em ambientes gélidos. Seu sangue não congela e seu corpo suporta longos períodos em torpor, reduzindo desgaste no frio extremo.",
         mutações: [
           { cost: "1 adptação e 1 sucesso", name: "Líquen-de-mapa", desc: "Não sofre penalidades por frio intenso ou neve, mesmo abaixo de –20°C. Pode dormir ao relento sem risco de congelamento ou exaustão térmica." },
-          { cost: "1 sucesso e 1 pressão", name: "Marmota-alpina", desc: "Pode entrar voluntariamente em estado de torpor por até 12 horas, reduzindo consumo de oxigênio e de estabilizando ferimentos (não morre por sangramento nesse estado). Contudo, ao sair do torpor, a Potência é reduzida em um (mínimo 0) até o próximo descanso." },
-          { cost: "1 adptação e 1 pressão", name: "Husky siberiano", desc: "Os pelos de todo o corpo crescem muito formando uma proteção contra o frio. Em ambientes quentes sofre +1 PRESSÃO em testes que incluam Atletismo." }
+          { cost: "1 sucesso e 1 pressão", name: "Marmota-alpina", desc: "Pode entrar voluntariamente em estado de torpor por até 12 horas, reduzindo consumo de oxigênio e estabilizando ferimentos (não morre por sangramento nesse estado). Contudo, ao sair do torpor, a Potência é reduzida em um (mínimo 0) até o próximo descanso." },
+          { cost: "1 adptação e 1 pressão", name: "Husky siberiano", desc: "Os pelos de todo o corpo crescem muito formando uma proteção contra o frio. Em ambientes quentes sofre Pressão adicional em testes que incluam Atletismo." }
         ]
       }
     ]

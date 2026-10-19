@@ -1,26 +1,31 @@
 /* Círculos / Losangos de Valor */
 .value-bubbles {
   display: grid;
-  grid-template-columns: repeat(5,1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 4px;
 }
-.desc{
+
+.desc {
   font-size: var(--font-size-sm);
 }
+
 .bubble {
   width: 14px;
   height: 14px;
   background-color: transparent;
   transition: var(--transition-fast);
 }
-.bubble-instinct{
+
+.bubble-instinct {
   border: 1px solid var(--color-instintos);
-  
+
 }
-.bubble-conhecimento{
+
+.bubble-conhecimento {
   border: 1px solid var(--color-conhecimentos);
 }
-.bubble-pratica{
+
+.bubble-pratica {
   border: 1px solid var(--color-praticas);
 }
 
@@ -30,7 +35,7 @@
 }
 
 /* Conhecimentos e Práticas usam losangos */
-#conhecimentos-list-sheet .bubble, 
+#conhecimentos-list-sheet .bubble,
 #praticas-list-sheet .bubble {
   transform: rotate(45deg);
   width: 11px;
@@ -47,14 +52,17 @@
   background-color: var(--color-rust-glow);
   border-color: var(--color-rust-glow);
 }
+
 #praticas-list-sheet .bubble.filled {
   background-color: var(--color-praticas);
   border-color: var(--color-praticas);
 }
+
 #conhecimentos-list-sheet .bubble.filled {
   background-color: var(--color-conhecimentos);
   border-color: var(--color-conhecimentos);
 }
+
 /* Saúde na Ficha */
 .status-header {
   font-family: var(--font-heading);
@@ -97,6 +105,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
 .health-total-label strong:last-child {
   color: var(--color-blue-glow);
 }
@@ -142,12 +151,29 @@
 }
 
 /* Preenchimento das gotas com cores do nível de gravidade */
-.health-level-row[data-level="6"] .health-drop.filled { color: var(--health-6); }
-.health-level-row[data-level="5"] .health-drop.filled { color: var(--health-5); }
-.health-level-row[data-level="4"] .health-drop.filled { color: var(--health-4); }
-.health-level-row[data-level="3"] .health-drop.filled { color: var(--health-3); }
-.health-level-row[data-level="2"] .health-drop.filled { color: var(--health-2); }
-.health-level-row[data-level="1"] .health-drop.filled { color: var(--health-1); }
+.health-level-row[data-level="6"] .health-drop.filled {
+  color: var(--health-6);
+}
+
+.health-level-row[data-level="5"] .health-drop.filled {
+  color: var(--health-5);
+}
+
+.health-level-row[data-level="4"] .health-drop.filled {
+  color: var(--health-4);
+}
+
+.health-level-row[data-level="3"] .health-drop.filled {
+  color: var(--health-3);
+}
+
+.health-level-row[data-level="2"] .health-drop.filled {
+  color: var(--health-2);
+}
+
+.health-level-row[data-level="1"] .health-drop.filled {
+  color: var(--health-1);
+}
 
 .health-drop.disabled {
   opacity: 0.15;
@@ -169,12 +195,29 @@
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
-.health-level-row.active[data-level="6"] { border-left-color: var(--health-6); }
-.health-level-row.active[data-level="5"] { border-left-color: var(--health-5); }
-.health-level-row.active[data-level="4"] { border-left-color: var(--health-4); }
-.health-level-row.active[data-level="3"] { border-left-color: var(--health-3); }
-.health-level-row.active[data-level="2"] { border-left-color: var(--health-2); }
-.health-level-row.active[data-level="1"] { border-left-color: var(--health-1); }
+.health-level-row.active[data-level="6"] {
+  border-left-color: var(--health-6);
+}
+
+.health-level-row.active[data-level="5"] {
+  border-left-color: var(--health-5);
+}
+
+.health-level-row.active[data-level="4"] {
+  border-left-color: var(--health-4);
+}
+
+.health-level-row.active[data-level="3"] {
+  border-left-color: var(--health-3);
+}
+
+.health-level-row.active[data-level="2"] {
+  border-left-color: var(--health-2);
+}
+
+.health-level-row.active[data-level="1"] {
+  border-left-color: var(--health-1);
+}
 
 .health-adjust-input {
   width: 40px;
@@ -190,11 +233,13 @@
   font-weight: 700;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.btn-close-roller-panel{
+
+.btn-close-roller-panel {
   background-color: var(--color-rust-glow);
   border-color: var(--color-rust-glow);
   box-shadow: var(--glow-shadow);
 }
+
 .health-adjust-input:focus {
   outline: none;
   border-color: var(--color-blue-glow);
@@ -348,11 +393,13 @@
 }
 
 .det-side .cabo-label {
-  color: var(--color-instintos); /* Bright Red */
+  color: var(--color-instintos);
+  /* Bright Red */
 }
 
 .ass-side .cabo-label {
-  color: var(--color-blue-glow); /* Bright Cyan/Blue */
+  color: var(--color-blue-glow);
+  /* Bright Cyan/Blue */
 }
 
 .cabo-level-container {
@@ -370,11 +417,13 @@
 }
 
 .det-side .cabo-level {
-  color: var(--color-instintos); /* Bright Red */
+  color: var(--color-instintos);
+  /* Bright Red */
 }
 
 .ass-side .cabo-level {
-  color: var(--color-blue-glow); /* Bright Cyan/Blue */
+  color: var(--color-blue-glow);
+  /* Bright Cyan/Blue */
 }
 
 .btn-cabo-adjust {
@@ -408,11 +457,13 @@
   gap: 6px;
   justify-items: center;
 }
-.status-cards-row{
-  display: grid; 
-  grid-template-columns: 1fr 1fr; 
+
+.status-cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+
 .cabo-point {
   width: 32px;
   height: 32px;
@@ -437,7 +488,7 @@
 
 .det-side .cabo-point.filled {
   color: var(--color-instintos);
-  
+
 }
 
 .det-side .cabo-point:hover:not(.filled) {
@@ -449,8 +500,9 @@
 }
 
 .ass-side .cabo-point.filled {
-  color: var(--color-blue-glow);;
-  
+  color: var(--color-blue-glow);
+  ;
+
 }
 
 .ass-side .cabo-point:hover:not(.filled) {
@@ -487,9 +539,17 @@
 }
 
 @keyframes pulse-red {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 /* Página 2: Características */
@@ -595,11 +655,29 @@
   height: 16px;
 }
 
-.suit-copas { color: #f43f5e; }
-.suit-ouros { color: #3b82f6; } /* Azul nos adaptativos? Ou amarelo ouros? Vamos usar amarelo no ouros */
-.suit-ouros { color: #eab308; }
-.suit-espadas { color: #a855f7; } /* Roxo em inoportunos */
-.suit-paus { color: #10b981; } /* Verde em singulares */
+.suit-copas {
+  color: #f43f5e;
+}
+
+.suit-ouros {
+  color: #3b82f6;
+}
+
+/* Azul nos adaptativos? Ou amarelo ouros? Vamos usar amarelo no ouros */
+.suit-ouros {
+  color: #eab308;
+}
+
+.suit-espadas {
+  color: #a855f7;
+}
+
+/* Roxo em inoportunos */
+.suit-paus {
+  color: #10b981;
+}
+
+/* Verde em singulares */
 
 .mutations-sheet-list {
   display: flex;
@@ -624,7 +702,7 @@
 }
 
 .mutation-sheet-item .desc {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-md);
   color: var(--text-secondary);
 }
 
@@ -724,16 +802,16 @@
   border-radius: 2px;
 }
 
-.prop-checkbox:hover input ~ .checkmark {
+.prop-checkbox:hover input~.checkmark {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-.prop-checkbox.prop-q input:checked ~ .checkmark {
+.prop-checkbox.prop-q input:checked~.checkmark {
   background-color: var(--color-blue-glow);
   border-color: var(--color-blue-glow);
 }
 
-.prop-checkbox.prop-e input:checked ~ .checkmark {
+.prop-checkbox.prop-e input:checked~.checkmark {
   background-color: #ef4444;
   border-color: #ef4444;
 }
@@ -744,7 +822,7 @@
   display: none;
 }
 
-.prop-checkbox input:checked ~ .checkmark::after {
+.prop-checkbox input:checked~.checkmark::after {
   display: block;
 }
 
@@ -1020,7 +1098,7 @@
 }
 
 .char-portrait-placeholder {
-  font-size: 24px;
+  font-size: var(--font-size-xl);
   color: var(--text-muted);
 }
 

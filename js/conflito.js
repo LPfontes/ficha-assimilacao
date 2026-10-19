@@ -85,48 +85,43 @@ function _renderAmeacaActivations(a, ameacaIdx) {
 
     return `
       <div class="${_getAtivacaoItemClass(isCompleted, 'ameaca-ativacao-card')}">
-        <!-- Partitura da Ameaça -->
         <div class="conflito-ativacao-investimento ameaca-ativacao-investimento">
-        <div class="investimento-label-row" style="display:flex; align-items: center; gap:4px; ">
-          <span class="investimento-label">Partitura:</span>
-          <button class="btn-delete-ativacao-ameaca btn-danger btn-sm" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Excluir Ativação da Ameaça">&times;</button>
-          <div class="investimento-controls">
-            ${requiredS > 0 ? `
-            <div class="investimento-control-group group-s">
-              <img src="${_diceImg('S')}" alt="S" title="Sucesso" class="conflito-trigger-badge-img badge-img-s">
-              <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">-</button>
-              <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
-              <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">+</button>
-            </div>` : ""}
-            ${requiredA > 0 ? `
-            <div class="investimento-control-group group-a">
-              <img src="${_diceImg('A')}" alt="A" title="Adaptação" class="conflito-trigger-badge-img badge-img-a">
-              <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">-</button>
-              <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
-              <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">+</button>
-            </div>` : ""}
-            ${requiredP > 0 ? `
-            <div class="investimento-control-group group-p">
-              <img src="${_diceImg('P')}" alt="P" title="Pressão" class="conflito-trigger-badge-img badge-img-p">
-              <button type="button" class="btn-invest-ameaca-dec btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">-</button>
-              <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
-              <button type="button" class="btn-invest-ameaca-inc btn-invest-mini" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">+</button>
-            </div>` : ""}
-            <div class="conflito-ativacao-title-row-left">
-              <span class="conflito-ativacao-titulo ameaca-ativacao-titulo">Ativação</span>
+          <div class="investimento-label-row">
+            <div class="investimento-controls">
+              ${requiredS > 0 ? `
+              <span class="conflito-result-badge badge-s" title="Sucessos (S)">
+                <img src="assets/sucesso.webp" alt="S">
+                <button type="button" class="btn-pool-adjust btn-invest-ameaca-dec" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">-</button>
+                <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-ameaca-inc" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">+</button>
+              </span>` : ""}
+              ${requiredA > 0 ? `
+              <span class="conflito-result-badge badge-a" title="Adaptações (A)">
+                <img src="assets/adaptacao.webp" alt="A">
+                <button type="button" class="btn-pool-adjust btn-invest-ameaca-dec" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">-</button>
+                <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-ameaca-inc" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">+</button>
+              </span>` : ""}
+              ${requiredP > 0 ? `
+              <span class="conflito-result-badge badge-p" title="Pressões (P)">
+                <img src="assets/pressao.webp" alt="P">
+                <button type="button" class="btn-pool-adjust btn-invest-ameaca-dec" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">-</button>
+                <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-ameaca-inc" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">+</button>
+              </span>` : ""}
+            </div>
+
+            <div class="investimento-actions">
+              ${isCompleted ? `<button class="btn btn-sm btn-reset-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Gastar todas as investidas e resetar" style="background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;">Gastar</button>` : ""}
+              <button class="btn btn-sm btn-edit-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Editar Ativação">Editar</button>
+              <button class="btn-delete-ativacao-ameaca btn-danger btn-sm" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Excluir Ativação">&times;</button>
             </div>
           </div>
-          </div>
           
-          <div class="conflito-ativacao-info">
-            <span class="conflito-ativacao-titulo ameaca-ativacao-titulo">${esc(act.titulo)}</span>
-            <div class="conflito-ativacao-efeito ameaca-ativacao-efeito">${esc(act.efeito)}</div>
+          <div class="conflito-ativacao-info" style="margin-top:4px;">
+            <strong class="conflito-ativacao-titulo ameaca-ativacao-titulo" style="color:var(--text-primary); font-size:var(--font-size-sm); display:block; margin-bottom:2px;">${esc(act.titulo)}</strong>
+            <div class="conflito-ativacao-efeito ameaca-ativacao-efeito" style="color:var(--text-secondary); font-size:var(--font-size-xs);">${esc(act.efeito)}</div>
           </div>
-        </div>
-
-        <div style="display:flex; gap:4px; margin-top:4px;">
-          ${isCompleted ? `<button class="btn-reset-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Gastar todas as investidas e resetar" style="background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;">Gastar</button>` : ""}
-          <button class="btn-edit-ativacao-ameaca" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Editar Ativação da Ameaça" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;">Editar</button>
         </div>
       </div>
     `;
@@ -137,19 +132,19 @@ function getScreen() { return document.getElementById("conflito-screen"); }
 
 function _renderCondicionantes(condicionantes) {
   if (!condicionantes || condicionantes.length === 0) {
-    return `<div class="world-list-empty" style="font-size: 11px; padding: 12px; color: var(--text-muted);">Nenhum condicionante cadastrado.</div>`;
+    return `<div class="world-list-empty" style="font-size: var(--font-size-md); padding: 12px; color: var(--text-muted);">Nenhum condicionante cadastrado.</div>`;
   }
   return condicionantes.map((cond, idx) => `
     <div class="world-list-item" data-cond-idx="${idx}" style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.06);">
-      <input type="text" class="cond-texto" value="${esc(cond)}" placeholder="Ex: Ao sofrer dano, ganha +1 Pressão..." style="flex: 1; font-size: 12px; background: transparent; border: none; color: #fff; padding: 2px 0; outline: none;">
-      <button class="btn btn-sm btn-danger btn-remove-cond" data-idx="${idx}" style="padding: 1px 6px; font-size: 11px; height: 18px; line-height: 1.2;">&times;</button>
+      <input type="text" class="cond-texto" value="${esc(cond)}" placeholder="Ex: Ao sofrer dano, ganha +1 Pressão..." style="flex: 1; font-size: var(--font-size-md); background: transparent; border: none; color: #fff; padding: 2px 0; outline: none;">
+      <button class="btn btn-sm btn-danger btn-remove-cond" data-idx="${idx}" style="padding: 1px 6px; font-size: var(--font-size-md); height: 18px; line-height: 1.2;">&times;</button>
     </div>
   `).join("");
 }
 
 function _renderObjetivosPrincipais(objetivosPrincipais) {
   if (!objetivosPrincipais || objetivosPrincipais.length === 0) {
-    return `<div class="world-list-empty" style="font-size: 11px; padding: 12px; color: var(--text-muted);">Nenhum objetivo principal definido.</div>`;
+    return `<div class="world-list-empty" style="font-size: var(--font-size-md); padding: 12px; color: var(--text-muted);">Nenhum objetivo principal definido.</div>`;
   }
   return objetivosPrincipais.map((obj, idx) => `
     <div class="objetivo-principal-item" data-obj-idx="${idx}" style="margin-bottom: 12px; padding: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); border-radius: 4px;">
@@ -159,7 +154,7 @@ function _renderObjetivosPrincipais(objetivosPrincipais) {
           <button type="button" class="btn-obj-princ-dec" data-idx="${idx}">-</button>
           <input type="number" value="${obj.valor || 0}" min="0" max="99" class="conflito-dado-input obj-princ-val" readonly style="width: 32px; text-align: center;">
           <button type="button" class="btn-obj-princ-inc" data-idx="${idx}">+</button>
-          <button type="button" class="btn btn-sm btn-danger btn-remove-obj-princ" data-idx="${idx}" style="margin-left:8px; font-size:12px; padding:2px 6px;">&times;</button>
+          <button type="button" class="btn btn-sm btn-danger btn-remove-obj-princ" data-idx="${idx}" style="margin-left:8px; font-size: var(--font-size-xs); padding:2px 6px;">&times;</button>
         </div>
       </div>
       <textarea class="ws-textarea obj-princ-desc" placeholder="Descreva o objetivo principal..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(obj.descricao || '')}</textarea>
@@ -169,7 +164,7 @@ function _renderObjetivosPrincipais(objetivosPrincipais) {
 
 function _renderObjetivosSecundarios(objetivosSecundarios) {
   if (!objetivosSecundarios || objetivosSecundarios.length === 0) {
-    return `<div class="world-list-empty" style="font-size: 11px; padding: 12px; color: var(--text-muted);">Nenhum objetivo secundário definido.</div>`;
+    return `<div class="world-list-empty" style="font-size: var(--font-size-md); padding: 12px; color: var(--text-muted);">Nenhum objetivo secundário definido.</div>`;
   }
   return objetivosSecundarios.map((obj, idx) => `
     <div class="objetivo-secundario-item" data-obj-idx="${idx}" style="margin-bottom: 12px; padding: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.15); border-radius: 4px;">
@@ -179,7 +174,7 @@ function _renderObjetivosSecundarios(objetivosSecundarios) {
           <button type="button" class="btn-obj-sec-dec btn-conf-qty-dec" data-idx="${idx}">-</button>
           <input type="number" value="${obj.valor || 0}" min="0" max="99" class="conflito-dado-input obj-sec-val" readonly style="width: 32px; text-align: center;">
           <button type="button" class="btn-obj-sec-inc btn-conf-qty-inc" data-idx="${idx}">+</button>
-          <button type="button" class="btn btn-sm btn-danger btn-remove-obj-sec" data-idx="${idx}" style="margin-left:8px; font-size:12px; padding:2px 6px;">&times;</button>
+          <button type="button" class="btn btn-sm btn-danger btn-remove-obj-sec" data-idx="${idx}" style="margin-left:8px; font-size: var(--font-size-xs); padding:2px 6px;">&times;</button>
         </div>
       </div>
       <textarea class="ws-textarea obj-sec-desc" placeholder="Descreva o objetivo secundário..." style="min-height: 48px; font-size: var(--font-size-md);">${esc(obj.descricao || '')}</textarea>
@@ -203,40 +198,15 @@ function _renderAmeacas(c) {
     const badgeText = a.objetivoTipo || "Principal";
 
     return `
-      <div class="world-list-item conflito-ameaca-card">
-        
-      <div class="conflito-ameaca-title-row">
-          <span>${esc(a.nome)}</span>
-          <span class="attr-value-badge">${badgeText}</span>
-          <button class="btn btn-sm btn-edit-ameaca btn-blue" data-idx="${idx}" title="Editar Ameaça">Editar</button>
-          <button class="btn btn-sm btn-danger btn-remove-ameaca" data-idx="${idx}">&times;</button>
-        </div>
-        <div class="conflito-ameaca-descricao">
-          ${esc(a.descricao || "Sem descrição.")}
-        </div>
-
-        <!-- Lista de Ativações da Ameaça -->
-        <div class="ameaca-ativacoes-container">
-        <button type="button" class="btn btn-sm btn-add-ativacao-ameaca btn-blue" data-ameaca-idx="${idx}">+ Ativação</button>
-          <div class="ameaca-ativacoes-header">
-            <div id="conflito-last-roll-container-ameaca-${idx}" class="conflito-last-roll-counter">
-              <span class="last-roll-label">Disponível:</span>
-              <span class="conflito-result-badge badge-s" title="Sucessos">S: 0</span>
-              <span class="conflito-result-badge badge-a" title="Adaptações">A: 0</span>
-              <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: 0</span>
-            </div>
-            <div class="ameaca-ativacoes-header">
-            <div class="conflito-ativacao-header-row">
-              <span>Ativações da Ameaça</span>
-                <div class="conflito-ameaca-actions">
-                  <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}">🎲 Rolar</button>
-                </div>
-                <span>Dados: ${diceDesc}</span>
-              </div>
-            </div>
+      <div class="world-list-item conflito-ameaca-card" data-idx="${idx}">
+        <div class="conflito-ameaca-title-row">
+          <div class="conflito-ameaca-info">
+            <strong class="conflito-ameaca-title">${esc(a.nome)}</strong>
+            <span class="attr-value-badge conflito-ameaca-badge">${badgeText}</span>
           </div>
-          <div class="ameaca-ativacoes-list">
-            ${_renderAmeacaActivations(a, idx)}
+          <div class="conflito-ameaca-actions">
+            <button class="btn btn-sm btn-view-ameaca btn-blue" data-idx="${idx}" title="Abrir Ameaça em Modal">Abrir Ameaça</button>
+            <button class="btn btn-sm btn-danger btn-remove-ameaca" data-idx="${idx}" title="Excluir Ameaça">&times;</button>
           </div>
         </div>
       </div>
@@ -288,6 +258,20 @@ export function renderConflitoSheet() {
   });
 
   const screen = getScreen();
+
+  // Preservar estado aberto do modal de detalhes da ameaça (se houver)
+  const prevDetalhesModal = screen.querySelector("#conflito-modal-ameaca-detalhes");
+  const wasDetalhesOpen = prevDetalhesModal && !prevDetalhesModal.classList.contains("hidden");
+  const openAmeacaIdx = wasDetalhesOpen && prevDetalhesModal.dataset.openAmeacaIdx !== "" && prevDetalhesModal.dataset.openAmeacaIdx !== undefined
+    ? parseInt(prevDetalhesModal.dataset.openAmeacaIdx)
+    : null;
+
+  // Preservar estado aberto do modal de detalhes da ativação (se houver)
+  const prevAtivacaoModal = screen.querySelector("#conflito-modal-ativacao-detalhes");
+  const wasAtivacaoOpen = prevAtivacaoModal && !prevAtivacaoModal.classList.contains("hidden");
+  const openAtivacaoIdx = wasAtivacaoOpen && prevAtivacaoModal.dataset.openAtivacaoIdx !== "" && prevAtivacaoModal.dataset.openAtivacaoIdx !== undefined
+    ? parseInt(prevAtivacaoModal.dataset.openAtivacaoIdx)
+    : null;
 
   screen.innerHTML = `
     <div class="world-sheet-screen">
@@ -346,33 +330,38 @@ export function renderConflitoSheet() {
             
             <div class="conflito-dados-mid-grid">
               <div class="conflito-rolagem-panel">
-                <!-- d6 Row -->
-                <div class="conflito-dado-row">
-                  <span class="conflito-dado-title">DADOS D6</span>
-                  <div class="conflito-qty-controls">
-                    <button type="button" class="btn-conf-qty-dec" data-sides="6">-</button>
-                    <input type="number" id="conflito-roll-d6" value="${(c.d6Count ?? c.grau) || 1}" min="0" max="20" class="conflito-dado-input" readonly>
-                    <button type="button" class="btn-conf-qty-inc" data-sides="6">+</button>
+                <div class="modal-ameaca-dice-row" style="margin-bottom: 8px;">
+                  <div class="investimento-control-group group-s" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                    <img src="assets/d6/3-4(D6).webp" alt="d6" style="width:36px;height:36px;object-fit:contain;">
+                    <span style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:bold;">d6</span>
+                    <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                      <button type="button" class="btn-conf-qty-dec" data-sides="6" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                      <span id="conflito-roll-d6-val" class="invest-val" style="min-width:16px; font-weight:bold;">${(c.d6Count ?? c.grau) || 1}</span>
+                      <button type="button" class="btn-conf-qty-inc" data-sides="6" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                      <input type="hidden" id="conflito-roll-d6" value="${(c.d6Count ?? c.grau) || 1}">
+                    </div>
                   </div>
-                </div>
-                
-                <!-- d10 Row -->
-                <div class="conflito-dado-row">
-                  <span class="conflito-dado-title">DADOS D10</span>
-                  <div class="conflito-qty-controls">
-                    <button type="button" class="btn-conf-qty-dec" data-sides="10">-</button>
-                    <input type="number" id="conflito-roll-d10" value="${c.d10Count || 0}" min="0" max="20" class="conflito-dado-input" readonly>
-                    <button type="button" class="btn-conf-qty-inc" data-sides="10">+</button>
-                  </div>
-                </div>
 
-                <!-- d12 Row -->
-                <div class="conflito-dado-row">
-                  <span class="conflito-dado-title">DADOS D12</span>
-                  <div class="conflito-qty-controls">
-                    <button type="button" class="btn-conf-qty-dec" data-sides="12">-</button>
-                    <input type="number" id="conflito-roll-d12" value="${c.d12Count || 0}" min="0" max="20" class="conflito-dado-input" readonly>
-                    <button type="button" class="btn-conf-qty-inc" data-sides="12">+</button>
+                  <div class="investimento-control-group group-a" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                    <img src="assets/d10/6(D10).webp" alt="d10" style="width:36px;height:36px;object-fit:contain;">
+                    <span style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:bold;">d10</span>
+                    <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                      <button type="button" class="btn-conf-qty-dec" data-sides="10" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                      <span id="conflito-roll-d10-val" class="invest-val" style="min-width:16px; font-weight:bold;">${c.d10Count || 0}</span>
+                      <button type="button" class="btn-conf-qty-inc" data-sides="10" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                      <input type="hidden" id="conflito-roll-d10" value="${c.d10Count || 0}">
+                    </div>
+                  </div>
+
+                  <div class="investimento-control-group group-p" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                    <img src="assets/d12/11(D12).webp" alt="d12" style="width:36px;height:36px;object-fit:contain;">
+                    <span style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:bold;">d12</span>
+                    <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                      <button type="button" class="btn-conf-qty-dec" data-sides="12" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                      <span id="conflito-roll-d12-val" class="invest-val" style="min-width:16px; font-weight:bold;">${c.d12Count || 0}</span>
+                      <button type="button" class="btn-conf-qty-inc" data-sides="12" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                      <input type="hidden" id="conflito-roll-d12" value="${c.d12Count || 0}">
+                    </div>
                   </div>
                 </div>
 
@@ -385,7 +374,7 @@ export function renderConflitoSheet() {
               <div class="conflito-condicionantes-section" style="background:transparent;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <h4 class="ws-label" style="margin: 0; font-size: var(--font-size-md);">Condicionantes da Cena</h4>
-                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-cond" style="font-size: 12px; padding: 2px 10px; line-height: 1.2;">+ Condicionante</button>
+                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-cond" style="font-size: var(--font-size-md); padding: 2px 10px; line-height: 1.2;">+ Condicionante</button>
                 </div>
                 <div id="conflito-condicionantes-list" class="conflito-condicionantes-list">
                   ${_renderCondicionantes(c.condicionantes)}
@@ -396,8 +385,8 @@ export function renderConflitoSheet() {
             <div class="conflito-objetivos-panel">
               <div id="conflito-objetivos-principais-container">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <label class="ws-label" style="margin-bottom: 0;">Objetivos Principais</label>
-                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-obj-princ" style="font-size: 12px; padding: 2px 10px; line-height: 1.2;">+ Objetivo</button>
+                  <h4 class="ws-label" style="margin: 0; font-size: var(--font-size-md);">Objetivos Principais</h4>
+                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-obj-princ">+ Objetivo</button>
                 </div>
                 <div id="conflito-objetivos-princ-list" class="conflito-objetivos-princ-list">
                   ${_renderObjetivosPrincipais(c.objetivosPrincipais)}
@@ -405,8 +394,8 @@ export function renderConflitoSheet() {
               </div>
               <div id="conflito-objetivos-secundarios-container">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <label class="ws-label" style="margin-bottom: 0;">Objetivos Secundários</label>
-                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-obj-sec" style="font-size: 10px; padding: 2px 8px; line-height: 1.2;">+ Objetivo</button>
+                  <h4 class="ws-label" style="margin: 0; font-size: var(--font-size-md);">Objetivos Secundários</h4>
+                  <button type="button" class="btn btn-sm btn-blue" id="btn-conflito-add-obj-sec">+ Objetivo</button>
                 </div>
                 <div id="conflito-objetivos-sec-list" class="conflito-objetivos-sec-list">
                   ${_renderObjetivosSecundarios(c.objetivosSecundarios)}
@@ -421,7 +410,7 @@ export function renderConflitoSheet() {
               <div class="conflito-rolagem-log">
                 <div class="conflito-log-header">
                   <span>Histórico de Rolagens</span>
-                  <button id="btn-conflito-clear-log" class="btn btn-sm btn-danger btn-conflito-clear-log" style="font-size: 10px; padding: 2px 6px; line-height: 1.2;" title="Limpar Histórico">Limpar</button>
+                  <button id="btn-conflito-clear-log" class="btn btn-sm btn-danger btn-conflito-clear-log" style="font-size: var(--font-size-sm); padding: 2px 6px; line-height: 1.2;" title="Limpar Histórico">Limpar</button>
                 </div>
                 <div id="conflito-rolagem-log-list" class="conflito-rolagem-log-list">
                   <!-- Será preenchido dinamicamente -->
@@ -441,7 +430,6 @@ export function renderConflitoSheet() {
           <div class="conflito-ativacoes-header">
             <h3 class="ws-section-title conflito-section-title">Ativações do Conflito</h3>
             <div id="conflito-last-roll-container"></div>
-            <button id="btn-toggle-simbolos" class="btn btn-sm" style="font-size:10px;padding:2px 10px;" title="Alternar símbolos dos dados">Trocar Dados</button>
           </div>
           <div id="conflito-ativacoes-list" class="conflito-ativacoes-list">
             ${c.ativacoes.map((act, idx) => {
@@ -462,50 +450,36 @@ export function renderConflitoSheet() {
       investedP >= requiredP;
 
     return `
-                <div class="${_getAtivacaoItemClass(isCompleted)}">
-                  
-                  <!-- Painel de Investimento (Partitura do Conflito) -->
-                  <div class="conflito-ativacao-investimento">
-                  <div class="investimento-label-row" style="display:flex; align-items: center; gap:4px;">
-                    <span class="investimento-label">Partitura:</span>
-                    <div class="investimento-controls">
-                      ${requiredS > 0 ? `
-                      <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
-                        <img src="${_diceImg('S')}" alt="S" title="Sucesso">
-                        <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
-                        <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
-                        <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
-                      </div>` : ""}
-                      ${requiredA > 0 ? `
-                      <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
-                        <img src="${_diceImg('A')}" alt="A" title="Adaptação">
-                        <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
-                        <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
-                        <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
-                      </div>` : ""}
-                      ${requiredP > 0 ? `
-                      <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
-                        <img src="${_diceImg('P')}" alt="P" title="Pressão">
-                        <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
-                        <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
-                        <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
-                      </div>` : ""}
+                <div class="${_getAtivacaoItemClass(isCompleted)}" data-act-idx="${idx}" style="cursor: pointer;">
+                  <div class="conflito-ativacao-investimento conflito-ativacao-compact">
+                    <div class="conflito-ativacao-info-col">
+                      <strong class="conflito-ativacao-titulo" style="font-size:var(--font-size-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${esc(act.titulo)}</strong>
                     </div>
-                    </div>
-                  <div style="display:flex; gap:4px; margin-top:4px;">
-                    ${isCompleted ? `<button class="btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
-                    <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação">Editar</button>
-                  </div>
-                  </div>
-                  <div class="conflito-ativacao-title-row">
-                  <span title="Ativação">
-                    <span class="conflito-ativacao-titulo">${act.titulo}</span>
-                  </span>
-                  </div>
-                  <div class="conflito-ativacao-efeito">${act.efeito}</div>
 
-                  <div style="display:flex; gap:4px; margin-top:4px;">
-                    <button class="btn-delete-ativacao" data-idx="${idx}" title="Excluir Ativação">&times;</button>
+                    <div class="conflito-ativacao-right-col">
+                      <div class="investimento-controls">
+                        ${requiredS > 0 ? `
+                        <span class="conflito-result-badge badge-s" title="Sucessos (S)">
+                          <img src="assets/sucesso.webp" alt="S">
+                          <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
+                        </span>` : ""}
+                        ${requiredA > 0 ? `
+                        <span class="conflito-result-badge badge-a" title="Adaptações (A)">
+                          <img src="assets/adaptacao.webp" alt="A">
+                          <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
+                        </span>` : ""}
+                        ${requiredP > 0 ? `
+                        <span class="conflito-result-badge badge-p" title="Pressões (P)">
+                          <img src="assets/pressao.webp" alt="P">
+                          <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
+                        </span>` : ""}
+                      </div>
+
+                      <div class="investimento-actions">
+                        ${isCompleted ? `<button class="btn btn-sm btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar" style="background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;">Gastar</button>` : ""}
+                        <button class="btn-delete-ativacao btn-danger btn-sm" data-idx="${idx}" title="Excluir Ativação">&times;</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               `;
@@ -515,7 +489,7 @@ export function renderConflitoSheet() {
           <!-- Guia Rápido de Regras (pág. 33) -->
           <div class="conflito-guia-rapido">
             <button type="button" class="btn-toggle-guia" id="btn-toggle-guia">
-              <span>📖 Guia de Regras (pág. 33)</span>
+              <span>Guia de Regras (pág. 33)</span>
               <span class="guia-arrow">▼</span>
             </button>
             <div class="guia-body hidden" id="conflito-guia-body">
@@ -527,7 +501,7 @@ export function renderConflitoSheet() {
           </div>
 
           <button id="btn-open-nova-ativacao-modal" class="btn btn-sm btn-block conflito-add-ativacao-btn" style="margin-top: 10px;">
-            ➕ Nova Ativação
+            Nova Ativação
           </button>
 
           <!-- Ameaças Ativas -->
@@ -557,7 +531,7 @@ export function renderConflitoSheet() {
             <div id="gatilho-builder" style="display:flex; flex-direction:column; gap:8px;">
               <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; min-height:36px; padding:6px 10px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:4px;">
                 <span id="gatilho-preview" style="display:flex; align-items:center; gap:4px; min-height:26px;"></span>
-                <button type="button" id="btn-gatilho-clear" style="margin-left:auto; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px;" title="Limpar">&times;</button>
+                <button type="button" id="btn-gatilho-clear" style="margin-left:auto; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size: var(--font-size-xs);" title="Limpar">&times;</button>
               </div>
               <div style="display:flex; gap:8px;">
                 <div class="investimento-control-group group-s" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
@@ -606,40 +580,60 @@ export function renderConflitoSheet() {
 
     <!-- Modal de Nova Ameaça -->
     <div id="conflito-modal-nova-ameaca" class="conflito-modal hidden">
-      <div class="conflito-modal-content card-glass">
+      <div class="conflito-modal-content card-glass modal-nova-ameaca-content">
         <div class="conflito-modal-header">
           <h4 class="conflito-modal-title">Adicionar Ameaça</h4>
           <button type="button" class="btn-close-modal" id="btn-close-ameaca-modal">&times;</button>
         </div>
         <div class="conflito-modal-body">
-          <p style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">
+          <p class="modal-form-help-text">
             Preencha os dados da Ameaça. Ela será cadastrada no banco compartilhado de ameaças.
           </p>
           <div class="conflito-form-group">
             <label class="ws-label" for="modal-ameaca-nome">Nome da Ameaça</label>
-            <input type="text" id="modal-ameaca-nome" placeholder="Ex: Criatura Voraz, Rebelião Interna..." class="conflito-form-input" style="width: 100%; box-sizing: border-box;" list="ameacas-db-list">
+            <input type="text" id="modal-ameaca-nome" placeholder="Ex: Criatura Voraz, Rebelião Interna..." class="conflito-form-input conflito-form-input-full" list="ameacas-db-list">
           </div>
           <div class="conflito-form-group">
             <label class="ws-label" for="modal-ameaca-descricao">Descrição / Interesses</label>
-            <textarea id="modal-ameaca-descricao" placeholder="Descreva os interesses, comportamento ou efeitos da Ameaça..." class="conflito-form-input" style="width: 100%; box-sizing: border-box; height: 80px;"></textarea>
+            <textarea id="modal-ameaca-descricao" placeholder="Descreva os interesses, comportamento ou efeitos da Ameaça..." class="conflito-form-input conflito-textarea-fixed"></textarea>
           </div>
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom: 12px;">
-            <div class="conflito-form-group">
-              <label class="ws-label" for="modal-ameaca-d6">Dados D6</label>
-              <input type="number" id="modal-ameaca-d6" value="1" min="0" max="20" class="conflito-form-input" style="width: 100%; box-sizing: border-box; text-align: center;">
+          <div class="dice-selector-row" style="margin-bottom: 12px;">
+            <div class="dice-select-control">
+              <img src="assets/d6/3-4(D6).webp" class="dice-tag tag-d6" alt="d6">
+              <label>(d6)</label>
+              <div class="number-input">
+                <button type="button" class="num-minus btn-dice-step" data-target="modal-ameaca-d6" data-step="-1">-</button>
+                <span id="modal-ameaca-d6-val" class="dice-qty-span">1</span>
+                <button type="button" class="num-plus btn-dice-step" data-target="modal-ameaca-d6" data-step="1">+</button>
+                <input type="hidden" id="modal-ameaca-d6" value="1">
+              </div>
             </div>
-            <div class="conflito-form-group">
-              <label class="ws-label" for="modal-ameaca-d10">Dados D10</label>
-              <input type="number" id="modal-ameaca-d10" value="0" min="0" max="20" class="conflito-form-input" style="width: 100%; box-sizing: border-box; text-align: center;">
+
+            <div class="dice-select-control">
+              <img src="assets/d10/6(D10).webp" class="dice-tag tag-d10" alt="d10">
+              <label>(d10)</label>
+              <div class="number-input">
+                <button type="button" class="num-minus btn-dice-step" data-target="modal-ameaca-d10" data-step="-1">-</button>
+                <span id="modal-ameaca-d10-val" class="dice-qty-span">0</span>
+                <button type="button" class="num-plus btn-dice-step" data-target="modal-ameaca-d10" data-step="1">+</button>
+                <input type="hidden" id="modal-ameaca-d10" value="0">
+              </div>
             </div>
-            <div class="conflito-form-group">
-              <label class="ws-label" for="modal-ameaca-d12">Dados D12</label>
-              <input type="number" id="modal-ameaca-d12" value="0" min="0" max="20" class="conflito-form-input" style="width: 100%; box-sizing: border-box; text-align: center;">
+
+            <div class="dice-select-control">
+              <img src="assets/d12/11(D12).webp" class="dice-tag tag-d12" alt="d12">
+              <label>(d12)</label>
+              <div class="number-input">
+                <button type="button" class="num-minus btn-dice-step" data-target="modal-ameaca-d12" data-step="-1">-</button>
+                <span id="modal-ameaca-d12-val" class="dice-qty-span">0</span>
+                <button type="button" class="num-plus btn-dice-step" data-target="modal-ameaca-d12" data-step="1">+</button>
+                <input type="hidden" id="modal-ameaca-d12" value="0">
+              </div>
             </div>
           </div>
           <div class="conflito-form-group">
             <label class="ws-label" for="modal-ameaca-objetivo">Objetivo no Conflito</label>
-            <select id="modal-ameaca-objetivo" class="conflito-form-input" style="width:100%; box-sizing: border-box;">
+            <select id="modal-ameaca-objetivo" class="conflito-form-input conflito-form-input-full">
               <option value="Principal">Objetivo Principal (Neutralização encerra Conflito)</option>
               <option value="Secundário">Objetivo Secundário (Neutralização retira ativações/dados)</option>
               <option value="Cenário">Apenas Cenário (Agente independente na cena)</option>
@@ -649,6 +643,32 @@ export function renderConflitoSheet() {
         <div class="conflito-modal-footer">
           <button type="button" class="btn btn-sm btn-secondary" id="btn-cancel-ameaca-modal">Cancelar</button>
           <button type="button" class="btn btn-sm btn-success" id="btn-confirm-add-ameaca">Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Visualização/Foco da Ameaça (sem desfoque) -->
+    <div id="conflito-modal-ameaca-detalhes" class="conflito-modal modal-no-backdrop-blur hidden">
+      <div class="conflito-modal-content card-glass modal-ameaca-detalhes-content">
+        <div class="conflito-modal-header">
+          <h4 class="conflito-modal-title" id="ameaca-detalhes-modal-title">Detalhes da Ameaça</h4>
+          <button type="button" class="btn-close-modal" id="btn-close-ameaca-detalhes">&times;</button>
+        </div>
+        <div class="conflito-modal-body" id="ameaca-detalhes-modal-body">
+          <!-- Conteúdo da Ameaça inserido dinamicamente -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Visualização/Foco da Ativação do Conflito (sem desfoque) -->
+    <div id="conflito-modal-ativacao-detalhes" class="conflito-modal modal-no-backdrop-blur hidden">
+      <div class="conflito-modal-content card-glass modal-ativacao-detalhes-content">
+        <div class="conflito-modal-header">
+          <h4 class="conflito-modal-title" id="ativacao-detalhes-modal-title">Ativação</h4>
+          <button type="button" class="btn-close-modal" id="btn-close-ativacao-detalhes">&times;</button>
+        </div>
+        <div class="conflito-modal-body" id="ativacao-detalhes-modal-body">
+          <!-- Conteúdo da Ativação inserido dinamicamente -->
         </div>
       </div>
     </div>
@@ -663,12 +683,17 @@ export function renderConflitoSheet() {
   }
   datalist.innerHTML = (worldState.ameacasDb || []).map(a => `<option value="${esc(a.nome)}">`).join("");
 
-  _attachListeners(c);
+  _attachListeners(c, openAtivacaoIdx, openAmeacaIdx);
   renderConflitoRollLog();
   renderConflitoLastRollCounter();
+
+  // Restaurar modal de detalhes da ameaça aberto se estiver ativo
+  if (wasDetalhesOpen && openAmeacaIdx !== null && c.ameacas && c.ameacas[openAmeacaIdx]) {
+    screen.querySelector(`.btn-view-ameaca[data-idx="${openAmeacaIdx}"]`)?.click();
+  }
 }
 
-function _attachListeners(c) {
+function _attachListeners(c, openAtivacaoIdx = null, openAmeacaIdx = null) {
   const screen = getScreen();
 
   screen.querySelector("#btn-conflito-back")?.addEventListener("click", goToLanding);
@@ -705,8 +730,10 @@ function _attachListeners(c) {
       screen.querySelector("#conflito-grau-val").textContent = c.grau;
 
       const d6Input = screen.querySelector("#conflito-roll-d6");
+      const d6ValSpan = screen.querySelector("#conflito-roll-d6-val");
       if (d6Input) {
         d6Input.value = c.grau;
+        if (d6ValSpan) d6ValSpan.textContent = c.grau;
         c.d6Count = c.grau;
         saveConflito(c);
       }
@@ -718,10 +745,13 @@ function _attachListeners(c) {
     btn.addEventListener("click", () => {
       const sides = btn.dataset.sides;
       const input = screen.querySelector(`#conflito-roll-d${sides}`);
+      const valSpan = screen.querySelector(`#conflito-roll-d${sides}-val`);
       if (input) {
         let val = parseInt(input.value) || 0;
-        input.value = Math.max(0, val - 1);
-        c[`d${sides}Count`] = parseInt(input.value);
+        let newVal = Math.max(0, val - 1);
+        input.value = newVal;
+        if (valSpan) valSpan.textContent = newVal;
+        c[`d${sides}Count`] = newVal;
         saveConflito(c);
       }
     });
@@ -731,10 +761,13 @@ function _attachListeners(c) {
     btn.addEventListener("click", () => {
       const sides = btn.dataset.sides;
       const input = screen.querySelector(`#conflito-roll-d${sides}`);
+      const valSpan = screen.querySelector(`#conflito-roll-d${sides}-val`);
       if (input) {
         let val = parseInt(input.value) || 0;
-        input.value = Math.min(20, val + 1);
-        c[`d${sides}Count`] = parseInt(input.value);
+        let newVal = Math.min(20, val + 1);
+        input.value = newVal;
+        if (valSpan) valSpan.textContent = newVal;
+        c[`d${sides}Count`] = newVal;
         saveConflito(c);
       }
     });
@@ -909,28 +942,33 @@ function _attachListeners(c) {
     renderConflitoSheet();
   });
 
+  // Função para abrir o modal de edição de ativação do conflito
+  const openEditAtivacaoModal = (idx) => {
+    const act = c.ativacoes[idx];
+    if (!act) return;
+    editingActivationState = { idx, ameacaIdx: null, isAmeaca: false };
+    activeThreatIdxForModal = null;
+    modalTitle.textContent = "Editar Ativação";
+    confirmBtn.textContent = "Salvar";
+    {
+      const val = act.gatilho || "";
+      setCounts(
+        (val.match(/S/g) || []).length,
+        (val.match(/A/g) || []).length,
+        (val.match(/P/g) || []).length
+      );
+    }
+    updateGatilhoPreview();
+    screen.querySelector("#modal-ativacao-titulo").value = act.titulo || "";
+    screen.querySelector("#modal-ativacao-efeito").value = act.efeito || "";
+    modal.classList.remove("hidden");
+  };
+
   // Listener para editar ativacao do conflito
   screen.querySelectorAll(".btn-edit-ativacao").forEach(btn => {
     btn.addEventListener("click", () => {
       const idx = parseInt(btn.dataset.idx);
-      const act = c.ativacoes[idx];
-      if (!act) return;
-      editingActivationState = { idx, ameacaIdx: null, isAmeaca: false };
-      activeThreatIdxForModal = null;
-      modalTitle.textContent = "Editar Ativação";
-      confirmBtn.textContent = "Salvar";
-      {
-        const val = act.gatilho || "";
-        setCounts(
-          (val.match(/S/g) || []).length,
-          (val.match(/A/g) || []).length,
-          (val.match(/P/g) || []).length
-        );
-      }
-      updateGatilhoPreview();
-      screen.querySelector("#modal-ativacao-titulo").value = act.titulo;
-      screen.querySelector("#modal-ativacao-efeito").value = act.efeito;
-      modal.classList.remove("hidden");
+      openEditAtivacaoModal(idx);
     });
   });
 
@@ -968,20 +1006,15 @@ function _attachListeners(c) {
     const requiredMap = { S: requiredS, A: requiredA, P: requiredP };
     const required = requiredMap[type] || 0;
 
-    const btn = screen.querySelector(`.btn-invest-inc[data-idx="${idx}"][data-type="${type}"], .btn-invest-dec[data-idx="${idx}"][data-type="${type}"]`);
-    const item = btn?.closest('.conflito-ativacao-item');
-    if (btn) {
-      const group = btn.closest('.investimento-control-group');
-      if (group) {
-        const valSpan = group.querySelector('.invest-val');
-        if (valSpan) {
-          valSpan.textContent = `${act[key]}/${required}`;
-          valSpan.classList.toggle('met', act[key] >= required && required > 0);
-        }
-      }
-    }
-
+    const item = screen.querySelector(`.conflito-ativacao-item[data-act-idx="${idx}"]`);
     if (item) {
+      const badge = item.querySelector(`.badge-${type.toLowerCase()}`);
+      const valSpan = badge?.querySelector('.invest-val');
+      if (valSpan) {
+        valSpan.textContent = `${act[key]}/${required}`;
+        valSpan.classList.toggle('met', act[key] >= required && required > 0);
+      }
+
       const totalRequired = requiredS + requiredA + requiredP;
       const isCompleted = totalRequired > 0 &&
         (act.investedS || 0) >= requiredS &&
@@ -989,18 +1022,59 @@ function _attachListeners(c) {
         (act.investedP || 0) >= requiredP;
       item.classList.toggle('completed-item', isCompleted);
 
-      const editBtn = item.querySelector('.btn-edit-ativacao');
-      if (editBtn) {
-        const container = editBtn.parentNode;
-        let resetBtn = container.querySelector('.btn-reset-ativacao');
+      const actionsContainer = item.querySelector('.investimento-actions');
+      if (actionsContainer) {
+        let resetBtn = actionsContainer.querySelector('.btn-reset-ativacao');
+        const deleteBtn = actionsContainer.querySelector('.btn-delete-ativacao');
         if (isCompleted && !resetBtn) {
           resetBtn = document.createElement('button');
-          resetBtn.className = 'btn-reset-ativacao';
+          resetBtn.className = 'btn btn-sm btn-reset-ativacao';
           resetBtn.dataset.idx = idx;
           resetBtn.title = 'Gastar todas as investidas e resetar';
           resetBtn.textContent = 'Gastar';
+          resetBtn.style.cssText = 'background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;';
+          resetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _resetAtivacao(idx);
+          });
+          if (deleteBtn) {
+            actionsContainer.insertBefore(resetBtn, deleteBtn);
+          } else {
+            actionsContainer.appendChild(resetBtn);
+          }
+        } else if (!isCompleted && resetBtn) {
+          resetBtn.remove();
+        }
+      }
+    }
+
+    // Atualiza elementos no modal de detalhes da ativação (se aberto)
+    if (ativacaoDetalhesModal && !ativacaoDetalhesModal.classList.contains("hidden") && parseInt(ativacaoDetalhesModal.dataset.openAtivacaoIdx) === idx) {
+      const modalBadge = ativacaoDetalhesBody.querySelector(`.conflito-result-badge.badge-${type.toLowerCase()}`);
+      if (modalBadge) {
+        const modalValSpan = modalBadge.querySelector('.invest-val');
+        if (modalValSpan) {
+          modalValSpan.textContent = `${act[key]}/${required}`;
+          modalValSpan.classList.toggle('met', act[key] >= required && required > 0);
+        }
+      }
+      const totalRequired = requiredS + requiredA + requiredP;
+      const isCompleted = totalRequired > 0 &&
+        (act.investedS || 0) >= requiredS &&
+        (act.investedA || 0) >= requiredA &&
+        (act.investedP || 0) >= requiredP;
+      const modalActions = ativacaoDetalhesBody.querySelector('.investimento-actions');
+      if (modalActions) {
+        let resetBtn = modalActions.querySelector('.btn-reset-ativacao');
+        if (isCompleted && !resetBtn) {
+          resetBtn = document.createElement('button');
+          resetBtn.className = 'btn btn-sm btn-reset-ativacao';
+          resetBtn.dataset.idx = idx;
+          resetBtn.title = 'Gastar todas as investidas e resetar';
+          resetBtn.textContent = 'Gastar';
+          resetBtn.style.cssText = 'background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;';
           resetBtn.addEventListener('click', () => _resetAtivacao(idx));
-          container.insertBefore(resetBtn, editBtn);
+          modalActions.insertBefore(resetBtn, modalActions.firstChild);
         } else if (!isCompleted && resetBtn) {
           resetBtn.remove();
         }
@@ -1009,6 +1083,143 @@ function _attachListeners(c) {
 
     saveConflito(c);
     renderConflitoLastRollCounter();
+  }
+
+  // --- MODAL DE DETALHES DA ATIVAÇÃO (SEM DESFOQUE) ---
+  const ativacaoDetalhesModal = screen.querySelector("#conflito-modal-ativacao-detalhes");
+  const ativacaoDetalhesBody = screen.querySelector("#ativacao-detalhes-modal-body");
+  const ativacaoDetalhesTitle = screen.querySelector("#ativacao-detalhes-modal-title");
+
+  const hideAtivacaoDetalhesModal = () => {
+    if (ativacaoDetalhesModal) {
+      ativacaoDetalhesModal.classList.add("hidden");
+      ativacaoDetalhesModal.dataset.openAtivacaoIdx = "";
+      if (ativacaoDetalhesBody) ativacaoDetalhesBody.innerHTML = "";
+    }
+  };
+
+  screen.querySelector("#btn-close-ativacao-detalhes")?.addEventListener("click", hideAtivacaoDetalhesModal);
+  ativacaoDetalhesModal?.addEventListener("click", (e) => {
+    if (e.target === ativacaoDetalhesModal) hideAtivacaoDetalhesModal();
+  });
+
+  const openAtivacaoDetalhesModal = (idx) => {
+    const act = c.ativacoes && c.ativacoes[idx];
+    if (!act || !ativacaoDetalhesModal || !ativacaoDetalhesBody) return;
+
+    ativacaoDetalhesModal.dataset.openAtivacaoIdx = idx;
+    if (ativacaoDetalhesTitle) ativacaoDetalhesTitle.textContent = `Ativação: ${act.titulo || 'Sem Título'}`;
+
+    const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
+    const requiredS = (cleanTrigger.match(/S/g) || []).length;
+    const requiredA = (cleanTrigger.match(/[AB]/g) || []).length;
+    const requiredP = (cleanTrigger.match(/[CP]/g) || []).length;
+    const totalRequired = requiredS + requiredA + requiredP;
+
+    const investedS = act.investedS || 0;
+    const investedA = act.investedA || 0;
+    const investedP = act.investedP || 0;
+
+    const isCompleted = totalRequired > 0 &&
+      investedS >= requiredS &&
+      investedA >= requiredA &&
+      investedP >= requiredP;
+
+    ativacaoDetalhesBody.innerHTML = `
+      <div class="conflito-ativacao-item modal-ativacao-detalhes-card">
+        <div class="conflito-ativacao-investimento" style="padding: 0;">
+          <div class="investimento-label-row">
+            <div class="investimento-controls">
+              ${requiredS > 0 ? `
+              <span class="conflito-result-badge badge-s" title="Sucessos (S)">
+                <img src="assets/sucesso.webp" alt="S">
+                <button type="button" class="btn-pool-adjust btn-invest-modal-dec" data-idx="${idx}" data-type="S">-</button>
+                <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-modal-inc" data-idx="${idx}" data-type="S">+</button>
+              </span>` : ""}
+              ${requiredA > 0 ? `
+              <span class="conflito-result-badge badge-a" title="Adaptações (A)">
+                <img src="assets/adaptacao.webp" alt="A">
+                <button type="button" class="btn-pool-adjust btn-invest-modal-dec" data-idx="${idx}" data-type="A">-</button>
+                <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-modal-inc" data-idx="${idx}" data-type="A">+</button>
+              </span>` : ""}
+              ${requiredP > 0 ? `
+              <span class="conflito-result-badge badge-p" title="Pressões (P)">
+                <img src="assets/pressao.webp" alt="P">
+                <button type="button" class="btn-pool-adjust btn-invest-modal-dec" data-idx="${idx}" data-type="P">-</button>
+                <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-modal-inc" data-idx="${idx}" data-type="P">+</button>
+              </span>` : ""}
+            </div>
+
+            <div class="investimento-actions">
+              ${isCompleted ? `<button class="btn btn-sm btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar" style="background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;">Gastar</button>` : ""}
+              <button class="btn btn-sm btn-edit-ativacao-from-modal" data-idx="${idx}" title="Editar Ativação">Editar</button>
+              <button class="btn-delete-ativacao-from-modal btn-danger btn-sm" data-idx="${idx}" title="Excluir Ativação">&times;</button>
+            </div>
+          </div>
+
+          <div class="conflito-ativacao-info" style="margin-top:12px; background:rgba(0,0,0,0.25); padding:10px; border-radius:4px; border:1px solid rgba(255,255,255,0.06);">
+            <strong class="conflito-ativacao-titulo" style="color:var(--text-primary); font-size:var(--font-size-md); display:block; margin-bottom:6px;">${esc(act.titulo)}</strong>
+            <div class="conflito-ativacao-efeito" style="color:var(--text-secondary); font-size:var(--font-size-sm); line-height:1.5;">${esc(act.efeito)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Conecta botões dentro do modal de detalhes da ativação
+    ativacaoDetalhesBody.querySelectorAll(".btn-invest-modal-inc").forEach(b => {
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        _updateInvestment(parseInt(b.dataset.idx), b.dataset.type, 1);
+      });
+    });
+
+    ativacaoDetalhesBody.querySelectorAll(".btn-invest-modal-dec").forEach(b => {
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        _updateInvestment(parseInt(b.dataset.idx), b.dataset.type, -1);
+      });
+    });
+
+    ativacaoDetalhesBody.querySelector(".btn-reset-ativacao")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _resetAtivacao(idx);
+      openAtivacaoDetalhesModal(idx);
+    });
+
+    ativacaoDetalhesBody.querySelector(".btn-edit-ativacao-from-modal")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hideAtivacaoDetalhesModal();
+      openEditAtivacaoModal(idx);
+    });
+
+    ativacaoDetalhesBody.querySelector(".btn-delete-ativacao-from-modal")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (confirm("Excluir esta ativação do conflito?")) {
+        c.ativacoes.splice(idx, 1);
+        saveConflito(c);
+        hideAtivacaoDetalhesModal();
+        renderConflitoSheet();
+      }
+    });
+
+    ativacaoDetalhesModal.classList.remove("hidden");
+  };
+
+  // Clique no card abre diretamente os detalhes da ativação
+  screen.querySelectorAll(".conflito-ativacao-item[data-act-idx]").forEach(item => {
+    item.addEventListener("click", (e) => {
+      if (e.target.closest("button") || e.target.closest("input")) return;
+      const actIdx = parseInt(item.dataset.actIdx);
+      if (!isNaN(actIdx)) openAtivacaoDetalhesModal(actIdx);
+    });
+  });
+
+  // Restaurar modal de ativação se estava aberto antes do re-render
+  if (openAtivacaoIdx !== null && c.ativacoes && c.ativacoes[openAtivacaoIdx]) {
+    openAtivacaoDetalhesModal(openAtivacaoIdx);
   }
 
   screen.querySelectorAll(".btn-invest-inc").forEach(btn => {
@@ -1039,16 +1250,28 @@ function _attachListeners(c) {
     act.snapshotA = 0;
     act.snapshotP = 0;
 
-    const item = screen.querySelector(`.conflito-ativacao-item [data-idx="${idx}"]`)?.closest('.conflito-ativacao-item');
+    const item = screen.querySelector(`.conflito-ativacao-item[data-act-idx="${idx}"]`);
     if (item) {
       item.classList.remove('completed-item');
       item.querySelectorAll('.invest-val').forEach(span => {
-        const required = span.textContent.split('/')[1];
+        const parts = span.textContent.split('/');
+        const required = parts[1] || '0';
         span.textContent = `0/${required}`;
         span.classList.remove('met');
       });
       const resetBtn = item.querySelector('.btn-reset-ativacao');
       resetBtn?.remove();
+    }
+
+    if (ativacaoDetalhesModal && !ativacaoDetalhesModal.classList.contains("hidden") && parseInt(ativacaoDetalhesModal.dataset.openAtivacaoIdx) === idx) {
+      ativacaoDetalhesBody.querySelectorAll('.invest-val').forEach(span => {
+        const parts = span.textContent.split('/');
+        const required = parts[1] || '0';
+        span.textContent = `0/${required}`;
+        span.classList.remove('met');
+      });
+      const modalResetBtn = ativacaoDetalhesBody.querySelector('.btn-reset-ativacao');
+      modalResetBtn?.remove();
     }
 
     saveConflito(c);
@@ -1066,11 +1289,6 @@ function _attachListeners(c) {
       const isHidden = body.classList.toggle("hidden");
       if (arrow) arrow.textContent = isHidden ? "▼" : "▲";
     }
-  });
-
-  screen.querySelector("#btn-toggle-simbolos")?.addEventListener("click", () => {
-    _toggleSimbolos();
-    renderConflitoSheet();
   });
 
   const _attachSingleRefListener = (containerId, fieldKey, stateKey) => {
@@ -1157,15 +1375,34 @@ function _attachListeners(c) {
   // --- CONTROLES DE AMEAÇAS ---
   const ameacaModal = screen.querySelector("#conflito-modal-nova-ameaca");
   
+  // Função auxiliar para atualizar o valor visual dos dados na modal de nova ameaça
+  const setModalAmeacaDiceVal = (targetId, val) => {
+    const clamped = Math.max(0, Math.min(20, parseInt(val) || 0));
+    const input = screen.querySelector(`#${targetId}`);
+    const span = screen.querySelector(`#${targetId}-val`);
+    if (input) input.value = clamped;
+    if (span) span.textContent = clamped;
+  };
+
+  // Botões de incremento e decremento de dados (+/-)
+  screen.querySelectorAll(".btn-dice-step").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.dataset.target;
+      const step = parseInt(btn.dataset.step) || 0;
+      const current = parseInt(screen.querySelector(`#${targetId}`)?.value) || 0;
+      setModalAmeacaDiceVal(targetId, current + step);
+    });
+  });
+
   // Abrir modal de ameaça (add)
   screen.querySelector("#btn-conflito-add-ameaca")?.addEventListener("click", () => {
     _editingAmeacaIdx = null;
     if (ameacaModal) {
       screen.querySelector("#modal-ameaca-nome").value = "";
       screen.querySelector("#modal-ameaca-descricao").value = "";
-      screen.querySelector("#modal-ameaca-d6").value = "1";
-      screen.querySelector("#modal-ameaca-d10").value = "0";
-      screen.querySelector("#modal-ameaca-d12").value = "0";
+      setModalAmeacaDiceVal("modal-ameaca-d6", 1);
+      setModalAmeacaDiceVal("modal-ameaca-d10", 0);
+      setModalAmeacaDiceVal("modal-ameaca-d12", 0);
       screen.querySelector("#modal-ameaca-objetivo").value = "Principal";
       screen.querySelector("#btn-confirm-add-ameaca").textContent = "Adicionar";
       ameacaModal.classList.remove("hidden");
@@ -1183,9 +1420,9 @@ function _attachListeners(c) {
       _editingAmeacaIdx = idx;
       screen.querySelector("#modal-ameaca-nome").value = a.nome || "";
       screen.querySelector("#modal-ameaca-descricao").value = a.descricao || "";
-      screen.querySelector("#modal-ameaca-d6").value = a.d6 ?? 1;
-      screen.querySelector("#modal-ameaca-d10").value = a.d10 ?? 0;
-      screen.querySelector("#modal-ameaca-d12").value = a.d12 ?? 0;
+      setModalAmeacaDiceVal("modal-ameaca-d6", a.d6 ?? 1);
+      setModalAmeacaDiceVal("modal-ameaca-d10", a.d10 ?? 0);
+      setModalAmeacaDiceVal("modal-ameaca-d12", a.d12 ?? 0);
       screen.querySelector("#modal-ameaca-objetivo").value = a.objetivoTipo || "Principal";
       screen.querySelector("#btn-confirm-add-ameaca").textContent = "Salvar";
       ameacaModal.classList.remove("hidden");
@@ -1210,9 +1447,9 @@ function _attachListeners(c) {
     const match = (worldState.ameacasDb || []).find(a => a.nome.toLowerCase() === nome.toLowerCase());
     if (match) {
       screen.querySelector("#modal-ameaca-descricao").value = match.descricao || "";
-      screen.querySelector("#modal-ameaca-d6").value = match.d6 !== undefined ? match.d6 : 1;
-      screen.querySelector("#modal-ameaca-d10").value = match.d10 !== undefined ? match.d10 : 0;
-      screen.querySelector("#modal-ameaca-d12").value = match.d12 !== undefined ? match.d12 : 0;
+      setModalAmeacaDiceVal("modal-ameaca-d6", match.d6 !== undefined ? match.d6 : 1);
+      setModalAmeacaDiceVal("modal-ameaca-d10", match.d10 !== undefined ? match.d10 : 0);
+      setModalAmeacaDiceVal("modal-ameaca-d12", match.d12 !== undefined ? match.d12 : 0);
       screen.querySelector("#modal-ameaca-objetivo").value = match.objetivoTipo || "Principal";
     }
   });
@@ -1245,6 +1482,351 @@ function _attachListeners(c) {
     saveConflito(c);
     hideAmeacaModal();
     renderConflitoSheet();
+  });
+
+  // --- MODAL DE DETALHES DA AMEAÇA (SEM DESFOQUE) ---
+  const detalhesModal = screen.querySelector("#conflito-modal-ameaca-detalhes");
+  const detalhesBody = screen.querySelector("#ameaca-detalhes-modal-body");
+  const detalhesTitle = screen.querySelector("#ameaca-detalhes-modal-title");
+
+  const hideDetalhesModal = () => {
+    if (detalhesModal) {
+      detalhesModal.classList.add("hidden");
+      detalhesModal.dataset.openAmeacaIdx = "";
+      detalhesBody.innerHTML = "";
+    }
+  };
+
+  screen.querySelector("#btn-close-ameaca-detalhes")?.addEventListener("click", hideDetalhesModal);
+  detalhesModal?.addEventListener("click", (e) => {
+    if (e.target === detalhesModal) hideDetalhesModal();
+  });
+
+  screen.querySelectorAll(".btn-view-ameaca").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      const a = c.ameacas[idx];
+      if (!a || !detalhesModal || !detalhesBody) return;
+
+      const preferredTab = btn.dataset.tab || detalhesModal.dataset.activeTab || "tab-geral";
+      detalhesModal.dataset.openAmeacaIdx = idx;
+      detalhesModal.dataset.activeTab = preferredTab;
+      detalhesTitle.textContent = `Ameaça: ${a.nome}`;
+      
+      const diceDesc = [
+        a.d6 > 0 ? `${a.d6}d6` : '',
+        a.d10 > 0 ? `${a.d10}d10` : '',
+        a.d12 > 0 ? `${a.d12}d12` : ''
+      ].filter(Boolean).join(" + ") || "Sem dados";
+
+      const ativacoesCount = (a.ativacoes || []).length;
+
+      detalhesBody.innerHTML = `
+        <div class="world-list-item conflito-ameaca-card modal-ameaca-card-inner">
+          <!-- Linha de Título e Objetivo Editáveis -->
+          <div class="modal-ameaca-header-row">
+            <input type="text" id="modal-edit-ameaca-nome" class="modal-ameaca-input-nome" value="${esc(a.nome)}" placeholder="Nome da Ameaça">
+            <select id="modal-edit-ameaca-objetivo" class="modal-ameaca-select-objetivo">
+              <option value="Principal" ${a.objetivoTipo === 'Principal' ? 'selected' : ''}>Objetivo Principal</option>
+              <option value="Secundário" ${a.objetivoTipo === 'Secundário' ? 'selected' : ''}>Objetivo Secundário</option>
+              <option value="Cenário" ${a.objetivoTipo === 'Cenário' ? 'selected' : ''}>Apenas Cenário</option>
+            </select>
+          </div>
+
+          <!-- Navegação por Abas -->
+          <div class="modal-ameaca-tabs">
+            <button type="button" class="modal-ameaca-tab-btn active" data-tab="tab-geral">
+              Geral & Rolagem
+            </button>
+            <button type="button" class="modal-ameaca-tab-btn" data-tab="tab-ativacoes">
+              Ativações <span class="modal-ameaca-tab-badge">${ativacoesCount}</span>
+            </button>
+            <button type="button" class="modal-ameaca-tab-btn" data-tab="tab-historico">
+              Histórico <span class="modal-ameaca-tab-badge" id="modal-ameaca-rolagens-badge">${(a.rolagens || []).length}</span>
+            </button>
+          </div>
+
+          <!-- Aba 1: Geral & Rolagem -->
+          <div id="tab-geral" class="modal-ameaca-tab-content active">
+            <!-- Descrição Editável -->
+            <div class="modal-ameaca-desc-group">
+              <textarea id="modal-edit-ameaca-descricao" placeholder="Descrição / Interesses da Ameaça..." class="ws-textarea modal-ameaca-textarea-desc">${esc(a.descricao || '')}</textarea>
+            </div>
+
+            <!-- Configuração dos Dados Editáveis e Ações -->
+            <div class="modal-ameaca-dice-panel">
+              <span style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Dados de Rolagem:</span>
+              <div class="modal-ameaca-dice-row">
+                <div class="investimento-control-group group-s" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                  <img src="assets/d6/3-4(D6).webp" alt="d6" style="width:36px;height:36px;object-fit:contain;">
+                  <span style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:bold;">d6</span>
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                    <button type="button" class="btn-ameaca-dice-step" data-target="modal-edit-ameaca-d6" data-step="-1" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                    <span id="modal-edit-ameaca-d6-val" class="invest-val" style="min-width:16px; font-weight:bold;">${a.d6 !== undefined ? a.d6 : 1}</span>
+                    <button type="button" class="btn-ameaca-dice-step" data-target="modal-edit-ameaca-d6" data-step="1" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                    <input type="hidden" id="modal-edit-ameaca-d6" value="${a.d6 !== undefined ? a.d6 : 1}">
+                  </div>
+                </div>
+
+                <div class="investimento-control-group group-a" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                  <img src="assets/d10/6(D10).webp" alt="d10" style="width:36px;height:36px;object-fit:contain;">
+                  <span style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:bold;">d10</span>
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                    <button type="button" class="btn-ameaca-dice-step" data-target="modal-edit-ameaca-d10" data-step="-1" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                    <span id="modal-edit-ameaca-d10-val" class="invest-val" style="min-width:16px; font-weight:bold;">${a.d10 !== undefined ? a.d10 : 0}</span>
+                    <button type="button" class="btn-ameaca-dice-step" data-target="modal-edit-ameaca-d10" data-step="1" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                    <input type="hidden" id="modal-edit-ameaca-d10" value="${a.d10 !== undefined ? a.d10 : 0}">
+                  </div>
+                </div>
+
+                <div class="investimento-control-group group-p" style="flex:1; flex-direction:column; padding:8px; gap:6px; cursor:default;">
+                  <img src="assets/d12/11(D12).webp" alt="d12" style="width:36px;height:36px;object-fit:contain;">
+                  <span style="font-size:var(--font-size-xs); color:var(--text-secondary); font-weight:bold;">d12</span>
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+                    <button type="button" class="btn-ameaca-dice-step" data-target="modal-edit-ameaca-d12" data-step="-1" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">-</button>
+                    <span id="modal-edit-ameaca-d12-val" class="invest-val" style="min-width:16px; font-weight:bold;">${a.d12 !== undefined ? a.d12 : 0}</span>
+                    <button type="button" class="btn-ameaca-dice-step" data-target="modal-edit-ameaca-d12" data-step="1" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; width:22px;height:22px;border-radius:3px;cursor:pointer;font-weight:bold;">+</button>
+                    <input type="hidden" id="modal-edit-ameaca-d12" value="${a.d12 !== undefined ? a.d12 : 0}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-ameaca-actions-bar">
+                <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}">🎲 Rolar Ameaça</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aba 2: Ativações -->
+          <div id="tab-ativacoes" class="modal-ameaca-tab-content">
+            <div id="conflito-last-roll-container-ameaca-${idx}" class="conflito-last-roll-counter">
+                  <!-- Renderizado por renderConflitoLastRollCounter -->
+            </div>
+            <div class="modal-ameaca-ativacoes-header">
+              <button type="button" class="btn btn-sm btn-add-ativacao-ameaca btn-blue" data-ameaca-idx="${idx}">+ Nova Ativação</button>
+            </div>
+            <div class="ameaca-ativacoes-container">
+              <div class="ameaca-ativacoes-list">
+                ${_renderAmeacaActivations(a, idx)}
+              </div>
+            </div>
+          </div>
+
+          <!-- Aba 3: Histórico de Rolagem -->
+          <div id="tab-historico" class="modal-ameaca-tab-content">
+            <div class="modal-ameaca-log-header">
+              <span style="font-size: var(--font-size-xs); font-weight: bold; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Rolagens Recentes da Ameaça</span>
+              <button type="button" class="btn-conflito-clear-log btn-clear-ameaca-log" data-idx="${idx}" title="Limpar histórico desta ameaça">🗑️ Limpar</button>
+            </div>
+            <div class="modal-ameaca-log-container" id="modal-ameaca-log-list-${idx}">
+              ${_renderAmeacaRollLogHtml(a)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Gerenciamento das Abas
+      const activeTabId = preferredTab || "tab-geral";
+      detalhesBody.querySelectorAll(".modal-ameaca-tab-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.tab === activeTabId);
+      });
+      detalhesBody.querySelectorAll(".modal-ameaca-tab-content").forEach(cEl => {
+        cEl.classList.toggle("active", cEl.id === activeTabId);
+      });
+
+      detalhesBody.querySelectorAll(".modal-ameaca-tab-btn").forEach(tabBtn => {
+        tabBtn.addEventListener("click", () => {
+          detalhesBody.querySelectorAll(".modal-ameaca-tab-btn").forEach(b => b.classList.remove("active"));
+          detalhesBody.querySelectorAll(".modal-ameaca-tab-content").forEach(c => c.classList.remove("active"));
+
+          tabBtn.classList.add("active");
+          const target = tabBtn.dataset.tab;
+          detalhesModal.dataset.activeTab = target;
+          const content = detalhesBody.querySelector(`#${target}`);
+          if (content) content.classList.add("active");
+        });
+      });
+
+      // Listeners para edição em tempo real no modal
+      const inputNome = detalhesBody.querySelector("#modal-edit-ameaca-nome");
+      inputNome?.addEventListener("input", (ev) => {
+        a.nome = ev.target.value;
+        detalhesTitle.textContent = `Ameaça: ${a.nome || 'Sem Nome'}`;
+        saveConflito(c);
+        const cardTitle = screen.querySelector(`.conflito-ameaca-card[data-idx="${idx}"] strong`);
+        if (cardTitle) cardTitle.textContent = a.nome;
+      });
+
+      const selectObjetivo = detalhesBody.querySelector("#modal-edit-ameaca-objetivo");
+      selectObjetivo?.addEventListener("change", (ev) => {
+        a.objetivoTipo = ev.target.value;
+        saveConflito(c);
+        const cardBadge = screen.querySelector(`.conflito-ameaca-card[data-idx="${idx}"] .attr-value-badge`);
+        if (cardBadge) cardBadge.textContent = a.objetivoTipo;
+      });
+
+      const inputDesc = detalhesBody.querySelector("#modal-edit-ameaca-descricao");
+      inputDesc?.addEventListener("input", (ev) => {
+        a.descricao = ev.target.value;
+        saveConflito(c);
+      });
+
+      // Controle dos botões de incremento/decremento dos dados da ameaça (+/-)
+      detalhesBody.querySelectorAll(".btn-ameaca-dice-step").forEach(stepBtn => {
+        stepBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          const targetId = stepBtn.dataset.target;
+          const step = parseInt(stepBtn.dataset.step) || 0;
+          const hiddenInput = detalhesBody.querySelector(`#${targetId}`);
+          const valSpan = detalhesBody.querySelector(`#${targetId}-val`);
+          if (!hiddenInput) return;
+
+          let currentVal = parseInt(hiddenInput.value) || 0;
+          let newVal = Math.max(0, Math.min(20, currentVal + step));
+
+          hiddenInput.value = newVal;
+          if (valSpan) valSpan.textContent = newVal;
+
+          if (targetId === "modal-edit-ameaca-d6") a.d6 = newVal;
+          else if (targetId === "modal-edit-ameaca-d10") a.d10 = newVal;
+          else if (targetId === "modal-edit-ameaca-d12") a.d12 = newVal;
+
+          saveConflito(c);
+        });
+      });
+
+      // Conectar botões dentro do modal de detalhes
+      renderConflitoLastRollCounter();
+
+      detalhesBody.querySelector(".btn-roll-ameaca")?.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const parts = [];
+        if (a.d6 > 0) parts.push(`${a.d6}d6`);
+        if (a.d10 > 0) parts.push(`${a.d10}d10`);
+        if (a.d12 > 0) parts.push(`${a.d12}d12`);
+        if (parts.length === 0) {
+          alert("Esta ameaça não tem nenhum dado atribuído!");
+          return;
+        }
+        const customFormulaInput = document.getElementById("dice-custom-formula");
+        if (customFormulaInput) customFormulaInput.value = parts.join("+");
+        _pendingAmeacaRollIdx = idx;
+        executeCustomRoll();
+      });
+
+      detalhesBody.querySelector(".btn-clear-ameaca-log")?.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (confirm(`Limpar o histórico de rolagens da ameaça "${a.nome || ''}"?`)) {
+          a.rolagens = [];
+          saveConflito(c);
+          const logList = detalhesBody.querySelector(`#modal-ameaca-log-list-${idx}`);
+          if (logList) logList.innerHTML = _renderAmeacaRollLogHtml(a);
+          const badge = detalhesBody.querySelector("#modal-ameaca-rolagens-badge");
+          if (badge) badge.textContent = "0";
+          renderConflitoLastRollCounter();
+        }
+      });
+
+      detalhesBody.querySelector(".btn-add-ativacao-ameaca")?.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        activeThreatIdxForModal = idx;
+        editingActivationState = null;
+        if (modal) {
+          modalTitle.textContent = "Nova Ativação da Ameaça";
+          confirmBtn.textContent = "Adicionar";
+          setCounts(0, 0, 0);
+          updateGatilhoPreview();
+          screen.querySelector("#modal-ativacao-titulo").value = "";
+          screen.querySelector("#modal-ativacao-efeito").value = "";
+          modal.classList.remove("hidden");
+        }
+      });
+
+      // Função para conectar listeners de ativações dentro do modal de detalhes
+      const attachDetalhesAtivacoesListeners = () => {
+        detalhesBody.querySelectorAll(".btn-edit-ativacao-ameaca").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const ameacaIdx = parseInt(btn.dataset.ameacaIdx);
+            const actIdx = parseInt(btn.dataset.actIdx);
+            const targetA = c.ameacas[ameacaIdx];
+            if (!targetA || !targetA.ativacoes || !targetA.ativacoes[actIdx]) return;
+            const act = targetA.ativacoes[actIdx];
+            editingActivationState = { idx: actIdx, ameacaIdx, isAmeaca: true };
+            activeThreatIdxForModal = null;
+            if (modal) {
+              modalTitle.textContent = "Editar Ativação da Ameaça";
+              confirmBtn.textContent = "Salvar";
+              const val = act.gatilho || "";
+              setCounts(
+                (val.match(/S/g) || []).length,
+                (val.match(/A/g) || []).length,
+                (val.match(/P/g) || []).length
+              );
+              updateGatilhoPreview();
+              screen.querySelector("#modal-ativacao-titulo").value = act.titulo || "";
+              screen.querySelector("#modal-ativacao-efeito").value = act.efeito || "";
+              modal.classList.remove("hidden");
+            }
+          });
+        });
+
+        detalhesBody.querySelectorAll(".btn-delete-ativacao-ameaca").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const ameacaIdx = parseInt(btn.dataset.ameacaIdx);
+            const actIdx = parseInt(btn.dataset.actIdx);
+            const targetA = c.ameacas[ameacaIdx];
+            if (!targetA || !targetA.ativacoes) return;
+
+            if (confirm(`Excluir a ativação "${targetA.ativacoes[actIdx]?.titulo || ''}" da ameaça?`)) {
+              targetA.ativacoes.splice(actIdx, 1);
+              saveConflito(c);
+              const listContainer = detalhesBody.querySelector(".ameaca-ativacoes-list");
+              if (listContainer) {
+                listContainer.innerHTML = _renderAmeacaActivations(targetA, ameacaIdx);
+                attachDetalhesAtivacoesListeners();
+              }
+              renderConflitoSheet();
+            }
+          });
+        });
+
+        detalhesBody.querySelectorAll(".btn-invest-ameaca-inc").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            _updateAmeacaInvestment(parseInt(btn.dataset.ameacaIdx), parseInt(btn.dataset.actIdx), btn.dataset.type, 1);
+          });
+        });
+
+        detalhesBody.querySelectorAll(".btn-invest-ameaca-dec").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            _updateAmeacaInvestment(parseInt(btn.dataset.ameacaIdx), parseInt(btn.dataset.actIdx), btn.dataset.type, -1);
+          });
+        });
+
+        detalhesBody.querySelectorAll(".btn-reset-ativacao-ameaca").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            _resetAmeacaAtivacao(parseInt(btn.dataset.ameacaIdx), parseInt(btn.dataset.actIdx));
+          });
+        });
+      };
+
+      attachDetalhesAtivacoesListeners();
+
+      detalhesModal.classList.remove("hidden");
+    });
+  });
+
+  // Clique no card abre diretamente os detalhes da ameaça
+  screen.querySelectorAll(".conflito-ameaca-card").forEach(card => {
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("button")) return;
+      card.querySelector(".btn-view-ameaca")?.click();
+    });
   });
 
   // Listener para excluir ameaça do conflito
@@ -1378,9 +1960,8 @@ function _attachListeners(c) {
     const required = requiredMap[type] || 0;
 
     const selector = `.btn-invest-ameaca-inc[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"][data-type="${type}"], .btn-invest-ameaca-dec[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"][data-type="${type}"]`;
-    const btn = screen.querySelector(selector);
-    if (btn) {
-      const group = btn.closest('.investimento-control-group');
+    screen.querySelectorAll(selector).forEach(btn => {
+      const group = btn.closest('.conflito-result-badge') || btn.closest('.investimento-control-group');
       if (group) {
         const valSpan = group.querySelector('.invest-val');
         if (valSpan) {
@@ -1388,7 +1969,7 @@ function _attachListeners(c) {
           valSpan.classList.toggle('met', act[key] >= required && required > 0);
         }
       }
-    }
+    });
 
     const el = screen.querySelector(`[data-ameaca-idx="${ameacaIdx}"][data-act-idx="${actIdx}"]`);
     if (el) {
@@ -1412,7 +1993,7 @@ function _attachListeners(c) {
             resetBtn.dataset.actIdx = actIdx;
             resetBtn.title = 'Gastar todas as investidas e resetar';
             resetBtn.textContent = 'Gastar';
-            resetBtn.style.cssText = 'background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer;';
+            resetBtn.style.cssText = 'background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;';
             resetBtn.addEventListener('click', (e) => { e.stopPropagation(); _resetAmeacaAtivacao(ameacaIdx, actIdx); });
             container.insertBefore(resetBtn, editBtn);
           } else if (!isCompleted && resetBtn) {
@@ -1613,6 +2194,65 @@ export function startNewConflito() {
   loadConflitoSheet(c);
 }
 
+function _renderRollItemHtml(roll, rIdx) {
+  let sucessos = roll.bonusSuccesses || 0;
+  let adaptacoes = roll.bonusAdaptations || 0;
+  let pressoes = roll.bonusPressures || 0;
+
+  (roll.keptDiceIndexes || []).forEach(idx => {
+    const die = roll.results && roll.results[idx];
+    if (die && die.symbols) {
+      die.symbols.forEach(sym => {
+        if (sym === "A") sucessos++;
+        if (sym === "B") adaptacoes++;
+        if (sym === "C") pressoes++;
+      });
+    }
+  });
+
+  const diceHtml = `
+    <div class="results-dice-grid">
+      ${(roll.results || []).map((die, idx) => {
+    const isKept = (roll.keptDiceIndexes || []).includes(idx);
+    const imgSrc = getDieFaceImgSrc(die.sides, die.value);
+    const contentHtml = imgSrc
+      ? `<img src="${imgSrc}" class="die-face-img" alt="d${die.sides} face ${die.value}">`
+      : `<span style="font-size: var(--font-size-xs);">d${die.sides}:${die.value}</span>`;
+    return `
+          <div class="result-die-card ${isKept ? 'kept' : ''}" data-die-index="${idx}" data-roll-idx="${rIdx}" style="cursor: default; pointer-events: none; opacity: 0.85;">
+            ${contentHtml}
+          </div>
+        `;
+  }).join("")}
+    </div>
+  `;
+
+  return `
+    <div class="conflito-log-item">
+      <div class="conflito-log-item-header">
+        <div class="conflito-log-results">
+          <span class="conflito-result-badge badge-s" title="Sucessos">S: ${sucessos}</span>
+          <span class="conflito-result-badge badge-a" title="Adaptações">A: ${adaptacoes}</span>
+          <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: ${pressoes}</span>
+        </div>
+        <span class="conflito-log-formula">${roll.formula || ''}</span>
+        <span class="conflito-log-time">${roll.timestamp || ''}</span>
+      </div>
+      <div class="conflito-log-dice">
+        ${diceHtml}
+      </div>
+    </div>
+  `;
+}
+
+function _renderAmeacaRollLogHtml(ameaca) {
+  const rolagens = ameaca.rolagens || [];
+  if (rolagens.length === 0) {
+    return `<div class="conflito-log-empty">Nenhuma rolagem realizada por esta ameaça ainda.</div>`;
+  }
+  return rolagens.map((roll, idx) => _renderRollItemHtml(roll, idx)).reverse().join("");
+}
+
 export function renderConflitoRollLog() {
   const c = worldState.currentConflito;
   if (!c) return;
@@ -1624,56 +2264,7 @@ export function renderConflitoRollLog() {
     return;
   }
 
-  list.innerHTML = c.rolagens.map((roll, rIdx) => {
-    let sucessos = roll.bonusSuccesses || 0;
-    let adaptacoes = roll.bonusAdaptations || 0;
-    let pressoes = roll.bonusPressures || 0;
-
-    roll.keptDiceIndexes.forEach(idx => {
-      const die = roll.results[idx];
-      if (die && die.symbols) {
-        die.symbols.forEach(sym => {
-          if (sym === "A") sucessos++;
-          if (sym === "B") adaptacoes++;
-          if (sym === "C") pressoes++;
-        });
-      }
-    });
-
-    const diceHtml = `
-      <div class="results-dice-grid">
-        ${roll.results.map((die, idx) => {
-      const isKept = roll.keptDiceIndexes.includes(idx);
-      const imgSrc = getDieFaceImgSrc(die.sides, die.value);
-      const contentHtml = imgSrc
-        ? `<img src="${imgSrc}" class="die-face-img" alt="d${die.sides} face ${die.value}">`
-        : `<span style="font-size:8px;">d${die.sides}:${die.value}</span>`;
-      return `
-            <div class="result-die-card ${isKept ? 'kept' : ''}" data-die-index="${idx}" data-roll-idx="${rIdx}" style="cursor: default; pointer-events: none; opacity: 0.85;">
-              ${contentHtml}
-            </div>
-          `;
-    }).join("")}
-      </div>
-    `;
-
-    return `
-      <div class="conflito-log-item">
-        <div class="conflito-log-item-header">
-          <div class="conflito-log-results">
-            <span class="conflito-result-badge badge-s" title="Sucessos">S: ${sucessos}</span>
-            <span class="conflito-result-badge badge-a" title="Adaptações">A: ${adaptacoes}</span>
-            <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">P: ${pressoes}</span>
-          </div>
-          <span class="conflito-log-formula">${roll.formula}</span>
-          <span class="conflito-log-time">${roll.timestamp}</span>
-        </div>
-        <div class="conflito-log-dice">
-          ${diceHtml}
-        </div>
-      </div>
-    `;
-  }).reverse().join("");
+  list.innerHTML = c.rolagens.map((roll, rIdx) => _renderRollItemHtml(roll, rIdx)).reverse().join("");
 }
 
 function _getAvailableDice(rolagens, activations, target = null) {
@@ -1757,17 +2348,20 @@ export function renderConflitoLastRollCounter() {
 
     container.innerHTML = `
       <span class="last-roll-label">Disponível:</span>
-      <span class="conflito-result-badge badge-s" style="display: inline-flex; align-items: center; gap: 4px;" title="Sucessos">
+      <span class="conflito-result-badge badge-s" title="Sucessos">
+        <img src="assets/sucesso.webp" alt="S" class="conflito-symbol-icon">
         <button type="button" class="btn-pool-adjust btn-pool-dec" data-type="S" data-threat="${isThreat}" data-threat-idx="${threatIdx}">-</button>
         <span>S: ${avail.S}</span>
         <button type="button" class="btn-pool-adjust btn-pool-inc" data-type="S" data-threat="${isThreat}" data-threat-idx="${threatIdx}">+</button>
       </span>
-      <span class="conflito-result-badge badge-a" style="display: inline-flex; align-items: center; gap: 4px;" title="Adaptações">
+      <span class="conflito-result-badge badge-a" title="Adaptações">
+        <img src="assets/adaptacao.webp" alt="A" class="conflito-symbol-icon">
         <button type="button" class="btn-pool-adjust btn-pool-dec" data-type="A" data-threat="${isThreat}" data-threat-idx="${threatIdx}">-</button>
         <span>A: ${avail.A}</span>
         <button type="button" class="btn-pool-adjust btn-pool-inc" data-type="A" data-threat="${isThreat}" data-threat-idx="${threatIdx}">+</button>
       </span>
-      <span class="conflito-result-badge badge-p" style="display: inline-flex; align-items: center; gap: 4px;" title="Ameaças/Pressões">
+      <span class="conflito-result-badge badge-p" title="Ameaças/Pressões">
+        <img src="assets/pressao.webp" alt="P" class="conflito-symbol-icon">
         <button type="button" class="btn-pool-adjust btn-pool-dec" data-type="P" data-threat="${isThreat}" data-threat-idx="${threatIdx}">-</button>
         <span>P: ${avail.P}</span>
         <button type="button" class="btn-pool-adjust btn-pool-inc" data-type="P" data-threat="${isThreat}" data-threat-idx="${threatIdx}">+</button>
@@ -1817,6 +2411,15 @@ document.addEventListener("roll-added", (e) => {
           act.snapshotA = act.investedA || 0;
           act.snapshotP = act.investedP || 0;
         });
+
+        // Se o modal de detalhes da ameaça estiver aberto, atualiza a lista de histórico e a badge em tempo real
+        const detalhesModal = document.getElementById("conflito-modal-ameaca-detalhes");
+        if (detalhesModal && !detalhesModal.classList.contains("hidden") && parseInt(detalhesModal.dataset.openAmeacaIdx) === _pendingAmeacaRollIdx) {
+          const logList = document.getElementById(`modal-ameaca-log-list-${_pendingAmeacaRollIdx}`);
+          if (logList) logList.innerHTML = _renderAmeacaRollLogHtml(a);
+          const badge = document.getElementById("modal-ameaca-rolagens-badge");
+          if (badge) badge.textContent = (a.rolagens || []).length;
+        }
       }
       _pendingAmeacaRollIdx = null;
     } else {

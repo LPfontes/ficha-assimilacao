@@ -6,11 +6,11 @@
     overflow-y: auto !important;
     height: auto !important;
   }
-  
+
   body::before {
     background-image: none !important;
   }
-  
+
   .main-content {
     height: auto !important;
     overflow-y: visible !important;
@@ -28,7 +28,7 @@
     height: auto !important;
     overflow: visible !important;
   }
-  
+
   .sheet-redesign-container {
     grid-template-columns: 1fr !important;
     display: flex !important;
@@ -37,8 +37,8 @@
     overflow: visible !important;
     gap: 16px !important;
   }
-  
-  .sheet-redesign-center, 
+
+  .sheet-redesign-center,
   .sheet-redesign-right {
     height: auto !important;
     overflow-y: visible !important;
@@ -50,7 +50,7 @@
     transform: none !important;
     position: relative !important;
   }
-  
+
   .dice-drawer.closed {
     transform: none !important;
   }
@@ -58,6 +58,7 @@
 
 /* SMARTPHONES (Largura até 768px) */
 @media (max-width: 768px) {
+
   /* Cabeçalho Responsivo */
   .main-header {
     flex-direction: row !important;
@@ -90,7 +91,7 @@
     padding: 0;
     z-index: 1001;
   }
-  
+
   .btn-mobile-menu .menu-bar {
     width: 100%;
     height: 2px;
@@ -101,9 +102,11 @@
   .btn-mobile-menu.active .menu-bar:nth-child(1) {
     transform: translateY(8px) rotate(45deg);
   }
+
   .btn-mobile-menu.active .menu-bar:nth-child(2) {
     opacity: 0;
   }
+
   .btn-mobile-menu.active .menu-bar:nth-child(3) {
     transform: translateY(-8px) rotate(-45deg);
   }
@@ -178,7 +181,7 @@
   #btn-open-roller .btn-text {
     display: none !important;
   }
-  
+
   /* Grades da Ficha */
   .status-cards-row {
     grid-template-columns: 1fr !important;
@@ -186,7 +189,7 @@
   }
 
   .aptitudes-columns-container {
-    grid-template-columns: 1fr 1fr!important;
+    grid-template-columns: 1fr 1fr !important;
     gap: 12px !important;
   }
 
@@ -197,7 +200,7 @@
     max-height: 90vh !important;
     margin: 20px auto !important;
     padding: 16px !important;
-    
+
     /* Desativa comportamento absoluto do drag */
     position: relative !important;
     top: auto !important;
@@ -206,7 +209,7 @@
     cursor: default !important;
   }
 
-  .grid-2-col-d, 
+  .grid-2-col-d,
   .grid-2-col {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
@@ -218,7 +221,7 @@
     gap: 8px !important;
   }
 
-  .drawer-col-1, 
+  .drawer-col-1,
   .drawer-col-2 {
     overflow: visible !important;
     height: auto !important;
@@ -451,7 +454,8 @@
   .step-indicator {
     width: 10px !important;
     height: 10px !important;
-    font-size: 0 !important; /* Oculta número */
+    font-size: 0 !important;
+    /* Oculta número */
     border-width: 1px !important;
   }
 
@@ -503,12 +507,13 @@
     gap: 8px !important;
   }
 
-  .header-assimilations{
+  .header-assimilations {
     flex-direction: column !important;
     gap: 8px !important;
     align-items: center !important;
     text-align: center !important;
   }
+
   .instinto-panel-content-flex {
     grid-template-columns: 1fr !important;
   }
@@ -529,7 +534,8 @@
     flex: 0 0 120px !important;
     scroll-snap-align: center !important;
   }
-  .refugio-resources-row{
+
+  .refugio-resources-row {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
@@ -545,19 +551,19 @@
   }
 
   #table-toolbar .table-title {
-    font-size: 13px !important;
+    font-size: var(--font-size-sm) !important;
     margin-right: 6px !important;
   }
 
   #table-toolbar .room-code-badge,
   #table-toolbar #table-host-badge {
-    font-size: 9px !important;
+    font-size: var(--font-size-sm) !important;
     padding: 2px 6px !important;
   }
 
   #table-toolbar .btn {
     padding: 4px 8px !important;
-    font-size: 11px !important;
+    font-size: var(--font-size-sm) !important;
     height: 28px !important;
     line-height: 1 !important;
     display: flex !important;
@@ -711,7 +717,7 @@
   .campaign-tab-btn {
     flex: 0 0 auto !important;
     padding: 12px 14px !important;
-    font-size: 12px !important;
+    font-size: var(--font-size-sm) !important;
   }
 
   .campaign-tab-contents {
@@ -769,7 +775,7 @@
 
   .ass-point-badge {
     padding: 2px 6px !important;
-    font-size: 11px !important;
+    font-size: var(--font-size-sm) !important;
   }
 
   .ass-point-badge .badge-label {
@@ -778,7 +784,7 @@
 
   .btn-point-adjust {
     padding: 0 3px !important;
-    font-size: 11px !important;
+    font-size: var(--font-size-sm) !important;
   }
 
   /* Tabs Nav - scroll horizontal no mobile */
@@ -801,7 +807,7 @@
     flex: 0 0 auto !important;
     white-space: nowrap !important;
     padding: 8px 10px !important;
-    font-size: 11px !important;
+    font-size: var(--font-size-sm) !important;
   }
 
   /* Região / Local / Refúgio screens */
@@ -816,7 +822,7 @@
   }
 
   .world-name-input {
-    font-size: 16px !important;
+    font-size: var(--font-size-sm) !important;
     min-width: 0 !important;
     width: 100% !important;
   }
@@ -840,7 +846,7 @@
 
   .world-list-item .btn-remove-world-item {
     align-self: flex-end !important;
-    font-size: 20px !important;
+    font-size: var(--font-size-md) !important;
     padding: 4px 8px !important;
   }
 
@@ -881,9 +887,11 @@
     width: 140px !important;
     height: 180px !important;
   }
+
   .w-300 {
     width: 300px;
   }
+
   .h-300 {
     height: 300px;
   }
@@ -893,12 +901,13 @@
   }
 
   .sheet-redesign-tabs-nav::-webkit-scrollbar {
-    display: none !important; /* Chrome, Safari, Opera */
+    display: none !important;
+    /* Chrome, Safari, Opera */
   }
 
   .sheet-tab-btn {
     padding: 8px 12px !important;
-    font-size: 11px !important;
+    font-size: var(--font-size-sm) !important;
     flex: 0 0 auto !important;
     justify-content: center !important;
   }
@@ -942,7 +951,7 @@
 
   .ass-point-badge {
     padding: 1px 4px !important;
-    font-size: 10px !important;
+    font-size: var(--font-size-sm) !important;
   }
 
   .ass-point-badge .badge-label {
@@ -951,7 +960,7 @@
 
   .btn-point-adjust {
     padding: 0 2px !important;
-    font-size: 10px !important;
+    font-size: var(--font-size-sm) !important;
   }
 
   .sheet-redesign-tabs-nav.card-glass {
@@ -960,7 +969,7 @@
 
   .sheet-tab-btn {
     padding: 6px 8px !important;
-    font-size: 10px !important;
+    font-size: var(--font-size-sm) !important;
   }
 
   .card-glass {
@@ -985,16 +994,17 @@
 
   .world-list-item input[type="text"],
   .world-list-item textarea {
-    font-size: 13px !important;
+    font-size: var(--font-size-sm) !important;
     padding: 4px 6px !important;
   }
 
   .btn-cabo-adjust {
-    opacity: 1 !important; /* Sempre visível no mobile */
+    opacity: 1 !important;
+    /* Sempre visível no mobile */
   }
 
   /* Modais de Mutações e Características */
-  .traits-wizard-list, 
+  .traits-wizard-list,
   .mutations-sheet-list-single {
     max-height: 250px !important;
   }

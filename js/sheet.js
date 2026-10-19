@@ -113,9 +113,9 @@ export function renderAptitudesSheet() {
           ${isCustom ? `<button class="btn-delete-hb-stat" title="Remover Instinto Customizado">&times;</button>` : ''}
         </span>
         <div style="display:flex; align-items:center; gap:6px;">
-          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
+          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size: var(--font-size-xs); padding:0; user-select:none;">-</button>
           <div class="value-bubbles"></div>
-          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
+          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size: var(--font-size-xs); padding:0; user-select:none;">+</button>
         </div>
       `;
       if (isCustom) {
@@ -195,9 +195,9 @@ export function renderAptitudesSheet() {
           ${isCustom ? `<button class="btn-delete-hb-stat" title="Remover Conhecimento Customizado">&times;</button>` : ''}
         </span>
         <div style="display:flex; align-items:center; gap:6px;">
-          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
+          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size: var(--font-size-xs); padding:0; user-select:none;">-</button>
           <div class="value-bubbles"></div>
-          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
+          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size: var(--font-size-xs); padding:0; user-select:none;">+</button>
         </div>
       `;
       if (isCustom) {
@@ -277,9 +277,9 @@ export function renderAptitudesSheet() {
           ${isCustom ? `<button class="btn-delete-hb-stat" title="Remover Prática Customizada">&times;</button>` : ''}
         </span>
         <div style="display:flex; align-items:center; gap:6px;">
-          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">-</button>
+          <button class="btn-bubble-dec" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size: var(--font-size-xs); padding:0; user-select:none;">-</button>
           <div class="value-bubbles"></div>
-          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size:12px; padding:0; user-select:none;">+</button>
+          <button class="btn-bubble-inc" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:18px; height:18px; display:flex; align-items:center; justify-content:center; border-radius:3px; cursor:pointer; font-size: var(--font-size-xs); padding:0; user-select:none;">+</button>
         </div>
       `;
       if (isCustom) {
@@ -674,7 +674,7 @@ export function renderCharacteristicsSheet() {
 
   el.traitsListSheet.innerHTML = "";
   if (char.caracteristicas.length === 0) {
-    el.traitsListSheet.innerHTML = `<div style="color:var(--text-muted); font-size:13px; grid-column:1/-1;">Nenhuma característica adquirida com Experiência.</div>`;
+    el.traitsListSheet.innerHTML = `<div style="color:var(--text-muted); font-size: var(--font-size-xs); grid-column:1/-1;">Nenhuma característica adquirida com Experiência.</div>`;
     return;
   }
 
@@ -688,7 +688,7 @@ export function renderCharacteristicsSheet() {
     card.className = "trait-sheet-card";
     card.innerHTML = `
       <div style="flex:1;">
-        <div class="name">${trait.nome}  <span style="font-size:10px; color:var(--text-secondary);"> (${trait.custo} XP)</span></div>
+        <div class="name">${trait.nome}  <span style="font-size: var(--font-size-xs); color:var(--text-secondary);"> (${trait.custo} XP)</span></div>
         <div class="desc">${trait.descricao}</div>
       </div>
       <button class="btn-delete-trait" data-id="${trait.id}" title="Remover Característica e recuperar XP">
@@ -722,19 +722,19 @@ export function renderMutationsSheet() {
 
     pointsContainer.innerHTML = `
       <div class="ass-point-badge success-badge">
-        <span class="badge-label">Sucesso [S]:</span>
+        <span class="badge-label"><span class="badge-name">Sucesso</span> <img src="assets/sucesso.webp" alt="S" class="ass-point-icon"></span>
         <button class="btn-point-adjust dec-a">-</button>
         <span class="badge-val">${char.ptsA}</span>
         <button class="btn-point-adjust inc-a">+</button>
       </div>
       <div class="ass-point-badge adaptation-badge">
-        <span class="badge-label">Adaptação [A]:</span>
+        <span class="badge-label"><span class="badge-name">Adaptação</span> <img src="assets/adaptacao.webp" alt="A" class="ass-point-icon"></span>
         <button class="btn-point-adjust dec-b">-</button>
         <span class="badge-val">${char.ptsB}</span>
         <button class="btn-point-adjust inc-b">+</button>
       </div>
       <div class="ass-point-badge pressure-badge">
-        <span class="badge-label">Pressão [P]:</span>
+        <span class="badge-label"><span class="badge-name">Pressão</span> <img src="assets/pressao.webp" alt="P" class="ass-point-icon"></span>
         <button class="btn-point-adjust dec-c">-</button>
         <span class="badge-val">${char.ptsC}</span>
         <button class="btn-point-adjust inc-c">+</button>
@@ -774,7 +774,7 @@ export function renderMutationsSheet() {
   };
 
   if (!char.mutações || char.mutações.length === 0) {
-    container.innerHTML = `<div style="color:var(--text-muted); font-size:13px; padding:8px;">Nenhuma mutação adquirida.</div>`;
+    container.innerHTML = `<div style="color:var(--text-muted); font-size: var(--font-size-xs); padding:8px;">Nenhuma mutação adquirida.</div>`;
     return;
   }
 
@@ -801,7 +801,7 @@ export function renderMutationsSheet() {
         <div class="title" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <span style="font-weight: bold;">${mut.name}</span>
           <span class="mutation-badge suit-tag-${mut.suit}">${suitLabels[mut.suit] || mut.suit}</span>
-          <span style="font-size:10px; color:var(--text-muted);">(${mut.cost})</span>
+          <span style="font-size: var(--font-size-xs); color:var(--text-muted);">(${mut.cost})</span>
           ${isPressSuit && maxPressao > 0 ? `
             <div class="mutation-pressure-counter" title="Contador de Pressão (Investidas restantes)">
               <span>Pressão:</span>
@@ -873,7 +873,7 @@ function openItemCategoriesModal(slotIndex) {
   el.modalBody.innerHTML = `
     <div class="modal-content-manage-categories card-glass">
       <h3 class="modal-title" style="margin-bottom:8px;">Gerenciar Categorias do Item</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+      <p style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:12px;">
         <strong>${esc(slot.name)}</strong>
       </p>
       <div style="display:flex; flex-direction:column; gap:6px; max-height:400px; overflow-y:auto;">
@@ -883,8 +883,8 @@ function openItemCategoriesModal(slotIndex) {
             <label style="display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:4px; background:rgba(255,255,255,0.03); cursor:pointer; transition:background 0.2s;">
               <input type="checkbox" class="cat-checkbox" value="${key}" ${checked} style="accent-color:var(--color-gold-glow);">
               <div style="display:flex; flex-direction:column; gap:2px;">
-                <span style="font-size:12px; font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
-                <span style="font-size:10px; color:var(--text-secondary);">${cat.desc}</span>
+                <span style="font-size: var(--font-size-xs); font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
+                <span style="font-size: var(--font-size-xs); color:var(--text-secondary);">${cat.desc}</span>
               </div>
             </label>
           `;
@@ -1004,7 +1004,7 @@ export function renderInventorySheet() {
   }
   if (labelBackpack) {
     if (safeLength > expectedLength) {
-      labelBackpack.innerHTML = `Na Mochila <span style="color:var(--color-rust); font-size:10px; margin-left:8px;">(SOBRECARGA)</span>`;
+      labelBackpack.innerHTML = `Na Mochila <span style="color:var(--color-rust); font-size: var(--font-size-xs); margin-left:8px;">(SOBRECARGA)</span>`;
     } else {
       labelBackpack.textContent = `Na Mochila`;
     }
@@ -1036,7 +1036,7 @@ export function renderInventorySheet() {
             const cat = ITEM_CATEGORIAS[catKey];
             if (!cat) return '';
             return `
-              <span class="item-category-badge" style="font-size: 8px; padding: 2px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); white-space: nowrap;">
+              <span class="item-category-badge" style="font-size: var(--font-size-sm); padding: 2px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.35); color: var(--color-gold-glow); white-space: nowrap;">
                 ${cat.nome}
               </span>
             `;
@@ -1049,7 +1049,7 @@ export function renderInventorySheet() {
         <div class="row" style="display: flex; flex-direction: row; gap: 4px;">  
           <!-- Qualidade -->
             <div class="prop-select-wrapper" title="Qualidade do Equipamento">
-              <select class="select-qualidade" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,255,102,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+              <select class="select-qualidade">
                 <option value="0" ${qual === 0 ? 'selected' : ''}>Q0: Quebrado</option>
                 <option value="1" ${qual === 1 ? 'selected' : ''}>Q1: Defeituoso</option>
                 <option value="2" ${qual === 2 ? 'selected' : ''}>Q2: Comprometido</option>
@@ -1062,8 +1062,8 @@ export function renderInventorySheet() {
  
             <!-- C Investidas -->
             <div class="prop-c-wrapper" title="Pressões" style="display: flex; align-items: center; gap: 4px;">
-              <span style="color: var(--color-rust-glow); font-size: 11px; font-weight: bold;">Desgate:</span>
-              <select class="select-pressao" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(141,36,40,0.3); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; width: 40px; cursor: pointer;">
+              <span style="color: var(--color-rust-glow); font-size: var(--font-size-md); font-weight: bold;">Desgate:</span>
+              <select class="select-pressao" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(141,36,40,0.3); color: var(--text-primary); font-size: var(--font-size-md); padding: 2px 4px; border-radius: 4px; outline: none; width: 40px; cursor: pointer;">
                 <option value="0" ${pressao === 0 ? 'selected' : ''}>0</option>
                 <option value="1" ${pressao === 1 ? 'selected' : ''}>1</option>
                 <option value="2" ${pressao === 2 ? 'selected' : ''}>2</option>
@@ -1077,7 +1077,7 @@ export function renderInventorySheet() {
             <div class="row" style="display: flex; flex-direction: row; gap: 6px; align-items: center;">
               <!-- Escassez -->
               <div class="prop-select-wrapper" title="Nível de Escassez">
-                <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: 11px; padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
+                <select class="select-escassez" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,162,255,0.2); color: var(--text-primary); font-size: var(--font-size-md); padding: 2px 4px; border-radius: 4px; outline: none; cursor: pointer;">
                   <option value="0" ${esc === 0 ? 'selected' : ''}>E0: Abundante</option>
                   <option value="1" ${esc === 1 ? 'selected' : ''}>E1: Corriqueiro</option>
                   <option value="2" ${esc === 2 ? 'selected' : ''}>E2: Comum</option>
@@ -1088,8 +1088,8 @@ export function renderInventorySheet() {
                 </select>
             </div>
             <div class="prop-select-wrapper prop-categoria-wrapper">
-              <button type="button" class="btn btn-sm btn-gerenciar-cat" data-slot="${i}" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
-                ➕ Gerenciar Categorias
+              <button type="button" class="btn btn-sm btn-gerenciar-cat" data-slot="${i}" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: var(--font-size-md); padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                Gerenciar Categorias
               </button>
             </div>
           
@@ -1097,7 +1097,7 @@ export function renderInventorySheet() {
         <div class="column" style="display: flex; flex-direction: column; gap: 4px; width: 100%;">
         <!-- Efeito -->
             <div class="prop-effect-wrapper" title="Efeito ou Bônus do Item">
-              <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: 11px; padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
+              <input type="text" class="item-effect" value="${slot.efeito || ''}" placeholder="Efeito / Descrição" style="background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.25); color: var(--text-secondary); font-size: var(--font-size-md); padding: 2px 6px; border-radius: 4px; outline: none; width: 300px; height: 50px;" title="Efeito do item">
             </div>
             <!-- Texto das Categorias -->
             <div class="category-descs-container" style="display: flex; flex-direction: column; gap: 4px;">
@@ -1492,7 +1492,7 @@ export function renderSavedMacrosSheet() {
       formulaParts.push(`mantém ${m.maxKeep}`);
 
       const formulaString = formulaParts.join(" + ").replace(" + mantém", " mantém").replace(" + -", " - ");
-      const nameBadge = m.assimilada ? `<span class="mutation-badge suit-tag-singulares" style="font-size: 9px; padding: 1px 4px; margin-left: 6px; background: #00a2ff; color: #fff; border-radius: 4px; font-weight: bold; text-transform: uppercase;">Assimilada</span>` : "";
+      const nameBadge = m.assimilada ? `<span class="mutation-badge suit-tag-singulares" style="font-size: var(--font-size-sm); padding: 1px 4px; margin-left: 6px; background: #00a2ff; color: #fff; border-radius: 4px; font-weight: bold; text-transform: uppercase;">Assimilada</span>` : "";
 
       item.innerHTML = `
         <div class="custom-roll-info" title="Clique para rolar">

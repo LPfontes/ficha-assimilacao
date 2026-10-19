@@ -57,7 +57,7 @@ import { esc } from "./screen-utils.js";
 // ==========================================
 // MODAL: SELETOR DE CARACTERÍSTICAS
 // ==========================================
-export function openTraitsModal() {
+export function openTraitsModal(selectedCostFilter = "todos") {
   const char = state.currentCharacter;
   if (!char) return;
 
@@ -66,12 +66,24 @@ export function openTraitsModal() {
   el.modalContainer.classList.remove("hidden");
   el.modalBody.innerHTML = `
     <h3 class="modal-title">Adquirir Característica</h3>
-    <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+    <p style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:16px;">
       Você possui <strong><span id="modal-xp-value">${char.xp}</span> pontos de XP</strong> disponíveis.
     </p>
-    <div style="display:flex; gap:8px; margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
       <button id="btn-open-create-trait-from-modal" class="btn btn-sm btn-success">+ Criar Característica</button>
     </div>
+    
+    <!-- Filtro de Custo -->
+    <div class="traits-cost-filter-bar" id="traits-cost-filter-bar">
+      <button class="traits-cost-tab ${selectedCostFilter === 'todos' ? 'active' : ''}" data-cost="todos">Todas</button>
+      <button class="traits-cost-tab ${selectedCostFilter === '1' ? 'active' : ''}" data-cost="1">1 XP</button>
+      <button class="traits-cost-tab ${selectedCostFilter === '2' ? 'active' : ''}" data-cost="2">2 XP</button>
+      <button class="traits-cost-tab ${selectedCostFilter === '3' ? 'active' : ''}" data-cost="3">3 XP</button>
+      <button class="traits-cost-tab ${selectedCostFilter === '4' ? 'active' : ''}" data-cost="4">4 XP</button>
+      <button class="traits-cost-tab ${selectedCostFilter === '5' ? 'active' : ''}" data-cost="5">5 XP</button>
+      <button class="traits-cost-tab ${selectedCostFilter === 'custom' ? 'active' : ''}" data-cost="custom">Personalizadas</button>
+    </div>
+
     <div class="traits-modal-grid" id="traits-modal-grid">
       <!-- JS insere os itens -->
     </div>
@@ -81,6 +93,14 @@ export function openTraitsModal() {
     el.modalContainer.classList.add("hidden");
     setTimeout(() => openCreateTraitModal(), 100);
   }, { once: true });
+
+  // Listener para filtros de custo
+  el.modalBody.querySelectorAll(".traits-cost-tab").forEach(tabBtn => {
+    tabBtn.addEventListener("click", () => {
+      const cost = tabBtn.dataset.cost;
+      openTraitsModal(cost);
+    });
+  });
 
   const grid = el.modalBody.querySelector("#traits-modal-grid");
 
@@ -99,8 +119,8 @@ export function openTraitsModal() {
         <div class="title-row">
           <span class="title">${esc(trait.nome)}</span>
           <span class="cost-badge">${trait.custo} XP</span>
-          ${isOwned ? '<span style="color:#00ff66; font-size:10px; font-weight:bold;">Adquirido</span>' : ''}
-          ${isCustom ? '<span style="color:#a855f7; font-size:10px; margin-left:4px;">⚙️</span>' : ''}
+          ${isOwned ? '<span style="color:#00ff66; font-size: var(--font-size-xs); font-weight:bold;">Adquirido</span>' : ''}
+          ${isCustom ? '<span style="color:#a855f7; font-size: var(--font-size-xs); margin-left:4px;">⚙️</span>' : ''}
         </div>
         <div class="req">${trait.requisitoText ? 'Requisito: ' + esc(trait.requisitoText) : ''}</div>
         <div class="desc">${esc(trait.descricao)}</div>
@@ -120,7 +140,7 @@ export function openTraitsModal() {
         char.xp += trait.custo;
         saveCurrentCharacter();
         loadCharacter(char.id);
-        openTraitsModal();
+        openTraitsModal(selectedCostFilter);
       } else {
         if (char.xp >= trait.custo) {
           logger.info(`Modal: Adquirindo característica "${trait.nome}" (Custo: ${trait.custo} XP).`);
@@ -128,7 +148,7 @@ export function openTraitsModal() {
           char.xp -= trait.custo;
           saveCurrentCharacter();
           loadCharacter(char.id);
-          openTraitsModal();
+          openTraitsModal(selectedCostFilter);
         } else {
           logger.warn("Modal: Falha ao adquirir característica: XP insuficiente.");
           alert("Pontos de XP insuficientes!");
@@ -139,16 +159,37 @@ export function openTraitsModal() {
     grid.appendChild(row);
   };
 
-  CARACTERISTICAS.forEach(trait => renderTraitRow(trait, false));
+  // Filtragem de características oficiais
+  const filteredOfficial = CARACTERISTICAS.filter(trait => {
+    if (selectedCostFilter === "custom") return false;
+    if (selectedCostFilter === "todos") return true;
+    return String(trait.custo) === String(selectedCostFilter);
+  });
+  filteredOfficial.forEach(trait => renderTraitRow(trait, false));
 
   // Custom traits
   const customTraits = getCustomTraits();
-  if (customTraits.length > 0) {
-    const sep = document.createElement("div");
-    sep.style.cssText = "grid-column:1/-1; border-top:1px solid rgba(255,255,255,0.08); margin:8px 0 4px 0; padding-top:8px; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;";
-    sep.textContent = "⚙️ Personalizadas";
-    grid.appendChild(sep);
-    customTraits.forEach(trait => renderTraitRow(trait, true));
+  const filteredCustom = customTraits.filter(trait => {
+    if (selectedCostFilter === "custom") return true;
+    if (selectedCostFilter === "todos") return true;
+    return String(trait.custo) === String(selectedCostFilter);
+  });
+
+  if (filteredCustom.length > 0) {
+    if (selectedCostFilter === "todos") {
+      const sep = document.createElement("div");
+      sep.style.cssText = "grid-column:1/-1; border-top:1px solid rgba(255,255,255,0.08); margin:8px 0 4px 0; padding-top:8px; font-size: var(--font-size-xs); color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;";
+      sep.textContent = "⚙️ Personalizadas";
+      grid.appendChild(sep);
+    }
+    filteredCustom.forEach(trait => renderTraitRow(trait, true));
+  }
+
+  if (filteredOfficial.length === 0 && filteredCustom.length === 0) {
+    const emptyMsg = document.createElement("div");
+    emptyMsg.style.cssText = "text-align:center; padding:24px; color:var(--text-muted); font-size:var(--font-size-sm);";
+    emptyMsg.textContent = "Nenhuma característica encontrada para este filtro.";
+    grid.appendChild(emptyMsg);
   }
 }
 
@@ -207,7 +248,7 @@ export function openAssimilationTestModal() {
     <h3 class="modal-title">Realizar Teste de Assimilação</h3>
     <div class="assimilation-test-modal">
       <p class="pool-display">Pilha de Dados: <strong>1d10 + ${char.assNivel}d12</strong></p>
-      <p style="font-size:13px; color:var(--text-secondary); text-align:center;">
+      <p style="font-size: var(--font-size-xs); color:var(--text-secondary); text-align:center;">
         O teste é realizado ao aumentar seu nível de Assimilação. Os símbolos Sucesso, Presão e Adaptação sorteados determinam suas opções de mutações no repouso.
       </p>
       
@@ -380,7 +421,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         .tarot-intro-screen h3 {
           font-family: var(--font-heading);
           color: var(--color-blue-glow);
-          font-size: 20px;
+          font-size: var(--font-size-md);
           margin-bottom: 12px;
           text-transform: uppercase;
           letter-spacing: 1px;
@@ -393,7 +434,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         }
         .points-badge {
           font-family: var(--font-heading);
-          font-size: 14px;
+          font-size: var(--font-size-md);
           font-weight: bold;
           padding: 8px 16px;
           border-radius: 6px;
@@ -419,10 +460,10 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
           gap: 10px;
           font-weight: bold;
           cursor: pointer;
-          font-size: 13px;
+          font-size: var(--font-size-md);
         }
         .singulares-config-box .desc {
-          font-size: 11px;
+          font-size: var(--font-size-md);
           color: var(--text-secondary);
           margin-top: 6px;
           line-height: 1.4;
@@ -430,7 +471,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       </style>
       <div class="tarot-intro-screen">
         <h3>🔮 Leitura de Mutações (Repouso)</h3>
-        <p style="font-size: 13px; color: var(--text-secondary); max-width: 500px; margin: 0 auto 16px; line-height: 1.5;">
+        <p style="font-size: var(--font-size-md); color: var(--text-secondary); max-width: 500px; margin: 0 auto 16px; line-height: 1.5;">
           Mutações se manifestam e reestruturam o corpo durante o repouso.
           Compre as cartas do Baralho de Assimilações de acordo com os resultados anotados no seu Teste de Assimilação.
         </p>
@@ -451,7 +492,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
           </div>
         </div>
 
-        <button class="btn btn-success btn-large" id="btn-draw-mutations-tarot" style="padding: 12px 28px; font-family: var(--font-heading); font-size: 15px; margin-top: 10px; box-shadow: var(--glow-shadow);">
+        <button class="btn btn-success btn-large" id="btn-draw-mutations-tarot" style="padding: 12px 28px; font-family: var(--font-heading); font-size: var(--font-size-md); margin-top: 10px; box-shadow: var(--glow-shadow);">
           SORTEAR CARTAS DO DESTINO
         </button>
       </div>
@@ -533,13 +574,13 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         color: var(--color-blue-glow);
         margin: 0 0 6px 0;
         text-transform: uppercase;
-        font-size: 18px;
+        font-size: var(--font-size-sm);
       }
       .points-bar {
         display: flex;
         gap: 12px;
         font-family: var(--font-heading);
-        font-size: 13px;
+        font-size: var(--font-size-md);
         background: rgba(0,0,0,0.3);
         padding: 6px 14px;
         border-radius: 20px;
@@ -552,7 +593,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       }
       .tarot-carousel-title {
         font-family: var(--font-heading);
-        font-size: 14px;
+        font-size: var(--font-size-md);
         color: var(--text-secondary);
         margin-bottom: 8px;
         text-transform: uppercase;
@@ -582,8 +623,8 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         border-radius: 3px;
       }
       .tarot-card-wrapper {
-        width: 120px;
-        height: 190px;
+        width: 140px;
+        height: 210px;
         cursor: pointer;
         flex: 0 0 auto;
         scroll-snap-align: center;
@@ -629,11 +670,11 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         color: #eab308;
       }
       .tarot-card-back .sigil {
-        font-size: 28px;
+        font-size: var(--font-size-xxxl);
         filter: drop-shadow(0 0 6px #eab308);
       }
       .tarot-card-back .back-text {
-        font-size: 8px;
+        font-size: var(--font-size-sm);
         text-transform: uppercase;
         letter-spacing: 2px;
         margin-top: 8px;
@@ -651,9 +692,9 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       .tarot-card-front.inoportunas { border-color: var(--color-pressao); color: var(--color-pressao); }
       .tarot-card-front.singulares { border-color: var(--color-singular); color: var(--color-singular); }
       
-      .card-suit-symbol { font-size: 24px; margin-bottom: 4px; }
-      .card-name-title { font-size: 11px; font-family: var(--font-heading); font-weight: bold; line-height: 1.2; word-break: break-word; }
-      .card-type-tag { font-size: 8px; text-transform: uppercase; margin-top: 6px; padding: 2px 6px; background: rgba(255,255,255,0.07); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+      .card-suit-symbol { font-size: var(--font-size-xl); margin-bottom: 4px; }
+      .card-name-title { font-size: var(--font-size-md); font-family: var(--font-heading); font-weight: bold; line-height: 1.2; word-break: break-word; }
+      .card-type-tag { font-size: var(--font-size-sm); text-transform: uppercase; margin-top: 6px; padding: 2px 6px; background: rgba(255,255,255,0.07); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
       
       .tarot-details-panel {
         width: 100%;
@@ -666,7 +707,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       }
       .detail-card-title {
         font-family: var(--font-heading);
-        font-size: 15px;
+        font-size: var(--font-size-md);
         font-weight: bold;
         margin-bottom: 10px;
         display: flex;
@@ -699,7 +740,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         margin-bottom: 3px;
       }
       .mut-title { font-weight: bold; font-size: var(--font-size-lg); }
-      .mut-cost { font-size: 10px; font-family: var(--font-heading); padding: 1px 6px; border-radius: 4px; font-weight: bold; }
+      .mut-cost { font-size: var(--font-size-md; font-family: var(--font-heading); padding: 1px 6px; border-radius: 4px; font-weight: bold; }
       .mut-cost.evolutivas { background: rgba(0,255,102,0.15); color: var(--color-sucesso); border: 1px solid rgba(0,255,102,0.3); }
       .mut-cost.adaptativas { background: rgba(234,179,8,0.15); color: var(--color-adaptacao); border: 1px solid rgba(234,179,8,0.3); }
       .mut-cost.inoportunas { background: rgba(239,68,68,0.15); color: var(--color-pressao); border: 1px solid rgba(239,68,68,0.3); }
@@ -710,7 +751,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
 
     <div class="tarot-modal-container">
       <div class="tarot-header">
-        <h3>🔮 Selecionar Mutações Sorteadas</h3>
+        <h3>Selecionar Mutações Sorteadas</h3>
         <p style="font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0;">Toque em cada carta para revelar e ver as opções de mutação.</p>
         <div class="points-bar">
           <span style="color:var(--color-sucesso);">Sucessos: <strong id="val-pts-a">${ptsA}</strong></span>
@@ -765,7 +806,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
       </div>
 
       <div class="tarot-details-panel" id="tarot-details-panel">
-        <div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 30px;">
+        <div style="text-align: center; color: var(--text-muted); font-size: var(--font-size-md); margin-top: 30px;">
           Selecione uma carta revelada no spread para ver as mutações disponíveis.
         </div>
       </div>
@@ -810,7 +851,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
     detailsPanel.innerHTML = `
       <div class="detail-card-title">
         <span>${cardData.carta} - ${cardData.nome}</span>
-        <span style="font-size:11px; text-transform:uppercase; opacity:0.8;">(${type})</span>
+        <span style="font-size: var(--font-size-xs); text-transform:uppercase; opacity:0.8;">(${type})</span>
       </div>
       <div class="mutation-buy-list">
         ${cardData.mutações.map((mut, mIdx) => {
@@ -833,7 +874,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
 
       let btnHtml = "";
       if (isOwned) {
-        btnHtml = `<span style="font-size:12px; color:var(--text-muted); font-weight:bold;">Adquirido</span>`;
+        btnHtml = `<span style="font-size: var(--font-size-xs); color:var(--text-muted); font-weight:bold;">Adquirido</span>`;
       } else {
         btnHtml = `
               <button class="btn btn-sm btn-buy-mut-tarot" data-m-idx="${mIdx}" ${!canBuy ? "disabled" : ""}>
@@ -1006,7 +1047,7 @@ export function openSettingsModal() {
         </div>
         <div class="setting-control" style="display: flex; align-items: center; gap: 8px;">
           <button id="btn-bubbles-dec" class="btn btn-sm" style="padding: 2px 8px;">-</button>
-          <strong id="val-bubbles-max" style="font-size: 14px; min-width: 20px; text-align: center;">${currentMaxBubbles}</strong>
+          <strong id="val-bubbles-max" style="font-size: var(--font-size-md); min-width: 20px; text-align: center;">${currentMaxBubbles}</strong>
           <button id="btn-bubbles-inc" class="btn btn-sm" style="padding: 2px 8px;">+</button>
         </div>
       </div>
@@ -1147,7 +1188,7 @@ export function openAddItemModal() {
     <div class="inventory-add-library-container">
       <h3 class="modal-title" style="margin-bottom:8px;">Biblioteca de Itens</h3>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:8px;">
-        <p style="font-size:13px; color:var(--text-secondary); margin:0;">
+        <p style="font-size: var(--font-size-xs); color:var(--text-secondary); margin:0;">
           Arraste um item para a ficha ou clique para equipar no primeiro espaço vazio.
         </p>
         <button id="btn-add-item-manual" class="btn btn-sm" style="flex-shrink:0;">Criar Manualmente</button>
@@ -1155,9 +1196,9 @@ export function openAddItemModal() {
       <div class="library-items-grid" style="display:grid; grid-template-columns:1fr; gap:8px; max-height:60vh; overflow-y:auto; padding-right:4px;">
         ${(worldState.itensDb || []).map((it, idx) => `
           <div class="library-item-card" draggable="true" data-item-idx="${idx}" style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); padding:8px; border-radius:4px; cursor:grab; user-select:none;">
-            <div style="font-weight:bold; font-size:13px; color:#fff;">${esc(it.name)}</div>
-            <div style="font-size:11px; color:#aaa; margin-top:4px;">${esc(it.efeito || '')}</div>
-            <div style="font-size:10px; color:#888; margin-top:4px;">Escassez: E${it.escassez} | Categoria: ${it.categorias ? it.categorias.join(", ") : (it.categoria || 'Nenhuma')}</div>
+            <div style="font-weight:bold; font-size: var(--font-size-xs); color:#fff;">${esc(it.name)}</div>
+            <div style="font-size: var(--font-size-xs); color:#aaa; margin-top:4px;">${esc(it.efeito || '')}</div>
+            <div style="font-size: var(--font-size-xs); color:#888; margin-top:4px;">Escassez: E${it.escassez} | Categoria: ${it.categorias ? it.categorias.join(", ") : (it.categoria || 'Nenhuma')}</div>
           </div>
         `).join("")}
       </div>
@@ -1212,21 +1253,21 @@ export function openAddItemModal() {
     el.modalBody.innerHTML = `
     <div class="inventory-add-manual-container">
       <h3 class="modal-title" style="margin-bottom:8px;">Adicionar Item Manual</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+      <p style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:16px;">
         Preencha os dados do novo item. Ele será colocado no primeiro espaço vazio.
       </p>
       <div class="add-item-form" style="display:flex; flex-direction:column; gap:14px;">
         <div class="form-group">
-          <label for="add-item-name" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Nome do Item</label>
+          <label for="add-item-name" style="font-size: var(--font-size-xs); color:var(--text-secondary); display:block; margin-bottom:4px;">Nome do Item</label>
           <input type="text" id="add-item-name" placeholder="Ex: Faca, Corda..." style="width:100%; padding:8px 12px;">
         </div>
         <div class="form-group">
-          <label for="add-item-efeito" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Efeito / Descrição</label>
+          <label for="add-item-efeito" style="font-size: var(--font-size-xs); color:var(--text-secondary); display:block; margin-bottom:4px;">Efeito / Descrição</label>
           <input type="text" id="add-item-efeito" placeholder="Ex: Arma leve..." style="width:100%; padding:8px 12px;">
         </div>
         <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px;">
           <div class="form-group">
-            <label for="add-item-qualidade" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Qualidade</label>
+            <label for="add-item-qualidade" style="font-size: var(--font-size-xs); color:var(--text-secondary); display:block; margin-bottom:4px;">Qualidade</label>
             <select id="add-item-qualidade" style="width:100%; padding:6px 8px;">
               <option value="0">Q0: Quebrado</option>
               <option value="1">Q1: Defeituoso</option>
@@ -1238,7 +1279,7 @@ export function openAddItemModal() {
             </select>
           </div>
           <div class="form-group">
-            <label for="add-item-pressao" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Desgaste</label>
+            <label for="add-item-pressao" style="font-size: var(--font-size-xs); color:var(--text-secondary); display:block; margin-bottom:4px;">Desgaste</label>
             <select id="add-item-pressao" style="width:100%; padding:6px 8px;">
               <option value="0" selected>0</option>
               <option value="1">1</option>
@@ -1250,7 +1291,7 @@ export function openAddItemModal() {
             </select>
           </div>
           <div class="form-group">
-            <label for="add-item-escassez" style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Escassez</label>
+            <label for="add-item-escassez" style="font-size: var(--font-size-xs); color:var(--text-secondary); display:block; margin-bottom:4px;">Escassez</label>
             <select id="add-item-escassez" style="width:100%; padding:6px 8px;">
               <option value="0">E0: Abundante</option>
               <option value="1">E1: Corriqueiro</option>
@@ -1263,17 +1304,17 @@ export function openAddItemModal() {
           </div>
         </div>
         <div class="form-group">
-          <label style="font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px;">Características / Categorias</label>
-          <button type="button" id="btn-toggle-cat-list" class="btn btn-sm btn-gerenciar-cat" style="width:100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: 11px; padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
-            ➕ Gerenciar Categorias
+          <label style="font-size: var(--font-size-xs); color:var(--text-secondary); display:block; margin-bottom:4px;">Características / Categorias</label>
+          <button type="button" id="btn-toggle-cat-list" class="btn btn-sm btn-gerenciar-cat" style="width:100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,165,0,0.25); color: var(--color-gold-glow); font-size: var(--font-size-md); padding: 6px 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+            Gerenciar Categorias
           </button>
           <div id="add-item-cat-list" style="display:none; flex-direction:column; gap:4px; margin-top:8px; max-height:200px; overflow-y:auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 4px;">
             ${Object.entries(ITEM_CATEGORIAS).map(([key, cat]) => `
               <label style="display:flex; align-items:center; gap:8px; padding:4px; border-radius:4px; background:rgba(255,255,255,0.03); cursor:pointer;">
                 <input type="checkbox" class="add-item-cat-checkbox" value="${key}" style="accent-color:var(--color-gold-glow);">
                 <div style="display:flex; flex-direction:column; gap:2px;">
-                  <span style="font-size:11px; font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
-                  <span style="font-size:9px; color:var(--text-secondary);">${cat.desc}</span>
+                  <span style="font-size: var(--font-size-xs); font-weight:bold; color:var(--color-gold-glow);">${cat.nome}</span>
+                  <span style="font-size: var(--font-size-xs); color:var(--text-secondary);">${cat.desc}</span>
                 </div>
               </label>
             `).join("")}
@@ -1358,7 +1399,7 @@ export function openUpgradeAptitudesModal() {
   const render = () => {
     let html = `
       <h3 class="modal-title" style="margin-bottom:4px;">Evoluir Aptidões</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+      <p style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:12px;">
         XP disponível: <strong id="modal-xp-value-upgrade" style="color:var(--color-blue-glow);">${char.xp}</strong>
       </p>
       <div class="upgrade-tabs" style="display:flex; gap:4px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:8px;">
@@ -1634,18 +1675,18 @@ export function openAssimilationLibraryModal() {
 
     let html = `
       <div class="lib-sub-tab-bar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; padding:6px; background:rgba(0,0,0,0.25); border-radius:4px; border:1px solid rgba(255,255,255,0.05); overflow-x:auto;">
-        <button class="lib-sub-tab" data-sub-tab="Todas" style="padding:4px 8px; font-size:11px; font-family:var(--font-heading); border-radius:3px; background:${activeSubTab === 'Todas' ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${activeSubTab === 'Todas' ? 'var(--border-color)' : 'transparent'}; color:${activeSubTab === 'Todas' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">Todas</button>
+        <button class="lib-sub-tab" data-sub-tab="Todas" style="padding:4px 8px; font-size:var(--font-size-sm); font-family:var(--font-heading); border-radius:3px; background:${activeSubTab === 'Todas' ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${activeSubTab === 'Todas' ? 'var(--border-color)' : 'transparent'}; color:${activeSubTab === 'Todas' ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">Todas</button>
     `;
     if (assimData && assimData.cartas) {
       html += assimData.cartas.map(card => {
         const shortName = card.carta.split(" ")[0];
         const isActive = activeSubTab === card.carta;
-        return `<button class="lib-sub-tab" data-sub-tab="${card.carta}" style="padding:4px 8px; font-size:11px; font-family:var(--font-heading); border-radius:3px; background:${isActive ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'}; color:${isActive ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">${shortName}</button>`;
+        return `<button class="lib-sub-tab" data-sub-tab="${card.carta}" style="padding:4px 8px; font-size:var(--font-size-sm); font-family:var(--font-heading); border-radius:3px; background:${isActive ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'}; color:${isActive ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">${shortName}</button>`;
       }).join('');
     }
     if (catCustomMuts.length > 0) {
       const isActive = activeSubTab === "Personalizadas";
-      html += `<button class="lib-sub-tab" data-sub-tab="Personalizadas" style="padding:4px 8px; font-size:11px; font-family:var(--font-heading); border-radius:3px; background:${isActive ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'}; color:${isActive ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">⚙️ Criadas</button>`;
+      html += `<button class="lib-sub-tab" data-sub-tab="Personalizadas" style="padding:4px 8px; font-size:var(--font-size-sm); font-family:var(--font-heading); border-radius:3px; background:${isActive ? 'rgba(255,255,255,0.1)' : 'transparent'}; border:1px solid ${isActive ? 'var(--border-color)' : 'transparent'}; color:${isActive ? '#fff' : 'var(--text-secondary)'}; cursor:pointer; text-transform:uppercase; font-weight:bold;">⚙️ Criadas</button>`;
     }
     html += `</div>`;
     return html;
@@ -1718,7 +1759,7 @@ export function openAssimilationLibraryModal() {
     if (catCustomMuts.length > 0 && (activeSubTab === "Todas" || activeSubTab === "Personalizadas")) {
       html += `
         <div class="lib-card">
-          <div class="lib-card-title" style="color:${cat.color};">⚙️ Personalizadas</div>
+          <div class="lib-card-title" style="color:${cat.color};">Personalizadas</div>
           <div class="lib-mutations">
       `;
       catCustomMuts.forEach(mut => {
@@ -1771,7 +1812,7 @@ export function openAssimilationLibraryModal() {
 
     let html = `
       <h3 class="modal-title">Biblioteca de Assimilações</h3>
-      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+      <p style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:12px;">
         Selecione mutações para adquirir com seus pontos disponíveis.
       </p>
       <div class="lib-points-bar">
@@ -1901,12 +1942,12 @@ export function openCustomRollModal(macroToEdit = null) {
     <h3 class="modal-title">${macroToEdit ? "Editar Rolagem" : "Nova Rolagem Personalizada"}</h3>
     <form id="form-custom-roll" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
       <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-        <label for="macro-name" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Nome da Rolagem:</label>
-        <input type="text" id="macro-name" value="${esc(macro.name)}" placeholder="Ex: Ataque Rápido, Furtividade Sutil" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" required />
+        <label for="macro-name" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Nome da Rolagem:</label>
+        <input type="text" id="macro-name" value="${esc(macro.name)}" placeholder="Ex: Ataque Rápido, Furtividade Sutil" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" required />
       </div>
 
       <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; background: rgba(0, 162, 255, 0.08); border: 1px dashed rgba(0, 162, 255, 0.3); padding: 8px; border-radius: 4px;">
-        <span style="font-weight:bold; font-size:12px; color:var(--text-secondary); user-select:none;">Rolagem Assimilada (Consome 1 Assimilação / 2 Determinação e rola d12)</span>
+        <span style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary); user-select:none;">Rolagem Assimilada (Consome 1 Assimilação / 2 Determinação e rola d12)</span>
         <label class="theme-switch">
           <input type="checkbox" id="macro-assimilada" ${macro.assimilada ? "checked" : ""}>
           <span class="slider"></span>
@@ -1915,19 +1956,19 @@ export function openCustomRollModal(macroToEdit = null) {
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label id="label-instinto-1" for="macro-instinto" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Instinto (d6):</label>
-          <select id="macro-instinto" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
+          <label id="label-instinto-1" for="macro-instinto" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Instinto (d6):</label>
+          <select id="macro-instinto" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
             <option value="">-- Nenhum --</option>
             ${Object.keys(state.currentCharacter?.instintos || { Influência:1, Percepção:1, Potência:1, Reação:1, Resolução:1, Sagacidade:1 }).map(i => `<option value="${i}" ${macro.instinto === i ? "selected" : ""}>${i}</option>`).join("")}
           </select>
         </div>
         <div class="form-group" id="group-instinto-bonus" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-instinto-bonus" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Bônus Dados Instinto (d6):</label>
-          <input type="number" id="macro-instinto-bonus" value="${macro.instintoBonus}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+          <label for="macro-instinto-bonus" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Bônus Dados Instinto (d6):</label>
+          <input type="number" id="macro-instinto-bonus" value="${macro.instintoBonus}" min="-5" max="10" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
         </div>
         <div class="form-group" id="group-instinto-2" style="display:none; flex-direction:column; gap:4px;">
-          <label for="macro-instinto-2" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Instinto 2 (d12):</label>
-          <select id="macro-instinto-2" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
+          <label for="macro-instinto-2" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Instinto 2 (d12):</label>
+          <select id="macro-instinto-2" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
             <option value="">-- Nenhum --</option>
             ${Object.keys(state.currentCharacter?.instintos || { Influência:1, Percepção:1, Potência:1, Reação:1, Resolução:1, Sagacidade:1 }).map(i => `<option value="${i}" ${macro.instinto2 === i ? "selected" : ""}>${i}</option>`).join("")}
           </select>
@@ -1936,8 +1977,8 @@ export function openCustomRollModal(macroToEdit = null) {
 
       <div id="group-skill-container" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-skill" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Conhecimento / Prática (d10):</label>
-          <select id="macro-skill" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
+          <label for="macro-skill" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Conhecimento / Prática (d10):</label>
+          <select id="macro-skill" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;">
             <option value="">-- Nenhum --</option>
             <optgroup label="Conhecimentos">
               ${Object.keys(state.currentCharacter?.conhecimentos || { Biologia:0, Erudição:0, Engenharia:0, Geografia:0, Medicina:0, Segurança:0 }).map(s => `<option value="${s}" ${macro.skill === s ? "selected" : ""}>${s}</option>`).join("")}
@@ -1949,34 +1990,34 @@ export function openCustomRollModal(macroToEdit = null) {
 
         </div>
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-skill-bonus" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Bônus Dados Skill (d10):</label>
-          <input type="number" id="macro-skill-bonus" value="${macro.skillBonus}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+          <label for="macro-skill-bonus" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Bônus Dados Skill (d10):</label>
+          <input type="number" id="macro-skill-bonus" value="${macro.skillBonus}" min="-5" max="10" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
         </div>
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-bonus-successes" style="font-weight:bold; font-size:11px; color:var(--text-secondary);">Sucessos Extras:</label>
-          <input type="number" id="macro-bonus-successes" value="${macro.bonusSuccesses}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+          <label for="macro-bonus-successes" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Sucessos Extras:</label>
+          <input type="number" id="macro-bonus-successes" value="${macro.bonusSuccesses}" min="-5" max="10" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
         </div>
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-bonus-pressures" style="font-weight:bold; font-size:11px; color:var(--text-secondary);">Pressões Extras:</label>
-          <input type="number" id="macro-bonus-pressures" value="${macro.bonusPressures}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+          <label for="macro-bonus-pressures" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Pressões Extras:</label>
+          <input type="number" id="macro-bonus-pressures" value="${macro.bonusPressures}" min="-5" max="10" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
         </div>
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-bonus-adaptations" style="font-weight:bold; font-size:11px; color:var(--text-secondary);">Adaptações Extras:</label>
-          <input type="number" id="macro-bonus-adaptations" value="${macro.bonusAdaptations}" min="-5" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+          <label for="macro-bonus-adaptations" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Adaptações Extras:</label>
+          <input type="number" id="macro-bonus-adaptations" value="${macro.bonusAdaptations}" min="-5" max="10" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
         </div>
       </div>
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-max-keep" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Dados a Manter:</label>
-          <input type="number" id="macro-max-keep" value="${macro.maxKeep}" min="1" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" required />
+          <label for="macro-max-keep" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Dados a Manter:</label>
+          <input type="number" id="macro-max-keep" value="${macro.maxKeep}" min="1" max="10" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" required />
         </div>
         <div class="form-group" style="display:flex; flex-direction:column; gap:4px;">
-          <label for="macro-d12-bonus" style="font-weight:bold; font-size:12px; color:var(--text-secondary);">Bônus Dados d12:</label>
-          <input type="number" id="macro-d12-bonus" value="${macro.d12Bonus || 0}" min="0" max="10" style="width:100%; padding:8px; font-size:14px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
+          <label for="macro-d12-bonus" style="font-weight:bold; font-size: var(--font-size-xs); color:var(--text-secondary);">Bônus Dados d12:</label>
+          <input type="number" id="macro-d12-bonus" value="${macro.d12Bonus || 0}" min="0" max="10" style="width:100%; padding:8px; font-size: var(--font-size-xs); background:rgba(0,0,0,0.3); border:1px solid var(--border-color); color:var(--text-primary); border-radius:4px;" />
         </div>
       </div>
 
@@ -2318,8 +2359,8 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${r.nome}</span>
                 <div style="display:flex; gap:6px;">
-                  <button class="btn btn-xs btn-export-refugio" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
-                  <button class="btn btn-xs btn-danger btn-delete-refugio" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                  <button class="btn btn-xs btn-export-refugio" data-id="${r.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-refugio" data-id="${r.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
                 </div>
               </div>
             `).join('')
@@ -2334,8 +2375,8 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${r.nome}</span>
                 <div style="display:flex; gap:6px;">
-                  <button class="btn btn-xs btn-export-regiao" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
-                  <button class="btn btn-xs btn-danger btn-delete-regiao" data-id="${r.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                  <button class="btn btn-xs btn-export-regiao" data-id="${r.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-regiao" data-id="${r.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
                 </div>
               </div>
             `).join('')
@@ -2350,8 +2391,8 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${c.nome}</span>
                 <div style="display:flex; gap:6px;">
-                  <button class="btn btn-xs btn-export-conflito" data-id="${c.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
-                  <button class="btn btn-xs btn-danger btn-delete-conflito" data-id="${c.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                  <button class="btn btn-xs btn-export-conflito" data-id="${c.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-conflito" data-id="${c.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
                 </div>
               </div>
             `).join('')
@@ -2366,8 +2407,8 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <span style="font-size:var(--font-size-xs); color:var(--text-primary);">${l.nome}</span>
                 <div style="display:flex; gap:6px;">
-                  <button class="btn btn-xs btn-export-local" data-id="${l.id}" style="padding:2px 6px; font-size:10px;">📥 Exportar</button>
-                  <button class="btn btn-xs btn-danger btn-delete-local" data-id="${l.id}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                  <button class="btn btn-xs btn-export-local" data-id="${l.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">📥 Exportar</button>
+                  <button class="btn btn-xs btn-danger btn-delete-local" data-id="${l.id}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
                 </div>
               </div>
             `).join('')
@@ -2388,7 +2429,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
             customInstincts.map((inst, idx) => `
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${typeof inst === 'string' ? inst : inst.nome}</span>
-                <button class="btn btn-xs btn-danger btn-delete-custom-instinct" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                <button class="btn btn-xs btn-danger btn-delete-custom-instinct" data-idx="${idx}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
               </div>
             `).join('')
           }
@@ -2402,9 +2443,9 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <div>
                   <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${typeof apt === 'string' ? apt : (apt.nome || apt.name)}</span>
-                  <small style="font-size:10px; color:var(--text-secondary); margin-left:6px;">(${apt.categoria || "Geral"})</small>
+                  <small style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-left:6px;">(${apt.categoria || "Geral"})</small>
                 </div>
-                <button class="btn btn-xs btn-danger btn-delete-custom-aptitude" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                <button class="btn btn-xs btn-danger btn-delete-custom-aptitude" data-idx="${idx}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
               </div>
             `).join('')
           }
@@ -2418,9 +2459,9 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <div>
                   <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${t.nome}</span>
-                  <small style="font-size:10px; color:var(--text-secondary); margin-left:6px;">(Custo: ${t.custo} XP)</small>
+                  <small style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-left:6px;">(Custo: ${t.custo} XP)</small>
                 </div>
-                <button class="btn btn-xs btn-danger btn-delete-custom-trait" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                <button class="btn btn-xs btn-danger btn-delete-custom-trait" data-idx="${idx}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
               </div>
             `).join('')
           }
@@ -2434,9 +2475,9 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
               <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
                 <div>
                   <span style="font-size:var(--font-size-xs); font-weight:600; color:var(--text-primary);">${m.name}</span>
-                  <small style="font-size:10px; color:var(--text-secondary); margin-left:6px;">(${m.suit.toUpperCase()})</small>
+                  <small style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-left:6px;">(${m.suit.toUpperCase()})</small>
                 </div>
-                <button class="btn btn-xs btn-danger btn-delete-custom-mutation" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">❌ Excluir</button>
+                <button class="btn btn-xs btn-danger btn-delete-custom-mutation" data-idx="${idx}" style="padding:2px 6px; font-size: var(--font-size-xs);">❌ Excluir</button>
               </div>
             `).join('')
           }
@@ -2473,12 +2514,12 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
         if (otherCharacters.length > 0) {
           otherCharactersHtml = `
             <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; text-align: left;">
-              <h5 style="font-size: 11px; margin-bottom: 8px; color: var(--text-primary); text-transform: uppercase; font-family:var(--font-heading);">Enviar Outras Fichas</h5>
+              <h5 style="font-size: var(--font-size-md); margin-bottom: 8px; color: var(--text-primary); text-transform: uppercase; font-family:var(--font-heading);">Enviar Outras Fichas</h5>
               <div style="display:flex; flex-direction:column; gap:6px;">
                 ${otherCharacters.map(char => `
                   <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
-                    <span style="font-size:11px; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${char.name}</span>
-                    <button class="btn btn-xs btn-cloud-push-other" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-blue-glow); color:var(--color-blue-glow); background:rgba(0,162,255,0.04); cursor:pointer;">
+                    <span style="font-size: var(--font-size-xs); color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">${char.name}</span>
+                    <button class="btn btn-xs btn-cloud-push-other" data-char-id="${char.id}" style="padding:2px 6px; font-size: var(--font-size-xs); border-color:var(--color-blue-glow); color:var(--color-blue-glow); background:rgba(0,162,255,0.04); cursor:pointer;">
                       📤 Enviar
                     </button>
                   </div>
@@ -2492,16 +2533,16 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
           if (cloudCharactersCache && cloudCharactersCache.length > 0) {
             cloudCharactersHtml = `
               <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; text-align: left;">
-                <h5 style="font-size: 11px; margin-bottom: 8px; color: var(--text-primary); text-transform: uppercase; font-family:var(--font-heading);">Fichas na Nuvem</h5>
+                <h5 style="font-size: var(--font-size-md); margin-bottom: 8px; color: var(--text-primary); text-transform: uppercase; font-family:var(--font-heading);">Fichas na Nuvem</h5>
                 <div style="display:flex; flex-direction:column; gap:6px;">
                   ${cloudCharactersCache.map(char => `
                     <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.02); padding:6px; border-radius:4px; border:1px solid rgba(255,255,255,0.04);">
-                      <span style="font-size:11px; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${char.name}</span>
+                      <span style="font-size: var(--font-size-xs); color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">${char.name}</span>
                       <div style="display:flex; gap:4px;">
-                        <button class="btn btn-xs btn-cloud-share-char" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-blue-glow); color:var(--color-blue-glow); background:rgba(18,93,110,0.04); cursor:pointer;">
+                        <button class="btn btn-xs btn-cloud-share-char" data-char-id="${char.id}" style="padding:2px 6px; font-size: var(--font-size-xs); border-color:var(--color-blue-glow); color:var(--color-blue-glow); background:rgba(18,93,110,0.04); cursor:pointer;">
                           🔗 Código
                         </button>
-                        <button class="btn btn-xs btn-cloud-delete-char" data-char-id="${char.id}" style="padding:2px 6px; font-size:10px; border-color:var(--color-danger); color:var(--color-danger); background:rgba(239,68,68,0.04); cursor:pointer;">
+                        <button class="btn btn-xs btn-cloud-delete-char" data-char-id="${char.id}" style="padding:2px 6px; font-size: var(--font-size-xs); border-color:var(--color-danger); color:var(--color-danger); background:rgba(239,68,68,0.04); cursor:pointer;">
                           🗑️ Apagar
                         </button>
                       </div>
@@ -2515,24 +2556,24 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
           html = `
           <!-- Perfil do Usuário -->
           <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; background:rgba(255,255,255,0.04); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
-            <div style="width:36px; height:36px; border-radius:50%; background:var(--color-blue-glow); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px; color:#fff;">
+            <div style="width:36px; height:36px; border-radius:50%; background:var(--color-blue-glow); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size: var(--font-size-xm); color:#fff;">
               ${state.currentUser.displayName.charAt(0).toUpperCase()}
             </div>
             <div style="flex:1; text-align:left;">
               <div style="font-weight:600; color:var(--text-primary); font-size:var(--font-size-sm);">${state.currentUser.displayName}</div>
-              <div style="font-size:10px; color:var(--text-secondary);">${state.currentUser.email}</div>
+              <div style="font-size: var(--font-size-xs); color:var(--text-secondary);">${state.currentUser.email}</div>
             </div>
             <button id="btn-google-sign-out" class="btn btn-xs btn-danger" style="padding: 4px 8px;">Sair</button>
           </div>
 
           <!-- Status de Sincronização -->
           ${state.hasUnsavedCloudChanges ? `
-            <div style="background:rgba(255, 102, 0, 0.08); border:1px solid var(--color-orange); color:var(--color-orange); padding:8px; border-radius:4px; font-size:11px; margin-bottom:16px; display:flex; align-items:center; gap:6px;">
+            <div style="background:rgba(255, 102, 0, 0.08); border:1px solid var(--color-orange); color:var(--color-orange); padding:8px; border-radius:4px; font-size: var(--font-size-xs); margin-bottom:16px; display:flex; align-items:center; gap:6px;">
               <span>⚠️</span>
               <span>Modificações pendentes de envio!</span>
             </div>
           ` : `
-            <div style="background:rgba(0, 255, 102, 0.05); border:1px solid var(--color-praticas); color:var(--color-praticas); padding:8px; border-radius:4px; font-size:11px; margin-bottom:16px; display:flex; align-items:center; gap:6px;">
+            <div style="background:rgba(0, 255, 102, 0.05); border:1px solid var(--color-praticas); color:var(--color-praticas); padding:8px; border-radius:4px; font-size: var(--font-size-xs); margin-bottom:16px; display:flex; align-items:center; gap:6px;">
               <span>✔️</span>
               <span>Sincronizado com o Firebase</span>
             </div>
@@ -2540,7 +2581,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
 
           <!-- Limites de Armazenamento -->
           <div style="margin-bottom:10px; text-align:left;">
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-bottom:2px;">
+            <div style="display:flex; justify-content:space-between; font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:2px;">
               <span>Espaço:</span>
               <strong>${stats.sizeKB.toFixed(2)} KB / ${stats.maxSizeKB} KB</strong>
             </div>
@@ -2550,7 +2591,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
           </div>
 
           <div style="margin-bottom:16px; text-align:left;">
-            <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-bottom:2px;">
+            <div style="display:flex; justify-content:space-between; font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:2px;">
               <span>Fichas na Nuvem:</span>
               <strong>${stats.count} / ${stats.maxCount}</strong>
             </div>
@@ -2561,10 +2602,10 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
 
           <!-- Ações principais -->
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-            <button id="btn-cloud-push" class="btn" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-weight: bold; background: rgba(0,162,255,0.05); padding: 8px; font-size:11px; cursor:pointer;">
+            <button id="btn-cloud-push" class="btn" style="border-color: var(--color-blue-glow); color: var(--color-blue-glow); font-weight: bold; background: rgba(0,162,255,0.05); padding: 8px; font-size: var(--font-size-xs); cursor:pointer;">
               📤 Enviar Atual
             </button>
-            <button id="btn-cloud-pull" class="btn" style="border-color: var(--color-praticas); color: var(--color-praticas); font-weight: bold; background: rgba(0,255,102,0.05); padding: 8px; font-size:11px; cursor:pointer;">
+            <button id="btn-cloud-pull" class="btn" style="border-color: var(--color-praticas); color: var(--color-praticas); font-weight: bold; background: rgba(0,255,102,0.05); padding: 8px; font-size: var(--font-size-xs); cursor:pointer;">
               📥 Puxar Nuvem
             </button>
           </div>
@@ -2599,7 +2640,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
         <div style="background:rgba(239,68,68,0.08); border:1px solid var(--color-danger); padding:12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
           <div style="flex:1; padding-right:12px;">
             <div style="font-size:var(--font-size-xs); font-weight:bold; color:#fff; margin-bottom:2px;">Apagar Tudo do Navegador</div>
-            <div style="font-size:10px; color:var(--text-secondary);">Isso limpará absolutamente todas as fichas locais, dados do mundo, e homebrews permanentemente.</div>
+            <div style="font-size: var(--font-size-xs); color:var(--text-secondary);">Isso limpará absolutamente todas as fichas locais, dados do mundo, e homebrews permanentemente.</div>
           </div>
           <button id="btn-wipe-everything" class="btn btn-danger btn-sm" style="white-space:nowrap;">Limpar Tudo</button>
         </div>
@@ -3231,8 +3272,8 @@ export function openManageItemsModal() {
         ${items.map((it, idx) => `
           <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:rgba(0,0,0,0.3); margin-bottom:4px; border-radius:4px;">
             <div>
-              <div style="font-weight:bold; font-size:14px; color:#fff;">${esc(it.name)}</div>
-              <div style="font-size:11px; color:#aaa;">Escassez: ${it.escassez} | Categorias: ${it.categorias ? it.categorias.join(", ") : ''}</div>
+              <div style="font-weight:bold; font-size: var(--font-size-xs); color:#fff;">${esc(it.name)}</div>
+              <div style="font-size: var(--font-size-xs); color:#aaa;">Escassez: ${it.escassez} | Categorias: ${it.categorias ? it.categorias.join(", ") : ''}</div>
             </div>
             <div style="display:flex; gap:8px;">
               <button class="btn btn-sm btn-edit-item" data-idx="${idx}">Editar</button>
@@ -3326,7 +3367,7 @@ export function openSelectReferencesModal(title, stateKey, currentIds, callback,
       return `
         <label style="display:flex; align-items:center; gap:10px; padding:10px; background:rgba(255,255,255,0.02); border:1px solid ${isSelected ? 'var(--color-blue-glow, #3b82f6)' : 'rgba(255,255,255,0.05)'}; border-radius:6px; cursor:pointer; user-select:none; transition: all 0.2s;">
           <input type="${isSingle ? 'radio' : 'checkbox'}" name="ref-item" value="${item.id}" ${isSelected ? 'checked' : ''} style="cursor:pointer;">
-          <span style="font-size:14px; color:#fff;">${esc(name)}</span>
+          <span style="font-size: var(--font-size-xs); color:#fff;">${esc(name)}</span>
         </label>
       `;
     }).join("");

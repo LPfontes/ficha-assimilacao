@@ -2329,7 +2329,7 @@ function _renderConflitosPickerList(filter = "") {
     const diceStr = [d6 && `${d6}d6`, d10 && `${d10}d10`, d12 && `${d12}d12`].filter(Boolean).join(" + ") || `${grau}d6`;
 
     item.innerHTML = `
-      <div class="ficha-picker-avatar-placeholder" style="background:rgba(190,49,53,0.18); border-color:rgba(190,49,53,0.35); color:var(--color-rust-glow); font-size:18px;">⚔️</div>
+      <div class="ficha-picker-avatar-placeholder" style="background:rgba(190,49,53,0.18); border-color:rgba(190,49,53,0.35); color:var(--color-rust-glow); font-size: var(--font-size-sm);">⚔️</div>
       <div class="ficha-picker-info">
         <div class="ficha-picker-name">${esc(c.nome || "Sem nome")}</div>
         <div class="ficha-picker-sub">${esc(diceStr)}</div>
@@ -2451,7 +2451,7 @@ function _renderMesaAtivacoes() {
   if (list) {
     const ativacoes = _activeConflito?.ativacoes || [];
     if (ativacoes.length === 0) {
-      list.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:16px 0;">Nenhuma ativação neste conflito.</div>`;
+      list.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size: var(--font-size-xs);padding:16px 0;">Nenhuma ativação neste conflito.</div>`;
     } else {
       list.innerHTML = ativacoes.map((act, idx) => {
         const cleanTrigger = act.gatilho.toUpperCase().replace(/\s+/g, "");
@@ -2475,40 +2475,38 @@ function _renderMesaAtivacoes() {
             <span class="conflito-ativacao-titulo">${esc(act.titulo)}</span>
           </div>
           <div style="display:flex;gap:4px;margin:4px 0;flex-wrap:wrap;align-items:center;">
-            <span style="font-size:10px;color:var(--text-muted);">Gatilho:</span>
+            <span style="font-size: var(--font-size-xs);color:var(--text-muted);">Gatilho:</span>
             ${triggerHtml}
           </div>
           <div class="conflito-ativacao-efeito">${esc(act.efeito)}</div>
-          <div class="mesa-ativacao-actions" style="display:flex; gap:4px; margin-top:4px;">
-            ${isCompleted ? `<button class="btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
-            <button class="btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação">Editar</button>
-          </div>
-          <div class="conflito-ativacao-investimento" style="margin-top:6px;">
-            <div class="investimento-label-row" style="display:flex;align-items:center;gap:4px;">
-              <span class="investimento-label">Partitura:</span>
-              <div class="investimento-controls">
-                ${requiredS > 0 ? `
-                <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
-                  <img src="${_diceImgMesa('S')}" alt="S">
-                  <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
-                  <span class="invest-val ${investedS >= requiredS ? 'met' : ''}">${investedS}/${requiredS}</span>
-                  <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
-                </div>` : ""}
-                ${requiredA > 0 ? `
-                <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
-                  <img src="${_diceImgMesa('A')}" alt="A">
-                  <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
-                  <span class="invest-val ${investedA >= requiredA ? 'met' : ''}">${investedA}/${requiredA}</span>
-                  <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
-                </div>` : ""}
-                ${requiredP > 0 ? `
-                <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
-                  <img src="${_diceImgMesa('P')}" alt="P">
-                  <button type="button" class="btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
-                  <span class="invest-val ${investedP >= requiredP ? 'met' : ''}">${investedP}/${requiredP}</span>
-                  <button type="button" class="btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
-                </div>` : ""}
-              </div>
+          <div class="investimento-label-row" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:6px;">
+            <div class="investimento-controls" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              ${requiredS > 0 ? `
+              <span class="conflito-result-badge badge-s" title="Sucessos (S)">
+                <img src="assets/sucesso.webp" alt="S">
+                <button type="button" class="btn-pool-adjust btn-invest-dec" data-idx="${idx}" data-type="S">-</button>
+                <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-inc" data-idx="${idx}" data-type="S">+</button>
+              </span>` : ""}
+              ${requiredA > 0 ? `
+              <span class="conflito-result-badge badge-a" title="Adaptações (A)">
+                <img src="assets/adaptacao.webp" alt="A">
+                <button type="button" class="btn-pool-adjust btn-invest-dec" data-idx="${idx}" data-type="A">-</button>
+                <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-inc" data-idx="${idx}" data-type="A">+</button>
+              </span>` : ""}
+              ${requiredP > 0 ? `
+              <span class="conflito-result-badge badge-p" title="Pressões (P)">
+                <img src="assets/pressao.webp" alt="P">
+                <button type="button" class="btn-pool-adjust btn-invest-dec" data-idx="${idx}" data-type="P">-</button>
+                <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
+                <button type="button" class="btn-pool-adjust btn-invest-inc" data-idx="${idx}" data-type="P">+</button>
+              </span>` : ""}
+            </div>
+
+            <div class="mesa-ativacao-actions" style="display:flex; align-items:center; gap:6px;">
+              ${isCompleted ? `<button class="btn btn-sm btn-reset-ativacao" data-idx="${idx}" title="Gastar todas as investidas e resetar" style="background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;">Gastar</button>` : ""}
+              <button class="btn btn-sm btn-edit-ativacao" data-idx="${idx}" title="Editar Ativação" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;">Editar</button>
             </div>
           </div>
         </div>`;
@@ -2556,39 +2554,39 @@ function _renderMesaAtivacoes() {
               <span class="conflito-ativacao-titulo">${esc(act.titulo)}</span>
             </div>
             <div style="display:flex;gap:4px;margin:4px 0;flex-wrap:wrap;align-items:center;">
-              <span style="font-size:10px;color:var(--text-muted);">Gatilho:</span>
+              <span style="font-size: var(--font-size-xs);color:var(--text-muted);">Gatilho:</span>
               ${triggerHtml}
             </div>
             <div class="conflito-ativacao-efeito">${esc(act.efeito)}</div>
-            <div class="mesa-ativacao-actions" style="display:flex; gap:4px; margin-top:4px;">
-              ${isCompleted ? `<button class="btn-reset-ativacao-ameaca-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Gastar todas as investidas e resetar">Gastar</button>` : ""}
-            </div>
-            <div class="conflito-ativacao-investimento" style="margin-top:6px;">
-              <div class="investimento-label-row" style="display:flex;align-items:center;gap:4px;">
-                <span class="investimento-label">Partitura:</span>
-                <div class="investimento-controls">
-                  ${requiredS > 0 ? `
-                  <div class="investimento-control-group group-s" title="Sucessos (S) investidos. Necessário: ${requiredS}">
-                    <img src="${_diceImgMesa('S')}" alt="S">
-                    <button type="button" class="btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">-</button>
-                    <span class="invest-val ${investedS >= requiredS ? 'met' : ''}">${investedS}/${requiredS}</span>
-                    <button type="button" class="btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">+</button>
-                  </div>` : ""}
-                  ${requiredA > 0 ? `
-                  <div class="investimento-control-group group-a" title="Adaptações (A) investidas. Necessário: ${requiredA}">
-                    <img src="${_diceImgMesa('A')}" alt="A">
-                    <button type="button" class="btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">-</button>
-                    <span class="invest-val ${investedA >= requiredA ? 'met' : ''}">${investedA}/${requiredA}</span>
-                    <button type="button" class="btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">+</button>
-                  </div>` : ""}
-                  ${requiredP > 0 ? `
-                  <div class="investimento-control-group group-p" title="Pressões (P) investidas. Necessário: ${requiredP}">
-                    <img src="${_diceImgMesa('P')}" alt="P">
-                    <button type="button" class="btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">-</button>
-                    <span class="invest-val ${investedP >= requiredP ? 'met' : ''}">${investedP}/${requiredP}</span>
-                    <button type="button" class="btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">+</button>
-                  </div>` : ""}
-                </div>
+            <div class="investimento-label-row">
+              <div class="investimento-controls">
+                ${requiredS > 0 ? `
+                <span class="conflito-result-badge badge-s" title="Sucessos (S)">
+                  <img src="assets/sucesso.webp" alt="S">
+                  <button type="button" class="btn-pool-adjust btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">-</button>
+                  <span class="invest-val ${investedS >= requiredS && requiredS > 0 ? 'met' : ''}">${investedS}/${requiredS}</span>
+                  <button type="button" class="btn-pool-adjust btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="S">+</button>
+                </span>` : ""}
+                ${requiredA > 0 ? `
+                <span class="conflito-result-badge badge-a" title="Adaptações (A)">
+                  <img src="assets/adaptacao.webp" alt="A">
+                  <button type="button" class="btn-pool-adjust btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">-</button>
+                  <span class="invest-val ${investedA >= requiredA && requiredA > 0 ? 'met' : ''}">${investedA}/${requiredA}</span>
+                  <button type="button" class="btn-pool-adjust btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="A">+</button>
+                </span>` : ""}
+                ${requiredP > 0 ? `
+                <span class="conflito-result-badge badge-p" title="Pressões (P)">
+                  <img src="assets/pressao.webp" alt="P">
+                  <button type="button" class="btn-pool-adjust btn-invest-ameaca-dec-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">-</button>
+                  <span class="invest-val ${investedP >= requiredP && requiredP > 0 ? 'met' : ''}">${investedP}/${requiredP}</span>
+                  <button type="button" class="btn-pool-adjust btn-invest-ameaca-inc-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" data-type="P">+</button>
+                </span>` : ""}
+              </div>
+
+              <div class="investimento-actions">
+                ${isCompleted ? `<button class="btn btn-sm btn-reset-ativacao-ameaca-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Gastar todas as investidas e resetar" style="background:rgba(255,255,0,0.1); border:1px solid rgba(255,200,0,0.3); color:var(--color-gold-glow); font-size: var(--font-size-xs); padding:2px 8px; border-radius:3px; cursor:pointer;">Gastar</button>` : ""}
+                <button class="btn btn-sm btn-edit-ativacao-ameaca-mesa" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Editar Ativação">Editar</button>
+                <button class="btn-delete-ativacao-ameaca-mesa btn-danger btn-sm" data-ameaca-idx="${ameacaIdx}" data-act-idx="${actIdx}" title="Excluir Ativação">&times;</button>
               </div>
             </div>
           </div>`;
@@ -2598,11 +2596,11 @@ function _renderMesaAtivacoes() {
           <div class="conflito-ameaca-card" style="margin-bottom:12px; padding:10px; border:1px solid rgba(255,255,255,0.08); border-radius:6px; background:rgba(0,0,0,0.15);">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:4px; margin-bottom:6px;">
               <strong style="color:var(--color-rust-glow);">${esc(a.nome)}</strong>
-              <span style="font-size:10px; color:var(--text-muted);">Dados: ${diceDesc}</span>
+              <span style="font-size: var(--font-size-xs); color:var(--text-muted);">Dados: ${diceDesc}</span>
             </div>
-            <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px; font-style:italic;">${esc(a.descricao || "Sem descrição.")}</div>
+            <div style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:8px; font-style:italic;">${esc(a.descricao || "Sem descrição.")}</div>
             <div class="ameaca-ativacoes-list-mesa">
-              ${actsHtml || '<div style="font-size:10px; color:var(--text-muted); padding:8px 0;">Nenhuma ativação específica.</div>'}
+              ${actsHtml || '<div style="font-size: var(--font-size-xs); color:var(--text-muted); padding:8px 0;">Nenhuma ativação específica.</div>'}
             </div>
           </div>
         `;
@@ -2664,7 +2662,8 @@ function _updateMesaInvestment(idx, type, delta) {
   act[key] = delta > 0 ? (act[key] || 0) + delta : Math.max(0, (act[key] || 0) + delta);
   const list = document.getElementById("mesa-ativacoes-list");
   if (!list) return;
-  const group = list.querySelector(`.btn-invest-inc[data-idx="${idx}"][data-type="${type}"]`)?.closest(".investimento-control-group");
+  const btn = list.querySelector(`.btn-invest-inc[data-idx="${idx}"][data-type="${type}"]`);
+  const group = btn?.closest(".conflito-result-badge") || btn?.closest(".investimento-control-group");
   if (!group) return;
   const valSpan = group.querySelector(".invest-val");
   if (!valSpan) return;
@@ -2832,10 +2831,10 @@ function _renderFichasVisibilityList() {
     item.style.borderRadius = "4px";
 
     item.innerHTML = `
-      <span style="font-size: 13px; font-weight: 500;">👤 ${esc(p.name)} (Jogador)</span>
+      <span style="font-size: var(--font-size-md); font-weight: 500;">👤 ${esc(p.name)} (Jogador)</span>
       <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
         <input type="checkbox" class="visibility-checkbox" data-id="${p.id}" ${isHidden ? "checked" : ""}>
-        <span style="font-size: 11px; color: ${isHidden ? "#ff5555" : "#55ff55"}; font-weight: bold;">${isHidden ? "Oculto" : "Visível"}</span>
+        <span style="font-size: var(--font-size-md); color: ${isHidden ? "#ff5555" : "#55ff55"}; font-weight: bold;">${isHidden ? "Oculto" : "Visível"}</span>
       </label>
     `;
 
@@ -2870,10 +2869,10 @@ function _renderFichasVisibilityList() {
     item.style.borderRadius = "4px";
 
     item.innerHTML = `
-      <span style="font-size: 13px; font-weight: 500;">📋 ${esc(entry.char.name)} (Ficha Mestre)</span>
+      <span style="font-size: var(--font-size-md); font-weight: 500;">📋 ${esc(entry.char.name)} (Ficha Mestre)</span>
       <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
         <input type="checkbox" class="visibility-checkbox" data-id="${entry.id}" ${isHidden ? "checked" : ""}>
-        <span style="font-size: 11px; color: ${isHidden ? "#ff5555" : "#55ff55"}; font-weight: bold;">${isHidden ? "Oculto" : "Visível"}</span>
+        <span style="font-size: var(--font-size-md); color: ${isHidden ? "#ff5555" : "#55ff55"}; font-weight: bold;">${isHidden ? "Oculto" : "Visível"}</span>
       </label>
     `;
 
@@ -2897,7 +2896,7 @@ function _renderFichasVisibilityList() {
   });
 
   if (_lastPlayersList.length === 0 && _extraFichas.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:16px; color:var(--color-text-muted); font-size:12px;">Nenhuma ficha disponível na mesa no momento.</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:16px; color:var(--color-text-muted); font-size: var(--font-size-xs);">Nenhuma ficha disponível na mesa no momento.</div>`;
   }
 }
 
@@ -3553,7 +3552,7 @@ function _renderCampaignNotas() {
     const timeStr = new Date(note.timestamp).toLocaleString();
     const canDelete = isMestre || note.autor === state.currentUser?.displayName;
     const deleteBtn = canDelete 
-      ? `<button class="btn btn-sm btn-danger-dropdown btn-remove-note" data-id="${esc(note.id)}" style="position:absolute; top:12px; right:12px; padding:2px 6px; font-size:10px;">✕</button>` 
+      ? `<button class="btn btn-sm btn-danger-dropdown btn-remove-note" data-id="${esc(note.id)}" style="position:absolute; top:12px; right:12px; padding:2px 6px; font-size: var(--font-size-xs);">✕</button>` 
       : "";
 
     return `
@@ -3657,7 +3656,7 @@ function _renderCampaignHistoria() {
   feed.innerHTML = entradas.map(entry => {
     const dateStr = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const deleteBtn = isMestre 
-      ? `<button class="btn-remove-hist" data-id="${esc(entry.id)}" style="background:none;border:none;color:var(--color-rust-glow);cursor:pointer;font-size:10px;margin-left:8px;">Excluir</button>`
+      ? `<button class="btn-remove-hist" data-id="${esc(entry.id)}" style="background:none;border:none;color:var(--color-rust-glow);cursor:pointer;font-size: var(--font-size-xs);margin-left:8px;">Excluir</button>`
       : "";
     return `
       <div class="chronicle-entry">
@@ -3756,7 +3755,7 @@ function _openSharedFichaViewer(fichaObj) {
   const traits = char.traits || [];
   const traitsHtml = traits.length > 0 
     ? traits.map(t => `<div class="lib-item-viewer"><div class="lib-item-title">${esc(t.name)}</div><div class="lib-item-desc">${esc(t.effect)}</div></div>`).join("")
-    : '<div style="color:var(--text-muted); font-size:12px;">Nenhuma característica.</div>';
+    : '<div style="color:var(--text-muted); font-size: var(--font-size-xs);">Nenhuma característica.</div>';
 
   // Renderizar mutações / assimilações
   const mutations = char.mutações || char.mutations || [];
@@ -3765,13 +3764,13 @@ function _openSharedFichaViewer(fichaObj) {
         const pressInfo = m.pressaoAtual !== undefined ? ` • Pressão: ${m.pressaoAtual}` : "";
         return `<div class="lib-item-viewer"><div class="lib-item-title">${esc(m.name)}${pressInfo}</div><div class="lib-item-desc">${esc(m.desc)}</div></div>`;
       }).join("")
-    : '<div style="color:var(--text-muted); font-size:12px;">Nenhuma mutação/assimilação.</div>';
+    : '<div style="color:var(--text-muted); font-size: var(--font-size-xs);">Nenhuma mutação/assimilação.</div>';
 
   // Renderizar inventário
   const slots = char.inventory || char.inventario || [];
   const slotsHtml = Object.values(slots).length > 0
     ? Object.values(slots).map(s => s && s.name ? `<div class="lib-item-viewer"><div class="lib-item-title">${esc(s.name)}</div><div class="lib-item-desc">Qtde: ${s.qty || 1} • Tipo: ${s.type || "Geral"}</div></div>` : "").filter(Boolean).join("")
-    : '<div style="color:var(--text-muted); font-size:12px;">Inventário vazio.</div>';
+    : '<div style="color:var(--text-muted); font-size: var(--font-size-xs);">Inventário vazio.</div>';
 
   const instintosHtml = Object.entries(char.instintos || {}).map(([name, val]) =>
     `<div class="ficha-viewer-stat-row" style="margin-bottom: 0;"><span class="ficha-viewer-stat-name">${esc(name)}</span><span class="ficha-viewer-stat-value">${val}</span></div>`
@@ -3819,17 +3818,17 @@ function _openSharedFichaViewer(fichaObj) {
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Instintos)</div>
         <div class="ficha-viewer-aptitudes-grid">
-          ${instintosHtml || '<div style="color:var(--text-muted); font-size:12px;">Nenhum instinto.</div>'}
+          ${instintosHtml || '<div style="color:var(--text-muted); font-size: var(--font-size-xs);">Nenhum instinto.</div>'}
         </div>
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Conhecimentos)</div>
         <div class="ficha-viewer-aptitudes-grid">
-          ${conhecimentosHtml || '<div style="color:var(--text-muted); font-size:12px;">Nenhum conhecimento.</div>'}
+          ${conhecimentosHtml || '<div style="color:var(--text-muted); font-size: var(--font-size-xs);">Nenhum conhecimento.</div>'}
         </div>
         
         <div class="ficha-viewer-block-title" style="margin-top:16px;">Aptidões (Práticas)</div>
         <div class="ficha-viewer-aptitudes-grid">
-          ${praticasHtml || '<div style="color:var(--text-muted); font-size:12px;">Nenhuma prática.</div>'}
+          ${praticasHtml || '<div style="color:var(--text-muted); font-size: var(--font-size-xs);">Nenhuma prática.</div>'}
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations, updateCloudSyncBadge } from "./js/state.js";
-import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits } from "./js/wizard.js";
+import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits, setWizardTraitsCostFilter } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
 import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openManageItemsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal, openCloudSyncModal, openExportModal } from "./js/modals.js";
 import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
@@ -71,7 +71,9 @@ function setupEventListeners() {
   logger.info("Configurando ouvintes de eventos da interface...");
   // Header controls
   el.btnNewChar.addEventListener("click", startWizard);
-  el.btnDeleteChar.addEventListener("click", deleteActiveCharacter);
+  if (el.btnDeleteChar) {
+    el.btnDeleteChar.addEventListener("click", deleteActiveCharacter);
+  }
   if (el.btnSettings) {
     el.btnSettings.addEventListener("click", openSettingsModal);
   }
@@ -740,9 +742,13 @@ function setupEventListeners() {
   });
 
   // Filtro de Custo de Características do Wizard
-  const wizTraitsCostFilter = document.getElementById("wiz-traits-cost-filter");
-  if (wizTraitsCostFilter) {
-    wizTraitsCostFilter.addEventListener("change", renderWizardTraits);
+  const wizFilterBar = document.getElementById("traits-cost-filter-bar");
+  if (wizFilterBar) {
+    wizFilterBar.querySelectorAll(".traits-cost-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        setWizardTraitsCostFilter(tab.dataset.cost);
+      });
+    });
   }
 
   // Clique na moldura do retrato para abrir selecionador de arquivo

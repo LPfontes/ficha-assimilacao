@@ -87,7 +87,7 @@ export function renderRefPanelMulti(label, containerId, ids, stateKey) {
       <span>${esc(s.name || s.nome)}</span>
       <button class="btn-remove-ref" data-refid="${s.id}" data-refcontainer="${containerId}" title="Remover vínculo">&times;</button>
     </span>
-  `).join("") || `<span style="font-size:10px;color:var(--text-muted);">Nenhum vinculado</span>`;
+  `).join("") || `<span style="font-size: var(--font-size-xs);color:var(--text-muted);">Nenhum vinculado</span>`;
   
   const addHtml = (available.length > 0 || items.length > 0)
     ? `<div style="margin-top:8px;">
@@ -117,7 +117,7 @@ export function renderRefPanelSingle(label, id, currentId, stateKey) {
          <span>${esc(currentItem.name || currentItem.nome)}</span>
          <button class="btn-remove-ref" data-refid="${currentItem.id}" data-refcontainer="${id}" title="Remover vínculo">&times;</button>
        </span>`
-    : `<span style="font-size:10px;color:var(--text-muted);">Nenhum vinculado</span>`;
+    : `<span style="font-size: var(--font-size-xs);color:var(--text-muted);">Nenhum vinculado</span>`;
     
   const addHtml = items.length > 0
     ? `<div style="margin-top:8px;">

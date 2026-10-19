@@ -147,13 +147,13 @@ function openCreateCriseModal(r) {
     <!-- Simulador de Dados -->
     <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-bottom: 12px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-        <span class="ws-label" style="font-size: 11px;">Rolar Gravidade (4 dados - elimina 1)</span>
-        <button id="btn-modal-crise-roll" class="btn btn-sm btn-secondary" style="padding: 2px 8px; font-size: 10px;">Rolar 4d6</button>
+        <span class="ws-label" style="font-size: var(--font-size-md);">Rolar Gravidade (4 dados - elimina 1)</span>
+        <button id="btn-modal-crise-roll" class="btn btn-sm btn-secondary" style="padding: 2px 8px; font-size: var(--font-size-sm);">Rolar 4d6</button>
       </div>
       <div id="modal-crise-dice-container" style="display:flex; gap:8px; justify-content:center; min-height: 40px; align-items:center;">
-        <span style="font-size:10px; color:var(--text-muted); font-style:italic;">Clique em "Rolar 4d6" para sortear.</span>
+        <span style="font-size: var(--font-size-xs); color:var(--text-muted); font-style:italic;">Clique em "Rolar 4d6" para sortear.</span>
       </div>
-      <div id="modal-crise-dice-instruction" style="font-size: 10px; color:#56ffff; text-align:center; margin-top: 4px; display:none; user-select:none;">
+      <div id="modal-crise-dice-instruction" style="font-size: var(--font-size-sm); color:#56ffff; text-align:center; margin-top: 4px; display:none; user-select:none;">
         Escolha 1 dado para eliminar clicando sobre ele
       </div>
     </div>
@@ -177,7 +177,7 @@ function openCreateCriseModal(r) {
 
     <div style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;">
       <input type="checkbox" id="modal-crise-reduce-moral" checked style="width:16px; height:16px; accent-color:#ef4444; cursor:pointer;">
-      <label for="modal-crise-reduce-moral" class="ws-label" style="cursor:pointer; font-size:11px; user-select:none; color:#ffb0b0;">
+      <label for="modal-crise-reduce-moral" class="ws-label" style="cursor:pointer; font-size: var(--font-size-xs); user-select:none; color:#ffb0b0;">
         Reduzir 1 de Moral do Refúgio (de ${r.moral || 0} para ${Math.max(0, (r.moral || 0) - 1)})
       </label>
     </div>
@@ -421,27 +421,27 @@ export function renderRefugioSheet() {
                 <div class="refugio-resources-row">
                   <div class="refugio-resource-card res-agua">
                     <span class="refugio-resource-label">Água</span>
-                    <button type="button" class="btn-res-dec" data-res-key="agua" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                    <button type="button" class="btn-res-dec" data-res-key="agua" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                     <span class="refugio-resource-value" data-res-key="agua">${r.recursos.agua ?? 0}</span>
-                    <button type="button" class="btn-res-inc" data-res-key="agua" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                    <button type="button" class="btn-res-inc" data-res-key="agua" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                   </div>
                   <div class="refugio-resource-card res-alimento">
                   <span class="refugio-resource-label">Alimento</span>
-                  <button type="button" class="btn-res-dec" data-res-key="alimento" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="alimento" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="alimento">${r.recursos.alimento ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="alimento" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="alimento" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                   </div>
                   <div class="refugio-resource-card res-remedios">
                   <span class="refugio-resource-label">Remédios</span>
-                  <button type="button" class="btn-res-dec" data-res-key="remedios" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="remedios" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="remedios">${r.recursos.remedios ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="remedios" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="remedios" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                   </div>
                   <div class="refugio-resource-card res-vestuario">
                   <span class="refugio-resource-label">Vestuário</span>
-                  <button type="button" class="btn-res-dec" data-res-key="vestuario" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="vestuario" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="vestuario">${r.recursos.vestuario ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="vestuario" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="vestuario" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                   </div>
                 </div>
               </div>
@@ -452,27 +452,27 @@ export function renderRefugioSheet() {
               <div class="refugio-resources-row">
                 <div class="refugio-resource-card res-plantas">
                   <span class="refugio-resource-label">Plantas</span>
-                  <button type="button" class="btn-res-dec" data-res-key="plantas" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="plantas" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="plantas">${r.recursos.plantas ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="plantas" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="plantas" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
                 <div class="refugio-resource-card res-animais">
                   <span class="refugio-resource-label">Animais</span>
-                  <button type="button" class="btn-res-dec" data-res-key="animais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="animais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="animais">${r.recursos.animais ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="animais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="animais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
                 <div class="refugio-resource-card res-madeira">
                   <span class="refugio-resource-label">Madeira</span>
-                  <button type="button" class="btn-res-dec" data-res-key="madeira" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="madeira" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="madeira">${r.recursos.madeira ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="madeira" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="madeira" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
                 <div class="refugio-resource-card res-biomassa">
                   <span class="refugio-resource-label">Biomassa</span>
-                  <button type="button" class="btn-res-dec" data-res-key="biomassa" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="biomassa" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="biomassa">${r.recursos.biomassa ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="biomassa" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="biomassa" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
               </div>
             </div>
@@ -483,27 +483,27 @@ export function renderRefugioSheet() {
               <div class="refugio-resources-row">
                 <div class="refugio-resource-card res-minerais">
                   <span class="refugio-resource-label">Minerais</span>
-                  <button type="button" class="btn-res-dec" data-res-key="minerais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="minerais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="minerais">${r.recursos.minerais ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="minerais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="minerais" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
                 <div class="refugio-resource-card res-combustivel">
                   <span class="refugio-resource-label">Combustível</span>
-                  <button type="button" class="btn-res-dec" data-res-key="combustivel" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="combustivel" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="combustivel">${r.recursos.combustivel ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="combustivel" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="combustivel" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
                 <div class="refugio-resource-card res-municao">
                   <span class="refugio-resource-label">Munição</span>
-                  <button type="button" class="btn-res-dec" data-res-key="municao" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="municao" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="municao">${r.recursos.municao ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="municao" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="municao" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
                 <div class="refugio-resource-card res-mat_constr">
                   <span class="refugio-resource-label">Mat. Constr.</span>
-                  <button type="button" class="btn-res-dec" data-res-key="mat_constr" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">-</button>
+                  <button type="button" class="btn-res-dec" data-res-key="mat_constr" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">-</button>
                   <span class="refugio-resource-value" data-res-key="mat_constr">${r.recursos.mat_constr ?? 0}</span>
-                  <button type="button" class="btn-res-inc" data-res-key="mat_constr" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; outline:none; user-select:none;">+</button>
+                  <button type="button" class="btn-res-inc" data-res-key="mat_constr" style="background:rgba(255,255,255,0.02); border:none; border-left:1px solid rgba(255,255,255,0.08); color:var(--text-secondary); width:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size: var(--font-size-xs); font-weight:bold; outline:none; user-select:none;">+</button>
                 </div>
               </div>
           </div>
@@ -576,12 +576,12 @@ function _renderBuildings(screen, r) {
       <!-- Linha de Fluxo de Recursos (Consome / Produz) -->
       <div style="display:flex; gap:10px; margin: 4px 0 6px 0;">
         <div style="flex:1; display:flex; align-items:center; gap:6px; background:rgba(239,68,68,0.04); border:1px solid rgba(239,68,68,0.15); padding:3px 8px; border-radius:4px;">
-          <span style="font-size:9px; color:#ef4444; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px; user-select:none;">Consome</span>
-          <input type="text" class="building-consumo" value="${esc(c.consumo || '')}" placeholder="Ex: Plantas 1" style="background:transparent; border:none; color:#ffb0b0; font-size:11px; width:100%; outline:none;">
+          <span style="font-size: var(--font-size-xs); color:#ef4444; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px; user-select:none;">Consome</span>
+          <input type="text" class="building-consumo" value="${esc(c.consumo || '')}" placeholder="Ex: Plantas 1" style="background:transparent; border:none; color:#ffb0b0; font-size: var(--font-size-xs); width:100%; outline:none;">
         </div>
         <div style="flex:1; display:flex; align-items:center; gap:6px; background:rgba(0,255,102,0.04); border:1px solid rgba(0,255,102,0.15); padding:3px 8px; border-radius:4px;">
-          <span style="font-size:9px; color:#00ff66; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px; user-select:none;">Produz</span>
-          <input type="text" class="building-producao" value="${esc(c.producao || '')}" placeholder="Ex: Medicamentos 1" style="background:transparent; border:none; color:#a0ffa0; font-size:11px; width:100%; outline:none;">
+          <span style="font-size: var(--font-size-xs); color:#00ff66; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px; user-select:none;">Produz</span>
+          <input type="text" class="building-producao" value="${esc(c.producao || '')}" placeholder="Ex: Medicamentos 1" style="background:transparent; border:none; color:#a0ffa0; font-size: var(--font-size-xs); width:100%; outline:none;">
         </div>
       </div>
 

@@ -7,7 +7,7 @@
   height: 44px;
   border-radius: 50%;
   background: var(--color-blue-glow);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -36,6 +36,7 @@
     width: 40px;
     height: 40px;
   }
+
   .player-fab svg {
     width: 20px;
     height: 20px;
@@ -95,7 +96,7 @@
 }
 
 .mini-player .player-track-name {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   font-family: var(--font-heading);
   white-space: nowrap;
@@ -112,15 +113,15 @@
 }
 
 .mini-player .player-time {
-  font-size: 10px;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .mini-player .player-time-sep {
-  font-size: 10px;
-  color: rgba(255,255,255,0.15);
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.15);
 }
 
 .mini-player .player-actions {
@@ -146,7 +147,7 @@
 
 .mini-player .player-btn:hover {
   opacity: 1;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .mini-player .player-btn svg {
@@ -191,7 +192,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -246,7 +247,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .player-expanded-info {
@@ -284,11 +285,11 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: var(--transition-fast);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .player-expanded-item:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .player-expanded-item.active {
@@ -331,6 +332,7 @@
   .mini-player .player-volume-wrap {
     display: none;
   }
+
   .mini-player .player-btn-shuffle,
   .mini-player .player-btn-repeat {
     display: none;
@@ -341,21 +343,26 @@
   .mini-player .player-btn-expand {
     display: none;
   }
+
   .mini-player .player-track-name {
     max-width: 80px;
   }
+
   .mini-player .player-track-art {
     width: 26px;
     height: 26px;
   }
+
   .mini-player .player-track-art svg {
     width: 14px;
     height: 14px;
   }
+
   .mini-player .player-btn-play {
     width: 24px;
     height: 24px;
   }
+
   .mini-player .player-btn-play svg {
     width: 12px;
     height: 12px;
@@ -368,7 +375,7 @@
   cursor: default !important;
   opacity: 0.7;
 }
+
 .player-expanded-item.disabled:hover {
   background: transparent !important;
 }
-

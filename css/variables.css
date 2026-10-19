@@ -3,45 +3,59 @@
 :root {
   /* Paleta de Cores Papel Envelhecido Pós-Colapso */
   --bg-main: transparent;
-  --bg-card: rgba(0, 0, 0, 0.5); /* Cor de papel */
+  --bg-card: rgba(0, 0, 0, 0.5);
+  /* Cor de papel */
   --bg-header: rgba(0, 0, 0, 0.3);
-  --border-color: rgba(44, 36, 27, 0.3); /* Tinta desbotada */
+  --border-color: rgba(44, 36, 27, 0.3);
+  /* Tinta desbotada */
   --border-color-glow: rgba(44, 36, 27, 0.6);
-  
+
   /* Acentos Temáticos */
-  --color-blue-glow: hsl(191.09, 71.88%, 50%); /* Ciano escuro */
+  --color-blue-glow: hsl(191.09, 71.88%, 50%);
+  /* Ciano escuro */
   --color-blue-dark: #0a3a45;
-  --color-rust: #8d2428; /* Vermelho escuro */
+  --color-rust: #8d2428;
+  /* Vermelho escuro */
   --color-rust-glow: #be3135;
   --color-bronze: #8b6508;
   --color-instintos: hsl(356.79, 50%, 50%);
   --color-conhecimentos: hsl(204.32, 33.33%, 50%);
   --color-praticas: hsl(55.14, 16.12%, 50%);
   /* Cores de Alerta de Saúde */
-  --color-health-label: #4c7b12; /* Texto do rótulo da saúde */
-  --health-6: #34bd19; /* Saudável */
-  --health-5: #a3e635; /* Escoriação */
-  --health-4: #facc15; /* Laceração */
-  --health-3: #f97316; /* Ferimentos */
-  --health-2: #ef4444; /* Debilitação */
-  --health-1: #991b1b; /* Incapacitação */
+  --color-health-label: #4c7b12;
+  /* Texto do rótulo da saúde */
+  --health-6: #34bd19;
+  /* Saudável */
+  --health-5: #a3e635;
+  /* Escoriação */
+  --health-4: #facc15;
+  /* Laceração */
+  --health-3: #f97316;
+  /* Ferimentos */
+  --health-2: #ef4444;
+  /* Debilitação */
+  --health-1: #991b1b;
+  /* Incapacitação */
 
   /* Cores Neutras (Inversão) */
-  --text-primary: #ffffff; /* Tinta quase preta */
-  --text-secondary: #f8f7f6; /* Tinta marrom escuro */
-  --text-muted: #cac6c1; /* Tinta desbotada */
+  --text-primary: #ffffff;
+  /* Tinta quase preta */
+  --text-secondary: #f8f7f6;
+  /* Tinta marrom escuro */
+  --text-muted: #cac6c1;
+  /* Tinta desbotada */
   --bg-input: rgba(0, 0, 0, 0.4);
-  
+
   /* Tipografia */
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
-  --font-size-xs: 10px;
-  --font-size-xm: 12px;
-  --font-size-sm: 14px;
-  --font-size-md: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 20px;
-  --font-size-xxl: 24px;
+  --font-size-xs: 14px;
+  --font-size-xm: 16px;
+  --font-size-sm: 18px;
+  --font-size-md: 20px;
+  --font-size-lg: 22px;
+  --font-size-xl: 24px;
+  --font-size-xxl: 26px;
   --font-size-xxxl: 28px;
   --font-size-huge: 36px;
   /* Transições e Bordas */
@@ -62,7 +76,7 @@
   /* Cores dos Atributos */
   --color-sucesso: #a80000;
   --color-adaptacao: #a6a400;
-  --color-pressao: hsl(192.6,98.6%,50%);
+  --color-pressao: hsl(192.6, 98.6%, 50%);
   --color-singular: #a855f7;
 }
 
@@ -74,7 +88,8 @@
 }
 
 body {
-  background-color: #1a1511; /* Cor de fundo base escura do tema */
+  background-color: #1a1511;
+  /* Cor de fundo base escura do tema */
   color: var(--text-primary);
   font-family: var(--font-body);
   line-height: 1.5;
@@ -96,7 +111,8 @@ body::before {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  opacity: 0.3; /* AJUSTE A OPACIDADE AQUI (ex: 0.1 a 1.0) */
+  opacity: 0.3;
+  /* AJUSTE A OPACIDADE AQUI (ex: 0.1 a 1.0) */
   z-index: -1;
   pointer-events: none;
 }
@@ -106,13 +122,16 @@ body::before {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-main);
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 255, 102, 0.2);
   border-radius: var(--radius-sm);
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-blue-glow);
 }
@@ -159,22 +178,27 @@ body::before {
   gap: 16px;
 }
 
-select, input[type="text"], input[type="number"], textarea {
+select,
+input[type="text"],
+input[type="number"],
+textarea {
   background: rgba(0, 0, 0, 0);
-  border: 1px solid var(--border-color);
+  border: none;
   color: var(--text-primary);
-  border-radius: var(--radius-sm);
   font-family: var(--font-body);
   outline: none;
   transition: var(--transition-fast);
 }
 
-select:focus, input:focus, textarea:focus {
+select:focus,
+input:focus,
+textarea:focus {
   border-color: var(--color-blue-glow);
   box-shadow: var(--glow-shadow);
 }
 
-option, optgroup {
+option,
+optgroup {
   background-color: #1a1a1a;
   color: var(--text-primary);
 }
@@ -190,7 +214,7 @@ option, optgroup {
   align-items: center;
   gap: 8px;
   transition: var(--transition-fast);
-  
+
   /* Padrão de botões (antigo btn-secondary) */
   background-color: transparent;
   color: var(--text-primary);
@@ -203,20 +227,24 @@ option, optgroup {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 var(--color-blue-dark);
 }
-.export-json{
+
+.export-json {
   background-color: #4c7b12;
   border: 1px solid #304e0b;
   box-shadow: 2px 2px 0 #304e0b;
 }
-.import-json{
+
+.import-json {
   background-color: #0f325c;
 }
+
 .btn-success {
   background-color: var(--color-official-cyan-dark);
   color: #fff;
   border-color: #052229;
   box-shadow: 2px 2px 0 #052229;
 }
+
 .btn-success:hover:not(:disabled) {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 #052229;
@@ -228,6 +256,7 @@ option, optgroup {
   border-color: #5e1114;
   box-shadow: 2px 2px 0 #5e1114;
 }
+
 .btn-danger:hover:not(:disabled) {
   background-color: #a0282d;
   transform: translate(1px, 1px);
@@ -245,17 +274,20 @@ option, optgroup {
   padding: 6px 12px;
   font-size: var(--font-size-sm);
 }
-.btn-blue{
+
+.btn-blue {
   background-color: var(--color-blue-dark);
   border-color: var(--color-blue-dark);
   color: #fff;
   box-shadow: 2px 2px 0 var(--color-blue-dark);
 }
+
 .btn-blue:hover:not(:disabled) {
   background-color: #125d6e;
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 #052229;
 }
+
 .btn-block {
   display: flex;
   width: 100%;
@@ -292,7 +324,6 @@ option, optgroup {
   display: flex;
   flex-direction: column;
   transition: var(--transition-normal);
-  padding: 10px;
 }
 
 /* Wizard e Sheet precisam do padding que main-content tinha antes */
@@ -314,5 +345,3 @@ option, optgroup {
   box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
   position: relative;
 }
-
-

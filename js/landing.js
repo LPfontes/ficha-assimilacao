@@ -137,32 +137,32 @@ function openSheetTypeModal(folderId = null) {
     <h3 class="modal-title" style="margin-bottom:16px;">Que tipo de ficha deseja criar?</h3>
     <div class="sheet-type-modal-grid">
       <div class="sheet-type-card" data-type="infectado" tabindex="0">
-        <span class="type-emoji">🧬</span>
+        
         <span class="type-label" style="color:hsl(145,60%,55%);">Infectado</span>
         <span class="type-desc">Ficha de personagem jogador</span>
       </div>
       <div class="sheet-type-card" data-type="refugio" tabindex="0">
-        <span class="type-emoji">🏕️</span>
+       
         <span class="type-label" style="color:hsl(28,70%,60%);">Refúgio</span>
         <span class="type-desc">Acampamento ou comunidade</span>
       </div>
       <div class="sheet-type-card" data-type="regiao" tabindex="0">
-        <span class="type-emoji">🗺️</span>
+        
         <span class="type-label" style="color:hsl(205,55%,55%);">Região</span>
         <span class="type-desc">Território com atributos</span>
       </div>
       <div class="sheet-type-card" data-type="conflito" tabindex="0">
-        <span class="type-emoji">⚔️</span>
+        
         <span class="type-label" style="color:hsl(0,60%,58%);">Conflito</span>
         <span class="type-desc">Ameaça ou crise narrativa</span>
       </div>
       <div class="sheet-type-card" data-type="local" tabindex="0">
-        <span class="type-emoji">📍</span>
+        
         <span class="type-label" style="color:hsl(270,45%,62%);">Local</span>
         <span class="type-desc">Ponto de interesse narrativo</span>
       </div>
       <div class="sheet-type-card" data-type="campanha" tabindex="0">
-        <span class="type-emoji">📋</span>
+        
         <span class="type-label" style="color:var(--color-blue-glow);">Mesa de Jogo</span>
         <span class="type-desc">Lobby e diários compartilhados para narrar</span>
       </div>
@@ -298,12 +298,12 @@ export function renderCharactersList() {
     : allItems.filter(item => item._sheetType === activeFilterTab);
 
   const TYPE_BADGES = {
-    infectado: `<span class="sheet-type-badge badge-infectado">🧬 Infectado</span>`,
-    refugio:   `<span class="sheet-type-badge badge-refugio">🏕️ Refúgio</span>`,
-    regiao:    `<span class="sheet-type-badge badge-regiao">🗺️ Região</span>`,
-    conflito:  `<span class="sheet-type-badge badge-conflito">⚔️ Conflito</span>`,
-    local:     `<span class="sheet-type-badge badge-local">📍 Local</span>`,
-    campanha:  `<span class="sheet-type-badge badge-campanha">📋 Mesa de Jogo</span>`,
+    infectado: `<span class="sheet-type-badge badge-infectado">Infectado</span>`,
+    refugio:   `<span class="sheet-type-badge badge-refugio">Refúgio</span>`,
+    regiao:    `<span class="sheet-type-badge badge-regiao">Região</span>`,
+    conflito:  `<span class="sheet-type-badge badge-conflito">Conflito</span>`,
+    local:     `<span class="sheet-type-badge badge-local">Local</span>`,
+    campanha:  `<span class="sheet-type-badge badge-campanha">Mesa de Jogo</span>`,
   };
 
   const TYPE_SUB = {
@@ -1038,7 +1038,7 @@ function openMoveToFolderModal(itemId, sheetType) {
             <span class="folder-icon">🗂️</span>
             <span class="folder-select-name">Sem Pasta (Ficha Avulsa)</span>
           </div>
-          ${!currentFolderId ? '<span style="color:var(--color-blue-glow);font-size:12px;">✓ Atual</span>' : ''}
+          ${!currentFolderId ? '<span style="color:var(--color-blue-glow);font-size: var(--font-size-xs);">✓ Atual</span>' : ''}
         </div>
         ${folders.map(f => `
           <div class="folder-select-item ${f.id === currentFolderId ? 'is-current' : ''}" data-folder-id="${escapeHtml(f.id)}">
@@ -1046,12 +1046,12 @@ function openMoveToFolderModal(itemId, sheetType) {
               <span class="folder-icon">${f.icon || '📁'}</span>
               <span class="folder-select-name">${escapeHtml(f.name)}</span>
             </div>
-            ${f.id === currentFolderId ? '<span style="color:var(--color-blue-glow);font-size:12px;">✓ Atual</span>' : ''}
+            ${f.id === currentFolderId ? '<span style="color:var(--color-blue-glow);font-size: var(--font-size-xs);">✓ Atual</span>' : ''}
           </div>
         `).join("")}
       </div>
       <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:8px;">
-        <button id="btn-create-in-move" class="btn btn-folder-secondary" style="font-size:12px;">
+        <button id="btn-create-in-move" class="btn btn-folder-secondary" style="font-size: var(--font-size-xs);">
           + Criar Nova Pasta
         </button>
         <button id="btn-close-move" class="btn" style="padding:8px 18px;">Fechar</button>
