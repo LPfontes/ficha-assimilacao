@@ -41,6 +41,31 @@ function parseCost(costStr) {
   return { a, b, c, singular };
 }
 
+// Constrói o HTML de custo da mutação (.lib-mut-cost) usando ícones correspondentes
+function renderLibMutCostHtml(costStr, borderColor) {
+  if (!costStr) return "";
+  const reqs = parseCost(costStr);
+  const parts = [];
+
+  if (reqs.singular > 0) {
+    parts.push(`<span>${reqs.singular} Singular</span>`);
+  }
+  if (reqs.a > 0) {
+    parts.push(`<span class="cost-item">${reqs.a}<img src="assets/sucesso.webp" alt="S" class="ass-point-icon"> </span>`);
+  }
+  if (reqs.b > 0) {
+    parts.push(`<span class="cost-item">${reqs.b}<img src="assets/adaptacao.webp" alt="A" class="ass-point-icon"> </span>`);
+  }
+  if (reqs.c > 0) {
+    parts.push(`<span class="cost-item">${reqs.c}<img src="assets/pressao.webp" alt="P" class="ass-point-icon"> </span>`);
+  }
+
+  const content = parts.length > 0 ? parts.join(`<span class="cost-separator">+</span>`) : escapeHtml(costStr);
+  const styleAttr = borderColor ? `style="border-color:${borderColor}; color:${borderColor};"` : "";
+
+  return `<span class="lib-mut-cost" ${styleAttr}>${content}</span>`;
+}
+
 import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCustomTraits, getCustomMutations, saveCustomMutations, getCustomInstincts, saveCustomInstincts, getCustomAptitudes, saveCustomAptitudes, updateCloudSyncBadge, updateCharSelector } from "./state.js";
 
 import { worldState, saveItemToDb } from "./world-state.js";
@@ -1594,8 +1619,8 @@ export function openCreateMutationModal() {
         </select>
       </div>
       <div class="form-group">
-        <label>Custo (texto livre, ex: "2 sucessos e 1 adaptação")</label>
-        <input type="text" id="hb-mut-cost" placeholder="Ex: 2 sucessos e 1 pressão" style="width:100%; padding:8px 12px;">
+        <label>Custo (texto livre, ex: "2 Sucessos e 1 adaptação")</label>
+        <input type="text" id="hb-mut-cost" placeholder="Ex: 2 Sucessos e 1 pressão" style="width:100%; padding:8px 12px;">
       </div>
       <div class="form-group">
         <label>Nível de Assimilação Requerido (opcional)</label>
@@ -1737,7 +1762,7 @@ export function openAssimilationLibraryModal() {
               <div class="lib-mut-info">
                 <div class="lib-mut-title-row">
                   <span class="lib-mut-name">${mut.name}</span>
-                  <span class="lib-mut-cost" style="border-color:${cat.color}; color:${cat.color};">${mut.cost}</span>
+                  ${renderLibMutCostHtml(mut.cost, cat.color)}
                   ${isOwned ? '<span class="lib-owned-badge">Adquirido</span>' : ''}
                 </div>
                 <div class="lib-mut-desc">${mut.desc}</div>
@@ -1786,7 +1811,7 @@ export function openAssimilationLibraryModal() {
             <div class="lib-mut-info">
               <div class="lib-mut-title-row">
                 <span class="lib-mut-name">${esc(mut.name)}</span>
-                <span class="lib-mut-cost" style="border-color:${cat.color}; color:${cat.color};">${esc(mut.cost)}</span>
+                ${renderLibMutCostHtml(mut.cost, cat.color)}
                 ${isOwned ? '<span class="lib-owned-badge">Adquirido</span>' : ''}
               </div>
               <div class="lib-mut-desc">${esc(mut.desc)}</div>
@@ -1816,9 +1841,9 @@ export function openAssimilationLibraryModal() {
         Selecione mutações para adquirir com seus pontos disponíveis.
       </p>
       <div class="lib-points-bar">
-        <span style="color:var(--color-sucesso);">♥ Sucesso: <strong>${curA}</strong></span>
-        <span style="color:var(--color-adaptacao);">♦ Adaptação: <strong>${curB}</strong></span>
-        <span style="color:var(--color-pressao);">♠ Pressão: <strong>${curC}</strong></span>
+        <span style="color:var(--color-sucesso);"><img src="assets/sucesso.webp" alt="S" class="ass-point-icon"> <strong>${curA}</strong></span>
+        <span style="color:var(--color-adaptacao);"><img src="assets/adaptacao.webp" alt="A" class="ass-point-icon"> <strong>${curB}</strong></span>
+        <span style="color:var(--color-pressao);"><img src="assets/pressao.webp" alt="P" class="ass-point-icon"> <strong>${curC}</strong></span>
       </div>
       <div class="lib-tab-bar">
         ${categories.map((cat, i) =>

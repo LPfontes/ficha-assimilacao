@@ -317,6 +317,7 @@
   display: flex;
   gap: 16px;
   justify-content: center;
+  align-items: center;
   font-family: var(--font-heading);
   font-size: var(--font-size-md);
   background: rgba(0, 0, 0, 0.3);
@@ -324,6 +325,18 @@
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   margin-bottom: 16px;
+}
+
+.lib-points-bar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lib-points-bar .ass-point-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .library-modal-list {
@@ -420,11 +433,32 @@
 .lib-mut-cost {
   font-size: var(--font-size-sm);
   font-family: var(--font-heading);
-  padding: 1px 6px;
-  border-radius: 4px;
+  padding: 4px 8px;
   font-weight: bold;
-  border: 1px solid;
-  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.lib-mut-cost .cost-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lib-mut-cost .cost-separator {
+  opacity: 0.6;
+  font-size: var(--font-size-xs);
+}
+
+.lib-mut-cost .ass-point-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 .lib-owned-badge {

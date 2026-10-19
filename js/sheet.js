@@ -799,9 +799,9 @@ export function renderMutationsSheet() {
     row.innerHTML = `
       <div style="flex:1;">
         <div class="title" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <span style="font-weight: bold;">${mut.name}</span>
           <span class="mutation-badge suit-tag-${mut.suit}">${suitLabels[mut.suit] || mut.suit}</span>
           <span style="font-size: var(--font-size-xs); color:var(--text-muted);">(${mut.cost})</span>
+          <span style="font-weight: bold;">${mut.name}</span>
           ${isPressSuit && maxPressao > 0 ? `
             <div class="mutation-pressure-counter" title="Contador de Pressão (Investidas restantes)">
               <span>Pressão:</span>
