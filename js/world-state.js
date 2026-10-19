@@ -270,15 +270,17 @@ export function loadItensDb() {
     worldState.itensDb = [];
   }
 
-  // Popula itens default que não estejam no DB, e atualiza propriedades ausentes
+  // Popula itens default que não estejam no DB, e atualiza propriedades ausentes/atualizadas
   let dbChanged = false;
   for (const defaultItem of DEFAULT_ITENS_DB) {
     const existing = worldState.itensDb.find(i => i.name.toLowerCase() === defaultItem.name.toLowerCase());
     if (!existing) {
-      worldState.itensDb.push(defaultItem);
+      worldState.itensDb.push({ ...defaultItem });
       dbChanged = true;
     } else {
-      if (!existing.categorias && defaultItem.categorias) {
+      if (existing.efeito !== defaultItem.efeito || existing.escassez !== defaultItem.escassez || JSON.stringify(existing.categorias) !== JSON.stringify(defaultItem.categorias)) {
+        existing.efeito = defaultItem.efeito;
+        existing.escassez = defaultItem.escassez;
         existing.categorias = defaultItem.categorias;
         dbChanged = true;
       }

@@ -102,19 +102,24 @@ export const ITEM_CATEGORIAS = {
 };
 
 export const DEFAULT_ITENS_DB = [
-  { name: "Taco de Baseball com Pregos", escassez: 0, efeito: "Improvisado – um Sucesso a menos em todos os testes com essa arma e Letal – uma vez por dia pode trocar qualquer Adaptação por Sucesso na jogada.", categorias: ["improvisado", "letal"] },
-  { name: "Escudo de Tampa de Barril", escassez: 0, efeito: "Frágil – precisa de uma Pressão a menos para baixar um nível de qualidade e Protetivo – uma vez por cena evita a perda de um Ponto de Saúde.", categorias: ["fragil", "protetivo"] },
+  { name: "Taco de Baseball com Pregos", escassez: 0, efeito: "Improvisado – um A a menos em todos os testes com essa arma e Letal – uma vez por dia pode trocar qualquer B por A na jogada.", categorias: ["improvisado", "letal"] },
+  { name: "Escudo de Tampa de Barril", escassez: 0, efeito: "Frágil – precisa de uma C a menos para baixar um nível de qualidade e Protetivo – uma vez por cena evita a perda de um Ponto de Saúde.", categorias: ["fragil", "protetivo"] },
   { name: "Barras de Nutrientes Especiais", escassez: 1, efeito: "Restaurador – seis usos, cada uso alimenta por um dia e dá +1 Ponto de Saúde na sua Recuperação, mas tal efeito não se acumula no mesmo dia na mesma personagem. Termina após o sexto uso.", categorias: ["restaurador"] },
   { name: "Escudo Anti-tumulto", escassez: 1, efeito: "Protetivo – uma vez por cena evita a perda de um Ponto de Saúde.", categorias: ["protetivo"] },
   { name: "Faca de Combate", escassez: 1, efeito: "Ágil – ataque armado substitui Potência por Reação.", categorias: ["agil"] },
-  { name: "Machado de Guerra", escassez: 1, efeito: "Letal – uma vez por dia pode trocar qualquer número de Adaptação por Sucesso na jogada.", categorias: ["letal"] },
-  { name: "Cota de Malha Longa", escassez: 2, efeito: "Armadura – três vezes por combate evita a perda de um Ponto de Saúde e Pesado – cancela um Sucesso em todo teste que envolva pura movimentação ou furtividade e ocupa dois espaços de inventário.", categorias: ["armadura", "pesado"] },
-  { name: "Lanterna", escassez: 2, efeito: "Iluminador - 18m e Discreto – não ocupa espaço de inventário e não é percebido enquanto continuar guardado.", categorias: ["iluminador", "discreto"] },
+  { name: "Machado de Guerra", escassez: 1, efeito: "Letal – uma vez por dia pode trocar qualquer número de B por A na jogada.", categorias: ["letal"] },
+  { name: "Cota de Malha Longa", escassez: 2, efeito: "Armadura – três vezes por combate evita a perda de um Ponto de Saúde e Pesado – cancela A em todo teste que envolva pura movimentação ou furtividade e ocupa dois espaços de inventário.", categorias: ["armadura", "pesado"] },
+  { name: "Lanterna", escassez: 2, efeito: "Iluminador – 18m e Discreto – não ocupa espaço de inventário e não é percebido enquanto continuar guardado.", categorias: ["iluminador", "discreto"] },
   { name: "Mochila de Acampamento", escassez: 2, efeito: "Espaçoso x2 – 10 espaços de inventário em vez de 6.", categorias: ["espacoso", "espacoso"] },
   { name: "Caneta de Adrenalina", escassez: 3, efeito: "Adrenalina – seis usos; cada uso dá 6 Pontos de Saúde até o próximo repouso e cada uso adicional num dia pede um teste de Resolução + Atletismo para ganhar 6 Pontos de Saúde ou perder 8 Pontos de Saúde.", categorias: ["adrenalina"] },
   { name: "Colete Tático", escassez: 3, efeito: "Armadura – três vezes por combate evita a perda de um Ponto de Saúde.", categorias: ["armadura"] },
-  { name: "Escudo Tático", escassez: 3, efeito: "Protetivo – uma vez por cena evita a perda de um Ponto de Saúde e Durável – precisa de uma Pressão adicional para perder um nível de Qualidade.", categorias: ["protetivo", "duravel"] },
-  { name: "Katana", escassez: 3, efeito: "Ágil – ataque armado substitui Potência por Reação e Eficiente – Ao fazer um teste com esse item você pode fazer um uso diário para trocar 16 por 11", categorias: ["agil", "eficiente"] }
+  { name: "Escudo Tático", escassez: 3, efeito: "Protetivo – uma vez por cena evita a perda de um Ponto de Saúde e Durável – precisa de uma C adicional para perder um nível de Qualidade.", categorias: ["protetivo", "duravel"] },
+  { name: "Katana", escassez: 3, efeito: "Ágil – ataque armado substitui Potência por Reação e Eficiente – Ao fazer um teste com esse item você pode fazer um uso diário para trocar 1d6 por 1d10.", categorias: ["agil", "eficiente"] },
+  { name: "Kit de Primeiros Socorros", escassez: 3, efeito: "Uso Único e Medicinal – Cancela até duas CC no teste de tratamento médico com Medicina.", categorias: ["uso_unico", "medicinal"] },
+  { name: "Revólver", escassez: 3, efeito: "Letal – uma vez por dia pode trocar qualquer B por A na jogada e Eficiente – Ao fazer um teste com esse item você pode fazer um uso diário para trocar 1d6 por 1d10; exige munição.", categorias: ["letal", "eficiente"] },
+  { name: "Granada", escassez: 4, efeito: "Explosivo – detona uma área com um uso único, destruindo estruturas e ferindo quaisquer criaturas dentro dela.", categorias: ["explosivo", "uso_unico"] },
+  { name: "Lança-chamas", escassez: 4, efeito: "Inflamável – faça um teste para arremessá-lo e tentar incinerar uma área alvo investindo uma quantidade de A solicitada pelo(a) Assimilador(a).", categorias: ["inflamavel"] },
+  { name: "Mala de Médico de Combate", escassez: 4, efeito: "Medicinal – seis usos, cada uso cancela uma C no teste de tratamento médico, podendo fazer uma quantidade de usos por teste igual à sua Medicina.", categorias: ["medicinal"] }
 ];
 
 export const DEFESA_LABELS = [
