@@ -1,4 +1,4 @@
-import { el, state, loadCharacter, saveCurrentCharacter } from "./state.js";
+import { el, state, loadCharacter, saveCurrentCharacter, getCustomTraits } from "./state.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ICONS } from "../icons.js";
 import { logger } from "./logger.js";
