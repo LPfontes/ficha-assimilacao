@@ -70,7 +70,7 @@ import { el, state, saveCurrentCharacter, loadCharacter, getCustomTraits, saveCu
 
 import { worldState, saveItemToDb } from "./world-state.js";
 import { getFirebaseConfig } from "./config.js";
-import { renderMutationsSheet, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet, renderSavedMacrosSheet } from "./sheet.js";
+import { renderMutationsSheet, setActiveMutationSuit, renderCaboGuerraSheet, renderInventorySheet, renderAptitudesSheet, renderHomebrewSheet, renderSavedMacrosSheet } from "./sheet.js";
 import { CARACTERISTICAS } from "./characteristics.js";
 import { ASSIMILACOES } from "./assimilations.js";
 import { ICONS } from "../icons.js";
@@ -995,6 +995,7 @@ export function openMutationSelectionScreen(ptsA, ptsB, ptsC) {
         });
 
         saveCurrentCharacter();
+        setActiveMutationSuit(type);
         renderMutationsSheet();
 
         // Recarrega
@@ -1917,6 +1918,7 @@ export function openAssimilationLibraryModal() {
         });
 
         saveCurrentCharacter();
+        setActiveMutationSuit(cat);
         renderMutationsSheet();
         renderLibrary();
       });

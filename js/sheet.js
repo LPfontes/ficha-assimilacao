@@ -709,6 +709,30 @@ export function renderCharacteristicsSheet() {
   });
 }
 
+export const MUTATION_CATEGORIES = [
+  { key: "todas", label: "Todas", color: "var(--text-primary)", suitSymbol: "" },
+  { key: "evolutivas", label: "Evolutivas", color: "var(--color-sucesso)", suitSymbol: "♥" },
+  { key: "adaptativas", label: "Adaptativas", color: "var(--color-adaptacao)", suitSymbol: "♦" },
+  { key: "inoportunas", label: "Inoportunas", color: "var(--color-pressao)", suitSymbol: "♠" },
+  { key: "singulares", label: "Singulares", color: "var(--color-singular)", suitSymbol: "♣" }
+];
+
+const SUIT_ORDER = {
+  evolutivas: 1,
+  adaptativas: 2,
+  inoportunas: 3,
+  singulares: 4
+};
+
+let activeMutationTab = 0;
+
+export function setActiveMutationSuit(suitKey) {
+  const idx = MUTATION_CATEGORIES.findIndex(c => c.key === suitKey);
+  if (idx !== -1) {
+    activeMutationTab = idx;
+  }
+}
+
 export function renderMutationsSheet() {
   const char = state.currentCharacter;
   if (!char) return;
@@ -767,18 +791,70 @@ export function renderMutationsSheet() {
   container.innerHTML = "";
 
   const suitLabels = {
-    evolutivas: "Evolutiva ",
+    evolutivas: "Evolutiva",
     adaptativas: "Adaptativa",
     inoportunas: "Inoportuna",
     singulares: "Singular"
   };
 
+  const counts = {
+    todas: (char.mutações || []).length,
+    evolutivas: 0,
+    adaptativas: 0,
+    inoportunas: 0,
+    singulares: 0
+  };
+  (char.mutações || []).forEach(mut => {
+    const s = mut.suit || "evolutivas";
+    if (counts[s] !== undefined) {
+      counts[s]++;
+    }
+  });
+
+  const tabsContainer = document.getElementById("mutations-sheet-tabs");
+  if (tabsContainer) {
+    tabsContainer.innerHTML = MUTATION_CATEGORIES.map((cat, i) => {
+      const isActive = i === activeMutationTab;
+      const count = counts[cat.key] || 0;
+      const countBadge = count > 0 ? ` <span class="mutation-tab-count">(${count})</span>` : "";
+      const activeStyle = isActive ? `border-color:${cat.color}; color:${cat.color};` : "";
+      const symbolPrefix = cat.suitSymbol ? `${cat.suitSymbol} ` : "";
+      return `<button class="lib-tab ${isActive ? 'active' : ''}" data-tab-index="${i}" style="${activeStyle}">${symbolPrefix}${cat.label}${countBadge}</button>`;
+    }).join("");
+
+    tabsContainer.querySelectorAll(".lib-tab").forEach(tabBtn => {
+      tabBtn.addEventListener("click", () => {
+        activeMutationTab = parseInt(tabBtn.dataset.tabIndex, 10);
+        renderMutationsSheet();
+      });
+    });
+  }
+
+  const currentCat = MUTATION_CATEGORIES[activeMutationTab] || MUTATION_CATEGORIES[0];
+
   if (!char.mutações || char.mutações.length === 0) {
-    container.innerHTML = `<div style="color:var(--text-muted); font-size: var(--font-size-xs); padding:8px;">Nenhuma mutação adquirida.</div>`;
+    container.innerHTML = `<div style="color:var(--text-muted); font-size: var(--font-size-xs); padding:16px; text-align:center;">Nenhuma mutação adquirida.</div>`;
     return;
   }
 
-  char.mutações.forEach(mut => {
+  let filteredMutations = [];
+  if (currentCat.key === "todas") {
+    filteredMutations = [...(char.mutações || [])].sort((a, b) => {
+      const orderA = SUIT_ORDER[a.suit] || 99;
+      const orderB = SUIT_ORDER[b.suit] || 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return (a.name || "").localeCompare(b.name || "");
+    });
+  } else {
+    filteredMutations = (char.mutações || []).filter(mut => (mut.suit || "evolutivas") === currentCat.key);
+  }
+
+  if (filteredMutations.length === 0) {
+    container.innerHTML = `<div style="color:var(--text-muted); font-size: var(--font-size-xs); padding:16px; text-align:center;">Nenhuma mutação ${currentCat.label.toLowerCase()} adquirida.</div>`;
+    return;
+  }
+
+  filteredMutations.forEach(mut => {
     const row = document.createElement("div");
     row.className = `mutation-sheet-item suit-${mut.suit}`;
 

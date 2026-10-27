@@ -5,6 +5,7 @@
 }
 
 .sheet-layout-grid {
+  padding: 10px;
   display: flex;
   height: 100%;
   overflow: hidden;
@@ -683,6 +684,31 @@
   min-height: 350px !important;
 }
 
+/* Abas de Tipos de Mutações na Ficha */
+#mutations-sheet-tabs {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+#mutations-sheet-tabs .lib-tab {
+  font-size: var(--font-size-sm);
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  white-space: nowrap;
+  flex: 1 0 auto;
+}
+
+#mutations-sheet-tabs .mutation-tab-count {
+  font-size: var(--font-size-xs);
+  opacity: 0.85;
+}
+
 /* Lista Única de Assimilações/Mutações */
 .mutations-sheet-list-single {
   display: flex;
@@ -849,7 +875,7 @@
 
 .assimilations-header-group {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--spacing-sm, 8px);
 }
 

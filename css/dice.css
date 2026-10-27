@@ -539,6 +539,7 @@ img.dice-tag:hover {
    CHAT DE ROLAGENS (HISTÓRICO NA GAVETA)
    ========================================== */
 .roll-chat-section {
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
   gap: 12px;

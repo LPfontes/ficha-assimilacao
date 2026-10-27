@@ -1008,4 +1008,10 @@
   .mutations-sheet-list-single {
     max-height: 250px !important;
   }
+
+  #mutations-sheet-tabs .lib-tab {
+    font-size: var(--font-size-xs) !important;
+    padding: 6px 2px !important;
+    letter-spacing: 0 !important;
+  }
 }
