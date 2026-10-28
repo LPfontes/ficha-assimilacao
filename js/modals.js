@@ -2596,7 +2596,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
           <!-- Status de Sincronização -->
           ${state.hasUnsavedCloudChanges ? `
             <div style="background:rgba(255, 102, 0, 0.08); border:1px solid var(--color-orange); color:var(--color-orange); padding:8px; border-radius:4px; font-size: var(--font-size-xs); margin-bottom:16px; display:flex; align-items:center; gap:6px;">
-              <span>⚠️</span>
+              <span></span>
               <span>Modificações pendentes de envio!</span>
             </div>
           ` : `
@@ -3201,7 +3201,7 @@ export async function openStorageManagerModal(defaultTab = "fichas") {
       });
 
       document.getElementById("btn-wipe-everything").addEventListener("click", () => {
-        if (confirm("⚠️ ATENÇÃO EXTREMA: Você está prestes a deletar ABSOLUTAMENTE TUDO (personagens, fichas, mundos, refúgios, homebrew). Esta ação é permanente e NÃO PODE ser desfeita. Tem certeza absoluta?")) {
+        if (confirm(" ATENÇÃO EXTREMA: Você está prestes a deletar ABSOLUTAMENTE TUDO (personagens, fichas, mundos, refúgios, homebrew). Esta ação é permanente e NÃO PODE ser desfeita. Tem certeza absoluta?")) {
           localStorage.clear();
           sessionStorage.clear();
           alert("Todos os dados foram apagados com sucesso.");

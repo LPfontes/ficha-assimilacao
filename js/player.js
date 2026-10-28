@@ -328,7 +328,7 @@ function updateMiniPlayer() {
   if (!track) return;
   if (dom["player-track-name"]) {
     dom["player-track-name"].textContent = autoplayBlocked
-      ? `${track.title} ⚠️ (Clique para ativar áudio)`
+      ? `${track.title}  (Clique para ativar áudio)`
       : track.title;
   }
 }

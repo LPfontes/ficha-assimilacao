@@ -195,7 +195,6 @@ export function openMesaLandingOptionsModal() {
     
     <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
       <button id="btn-choice-criar-mesa" class="btn btn-landing-primary" style="padding:14px; text-align:left; display:flex; align-items:center; gap:12px;">
-        <span style="font-size:1.4em;">👑</span>
         <div>
           <div style="font-weight:bold; color:var(--text-primary);">Criar Nova Mesa (Mestre)</div>
           <div style="font-size:var(--font-size-xs); color:var(--text-muted); margin-top:2px;">Inicie uma mesa, gerencie fichas, notas e crônicas.</div>
@@ -203,7 +202,6 @@ export function openMesaLandingOptionsModal() {
       </button>
       
       <button id="btn-choice-entrar-mesa" class="btn btn-landing-secondary" style="padding:14px; text-align:left; display:flex; align-items:center; gap:12px; border-color:var(--color-blue-glow); color:var(--text-primary);">
-        <span style="font-size:1.4em;">🎲</span>
         <div>
           <div style="font-weight:bold; color:var(--color-blue-glow);">Entrar em Mesa Existente (Jogador)</div>
           <div style="font-size:var(--font-size-xs); color:var(--text-muted); margin-top:2px;">Se conecte com o código enviado pelo Mestre.</div>
@@ -1950,7 +1948,7 @@ function _openDrawerForExtraFicha(char) {
 
   const titleEl = drawer.querySelector(".modal-title");
   const prevTitle = titleEl?.textContent;
-  if (titleEl) titleEl.textContent = '🎲 Painel de Rolagem — ' + (char.name || 'Ficha Extra');
+  if (titleEl) titleEl.textContent = 'Painel de Rolagem — ' + (char.name || 'Ficha Extra');
 
   import("./roller.js").then(({ updateDiceDrawerUI }) => updateDiceDrawerUI());
 
@@ -2646,7 +2644,7 @@ function _resetMesaAmeacaAtivacao(ameacaIdx, actIdx) {
       type: "chat",
       playerId: peerManager.playerId,
       data: {
-        text: `⚠️ **Mestre ativou:** ${msg}`,
+        text: ` **Mestre ativou:** ${msg}`,
         senderName: "Mestre",
         timestamp: Date.now()
       }

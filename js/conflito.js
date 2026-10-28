@@ -366,7 +366,7 @@ export function renderConflitoSheet() {
                 </div>
 
                 <button id="btn-conflito-roll" class="btn btn-sm btn-block conflito-roll-btn">
-                  🎲 Rolar Conflito
+                  Rolar Conflito
                 </button>
               </div>
 
@@ -1593,7 +1593,7 @@ function _attachListeners(c, openAtivacaoIdx = null, openAmeacaIdx = null) {
               </div>
 
               <div class="modal-ameaca-actions-bar">
-                <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}">🎲 Rolar Ameaça</button>
+                <button class="btn btn-sm btn-roll-ameaca btn-blue" data-idx="${idx}"> Rolar Ameaça</button>
               </div>
             </div>
           </div>

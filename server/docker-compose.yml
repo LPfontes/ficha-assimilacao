@@ -1,0 +1,38 @@
+services:
+  server:
+    container_name: ficha-server
+    image: lpfonts/ficha-server:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - MONGO_URI=mongodb://mongodb:27017/assimilacao_rpg
+      - GCS_BUCKET_NAME=${GCS_BUCKET_NAME:-}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  mongodb:
+    container_name: ficha-mongodb
+    image: mongo:6-jammy
+    restart: unless-stopped
+    # A porta não é exposta para a internet pública, protegendo seu banco contra invasões.
+    # O container 'server' conversa diretamente com ele pela rede interna do Docker.
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  mongo_data:
+    driver: local

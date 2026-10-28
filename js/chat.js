@@ -193,11 +193,11 @@ export function renderChatHistory() {
     }
     
     if (healthLvl === 4 || healthLvl === 3) {
-      narrativeText += `<div class="roll-health-warning health-warning-orange">⚠️ <strong>Penalidade de Saúde (${healthLvlName}):</strong> -1 Sucesso [S] aplicado.</div>`;
+      narrativeText += `<div class="roll-health-warning health-warning-orange"> <strong>Penalidade de Saúde (${healthLvlName}):</strong> -1 Sucesso [S] aplicado.</div>`;
     } else if (healthLvl === 2) {
-      narrativeText += `<div class="roll-health-warning health-warning-red">⚠️ <strong>Penalidade de Saúde (Debilitação):</strong> -2 Sucessos [S] aplicados. Incapaz de agir sem gastar 1 Determinação.</div>`;
+      narrativeText += `<div class="roll-health-warning health-warning-red"> <strong>Penalidade de Saúde (Debilitação):</strong> -2 Sucessos [S] aplicados. Incapaz de agir sem gastar 1 Determinação.</div>`;
     } else if (healthLvl === 1) {
-      narrativeText += `<div class="roll-health-warning health-warning-darkred">⚠️ <strong>Penalidade de Saúde (Incapacitação):</strong> Personagem em coma. Conversa exige 1 Determinação/rodada. Ação exige +2 A.</div>`;
+      narrativeText += `<div class="roll-health-warning health-warning-darkred"> <strong>Penalidade de Saúde (Incapacitação):</strong> Personagem em coma. Conversa exige 1 Determinação/rodada. Ação exige +2 A.</div>`;
     }
     
     msg.innerHTML = `
