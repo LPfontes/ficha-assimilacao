@@ -319,9 +319,24 @@ export function renderWizardHealth() {
 }
 
 let _wizardTraitsCostFilter = "todos";
+let _wizardTraitsSearchQuery = "";
+
+function normalizeWizSearch(str) {
+  if (!str) return "";
+  return String(str)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
 
 export function setWizardTraitsCostFilter(cost) {
   _wizardTraitsCostFilter = cost;
+  renderWizardTraits();
+}
+
+export function setWizardTraitsSearchQuery(query) {
+  _wizardTraitsSearchQuery = query || "";
   renderWizardTraits();
 }
 
@@ -330,6 +345,7 @@ export function renderWizardTraits() {
   
   const container = document.getElementById("wiz-traits-list");
   container.innerHTML = "";
+  const q = normalizeWizSearch(_wizardTraitsSearchQuery);
   
   // Atualiza estado ativo dos botões de filtro
   const filterBar = document.getElementById("traits-cost-filter-bar");
@@ -347,6 +363,12 @@ export function renderWizardTraits() {
     if (trait.id === "estagio_avancado" && state.wizardData.step !== 8) return; 
     if (_wizardTraitsCostFilter === "custom") return;
     if (_wizardTraitsCostFilter !== "todos" && trait.custo !== parseInt(_wizardTraitsCostFilter)) return;
+    if (q && !(
+      normalizeWizSearch(trait.nome).includes(q) ||
+      normalizeWizSearch(trait.descricao).includes(q) ||
+      normalizeWizSearch(trait.requisitoText).includes(q) ||
+      normalizeWizSearch(`${trait.custo} xp`).includes(q)
+    )) return;
     
     const isOwned = state.wizardData.caracteristicas.includes(trait.id);
     const meetsReqs = checkWizardTraitPrerequisites(trait.requisitos);
@@ -402,9 +424,14 @@ export function renderWizardTraits() {
   // Custom traits no Wizard
   const customTraits = getCustomTraits();
   const filteredCustom = customTraits.filter(trait => {
-    if (_wizardTraitsCostFilter === "custom") return true;
-    if (_wizardTraitsCostFilter === "todos") return true;
-    return String(trait.custo) === String(_wizardTraitsCostFilter);
+    if (_wizardTraitsCostFilter !== "custom" && _wizardTraitsCostFilter !== "todos" && String(trait.custo) !== String(_wizardTraitsCostFilter)) return false;
+    if (q && !(
+      normalizeWizSearch(trait.nome).includes(q) ||
+      normalizeWizSearch(trait.descricao).includes(q) ||
+      normalizeWizSearch(trait.requisitoText).includes(q) ||
+      normalizeWizSearch(`${trait.custo} xp`).includes(q)
+    )) return false;
+    return true;
   });
 
   if (filteredCustom.length > 0) {

@@ -79,14 +79,26 @@ import { DICE_MAP } from "./roller.js";
 import { logger } from "./logger.js";
 import { esc } from "./screen-utils.js";
 
+function normalizeSearch(str) {
+  if (!str) return "";
+  return String(str)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 // ==========================================
 // MODAL: SELETOR DE CARACTERÍSTICAS
 // ==========================================
-export function openTraitsModal(selectedCostFilter = "todos") {
+export function openTraitsModal(selectedCostFilter = "todos", initialSearchQuery = "") {
   const char = state.currentCharacter;
   if (!char) return;
 
   logger.info("Modal: Abrindo modal de características.");
+
+  let currentCostFilter = typeof selectedCostFilter === "string" ? selectedCostFilter : "todos";
+  let currentSearchQuery = typeof initialSearchQuery === "string" ? initialSearchQuery : "";
 
   el.modalContainer.classList.remove("hidden");
   el.modalBody.innerHTML = `
@@ -97,16 +109,21 @@ export function openTraitsModal(selectedCostFilter = "todos") {
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
       <button id="btn-open-create-trait-from-modal" class="btn btn-sm btn-success">+ Criar Característica</button>
     </div>
+
+    <div class="modal-search-wrapper">
+      <input type="text" id="traits-search-input" class="modal-search-input" placeholder="Buscar característica por nome, requisito ou descrição..." autocomplete="off" value="${esc(currentSearchQuery)}">
+      <button type="button" id="traits-search-clear" class="modal-search-clear ${currentSearchQuery ? '' : 'hidden'}" title="Limpar busca">&times;</button>
+    </div>
     
     <!-- Filtro de Custo -->
     <div class="traits-cost-filter-bar" id="traits-cost-filter-bar">
-      <button class="traits-cost-tab ${selectedCostFilter === 'todos' ? 'active' : ''}" data-cost="todos">Todas</button>
-      <button class="traits-cost-tab ${selectedCostFilter === '1' ? 'active' : ''}" data-cost="1">1 XP</button>
-      <button class="traits-cost-tab ${selectedCostFilter === '2' ? 'active' : ''}" data-cost="2">2 XP</button>
-      <button class="traits-cost-tab ${selectedCostFilter === '3' ? 'active' : ''}" data-cost="3">3 XP</button>
-      <button class="traits-cost-tab ${selectedCostFilter === '4' ? 'active' : ''}" data-cost="4">4 XP</button>
-      <button class="traits-cost-tab ${selectedCostFilter === '5' ? 'active' : ''}" data-cost="5">5 XP</button>
-      <button class="traits-cost-tab ${selectedCostFilter === 'custom' ? 'active' : ''}" data-cost="custom">Personalizadas</button>
+      <button class="traits-cost-tab ${currentCostFilter === 'todos' ? 'active' : ''}" data-cost="todos">Todas</button>
+      <button class="traits-cost-tab ${currentCostFilter === '1' ? 'active' : ''}" data-cost="1">1 XP</button>
+      <button class="traits-cost-tab ${currentCostFilter === '2' ? 'active' : ''}" data-cost="2">2 XP</button>
+      <button class="traits-cost-tab ${currentCostFilter === '3' ? 'active' : ''}" data-cost="3">3 XP</button>
+      <button class="traits-cost-tab ${currentCostFilter === '4' ? 'active' : ''}" data-cost="4">4 XP</button>
+      <button class="traits-cost-tab ${currentCostFilter === '5' ? 'active' : ''}" data-cost="5">5 XP</button>
+      <button class="traits-cost-tab ${currentCostFilter === 'custom' ? 'active' : ''}" data-cost="custom">Personalizadas</button>
     </div>
 
     <div class="traits-modal-grid" id="traits-modal-grid">
@@ -119,15 +136,20 @@ export function openTraitsModal(selectedCostFilter = "todos") {
     setTimeout(() => openCreateTraitModal(), 100);
   }, { once: true });
 
-  // Listener para filtros de custo
-  el.modalBody.querySelectorAll(".traits-cost-tab").forEach(tabBtn => {
-    tabBtn.addEventListener("click", () => {
-      const cost = tabBtn.dataset.cost;
-      openTraitsModal(cost);
-    });
-  });
-
+  const searchInput = el.modalBody.querySelector("#traits-search-input");
+  const searchClearBtn = el.modalBody.querySelector("#traits-search-clear");
   const grid = el.modalBody.querySelector("#traits-modal-grid");
+  const xpValueEl = el.modalBody.querySelector("#modal-xp-value");
+
+  const matchesTraitQuery = (trait, q) => {
+    if (!q) return true;
+    return (
+      normalizeSearch(trait.nome).includes(q) ||
+      normalizeSearch(trait.descricao).includes(q) ||
+      normalizeSearch(trait.requisitoText).includes(q) ||
+      normalizeSearch(`${trait.custo} xp`).includes(q)
+    );
+  };
 
   const renderTraitRow = (trait, isCustom) => {
     if (!isCustom && trait.id === "estagio_avancado") return;
@@ -165,7 +187,8 @@ export function openTraitsModal(selectedCostFilter = "todos") {
         char.xp += trait.custo;
         saveCurrentCharacter();
         loadCharacter(char.id);
-        openTraitsModal(selectedCostFilter);
+        if (xpValueEl) xpValueEl.textContent = char.xp;
+        renderTraitsGrid();
       } else {
         if (char.xp >= trait.custo) {
           logger.info(`Modal: Adquirindo característica "${trait.nome}" (Custo: ${trait.custo} XP).`);
@@ -173,7 +196,8 @@ export function openTraitsModal(selectedCostFilter = "todos") {
           char.xp -= trait.custo;
           saveCurrentCharacter();
           loadCharacter(char.id);
-          openTraitsModal(selectedCostFilter);
+          if (xpValueEl) xpValueEl.textContent = char.xp;
+          renderTraitsGrid();
         } else {
           logger.warn("Modal: Falha ao adquirir característica: XP insuficiente.");
           alert("Pontos de XP insuficientes!");
@@ -184,38 +208,79 @@ export function openTraitsModal(selectedCostFilter = "todos") {
     grid.appendChild(row);
   };
 
-  // Filtragem de características oficiais
-  const filteredOfficial = CARACTERISTICAS.filter(trait => {
-    if (selectedCostFilter === "custom") return false;
-    if (selectedCostFilter === "todos") return true;
-    return String(trait.custo) === String(selectedCostFilter);
-  });
-  filteredOfficial.forEach(trait => renderTraitRow(trait, false));
+  const renderTraitsGrid = () => {
+    grid.innerHTML = "";
+    const q = normalizeSearch(currentSearchQuery);
 
-  // Custom traits
-  const customTraits = getCustomTraits();
-  const filteredCustom = customTraits.filter(trait => {
-    if (selectedCostFilter === "custom") return true;
-    if (selectedCostFilter === "todos") return true;
-    return String(trait.custo) === String(selectedCostFilter);
-  });
+    // Filtragem de características oficiais
+    const filteredOfficial = CARACTERISTICAS.filter(trait => {
+      if (trait.id === "estagio_avancado") return false;
+      if (currentCostFilter === "custom") return false;
+      if (currentCostFilter !== "todos" && String(trait.custo) !== String(currentCostFilter)) return false;
+      return matchesTraitQuery(trait, q);
+    });
+    filteredOfficial.forEach(trait => renderTraitRow(trait, false));
 
-  if (filteredCustom.length > 0) {
-    if (selectedCostFilter === "todos") {
-      const sep = document.createElement("div");
-      sep.style.cssText = "grid-column:1/-1; border-top:1px solid rgba(255,255,255,0.08); margin:8px 0 4px 0; padding-top:8px; font-size: var(--font-size-xs); color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;";
-      sep.textContent = "⚙️ Personalizadas";
-      grid.appendChild(sep);
+    // Custom traits
+    const customTraits = getCustomTraits();
+    const filteredCustom = customTraits.filter(trait => {
+      if (currentCostFilter !== "custom" && currentCostFilter !== "todos" && String(trait.custo) !== String(currentCostFilter)) return false;
+      return matchesTraitQuery(trait, q);
+    });
+
+    if (filteredCustom.length > 0) {
+      if (currentCostFilter === "todos") {
+        const sep = document.createElement("div");
+        sep.style.cssText = "grid-column:1/-1; border-top:1px solid rgba(255,255,255,0.08); margin:8px 0 4px 0; padding-top:8px; font-size: var(--font-size-xs); color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;";
+        sep.textContent = "⚙️ Personalizadas";
+        grid.appendChild(sep);
+      }
+      filteredCustom.forEach(trait => renderTraitRow(trait, true));
     }
-    filteredCustom.forEach(trait => renderTraitRow(trait, true));
+
+    if (filteredOfficial.length === 0 && filteredCustom.length === 0) {
+      const emptyMsg = document.createElement("div");
+      emptyMsg.style.cssText = "text-align:center; padding:24px; color:var(--text-muted); font-size:var(--font-size-sm);";
+      emptyMsg.textContent = "Nenhuma característica encontrada para este filtro.";
+      grid.appendChild(emptyMsg);
+    }
+  };
+
+  // Listener para busca
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      currentSearchQuery = e.target.value;
+      if (searchClearBtn) {
+        searchClearBtn.classList.toggle("hidden", !currentSearchQuery);
+      }
+      renderTraitsGrid();
+    });
   }
 
-  if (filteredOfficial.length === 0 && filteredCustom.length === 0) {
-    const emptyMsg = document.createElement("div");
-    emptyMsg.style.cssText = "text-align:center; padding:24px; color:var(--text-muted); font-size:var(--font-size-sm);";
-    emptyMsg.textContent = "Nenhuma característica encontrada para este filtro.";
-    grid.appendChild(emptyMsg);
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener("click", () => {
+      currentSearchQuery = "";
+      if (searchInput) {
+        searchInput.value = "";
+        searchInput.focus();
+      }
+      searchClearBtn.classList.add("hidden");
+      renderTraitsGrid();
+    });
   }
+
+  // Listener para filtros de custo
+  el.modalBody.querySelectorAll(".traits-cost-tab").forEach(tabBtn => {
+    tabBtn.addEventListener("click", () => {
+      currentCostFilter = tabBtn.dataset.cost;
+      el.modalBody.querySelectorAll(".traits-cost-tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.cost === currentCostFilter);
+      });
+      renderTraitsGrid();
+    });
+  });
+
+  renderTraitsGrid();
 }
 
 
@@ -1692,8 +1757,20 @@ export function openAssimilationLibraryModal() {
 
   let activeTab = 0;
   let activeSubTab = "Todas";
+  let currentSearchQuery = "";
+
+  const matchesMutQuery = (mut, q) => {
+    if (!q) return true;
+    return (
+      normalizeSearch(mut.name).includes(q) ||
+      normalizeSearch(mut.desc).includes(q) ||
+      normalizeSearch(mut.cost).includes(q) ||
+      (mut.req && normalizeSearch(`nivel ${mut.req}`).includes(q))
+    );
+  };
 
   const renderSubTabsHtml = (catIndex) => {
+    if (normalizeSearch(currentSearchQuery)) return "";
     const cat = categories[catIndex];
     const assimData = ASSIMILACOES[cat.key];
     const catCustomMuts = getCustomMutations().filter(m => m.suit === cat.key);
@@ -1718,28 +1795,33 @@ export function openAssimilationLibraryModal() {
     return html;
   };
 
-  const renderCategoryContent = (catIndex) => {
-    const cat = categories[catIndex];
-    const curA = char.ptsA || 0;
-    const curB = char.ptsB || 0;
-    const curC = char.ptsC || 0;
-
-    let html = `<div class="library-modal-list">`;
+  const renderSingleCategoryCardsHtml = (cat, q, curA, curB, curC, ignoreSubTab = false) => {
+    let catHtml = "";
+    const effectiveSubTab = ignoreSubTab ? "Todas" : activeSubTab;
 
     const assimData = ASSIMILACOES[cat.key];
-    if (assimData && assimData.cartas && activeSubTab !== "Personalizadas") {
-      const cardsToRender = activeSubTab === "Todas"
+    if (assimData && assimData.cartas && effectiveSubTab !== "Personalizadas") {
+      const cardsToRender = effectiveSubTab === "Todas"
         ? assimData.cartas
-        : assimData.cartas.filter(c => c.carta === activeSubTab);
+        : assimData.cartas.filter(c => c.carta === effectiveSubTab);
 
       cardsToRender.forEach(card => {
-        html += `
+        const cardMatches = q && (
+          normalizeSearch(card.carta).includes(q) ||
+          normalizeSearch(card.nome).includes(q) ||
+          normalizeSearch(`${card.carta} — ${card.nome}`).includes(q)
+        );
+
+        const matchingMuts = card.mutações.filter(mut => !q || cardMatches || matchesMutQuery(mut, q));
+        if (matchingMuts.length === 0) return;
+
+        catHtml += `
           <div class="lib-card">
             <div class="lib-card-title">${card.carta} — ${card.nome}</div>
             <div class="lib-mutations">
         `;
 
-        card.mutações.forEach(mut => {
+        matchingMuts.forEach(mut => {
           const isOwned = char.mutações.some(m => m.id && mut.id ? m.id === mut.id : m.name === mut.name);
           const reqs = parseCost(mut.cost);
           const meetsLevelReq = !mut.req || char.assNivel >= mut.req;
@@ -1758,7 +1840,7 @@ export function openAssimilationLibraryModal() {
             reqLabel = `<span class="lib-req">Requer Assimilação Nível ${mut.req} (Atual: ${char.assNivel})</span>`;
           }
 
-          html += `
+          catHtml += `
             <div class="lib-mutation ${isOwned ? 'owned' : ''}">
               <div class="lib-mut-info">
                 <div class="lib-mut-title-row">
@@ -1776,14 +1858,17 @@ export function openAssimilationLibraryModal() {
           `;
         });
 
-        html += `</div></div>`;
+        catHtml += `</div></div>`;
       });
     }
 
     // Custom mutations for this category
-    const catCustomMuts = getCustomMutations().filter(m => m.suit === cat.key);
-    if (catCustomMuts.length > 0 && (activeSubTab === "Todas" || activeSubTab === "Personalizadas")) {
-      html += `
+    const catCustomMuts = getCustomMutations()
+      .filter(m => m.suit === cat.key)
+      .filter(m => !q || matchesMutQuery(m, q));
+
+    if (catCustomMuts.length > 0 && (effectiveSubTab === "Todas" || effectiveSubTab === "Personalizadas")) {
+      catHtml += `
         <div class="lib-card">
           <div class="lib-card-title" style="color:${cat.color};">Personalizadas</div>
           <div class="lib-mutations">
@@ -1807,7 +1892,7 @@ export function openAssimilationLibraryModal() {
           reqLabel = `<span class="lib-req">Requer Assimilação Nível ${mut.req} (Atual: ${char.assNivel})</span>`;
         }
 
-        html += `
+        catHtml += `
           <div class="lib-mutation ${isOwned ? 'owned' : ''}">
             <div class="lib-mut-info">
               <div class="lib-mut-title-row">
@@ -1824,34 +1909,178 @@ export function openAssimilationLibraryModal() {
           </div>
         `;
       });
-      html += `</div></div>`;
+      catHtml += `</div></div>`;
+    }
+
+    return catHtml;
+  };
+
+  const renderCategoryContent = (catIndex) => {
+    const curA = char.ptsA || 0;
+    const curB = char.ptsB || 0;
+    const curC = char.ptsC || 0;
+    const q = normalizeSearch(currentSearchQuery);
+
+    let html = `<div class="library-modal-list">`;
+    let hasAnyResult = false;
+
+    if (q) {
+      // Quando há busca ativa, pesquisa em todos os tipos de Assimilação
+      categories.forEach(cat => {
+        const catCardsHtml = renderSingleCategoryCardsHtml(cat, q, curA, curB, curC, true);
+        if (catCardsHtml) {
+          hasAnyResult = true;
+          html += `
+            <div class="lib-category">
+              <div class="lib-category-header" style="color:${cat.color}; border-color:${cat.color};">
+                <span class="lib-cat-symbol">${cat.suitSymbol}</span>
+                <span class="lib-cat-title">${cat.label}</span>
+              </div>
+              ${catCardsHtml}
+            </div>
+          `;
+        }
+      });
+    } else {
+      const cat = categories[catIndex];
+      const catCardsHtml = renderSingleCategoryCardsHtml(cat, "", curA, curB, curC, false);
+      if (catCardsHtml) {
+        hasAnyResult = true;
+        html += catCardsHtml;
+      }
+    }
+
+    if (!hasAnyResult) {
+      html += `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:var(--font-size-sm);">Nenhuma assimilação encontrada para este filtro.</div>`;
     }
 
     html += `</div>`;
     return html;
   };
 
-  const renderLibrary = () => {
+  const bindContentButtons = () => {
+    const subTabsContainer = el.modalBody.querySelector("#lib-sub-tabs-container");
+    if (subTabsContainer) {
+      subTabsContainer.querySelectorAll(".lib-sub-tab").forEach(subTabBtn => {
+        subTabBtn.addEventListener("click", () => {
+          activeSubTab = subTabBtn.dataset.subTab;
+          updateLibraryView();
+        });
+      });
+    }
+
+    const contentContainer = el.modalBody.querySelector("#lib-tab-content");
+    if (contentContainer) {
+      contentContainer.querySelectorAll(".lib-buy-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cat = btn.dataset.cat;
+          const mutId = btn.dataset.mutId || "";
+          const name = btn.dataset.mutName;
+          const costStr = btn.dataset.mutCost;
+          const desc = btn.dataset.mutDesc;
+          const reqs = parseCost(costStr);
+
+          logger.info(`Modal: Adquirindo mutação "${name}" via Biblioteca.`);
+
+          // Deduz pontos
+          if (reqs.singular > 0) {
+            let remSing = reqs.singular;
+            if (ptsA >= remSing) { ptsA -= remSing; remSing = 0; }
+            else { remSing -= ptsA; ptsA = 0; }
+            if (remSing > 0) { if (ptsB >= remSing) { ptsB -= remSing; remSing = 0; } else { remSing -= ptsB; ptsB = 0; } }
+            if (remSing > 0) { if (ptsC >= remSing) { ptsC -= remSing; remSing = 0; } else { remSing -= ptsC; ptsC = 0; } }
+          } else {
+            ptsA -= reqs.a;
+            ptsB -= reqs.b;
+            ptsC -= reqs.c;
+          }
+
+          char.ptsA = ptsA;
+          char.ptsB = ptsB;
+          char.ptsC = ptsC;
+
+          char.mutações.push({
+            id: mutId,
+            suit: cat,
+            name: name,
+            cost: costStr,
+            desc: desc
+          });
+
+          saveCurrentCharacter();
+          setActiveMutationSuit(cat);
+          renderMutationsSheet();
+          updateLibraryView();
+        });
+      });
+    }
+  };
+
+  const updateLibraryView = () => {
     const curA = char.ptsA || 0;
     const curB = char.ptsB || 0;
     const curC = char.ptsC || 0;
 
-    let html = `
+    const pointsBar = el.modalBody.querySelector("#lib-points-bar");
+    if (pointsBar) {
+      pointsBar.innerHTML = `
+        <span style="color:var(--color-sucesso);"><img src="assets/sucesso.webp" alt="S" class="ass-point-icon"> <strong>${curA}</strong></span>
+        <span style="color:var(--color-adaptacao);"><img src="assets/adaptacao.webp" alt="A" class="ass-point-icon"> <strong>${curB}</strong></span>
+        <span style="color:var(--color-pressao);"><img src="assets/pressao.webp" alt="P" class="ass-point-icon"> <strong>${curC}</strong></span>
+      `;
+    }
+
+    const isSearching = Boolean(currentSearchQuery.trim());
+    el.modalBody.querySelectorAll(".lib-tab").forEach(tabBtn => {
+      const idx = parseInt(tabBtn.dataset.tabIndex, 10);
+      const cat = categories[idx];
+      const isActive = !isSearching && idx === activeTab;
+      tabBtn.classList.toggle("active", isActive);
+      tabBtn.style.borderColor = isActive ? cat.color : "";
+      tabBtn.style.color = isActive ? cat.color : "";
+    });
+
+    const subTabsContainer = el.modalBody.querySelector("#lib-sub-tabs-container");
+    if (subTabsContainer) {
+      subTabsContainer.innerHTML = renderSubTabsHtml(activeTab);
+    }
+
+    const contentContainer = el.modalBody.querySelector("#lib-tab-content");
+    if (contentContainer) {
+      contentContainer.innerHTML = renderCategoryContent(activeTab);
+    }
+
+    bindContentButtons();
+  };
+
+  const initLibraryModal = () => {
+    const curA = char.ptsA || 0;
+    const curB = char.ptsB || 0;
+    const curC = char.ptsC || 0;
+
+    el.modalContainer.classList.remove("hidden");
+    el.modalBody.innerHTML = `
       <h3 class="modal-title">Biblioteca de Assimilações</h3>
       <p style="font-size: var(--font-size-xs); color:var(--text-secondary); margin-bottom:12px;">
         Selecione mutações para adquirir com seus pontos disponíveis.
       </p>
-      <div class="lib-points-bar">
+      <div class="lib-points-bar" id="lib-points-bar">
         <span style="color:var(--color-sucesso);"><img src="assets/sucesso.webp" alt="S" class="ass-point-icon"> <strong>${curA}</strong></span>
         <span style="color:var(--color-adaptacao);"><img src="assets/adaptacao.webp" alt="A" class="ass-point-icon"> <strong>${curB}</strong></span>
         <span style="color:var(--color-pressao);"><img src="assets/pressao.webp" alt="P" class="ass-point-icon"> <strong>${curC}</strong></span>
+      </div>
+      <div class="modal-search-wrapper">
+        <input type="text" id="lib-search-input" class="modal-search-input" placeholder="Buscar em todas as assimilações por nome, carta, custo ou descrição..." autocomplete="off">
+        <button type="button" id="lib-search-clear" class="modal-search-clear hidden" title="Limpar busca">&times;</button>
       </div>
       <div class="lib-tab-bar">
         ${categories.map((cat, i) =>
       `<button class="lib-tab ${i === activeTab ? 'active' : ''}" data-tab-index="${i}" style="${i === activeTab ? `border-color:${cat.color}; color:${cat.color};` : ''}">${cat.suitSymbol} ${cat.label}</button>`
     ).join('')}
       </div>
-      ${renderSubTabsHtml(activeTab)}
+      <div id="lib-sub-tabs-container">
+        ${renderSubTabsHtml(activeTab)}
+      </div>
       <div id="lib-tab-content">
         ${renderCategoryContent(activeTab)}
       </div>
@@ -1860,69 +2089,46 @@ export function openAssimilationLibraryModal() {
       </div>
     `;
 
-    el.modalContainer.classList.remove("hidden");
-    el.modalBody.innerHTML = html;
+    const searchInput = el.modalBody.querySelector("#lib-search-input");
+    const searchClearBtn = el.modalBody.querySelector("#lib-search-clear");
 
-    // Bind acquire buttons
+    if (searchInput) {
+      searchInput.addEventListener("input", (e) => {
+        currentSearchQuery = e.target.value;
+        if (searchClearBtn) {
+          searchClearBtn.classList.toggle("hidden", !currentSearchQuery);
+        }
+        updateLibraryView();
+      });
+    }
+
+    if (searchClearBtn) {
+      searchClearBtn.addEventListener("click", () => {
+        currentSearchQuery = "";
+        if (searchInput) {
+          searchInput.value = "";
+          searchInput.focus();
+        }
+        searchClearBtn.classList.add("hidden");
+        updateLibraryView();
+      });
+    }
+
     // Tab switching
     el.modalBody.querySelectorAll(".lib-tab").forEach(tabBtn => {
       tabBtn.addEventListener("click", () => {
         activeTab = parseInt(tabBtn.dataset.tabIndex, 10);
         activeSubTab = "Todas";
-        renderLibrary();
-      });
-    });
-
-    // Sub-tab switching
-    el.modalBody.querySelectorAll(".lib-sub-tab").forEach(subTabBtn => {
-      subTabBtn.addEventListener("click", () => {
-        activeSubTab = subTabBtn.dataset.subTab;
-        renderLibrary();
-      });
-    });
-
-    el.modalBody.querySelectorAll(".lib-buy-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const cat = btn.dataset.cat;
-        const mutId = btn.dataset.mutId || "";
-        const name = btn.dataset.mutName;
-        const costStr = btn.dataset.mutCost;
-        const desc = btn.dataset.mutDesc;
-        const reqs = parseCost(costStr);
-
-        logger.info(`Modal: Adquirindo mutação "${name}" via Biblioteca.`);
-
-        // Deduz pontos
-        if (reqs.singular > 0) {
-          let remSing = reqs.singular;
-          if (ptsA >= remSing) { ptsA -= remSing; remSing = 0; }
-          else { remSing -= ptsA; ptsA = 0; }
-          if (remSing > 0) { if (ptsB >= remSing) { ptsB -= remSing; remSing = 0; } else { remSing -= ptsB; ptsB = 0; } }
-          if (remSing > 0) { if (ptsC >= remSing) { ptsC -= remSing; remSing = 0; } else { remSing -= ptsC; ptsC = 0; } }
-        } else {
-          ptsA -= reqs.a;
-          ptsB -= reqs.b;
-          ptsC -= reqs.c;
+        if (currentSearchQuery) {
+          currentSearchQuery = "";
+          if (searchInput) searchInput.value = "";
+          if (searchClearBtn) searchClearBtn.classList.add("hidden");
         }
-
-        char.ptsA = ptsA;
-        char.ptsB = ptsB;
-        char.ptsC = ptsC;
-
-        char.mutações.push({
-          id: mutId,
-          suit: cat,
-          name: name,
-          cost: costStr,
-          desc: desc
-        });
-
-        saveCurrentCharacter();
-        setActiveMutationSuit(cat);
-        renderMutationsSheet();
-        renderLibrary();
+        updateLibraryView();
       });
     });
+
+    bindContentButtons();
 
     document.getElementById("btn-close-library").addEventListener("click", () => {
       el.modalContainer.classList.add("hidden");
@@ -1938,7 +2144,7 @@ export function openAssimilationLibraryModal() {
     }, { once: true });
   };
 
-  renderLibrary();
+  initLibraryModal();
 }
 
 export function openCustomRollModal(macroToEdit = null) {

@@ -1,5 +1,5 @@
 import { el, state, loadCharactersFromStorage, saveCurrentCharacter, loadCharacter, deleteActiveCharacter, importCharacterFile, getCustomTraits, getCustomMutations, updateCloudSyncBadge } from "./js/state.js";
-import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits, setWizardTraitsCostFilter } from "./js/wizard.js";
+import { startWizard, wizardPrevStep, wizardNextStep, wizardFinish, renderWizardTraits, setWizardTraitsCostFilter, setWizardTraitsSearchQuery } from "./js/wizard.js";
 import { updateDiceDrawerUI, execute3DPhysicsRoll, executeCustomRoll, setupNumberInputControls, updateKeepCountDisplay, initRolagemAssimiladaPanel } from "./js/roller.js";
 import { openTraitsModal, openAssimilationTestModal, openSettingsModal, openManageItemsModal, openMutationSelectionScreen, openAddItemModal, openUpgradeAptitudesModal, openAssimilationLibraryModal, openCreateTraitModal, openCreateMutationModal, openCloudSyncModal, openExportModal } from "./js/modals.js";
 import { renderAptitudesSheet, adjustCaboGuerraLevels, executeAssimilacaoAvanco, renderCaboGuerraSheet, addBodySlot, addBackpackSlot } from "./js/sheet.js";
@@ -741,13 +741,33 @@ function setupEventListeners() {
     });
   });
 
-  // Filtro de Custo de Características do Wizard
+  // Filtro de Custo e Busca de Características do Wizard
   const wizFilterBar = document.getElementById("traits-cost-filter-bar");
   if (wizFilterBar) {
     wizFilterBar.querySelectorAll(".traits-cost-tab").forEach(tab => {
       tab.addEventListener("click", () => {
         setWizardTraitsCostFilter(tab.dataset.cost);
       });
+    });
+  }
+
+  const wizSearchInput = document.getElementById("wiz-traits-search-input");
+  const wizSearchClear = document.getElementById("wiz-traits-search-clear");
+  if (wizSearchInput) {
+    wizSearchInput.addEventListener("input", (e) => {
+      const val = e.target.value;
+      if (wizSearchClear) wizSearchClear.classList.toggle("hidden", !val);
+      setWizardTraitsSearchQuery(val);
+    });
+  }
+  if (wizSearchClear) {
+    wizSearchClear.addEventListener("click", () => {
+      if (wizSearchInput) {
+        wizSearchInput.value = "";
+        wizSearchInput.focus();
+      }
+      wizSearchClear.classList.add("hidden");
+      setWizardTraitsSearchQuery("");
     });
   }
 
